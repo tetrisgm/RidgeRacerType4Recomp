@@ -10,6 +10,10 @@ cd "$ROOT"
 if [[ ! -x build-recompiler/psxrecomp-game || ! -x build-recompiler/psxrecomp-bios ]]; then
     bash psxrecomp/tools/ci/build_emitters.sh --framework psxrecomp --build-dir build-recompiler
 fi
+# OpenBIOS through the framework's canonical script: unlike the CLI's own BIOS
+# step it records the emitter fingerprint runtime.cmake checks for staleness.
+(cd psxrecomp && PSXRECOMP_BIOS_BUILD=../build-recompiler \
+    bash tools/regen_bios.sh --config bios/OpenBIOS.toml >/dev/null)
 python3 psxrecomp/psxrecomp_cli.py generate --config game.toml --project-root . \
     --no-toolchain-download "$@"
 # GEN_FULL_GLOB is evaluated at configure time, so re-configure existing build

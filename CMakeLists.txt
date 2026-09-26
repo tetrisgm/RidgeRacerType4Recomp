@@ -77,13 +77,28 @@ psxrecomp_add_game_runtime(psx-runtime
 
 # Stage runtime configs next to the exe for direct build/ launches. Only copy
 # files that exist -- never fail POST_BUILD when game_options.toml is absent.
-foreach(_R4_RUNTIME_CONFIG game.toml game_options.toml)
-    if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/${_R4_RUNTIME_CONFIG}")
-        add_custom_command(TARGET psx-runtime POST_BUILD
-            COMMAND ${CMAKE_COMMAND} -E copy_if_different
-                "${CMAKE_CURRENT_SOURCE_DIR}/${_R4_RUNTIME_CONFIG}"
-                "$<TARGET_FILE_DIR:psx-runtime>/${_R4_RUNTIME_CONFIG}"
-            COMMENT "Staging ${_R4_RUNTIME_CONFIG}"
-            VERBATIM)
-    endif()
-endforeach()
+# On Windows the staged game.toml names the recompiler with its .exe suffix:
+# the runtime checks the overlay_autocompile_cmd paths literally there.
+set(R4_STAGED_GAME_TOML "${CMAKE_CURRENT_SOURCE_DIR}/game.toml")
+if(WIN32)
+    file(READ "${CMAKE_CURRENT_SOURCE_DIR}/game.toml" _r4_game_toml)
+    string(REPLACE "build-recompiler/psxrecomp-game " "build-recompiler/psxrecomp-game.exe "
+        _r4_game_toml "${_r4_game_toml}")
+    set(R4_STAGED_GAME_TOML "${CMAKE_CURRENT_BINARY_DIR}/game.win.toml")
+    file(WRITE "${R4_STAGED_GAME_TOML}" "${_r4_game_toml}")
+    set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS
+        "${CMAKE_CURRENT_SOURCE_DIR}/game.toml")
+endif()
+add_custom_command(TARGET psx-runtime POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        "${R4_STAGED_GAME_TOML}" "$<TARGET_FILE_DIR:psx-runtime>/game.toml"
+    COMMENT "Staging game.toml"
+    VERBATIM)
+if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/game_options.toml")
+    add_custom_command(TARGET psx-runtime POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            "${CMAKE_CURRENT_SOURCE_DIR}/game_options.toml"
+            "$<TARGET_FILE_DIR:psx-runtime>/game_options.toml"
+        COMMENT "Staging game_options.toml"
+        VERBATIM)
+endif()
