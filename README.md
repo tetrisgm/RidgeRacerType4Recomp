@@ -50,7 +50,7 @@ netplay. Not yet verified end to end (see `ISSUES.md`).
 | Renderer | Stock psxrecomp OpenGL at 4:3; software selectable |
 | Widescreen | Not yet — adaptive renderer carried in `renderer/adaptive/` |
 
-## Building From Source (macOS)
+## Building From Source (macOS, Windows)
 
 Requirements: Xcode command-line tools, `brew install cmake ninja python`,
 and R4: Ridge Racer Type 4 (USA, SLUS-00797) as the Redump bin/cue (verify
@@ -66,6 +66,12 @@ cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DPSX_DEBUG_TOOLS=ON
 cmake --build build --target psx-runtime
 build/r4-runtime            # launcher; or tools/run_r4.sh build to go straight in
 ```
+
+**Windows** builds the same way from an MSYS2 **MINGW64** shell
+(`pacman -S mingw-w64-x86_64-{gcc,cmake,ninja,python} git`): run the same
+`tools/regen.sh` and `cmake` commands, then start `build\r4-runtime.exe`, or
+`tools\run_r4.cmd`, which also puts MinGW64 on PATH so background overlay
+compiles can find `python3` and `gcc`. The exe imports only Windows system DLLs.
 
 `tools/regen.sh` builds the recompiler into `build-recompiler/` on first use,
 verifies the disc against `game.toml [prepare_disc]`, extracts the boot EXE to

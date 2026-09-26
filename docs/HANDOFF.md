@@ -3,6 +3,10 @@
 ## Current work
 
 Bring-up complete and pushed (see `ISSUES.md` header for what is verified).
+Builds on macOS arm64 (`~/dev/ridgeracertype4`) and Windows x64 on the PC
+(`C:\Users\Shokunin\dev\ridgeracertype4`, MSYS2 MinGW64; its checkout is
+synced by git bundle because the PC has no GitHub credentials). The Windows
+build passed the headless turbo smoke test to a race.
 Next: owner check-in on feature enhancements — candidates are an R4
 widescreen plugin on `renderer/adaptive/`, DualShock analog as default,
 AOT overlay shards for R4.BIN, SIO1 link cable, a full-playthrough soak, and a
