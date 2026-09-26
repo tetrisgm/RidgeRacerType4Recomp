@@ -24,6 +24,15 @@ endif()
 
 project(RidgeRacerType4Recomp LANGUAGES C CXX)
 
+# Developer tests. OFF by default: tests/, tools/ and the disc are not in the
+# setup-host zip, and the player's Generate & rebuild configures this file with
+# no -DBUILD_TESTING=OFF, so an unconditional include(CTest) would register
+# sources the zip cannot build. Configure with -DR4_BUILD_TESTS=ON to get them.
+option(R4_BUILD_TESTS "Register R4's developer tests (needs tests/ and tools/)" OFF)
+if(R4_BUILD_TESTS)
+    include(CTest)
+endif()
+
 # --- Opt-in product surfaces (OFF by default in the framework) -------------
 # PSX_NETPLAY must be set BEFORE runtime.cmake is included: that is where
 # recomp-net / the lobby client / rbengine are wired. ENABLE_NETPLAY_IF_PRESENT
@@ -101,36 +110,49 @@ foreach(_R4_RUNTIME_CONFIG game.toml game_options.toml)
     endif()
 endforeach()
 
-# ---- R4 unit tests (pure C, no runtime or disc needed) --------------------
-# Run: cmake --build build --target test_r4_frame_rate test_r4_interp \
-#        test_r4_interp_plugin &&
-#      ctest --test-dir build --output-on-failure
-enable_testing()
-foreach(_r4_test r4_frame_rate r4_interp)
-    add_executable(test_${_r4_test} EXCLUDE_FROM_ALL tests/test_${_r4_test}.c)
-    target_include_directories(test_${_r4_test} PRIVATE src/mods)
-    add_test(NAME ${_r4_test}_build
-             COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}
-                     --target test_${_r4_test})
-    add_test(NAME ${_r4_test} COMMAND test_${_r4_test})
-    set_tests_properties(${_r4_test} PROPERTIES DEPENDS ${_r4_test}_build)
-endforeach()
-# The interpolation plugin itself against a mock mod API (rolled-back passes,
-# fallback to frame blend).
-add_executable(test_r4_interp_plugin EXCLUDE_FROM_ALL
-    tests/test_r4_interp_plugin.c src/mods/r4_interp.c)
-target_include_directories(test_r4_interp_plugin PRIVATE
-    src/mods ${CMAKE_CURRENT_SOURCE_DIR}/psxrecomp/runtime/include)
-add_test(NAME r4_interp_plugin_build
-         COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}
-                 --target test_r4_interp_plugin)
-add_test(NAME r4_interp_plugin COMMAND test_r4_interp_plugin)
-set_tests_properties(r4_interp_plugin PROPERTIES
-                     DEPENDS r4_interp_plugin_build)
-find_package(Python3 COMPONENTS Interpreter)
-if(Python3_Interpreter_FOUND)
+# Developer tests (R4_BUILD_TESTS above): ctest --test-dir build -R r4_
+# Every path is behind its own if(EXISTS ...) so the setup-host packager's
+# CMakeLists gate treats them as optional (none of them ship).
+if(R4_BUILD_TESTS AND BUILD_TESTING)
+    # R4 Frame Rate, pure C (no runtime or disc needed). The executables are
+    # built on demand by the *_build tests, so a plain
+    #   ctest --test-dir build -R r4_ --output-on-failure
+    # builds and runs them.
+    function(r4_frame_rate_test name)
+        add_executable(test_${name} EXCLUDE_FROM_ALL ${ARGN})
+        target_include_directories(test_${name} PRIVATE
+            "${CMAKE_CURRENT_SOURCE_DIR}/src/mods" "${PSXRECOMP_ROOT}/runtime/include")
+        add_test(NAME ${name}_build
+                 COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}
+                         --target test_${name})
+        add_test(NAME ${name} COMMAND test_${name})
+        set_tests_properties(${name} PROPERTIES DEPENDS ${name}_build)
+    endfunction()
+    # Option parsing.
+    if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_r4_frame_rate.c")
+        r4_frame_rate_test(r4_frame_rate
+            "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_r4_frame_rate.c")
+    endif()
+    # Interpolation math and the field table.
+    if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_r4_interp.c")
+        r4_frame_rate_test(r4_interp
+            "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_r4_interp.c")
+    endif()
+    # The interpolation plugin itself against a mock mod API (rolled-back
+    # passes, fallback to frame blend).
+    if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_r4_interp_plugin.c")
+        r4_frame_rate_test(r4_interp_plugin
+            "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_r4_interp_plugin.c"
+            "${CMAKE_CURRENT_SOURCE_DIR}/src/mods/r4_interp.c")
+    endif()
     # src/mods/r4_interp_fields.h must match tools/data/r4_interp_fields.json.
-    add_test(NAME r4_interp_fields_current
-             COMMAND ${Python3_EXECUTABLE}
-                     ${CMAKE_CURRENT_SOURCE_DIR}/tools/gen_r4_interp_fields.py --check)
+    find_package(Python3 QUIET COMPONENTS Interpreter)
+    if(Python3_FOUND)
+        if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/tools/gen_r4_interp_fields.py")
+            add_test(NAME r4_interp_fields_current
+                COMMAND "${Python3_EXECUTABLE}"
+                    "${CMAKE_CURRENT_SOURCE_DIR}/tools/gen_r4_interp_fields.py" --check
+                WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}")
+        endif()
+    endif()
 endif()
