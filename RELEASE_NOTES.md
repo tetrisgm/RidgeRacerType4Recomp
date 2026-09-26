@@ -27,8 +27,10 @@ computer from **your own disc**.
 
        xattr -dr com.apple.quarantine ~/Games/R4
 
-   (use your folder's path). Alternatively open **System Settings → Privacy &
-   Security** and click **Open Anyway** after each blocked launch.
+   (use your folder's path). Alternatively, after each blocked launch, click
+   **Open Anyway** in **System Settings → Privacy & Security** (macOS 13 and
+   later) or **System Preferences → Security & Privacy → General** (macOS 11
+   and 12).
 3. **Windows only:** if SmartScreen says "Windows protected your PC", click
    **More info → Run anyway**.
 4. Run `r4-runtime` (`r4-runtime.exe` on Windows). The setup wizard opens:
@@ -53,8 +55,10 @@ computer from **your own disc**.
 - NeGcon and JogCon are not supported; use a DualShock/analog pad or keyboard.
 - The first visit to some menus (garage, car select, records) runs slower while
   their code is compiled in the background; later visits are native.
-- Updating: extract a new version to a **new folder**. Extracting over an old
-  one keeps running the old build.
+- Updating: extract a new version to a **new folder** (extracting over an old
+  one keeps running the old build), then copy `saves/` — and
+  `build-release/settings.toml` to keep your settings and controls — from the
+  old folder into the new one before its first launch.
 - Not yet tested through a full Grand Prix season.
 
 ## Credits
@@ -62,4 +66,7 @@ computer from **your own disc**.
 Built on [psxrecomp](https://github.com/RetroPortingToolKit/psxrecomp) and
 [recomp-ui](https://github.com/RetroPortingToolKit/recomp-ui), with the
 MIT-licensed OpenBIOS from PCSX-Redux. R4: Ridge Racer Type 4 is © Bandai Namco
-Entertainment; this project contains none of its code or assets.
+Entertainment; this kit contains none of its code, audio, video or game data.
+The launcher shows the retail cover art (from
+[libretro-thumbnails](https://github.com/libretro-thumbnails/libretro-thumbnails))
+to identify the game.

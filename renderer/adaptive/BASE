@@ -1,5 +1,5 @@
 # Framework commit the patch is verified against (psxrecomp submodule gitlink).
-base = 19b5a65f5a6da9fc010ea50a9b85c0afdae24114
+base = 4d7311c8ccdfaefd5daee77e72bb17d87c8adb82
 # Provenance
 upstream_repo = RetroPortingToolKit/psxrecomp
 upstream_branch = feat/mmx6-adaptive-renderer

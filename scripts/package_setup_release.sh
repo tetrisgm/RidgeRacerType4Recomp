@@ -91,6 +91,7 @@ exec bash "${PACKAGER}" \
   --project-file README.md \
   --project-file LICENSE \
   --project-file DISC.md \
+  --project-file RELEASE_NOTES.md \
   --project-dir seeds \
   --project-dir recomp \
   --project-dir annotations \

@@ -11,8 +11,10 @@
 #
 # Always packages from a throwaway clone at <ref>: the framework packager wipes
 # generated/, rewrites VERSION and stages untracked framework files, so it must
-# never run in a working checkout. Submodules are cloned from this checkout's
-# own submodule repos, so unmerged framework commits in the pin still resolve.
+# never run in a working checkout. The psxrecomp and recomp-ui submodules are
+# cloned from this checkout's own submodule repos, so a pin on a commit that
+# is not upstream yet still resolves; their nested submodules come from their
+# .gitmodules URLs. Text files ship byte-for-byte (no CRLF conversion).
 #
 # Env: R4_RELEASE_DIR (clone location, default <repo>/build-release-clone),
 #      JOBS (default: all cores).
@@ -31,14 +33,19 @@ case "$(uname -s)" in
 esac
 
 # --- throwaway clone at <ref> -------------------------------------------------
+# Absolute and space-free: REL feeds -ffile-prefix-map, which CMake splits on
+# whitespace and which only matches the absolute paths the compiler sees.
+mkdir -p "$REL"; REL="$(cd "$REL" && pwd -P)"
+[[ "$REL" != *' '* ]] || { echo "error: release dir must not contain spaces: $REL" >&2; exit 2; }
 rm -rf "$REL"
-git clone -q "$SRC" "$REL"
+GITC=(-c core.autocrlf=false -c core.eol=lf)
+git "${GITC[@]}" clone -q -c core.autocrlf=false "$SRC" "$REL"
 git -C "$REL" checkout -q --detach "$SHA"
 for sm in psxrecomp recomp-ui; do
   git -C "$REL" config "submodule.$sm.url" "$SRC/$sm"
 done
-git -C "$REL" -c protocol.file.allow=always submodule update -q --init
-git -C "$REL/psxrecomp" submodule update -q --init --recursive
+git -C "$REL" "${GITC[@]}" -c protocol.file.allow=always submodule update -q --init
+git -C "$REL/psxrecomp" "${GITC[@]}" submodule update -q --init --recursive
 cd "$REL"
 
 V="$(tr -d '[:space:]' < VERSION)"; V="${V#v}"
@@ -66,9 +73,8 @@ if [[ $PLATFORM == macos ]]; then
   # build-machine paths embedded in the binaries.
   MAC=(-DCMAKE_OSX_ARCHITECTURES="arm64;x86_64" -DCMAKE_OSX_DEPLOYMENT_TARGET=11.0
        "-DCMAKE_IGNORE_PREFIX_PATH=/opt/homebrew;/usr/local")
-  MAP="-ffile-prefix-map=$REL/=./"
-  EMIT_ARGS+=("${MAC[@]}" "-DCMAKE_C_FLAGS=$MAP" "-DCMAKE_CXX_FLAGS=$MAP")
-  HOST_ARGS+=("${MAC[@]}" "-DCMAKE_C_FLAGS=$MAP" "-DCMAKE_CXX_FLAGS=$MAP"
+  EMIT_ARGS+=("${MAC[@]}")
+  HOST_ARGS+=("${MAC[@]}"
               -DCMAKE_DISABLE_FIND_PACKAGE_SDL3=ON
               -DCMAKE_DISABLE_FIND_PACKAGE_Freetype=ON
               -DSDL_HIDAPI_LIBUSB=OFF)
@@ -81,6 +87,12 @@ else
   export PSXRECOMP_RUNTIME_BIN_DIR=/mingw64/bin
   EXE=r4-runtime.exe; SFX=.exe
 fi
+# No build-machine paths in shipped binaries (__FILE__ in libjuice's logging,
+# asserts, ...). The compiler sees native absolute paths: C:/... on Windows.
+if [[ $PLATFORM == windows ]]; then NATIVE_REL="$(cygpath -m "$REL")"; else NATIVE_REL="$REL"; fi
+MAP="-ffile-prefix-map=$NATIVE_REL/=./"
+EMIT_ARGS+=("-DCMAKE_C_FLAGS=$MAP" "-DCMAKE_CXX_FLAGS=$MAP")
+HOST_ARGS+=("-DCMAKE_C_FLAGS=$MAP" "-DCMAKE_CXX_FLAGS=$MAP")
 
 cmake -S psxrecomp/recompiler -B "$EMIT" -G Ninja "${EMIT_ARGS[@]}" >/dev/null
 cmake --build "$EMIT" --target psxrecomp-game psxrecomp-bios -j"$JOBS" >/dev/null
@@ -98,14 +110,30 @@ for b in "${BINS[@]}"; do
     fi
     [[ "$(otool -l "$b" | awk '/LC_BUILD_VERSION/{f=1} f&&/minos/{print $2; f=0}' | sort -u)" == "11.0" ]] \
       || { echo "minos is not 11.0: $b" >&2; exit 1; }
-    ! strings "$b" | grep -qF "$REL" || { echo "build path leaked into $b" >&2; exit 1; }
   else
     if objdump -p "$b" | awk '/DLL Name:/{print tolower($3)}' \
         | grep -vE '^(kernel32|user32|gdi32|shell32|advapi32|ole32|oleaut32|comdlg32|comctl32|imm32|winmm|version|setupapi|cfgmgr32|hid|dinput8|dxgi|d3d11|d3d12|dwrite|d2d1|windowscodecs|opengl32|ws2_32|iphlpapi|bcrypt|crypt32|secur32|userenv|dbghelp|shlwapi|ntdll|uxtheme|dwmapi|mfplat|mfreadwrite|mf|propsys|api-ms-win-.*|ucrtbase|msvcrt)\.dll$'; then
       echo "non-system DLL import in $b" >&2; exit 1
     fi
   fi
+  # Leak gate: the release dir and the builder's home, in every spelling the
+  # binary could carry. strings goes to a file first -- grep -q on a pipe under
+  # pipefail would SIGPIPE strings and hide a match.
+  strings -a "$b" > .strings.txt
+  LEAKS=("$REL" "$NATIVE_REL" "$HOME")
+  if [[ $PLATFORM == windows ]]; then
+    LEAKS+=("$(cygpath -m "$HOME")" "$(cygpath -w "$HOME")" "$(cygpath -w "$REL")")
+    if [[ -n "${USERPROFILE:-}" ]]; then
+      LEAKS+=("$USERPROFILE" "$(cygpath -m "$USERPROFILE")" "$(cygpath -u "$USERPROFILE")")
+    fi
+  fi
+  for leak in "${LEAKS[@]}"; do
+    if grep -qiF -- "$leak" .strings.txt; then
+      echo "build-machine path leaked into $b: $leak" >&2; grep -iF -- "$leak" .strings.txt | head -3 >&2; exit 1
+    fi
+  done
 done
+rm -f .strings.txt
 
 # --- sign (macOS: ad-hoc; no Developer ID, which would embed a personal name) -
 if [[ $PLATFORM == macos ]]; then
@@ -145,7 +173,7 @@ for A in "${ARTS[@]}"; do
   bins="$(printf '%s\n' "$L" | grep -iE '\.bin$' | grep -vxF psxrecomp/bios/openbios.bin || true)"
   [[ -z "$bins" ]] || { echo "unexpected .bin in $Z: $bins" >&2; exit 1; }
   for f in "$EXE" "psxrecomp/recompiler/build/psxrecomp-game$SFX" "psxrecomp/recompiler/build/psxrecomp-bios$SFX" \
-           psx_game_version.txt VERSION LICENSE DISC.md CMakeLists.txt game.toml codegen_setup.c \
+           psx_game_version.txt VERSION LICENSE DISC.md RELEASE_NOTES.md CMakeLists.txt game.toml codegen_setup.c \
            seeds/ghidra_funcs.txt annotations/SLUS_007.97_annotations.csv psxrecomp/psxrecomp_cli.py \
            psxrecomp/bios/openbios.bin psxrecomp/bios/OpenBIOS.LICENSE psxrecomp/LICENSE recomp-ui/LICENSE; do
     grep -qxF "$f" <<< "$L" || { echo "missing $f in $Z" >&2; exit 1; }
