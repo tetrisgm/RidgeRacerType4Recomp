@@ -37,3 +37,21 @@ This project inherits, in order:
   built by default (see `renderer/adaptive/README.md`).
 - Disc identity and hashes live in `DISC.md`; verify a dump against them before
   blaming a regression.
+
+## Feature workflow (owner rules)
+
+- Engine/runtime/recompiler/launcher changes go to `psxrecomp` (or
+  `recomp-ui`) as PRs upstream; game-specific work goes to this repo. Never
+  patch the submodules in place on master.
+- psxrecomp's default behaviour stays faithful for every PS1 title. Enhancements
+  are elective and opt-in (off by default, enabled by config or a mod), never a
+  change to the base path.
+- Each feature set is developed in a worktree pair (this repo + psxrecomp, plus
+  recomp-ui when touched) on matching `feat/<name>` branches, and lands as small
+  PRs in every repo it touches. Each PR body says what the feature does and
+  links its sibling PRs.
+- A local integration branch that bundles several features for building and
+  playtesting is fine, but it is never the source of truth and never merged;
+  the per-repo PRs are what gets reviewed and landed.
+- Widescreen and similar presentation work use a custom renderer in the
+  MMX6/Tomba pattern (see `renderer/adaptive/`).
