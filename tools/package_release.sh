@@ -37,7 +37,7 @@ git -C "$REL" checkout -q --detach "$SHA"
 for sm in psxrecomp recomp-ui; do
   git -C "$REL" config "submodule.$sm.url" "$SRC/$sm"
 done
-git -C "$REL" submodule update -q --init
+git -C "$REL" -c protocol.file.allow=always submodule update -q --init
 git -C "$REL/psxrecomp" submodule update -q --init --recursive
 cd "$REL"
 
@@ -93,7 +93,7 @@ BINS=("$HOST/$EXE" "$EMIT/psxrecomp-game$SFX" "$EMIT/psxrecomp-bios$SFX")
 for b in "${BINS[@]}"; do
   if [[ $PLATFORM == macos ]]; then
     [[ "$(lipo -archs "$b")" == "x86_64 arm64" ]] || { echo "not universal: $b" >&2; exit 1; }
-    if otool -L "$b" | tail -n +2 | grep -vE '^[[:space:]]+(/usr/lib/|/System/Library/)'; then
+    if otool -L "$b" | grep -E '^[[:space:]]+[/@]' | grep -vE '^[[:space:]]+(/usr/lib/|/System/Library/)'; then
       echo "non-system dylib in $b" >&2; exit 1
     fi
     [[ "$(otool -l "$b" | awk '/LC_BUILD_VERSION/{f=1} f&&/minos/{print $2; f=0}' | sort -u)" == "11.0" ]] \
@@ -139,7 +139,7 @@ done
 for A in "${ARTS[@]}"; do
   Z="dist/r4-$V-$A.zip"
   L="$(python3 -c 'import sys,zipfile; print("\n".join(zipfile.ZipFile(sys.argv[1]).namelist()))' "$Z")"
-  if printf '%s\n' "$L" | grep -E '^(generated|disc|saves|ghidra|renderer|tools|build[^/]*|cache)/|^psxrecomp/generated/|SLUS_007\.97_|(^|/)SCPH[0-9]+\.(BIN|bin)$|\.(cue|iso|chd|img|ccd|sub)$|(^|/)(settings\.toml|bios\.cfg|disc\.cfg|overlay_captures\.json)$|^mods/installed/'; then
+  if printf '%s\n' "$L" | grep -E '^(generated|disc|saves|ghidra|renderer|tools|build[^/]*|cache)/|^psxrecomp/generated/|SLUS_007\.97_(full|dispatch|decls)|(^|/)SLUS_007\.97$|(^|/)SCPH[0-9]+\.(BIN|bin)$|\.(cue|iso|chd|img|ccd|sub)$|(^|/)(settings\.toml|bios\.cfg|disc\.cfg|overlay_captures\.json)$|^mods/installed/'; then
     echo "forbidden entries above in $Z" >&2; exit 1
   fi
   bins="$(printf '%s\n' "$L" | grep -iE '\.bin$' | grep -vxF psxrecomp/bios/openbios.bin || true)"
@@ -148,7 +148,7 @@ for A in "${ARTS[@]}"; do
            psx_game_version.txt VERSION LICENSE DISC.md CMakeLists.txt game.toml codegen_setup.c \
            seeds/ghidra_funcs.txt annotations/SLUS_007.97_annotations.csv psxrecomp/psxrecomp_cli.py \
            psxrecomp/bios/openbios.bin psxrecomp/bios/OpenBIOS.LICENSE psxrecomp/LICENSE recomp-ui/LICENSE; do
-    printf '%s\n' "$L" | grep -qxF "$f" || { echo "missing $f in $Z" >&2; exit 1; }
+    grep -qxF "$f" <<< "$L" || { echo "missing $f in $Z" >&2; exit 1; }
   done
   (cd dist && shasum -a 256 "r4-$V-$A.zip" 2>/dev/null || sha256sum "r4-$V-$A.zip") > "dist/r4-$V-$A.zip.sha256"
   echo "OK $Z ($(du -h "$Z" | cut -f1))"
