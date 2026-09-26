@@ -13,7 +13,8 @@ computer from **your own disc**.
 - An internet connection for the first build (it downloads the build tools and
   a few libraries).
 - About 2 GB of free space and 10–20 minutes for the first build.
-- **macOS 11 or later** (Apple Silicon or Intel): Apple's Command Line Tools.
+- **macOS 11 or later** (Apple Silicon; Intel is included but only smoke-tested):
+  Apple's Command Line Tools.
   If you don't have them, open Terminal and run `xcode-select --install`.
 - **Windows 10/11 x64**: nothing else.
 
