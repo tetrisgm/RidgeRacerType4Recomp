@@ -98,6 +98,33 @@ executable. Defaults live in `game.toml`:
   channel), `overlay_cache` (native overlay shards; see Building From Source).
 - `[netplay]` — disc gates: `require_cue`, `required_tracks = 1`, `required_disc_fp`.
 
+## Frame rate (optional mod)
+
+Mods -> Frame Rate -> **R4 Frame Rate** (experimental, off by default) shows
+races at the display's refresh rate or at 60 / 100 / 120 / 200 / 240 / 300 FPS.
+The game itself still runs at its original 30 Hz: lap times, AI, input and
+music are unchanged.
+
+- **Interpolated** (default): the race is redrawn between game frames with
+  the cars and camera part of the way to the next frame, by the game's own
+  draw code inside a psxrecomp render pass (frozen guest time, everything
+  restored afterwards). No added latency. Grand Prix and Time Attack races,
+  the attract demo and the replay after a Time Attack are interpolated; VS
+  split screen (not yet tested), menus, pause, results and movies are shown
+  as on a PS1. Where the renderer cannot draw in-between frames at all, the
+  package falls back to Frame blend and says so in the log.
+- **Frame blend**: crossfades finished frames (cheaper, ghosts, one frame
+  late).
+
+It needs the OpenGL renderer and turns vsync off. A monitor shows at most its
+own refresh rate, so rates above it cost more without showing more motion
+(with vsync off they can show as tearing instead).
+If the machine cannot draw every in-between frame, fewer are drawn and
+crossfaded; the game never slows down. Netplay sessions run without mods.
+Details and credits:
+`mods/preloaded/packages/r4.enhancement.frame-rate/1.0.0/README.txt`,
+`src/mods/r4_interp.c`, `psxrecomp/docs/RENDER_PASSES.md`.
+
 ## Controls
 
 Keyboard and SDL gamepads per recomp-ui's input settings. In R4's menus

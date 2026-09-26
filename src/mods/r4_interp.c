@@ -24,10 +24,10 @@
  * back.
  *
  * What: the per-mode call lists are the race handlers' own draw paths with
- * every logic, camera, sound and timer call removed (see
- * analysis notes fps_r4 section 3). The car/camera field list was first
- * found by dogewow2048 in the Japanese "60 FPS" cheat; it is re-derived for
- * the US EXE in tools/data/r4_interp_fields.json.
+ * every logic, camera, sound and timer call removed. The car/camera field
+ * list and the draw-only call lists come from dogewow2048's "60 FPS" cheat
+ * for the Japanese release; they are re-derived for the US EXE here and in
+ * tools/data/r4_interp_fields.json.
  *
  * Gates: pacing 0x180 (races), not paused, race phase 1..3 (overlay modes),
  * the same handler before and after this tick, consecutive ticks, and the
