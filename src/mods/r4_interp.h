@@ -8,11 +8,19 @@
 extern "C" {
 #endif
 
+#include <stdint.h>
+
+/* Called once from the package's constructor: registers the two
+ * function-entry hooks under the manifest [[plugin]] id "r4.framerate"
+ * (psxrecomp runs them only while the mod plan activates that id). Later
+ * calls change nothing. Returns how many psxrecomp accepted (2 = both). */
+int r4_interp_register_hooks(void);
+
 /* Called from the package's activation callback. enabled = method is
- * "interpolate". Registers the two function-entry hooks once per process. */
-void r4_interp_activate(int enabled);
-/* Called from the package's (plan-gated) VBlank callback. */
-void r4_interp_note_vblank(void);
+ * "interpolate". fallback_blend (PSX_MOD_FRAME_INTERPOLATION_LINEAR or
+ * _MOTION_ADAPTIVE) is what the presenter shows while render passes are
+ * unavailable. */
+void r4_interp_activate(int enabled, uint32_t fallback_blend);
 
 #ifdef __cplusplus
 }

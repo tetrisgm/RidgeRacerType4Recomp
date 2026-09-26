@@ -103,7 +103,7 @@ endforeach()
 
 # ---- R4 unit tests (pure C, no runtime or disc needed) --------------------
 # Run: cmake --build build --target test_r4_frame_rate test_r4_interp \
-#        test_r4_interp_pass_abort &&
+#        test_r4_interp_plugin &&
 #      ctest --test-dir build --output-on-failure
 enable_testing()
 foreach(_r4_test r4_frame_rate r4_interp)
@@ -115,17 +115,18 @@ foreach(_r4_test r4_frame_rate r4_interp)
     add_test(NAME ${_r4_test} COMMAND test_${_r4_test})
     set_tests_properties(${_r4_test} PROPERTIES DEPENDS ${_r4_test}_build)
 endforeach()
-# The interpolation plugin itself against a mock mod API (rolled-back passes).
-add_executable(test_r4_interp_pass_abort EXCLUDE_FROM_ALL
-    tests/test_r4_interp_pass_abort.c src/mods/r4_interp.c)
-target_include_directories(test_r4_interp_pass_abort PRIVATE
+# The interpolation plugin itself against a mock mod API (rolled-back passes,
+# fallback to frame blend).
+add_executable(test_r4_interp_plugin EXCLUDE_FROM_ALL
+    tests/test_r4_interp_plugin.c src/mods/r4_interp.c)
+target_include_directories(test_r4_interp_plugin PRIVATE
     src/mods ${CMAKE_CURRENT_SOURCE_DIR}/psxrecomp/runtime/include)
-add_test(NAME r4_interp_pass_abort_build
+add_test(NAME r4_interp_plugin_build
          COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}
-                 --target test_r4_interp_pass_abort)
-add_test(NAME r4_interp_pass_abort COMMAND test_r4_interp_pass_abort)
-set_tests_properties(r4_interp_pass_abort PROPERTIES
-                     DEPENDS r4_interp_pass_abort_build)
+                 --target test_r4_interp_plugin)
+add_test(NAME r4_interp_plugin COMMAND test_r4_interp_plugin)
+set_tests_properties(r4_interp_plugin PROPERTIES
+                     DEPENDS r4_interp_plugin_build)
 find_package(Python3 COMPONENTS Interpreter)
 if(Python3_Interpreter_FOUND)
     # src/mods/r4_interp_fields.h must match tools/data/r4_interp_fields.json.

@@ -32,7 +32,23 @@
  * Gates: pacing 0x180 (races), not paused, race phase 1..3 (overlay modes),
  * the same handler before and after this tick, consecutive ticks, and the
  * framework's plan (OpenGL, flip-aware interpolation, budget). Anything else
- * shows the stock frame for that tick. */
+ * shows the stock frame for that tick.
+ *
+ * Fallback: when the framework cannot run passes at all (no interpolating
+ * OpenGL presenter, a renderer mode that declines them, or passes disabled
+ * after faults), or every pass of several race ticks in a row was refused or
+ * rolled back, the presenter is switched to the player's frame blend and the
+ * log says so once. Passes are tried again when the framework reports them
+ * available (after a back-off when they failed while reported available).
+ *
+ * The two entry hooks belong to the manifest [[plugin]] id "r4.framerate"
+ * (psx_mod_register_function_entry_plugin). psxrecomp runs a function-entry
+ * hook only while the resolved mod plan activates its owner (the hook table
+ * is rebuilt after the activation callbacks and cleared on initialize,
+ * netplay clear and commit), so they are off while the package is disabled
+ * and in netplay. They are registered once, from the package's constructor
+ * (r4_interp_register_hooks); psxrecomp refuses a repeated id+address with
+ * 0, so activation never registers again. */
 #include "r4_interp.h"
 
 #include <stdio.h>
@@ -81,6 +97,13 @@
 
 #define R4_MAX_PASSES 16u
 
+/* Fallback to frame blend (see the header comment). Ticks are main-loop
+ * VSync(0) calls, 30 per second in a race. */
+#define R4_FALLBACK_MISSES  3u     /* race ticks in a row without a pass image */
+#define R4_RETRY_MIN_TICKS  30u    /* first retry after a failed resume: ~1 s */
+#define R4_RETRY_MAX_TICKS  960u   /* back-off cap: ~32 s */
+#define R4_RETRY_RESET_TICKS 300u  /* ~10 s of pass images resets the back-off */
+
 typedef struct R4Capture {
     int32_t car[R4_INTERP_CAR_COUNT][R4_INTERP_CAR_FIELD_COUNT];
     uint8_t car_active[R4_INTERP_CAR_COUNT];
@@ -108,8 +131,6 @@ typedef struct R4Blend {
 
 static struct {
     int enabled;            /* method = interpolate in the current session */
-    int hooks;              /* entry hooks registered (process lifetime) */
-    unsigned vblanks;       /* plan-gated liveness: VBlank callbacks seen */
     int in_pass;
     /* loop head */
     int pre_valid;
@@ -122,8 +143,15 @@ static struct {
     int prev_mode;
     uint32_t prev_tick, prev_demo_tick;
     R4Capture prev, cur;
+    /* fallback to frame blend */
+    uint32_t fallback_blend;   /* the Blend style option */
+    int in_fallback;
+    unsigned misses, good;
+    uint64_t retry_at;
+    unsigned retry_wait;
+    int logged_fallback, logged_resume;
     /* diagnostics */
-    uint64_t ticks, interpolated, gated, passes_ok;
+    uint64_t ticks, interpolated, gated, passes_ok, fallbacks;
     int logged_mode;
 } R;
 
@@ -522,6 +550,68 @@ static int r4_pass(struct CPUState *cpu, void *user, uint32_t alpha_q16) {
     return !call.broken;
 }
 
+/* ---- fallback to frame blend ----------------------------------------- */
+
+static const char *r4_unavailable_reason(uint32_t status) {
+    switch (status) {
+    case PSX_MOD_RENDER_PASS_NO_PRESENTER:
+        return "no interpolating OpenGL presenter";
+    case PSX_MOD_RENDER_PASS_BACKEND:
+        return "the renderer declines them in its current mode";
+    case PSX_MOD_RENDER_PASS_DISABLED:
+        return "disabled after repeated faults";
+    default:
+        return "every pass was refused or rolled back";
+    }
+}
+
+static void r4_enter_fallback(uint32_t status) {
+    R.in_fallback = 1;
+    R.misses = 0;
+    R.good = 0;
+    R.fallbacks++;
+    R.retry_at = R.ticks + R.retry_wait;
+    R.retry_wait = R.retry_wait * 2u > R4_RETRY_MAX_TICKS ? R4_RETRY_MAX_TICKS
+                                                          : R.retry_wait * 2u;
+    psx_mod_set_frame_interpolation_blend(R.fallback_blend);
+    if (!R.logged_fallback) {
+        R.logged_fallback = 1;
+        fprintf(stdout, "r4: render passes unavailable (%s); showing frame "
+                "blend until they are available again\n",
+                r4_unavailable_reason(status));
+    }
+}
+
+/* In fallback: go back to passes once the framework says they can run. */
+static int r4_try_resume(void) {
+    if (R.ticks < R.retry_at ||
+        psx_mod_render_pass_status() != PSX_MOD_RENDER_PASS_READY)
+        return 0;
+    R.in_fallback = 0;
+    R.misses = 0;
+    psx_mod_set_frame_interpolation_blend(PSX_MOD_FRAME_INTERPOLATION_HOLD);
+    if (!R.logged_resume) {
+        R.logged_resume = 1;
+        fprintf(stdout, "r4: render passes available again; interpolated "
+                "frames resumed\n");
+    }
+    return 1;
+}
+
+/* A race tick that wanted passes and got no image. status: why the plan
+ * was empty, or READY when passes ran and none was kept. Budget shedding
+ * and transient refusals (fast-forward, netplay, a busy machine) are not
+ * misses: the presenter holds the stock frame for those ticks. */
+static void r4_note_miss(uint32_t status) {
+    R.good = 0;
+    if (++R.misses >= R4_FALLBACK_MISSES) r4_enter_fallback(status);
+}
+
+static void r4_note_images(void) {
+    R.misses = 0;
+    if (++R.good >= R4_RETRY_RESET_TICKS) R.retry_wait = R4_RETRY_MIN_TICKS;
+}
+
 /* ---- hooks ------------------------------------------------------------ */
 
 static void r4_loop_head(CPUState *cpu, uint32_t address) {
@@ -550,18 +640,14 @@ static int r4_gates(int mode) {
 static void r4_pass_point(CPUState *cpu, uint32_t address) {
     uint32_t handler, tick, demo_tick, alphas[R4_MAX_PASSES], n;
     int mode, continuous, pre_valid = R.pre_valid;
-    unsigned vblanks = R.vblanks;
     R4Blend blend;
     (void)address;
     if (!R.enabled || R.in_pass || cpu->gpr[31] != R4_RA_PASS_POINT ||
         cpu->gpr[4] != 0u)
         return;
     R.pre_valid = 0;
-    R.vblanks = 0;
     R.ticks++;
-    /* The VBlank callback runs only while this plugin is in the mod plan;
-     * without it (a later vanilla session) the hooks stay inert. */
-    if (!vblanks || !pre_valid) { R.prev_valid = 0; return; }
+    if (!pre_valid) { R.prev_valid = 0; return; }
 
     handler = r4_handler();
     mode = handler == R.pre_handler ? r4_mode_of(handler) : R4_MODE_NONE;
@@ -575,12 +661,19 @@ static void r4_pass_point(CPUState *cpu, uint32_t address) {
     continuous = R.prev_valid && R.prev_mode == mode &&
                  (mode == R4_MODE_DEMO ? demo_tick == R.prev_demo_tick + 1u
                                        : tick == R.prev_tick + 1u);
-    if (continuous) {
+    if (continuous && (!R.in_fallback || r4_try_resume())) {
         /* Ask the presenter which phases of the coming frame it will show:
          * the frame flips at the next VBlank and is first presented one
          * VBlank later, for two VBlanks (0x180 pacing). */
         n = psx_mod_render_pass_plan(2u, 1u, alphas, R4_MAX_PASSES);
-        if (n) {
+        if (!n) {
+            uint32_t status = psx_mod_render_pass_status();
+            if (status == PSX_MOD_RENDER_PASS_NO_PRESENTER ||
+                status == PSX_MOD_RENDER_PASS_BACKEND ||
+                status == PSX_MOD_RENDER_PASS_DISABLED)
+                r4_note_miss(status);
+        } else {
+            uint64_t kept = R.passes_ok;
             uint32_t b = rd32(R4_FRAME_COUNTER) & 1u;
             uint32_t disp = R4_BUF_BASE + b * R4_BUF_STRIDE + 0x5Cu;
             PSXModRenderPass pass;
@@ -608,10 +701,15 @@ static void r4_pass_point(CPUState *cpu, uint32_t address) {
                 R.in_pass = 0;
             }
             R.interpolated++;
-            if (R.logged_mode != mode) {
-                R.logged_mode = mode;
-                fprintf(stdout, "r4: interpolating race mode %d (%u passes/frame)\n",
-                        mode, (unsigned)n);
+            if (R.passes_ok != kept) {
+                r4_note_images();
+                if (R.logged_mode != mode) {
+                    R.logged_mode = mode;
+                    fprintf(stdout, "r4: interpolating race mode %d (%u passes/frame)\n",
+                            mode, (unsigned)n);
+                }
+            } else {
+                r4_note_miss(PSX_MOD_RENDER_PASS_READY);
             }
         }
     }
@@ -622,25 +720,48 @@ static void r4_pass_point(CPUState *cpu, uint32_t address) {
     R.prev_demo_tick = demo_tick;
 }
 
-void r4_interp_activate(int enabled) {
+/* Entry hooks accepted by psxrecomp (2 = both); set once per process. */
+static int s_hooks_registered;
+static int s_hooks_tried, s_logged_unregistered;
+
+int r4_interp_register_hooks(void) {
+    if (!s_hooks_tried) {
+        s_hooks_tried = 1;
+        s_hooks_registered =
+            psx_mod_register_function_entry_plugin(R4_FR_PLUGIN, R4_VSYNC,
+                                                   r4_pass_point) +
+            psx_mod_register_function_entry_plugin(R4_FR_PLUGIN,
+                                                   R4_CLEAR_OTAG_R,
+                                                   r4_loop_head);
+    }
+    return s_hooks_registered;
+}
+
+void r4_interp_activate(int enabled, uint32_t fallback_blend) {
     R.enabled = enabled ? 1 : 0;
     R.in_pass = 0;
     R.prev_valid = 0;
     R.pre_valid = 0;
-    R.vblanks = 0;
     R.logged_mode = 0;
-    if (enabled && !R.hooks) {
-        /* Registered once per process: the framework keeps entry hooks for
-         * the process lifetime, so they gate themselves (enabled + VBlank
-         * liveness) instead of relying on being unregistered. */
-        R.hooks = psx_mod_register_function_entry_plugin(R4_FR_PLUGIN, R4_VSYNC,
-                                                         r4_pass_point) &&
-                  psx_mod_register_function_entry_plugin(R4_FR_PLUGIN,
-                                                         R4_CLEAR_OTAG_R,
-                                                         r4_loop_head);
+    R.fallback_blend = fallback_blend;
+    R.in_fallback = 0;
+    R.misses = 0;
+    R.good = 0;
+    R.retry_at = 0;
+    R.retry_wait = R4_RETRY_MIN_TICKS;
+    R.logged_fallback = 0;
+    R.logged_resume = 0;
+    /* The hooks were registered from the constructor and fire only while
+     * this plugin is activated; they still check R.enabled, since a session
+     * may pick Frame blend. Without them nothing would draw in-between
+     * frames, so show the player's frame blend instead of holding. */
+    if (enabled && s_hooks_registered != 2) {
+        R.enabled = 0;
+        psx_mod_set_frame_interpolation_blend(fallback_blend);
+        if (!s_logged_unregistered) {
+            s_logged_unregistered = 1;
+            fprintf(stderr, "r4: frame-rate hooks not registered (%d of 2); "
+                    "showing frame blend\n", s_hooks_registered);
+        }
     }
-}
-
-void r4_interp_note_vblank(void) {
-    R.vblanks++;
 }

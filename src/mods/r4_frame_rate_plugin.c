@@ -8,7 +8,9 @@
  *   method = interpolate  r4_interp.c redraws the race between game frames in
  *                         framework render passes (true in-between positions);
  *                         when no pass applies, the latest frame is held, so
- *                         nothing is ever shown later than stock.
+ *                         nothing is ever shown later than stock. While the
+ *                         framework cannot run passes at all, it shows the
+ *                         frame blend below instead (logged once).
  *   method = blend        crossfade of finished frames (Smooth = linear,
  *                         Sharp = motion-adaptive).
  *
@@ -25,6 +27,7 @@
 
 static void r4_frame_rate_activate(void) {
     char value[32];
+    uint32_t blend;
     R4FrameRateConfig cfg;
     r4_frame_rate_config_defaults(&cfg);
     if (psx_mod_option_value(R4_FR_PACKAGE, R4_FR_FEATURE, "rate",
@@ -37,16 +40,17 @@ static void r4_frame_rate_activate(void) {
                              value, sizeof value))
         cfg.blend = r4_frame_rate_parse_blend(value);
 
-    psx_mod_set_frame_interpolation_source(PSX_MOD_FRAME_SOURCE_FLIP);
-    if (cfg.method == R4_FRAME_RATE_INTERPOLATE)
-        psx_mod_set_frame_interpolation_blend(PSX_MOD_FRAME_INTERPOLATION_HOLD);
-    else
-        psx_mod_set_frame_interpolation_blend(
-            cfg.blend == R4_FRAME_RATE_SHARP
+    blend = cfg.blend == R4_FRAME_RATE_SHARP
                 ? PSX_MOD_FRAME_INTERPOLATION_MOTION_ADAPTIVE
-                : PSX_MOD_FRAME_INTERPOLATION_LINEAR);
+                : PSX_MOD_FRAME_INTERPOLATION_LINEAR;
+    psx_mod_set_frame_interpolation_source(PSX_MOD_FRAME_SOURCE_FLIP);
+    /* Interpolated: hold the newest frame wherever no pass image applies;
+     * r4_interp switches to `blend` while passes are unavailable. */
+    psx_mod_set_frame_interpolation_blend(
+        cfg.method == R4_FRAME_RATE_INTERPOLATE
+            ? (uint32_t)PSX_MOD_FRAME_INTERPOLATION_HOLD : blend);
     psx_mod_set_frame_interpolation(cfg.fps);
-    r4_interp_activate(cfg.method == R4_FRAME_RATE_INTERPOLATE);
+    r4_interp_activate(cfg.method == R4_FRAME_RATE_INTERPOLATE, blend);
     if (cfg.fps)
         fprintf(stdout, "r4: frame rate %u FPS, %s\n", (unsigned)cfg.fps,
                 cfg.method == R4_FRAME_RATE_INTERPOLATE ? "interpolated"
@@ -57,15 +61,9 @@ static void r4_frame_rate_activate(void) {
                                                          : "frame blend");
 }
 
-/* VBlank callbacks run only while this plugin is in the committed mod plan,
- * so they are the liveness signal that keeps r4_interp's function-entry
- * hooks (which the framework never unregisters) inert in a later vanilla or
- * netplay session of the same process. */
-static void r4_frame_rate_vblank(void) {
-    r4_interp_note_vblank();
-}
-
 PSX_MOD_CONSTRUCTOR(r4_frame_rate_register) {
+    /* Entry hooks first, once per process, owned by the same [[plugin]] id:
+     * they run only while the mod plan activates it. */
+    (void)r4_interp_register_hooks();
     psx_mod_register_activation_plugin(R4_FR_PLUGIN, r4_frame_rate_activate);
-    psx_mod_register_vblank_plugin(R4_FR_PLUGIN, r4_frame_rate_vblank);
 }
