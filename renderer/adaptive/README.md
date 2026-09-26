@@ -45,9 +45,9 @@ build-adaptive/build/r4-runtime --game build-adaptive/game.adaptive.toml
 ```
 
 `--configure` builds the patched recompiler, regenerates OpenBIOS and the game
-C into `generated-adaptive/`, writes `build-adaptive/game.adaptive.toml` (same
-config, with overlay shards compiled by the patched toolchain — ABI-23 shards
-would be rejected), and configures `build-adaptive/build` with
+C into `generated-adaptive/`, writes `build-adaptive/game.adaptive.toml`, prints
+the `PSX_OVERLAY_AUTOCOMPILE_CMD` that compiles overlay shards with the patched
+toolchain (ABI-23 shards from the stock one would be rejected), and configures `build-adaptive/build` with
 `-DPSXRECOMP_ROOT=build-adaptive/psxrecomp -DR4_GENERATED_DIR=generated-adaptive
 -DR4_ADAPTIVE_RENDERER=ON`. All outputs are gitignored.
 

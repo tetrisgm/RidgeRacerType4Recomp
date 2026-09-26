@@ -89,6 +89,8 @@ exec bash "${PACKAGER}" \
   --project-file codegen_setup.c \
   --project-file codegen_setup.h \
   --project-file README.md \
+  --project-file LICENSE \
+  --project-file DISC.md \
   --project-dir seeds \
   --project-dir recomp \
   --project-dir annotations \
