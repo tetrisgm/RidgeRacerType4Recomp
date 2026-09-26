@@ -1,0 +1,98 @@
+format_version = 6
+id = "r4.enhancement.frame-rate"
+version = "1.0.0"
+name = "R4 Frame Rate"
+author = "Shokunin"
+description = "Presents R4 at a higher frame rate while the game itself keeps its stock 30 Hz race logic, timers and audio."
+license = "MIT"
+resolver = "declarative"
+save_compatibility = "shared"
+
+# The interpolation plugin calls US EXE functions by address, so the package
+# is pinned to the exact boot EXE (DISC.md).
+[[target]]
+game_id = "SLUS-00797"
+exe_sha256 = "078e3a95185cfa0cc79936dce37cc2c1a90e17aa209b42eef342c970a97f3323"
+
+[[feature]]
+id = "frame-rate"
+name = "R4 Frame Rate"
+description = "Races are shown at the selected rate. Game logic, lap times, AI, input and music stay at the stock 30 Hz: extra frames are drawn, never simulated. Requires OpenGL; vsync is off while it runs."
+group = "Frame Rate"
+channel = "experimental"
+default_enabled = false
+
+[[option]]
+feature = "frame-rate"
+id = "rate"
+label = "Presentation rate"
+description = "Display refresh follows the monitor and gives the most even motion. Fixed rates are for high-refresh or variable-refresh displays; 200 and above need a fast GPU at high internal resolutions."
+group = "Frame Rate"
+type = "choice"
+default = "display"
+
+[[option.choice]]
+value = "display"
+label = "Display refresh (Recommended)"
+
+[[option.choice]]
+value = "60"
+label = "60 FPS"
+
+[[option.choice]]
+value = "100"
+label = "100 FPS"
+
+[[option.choice]]
+value = "120"
+label = "120 FPS"
+
+[[option.choice]]
+value = "200"
+label = "200 FPS"
+
+[[option.choice]]
+value = "240"
+label = "240 FPS"
+
+[[option.choice]]
+value = "300"
+label = "300 FPS"
+
+[[option]]
+feature = "frame-rate"
+id = "method"
+label = "Method"
+description = "Interpolated redraws the race between game frames with cars and camera placed in between, so motion is really smooth and no latency is added. Frame blend crossfades finished frames instead: cheaper, but it ghosts and shows each frame one game frame later."
+group = "Frame Rate"
+type = "choice"
+default = "interpolate"
+
+[[option.choice]]
+value = "interpolate"
+label = "Interpolated (smooth motion, no added latency)"
+
+[[option.choice]]
+value = "blend"
+label = "Frame blend"
+
+[[option]]
+feature = "frame-rate"
+id = "blend"
+label = "Blend style"
+description = "Frame blend only. Smooth crossfades the whole frame; Sharp keeps still areas blended but switches fast-moving areas at the halfway point."
+group = "Frame Rate"
+type = "choice"
+default = "smooth"
+
+[[option.choice]]
+value = "smooth"
+label = "Smooth"
+
+[[option.choice]]
+value = "sharp"
+label = "Sharp"
+
+[[plugin]]
+feature = "frame-rate"
+id = "r4.framerate"
