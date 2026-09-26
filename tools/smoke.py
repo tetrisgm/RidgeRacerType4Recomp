@@ -49,6 +49,27 @@ def wait_frames(n, port):
         time.sleep(0.02)
 
 
+def engage_widescreen(port):
+    """Let frames present on a 2D screen, then resume turbo.
+
+    TCP turbo skips the whole present path, and psxrecomp engages a wide
+    display aspect (the widescreen mod) in that path, on the first frame it
+    presents after game entry (never during an FMV, and not while the
+    post-FMV present hold is still draining). Turbo switched on during boot
+    would otherwise keep the whole run 4:3. Waits until native-wide engages,
+    or at most 60 frames when no wide aspect is configured.
+    """
+    cmd({"cmd": "turbo", "enabled": 0}, port=port)
+    mode = 0
+    for _ in range(60):
+        wait_frames(1, port)
+        mode = cmd({"cmd": "ws_nw"}, port=port).get("mode")
+        if mode == 2:
+            break
+    cmd({"cmd": "turbo", "enabled": 1}, port=port)
+    print(f"   widescreen mode={mode} (0 off, 2 native-wide)")
+
+
 def main():
     out = os.path.abspath(sys.argv[1] if len(sys.argv) > 1 else "smoke")
     port = int(sys.argv[sys.argv.index("--port") + 1]) if "--port" in sys.argv else DEFAULT_PORT
@@ -72,6 +93,8 @@ def main():
                 if not label.startswith("race"):
                     cmd({"cmd": "clear_input"}, port=port)
             wait_frames(int(settle * 60), port)
+            if label == "menu":
+                engage_widescreen(port)
             path = os.path.join(out, f"{i:02d}_{label}.png")
             cmd({"cmd": "screenshot", "path": path}, port=port)
             frame = cmd({"cmd": "frame"}, port=port).get("frame")
