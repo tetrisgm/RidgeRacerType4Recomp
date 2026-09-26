@@ -11,6 +11,9 @@ Rules (same as MegaManX6Recomp):
 - Every feature is default-disabled and enabled only from the launcher's Mods
   page. Callbacks do nothing until their package's activation runs.
 - Keep game logic in pure headers (`r4_*_*.h`) so `tests/` can check it
-  without a game build; register every test with ctest in `CMakeLists.txt`.
+  without a game build; register every test with ctest in `CMakeLists.txt`,
+  inside its `R4_BUILD_TESTS` block and behind `if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/...")`
+  (the release zip has no `tests/` or `tools/`, and the setup-host
+  packager's CMakeLists gate only accepts that exact guard form).
 - `r4_widescreen_plugin.c`: `r4.enhancement.widescreen` (`docs/WIDESCREEN.md`).
 - See `psxrecomp/docs/MOD_PACKAGES.md`.

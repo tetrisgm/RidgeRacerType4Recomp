@@ -73,7 +73,9 @@ tools/mod_state.py build --clear                        # back to stock
 - `R4_WS_PVS=0` turns the course-list union off for an A/B.
 - Headless runs never engage native-wide; use a window.
 - `ctest --test-dir build -R r4_widescreen` runs the helper unit test and the
-  cull-list check.
+  cull-list check. Configure with `-DR4_BUILD_TESTS=ON` first; the tests are
+  off by default because `tests/` and `tools/` are not in the release zip. The
+  cull-list check registers only when `disc/SLUS_007.97` and a regen exist.
 
 ## Measurements (macOS arm64, OpenGL)
 

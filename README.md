@@ -86,6 +86,9 @@ verifies the disc against `game.toml [prepare_disc]`, extracts the boot EXE to
 recompiler config, or the `psxrecomp` submodule. Drop `-DPSX_DEBUG_TOOLS=ON`
 for a build without the TCP debug server. The first configure needs network
 access: libjuice (netplay) is fetched, and on macOS the pinned static SDL3.
+Add `-DR4_BUILD_TESTS=ON` to register the developer tests (`tests/`,
+`tools/`), then run `ctest --test-dir build`. They are off by default because
+the release zip ships neither directory.
 
 ## Configuration
 
