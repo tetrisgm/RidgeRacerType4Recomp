@@ -64,7 +64,7 @@ if [[ "${1:-}" == "--configure" ]]; then
     # the PATCHED recompiler against the patched headers (overlay ABI 24): an
     # ABI-23 shard from the stock toolchain would be rejected at load time.
     sed -e "s#^out_dir = \"generated\"#out_dir = \"$GEN_DIR\"#" \
-        -e "s#--recompiler build-recompiler/psxrecomp-game#--recompiler build-adaptive/psxrecomp/recompiler/build/psxrecomp-game#" \
+        -e "s#--recompiler psxrecomp/recompiler/build/psxrecomp-game#--recompiler build-adaptive/psxrecomp/recompiler/build/psxrecomp-game#" \
         -e "s#--runtime-include psxrecomp/runtime/include#--runtime-include build-adaptive/psxrecomp/runtime/include#" \
         -e "s#python3 psxrecomp/tools/compile_overlays.py#python3 build-adaptive/psxrecomp/tools/compile_overlays.py#" \
         "$ROOT/game.toml" > "$ROOT/build-adaptive/game.adaptive.toml"

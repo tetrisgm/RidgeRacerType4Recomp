@@ -3,7 +3,7 @@
 # Autofilled by tools/new_project_layout/setup_project.{sh,ps1}.
 #
 # Usage:
-#   scripts/package_setup_release.sh <build-dir> <artifact-tag> [recompiler-build-dir]
+#   scripts/package_setup_release.sh <build-dir> <artifact-tag> [recompiler-build-dir (default psxrecomp/recompiler/build)]
 #
 # Writes: dist/r4-<VERSION>-<artifact-tag>.zip
 set -euo pipefail
@@ -11,7 +11,7 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 BUILD_DIR="${1:-}"
 ARTIFACT_TAG="${2:-}"
-RECOMPILER_BUILD="${3:-build-recompiler}"
+RECOMPILER_BUILD="${3:-psxrecomp/recompiler/build}"
 
 if [[ -z "${BUILD_DIR}" || -z "${ARTIFACT_TAG}" ]]; then
   echo "usage: $0 <build-dir> <artifact-tag> [recompiler-build-dir]" >&2

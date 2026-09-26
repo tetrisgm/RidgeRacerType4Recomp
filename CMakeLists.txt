@@ -82,7 +82,7 @@ psxrecomp_add_game_runtime(psx-runtime
 set(R4_STAGED_GAME_TOML "${CMAKE_CURRENT_SOURCE_DIR}/game.toml")
 if(WIN32)
     file(READ "${CMAKE_CURRENT_SOURCE_DIR}/game.toml" _r4_game_toml)
-    string(REPLACE "build-recompiler/psxrecomp-game " "build-recompiler/psxrecomp-game.exe "
+    string(REPLACE "recompiler/build/psxrecomp-game " "recompiler/build/psxrecomp-game.exe "
         _r4_game_toml "${_r4_game_toml}")
     set(R4_STAGED_GAME_TOML "${CMAKE_CURRENT_BINARY_DIR}/game.win.toml")
     file(WRITE "${R4_STAGED_GAME_TOML}" "${_r4_game_toml}")

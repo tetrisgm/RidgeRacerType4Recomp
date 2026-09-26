@@ -73,7 +73,7 @@ build/r4-runtime            # launcher; or tools/run_r4.sh build to go straight 
 `tools\run_r4.cmd`, which also puts MinGW64 on PATH so background overlay
 compiles can find `python3` and `gcc`. The exe imports only Windows system DLLs.
 
-`tools/regen.sh` builds the recompiler into `build-recompiler/` on first use,
+`tools/regen.sh` builds the recompiler into `psxrecomp/recompiler/build/` on first use,
 verifies the disc against `game.toml [prepare_disc]`, extracts the boot EXE to
 `disc/`, and writes `generated/`. Re-run it after changing seeds, annotations,
 recompiler config, or the `psxrecomp` submodule. Drop `-DPSX_DEBUG_TOOLS=ON`
