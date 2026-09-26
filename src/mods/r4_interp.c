@@ -603,6 +603,9 @@ static void r4_pass_point(CPUState *cpu, uint32_t address) {
                 pass.alpha_q16 = alphas[i];
                 if (psx_mod_render_pass(cpu, &pass, r4_pass, &blend))
                     R.passes_ok++;
+                /* r4_pass clears this itself only when it returns; a pass
+                 * the framework's watchdog rolls back leaves by longjmp. */
+                R.in_pass = 0;
             }
             R.interpolated++;
             if (R.logged_mode != mode) {
@@ -621,6 +624,7 @@ static void r4_pass_point(CPUState *cpu, uint32_t address) {
 
 void r4_interp_activate(int enabled) {
     R.enabled = enabled ? 1 : 0;
+    R.in_pass = 0;
     R.prev_valid = 0;
     R.pre_valid = 0;
     R.vblanks = 0;
