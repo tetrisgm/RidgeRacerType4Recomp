@@ -1,0 +1,70 @@
+format_version = 5
+id = "mmx6.enhancement.widescreen"
+version = "1.0.0"
+name = "Mega Man X6 Custom Renderer"
+author = "mstan"
+description = "An adaptive field of view with expanded terrain, anchored HUD and room-edge framing. Fit to Window follows the current window without an aspect limit."
+resolver = "declarative"
+save_compatibility = "shared"
+
+[[target]]
+game_id = "SLUS-01395"
+disc_sha256 = "91ef53c12c3a3eb3362d51d524d3f83cd4ff8e68bf2d2ad6c5c8ea4e0310d318"
+
+# One feature, one option. The launcher used to carry this as two separate
+# Settings rows (an aspect selector plus a distinct experimental 21:9 row),
+# which let a player set a wide aspect with no indication that it is a
+# game-specific enhancement rather than a display preference. Both now live
+# here, where the experimental status is stated and the default is off.
+[[feature]]
+id = "widescreen"
+name = "Custom Renderer"
+description = "Expand the view with adjacent terrain and actors. Experimental: stage and object coverage is still being validated."
+group = "Display"
+default_enabled = false
+
+[[option]]
+feature = "widescreen"
+id = "aspect"
+label = "Aspect"
+description = "Fit to Window follows live resizing. Fixed choices retain their selected aspect."
+group = "Display"
+type = "choice"
+default = "Fit"
+
+[[option.choice]]
+value = "Fit"
+label = "Fit to Window"
+
+[[option.choice]]
+value = "16:9"
+label = "16:9"
+
+[[option.choice]]
+value = "21:9"
+label = "21:9"
+
+[[option.choice]]
+value = "32:9"
+label = "32:9"
+
+[[option]]
+feature = "widescreen"
+id = "camera"
+label = "View anchoring"
+description = "Keep the wider view within the room at its edges. The original game camera and controls stay unchanged."
+group = "Display"
+type = "choice"
+default = "edges"
+
+[[option.choice]]
+value = "edges"
+label = "Room edges"
+
+[[option.choice]]
+value = "centered"
+label = "Centered (original widescreen)"
+
+[[plugin]]
+feature = "widescreen"
+id = "mmx6.widescreen"

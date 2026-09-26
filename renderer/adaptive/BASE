@@ -1,0 +1,11 @@
+# Framework commit the patch is verified against (psxrecomp submodule gitlink).
+base = 19b5a65f5a6da9fc010ea50a9b85c0afdae24114
+# Provenance
+upstream_repo = RetroPortingToolKit/psxrecomp
+upstream_branch = feat/mmx6-adaptive-renderer
+upstream_tip = 39ee7d79400e500eeb3ea26e3d2c35d889e9d5b5
+authored_merge_base = c68bf6e08568327d0c6816d083cf7d00875593f0
+merged_tree = 2799ea43b87584019ccb504c175878d80b60b488
+game_repo = mstan/MegaManX6Recomp
+game_branch = feat/mmx6-adaptive-renderer
+game_tip = e0a7cb3b464cffd0424088056dcef27e4c7910a5

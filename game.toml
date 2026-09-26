@@ -1,0 +1,102 @@
+# R4: Ridge Racer Type 4 (USA) — psxrecomp game config.
+# Identity, [prepare_disc] digests and [netplay] gates were autofilled by
+# psxrecomp/tools/new_project_layout/probe_disc.py from the Redump-verified
+# dump (see DISC.md) and reviewed by hand.
+
+[game]
+name = "R4: Ridge Racer Type 4"
+id = "SLUS-00797"
+# VS Battle is a 2-player horizontal split screen on pads 1 + 2; netplay seats
+# map session slot N to controller port N+1.
+players = 2
+exe = "disc/SLUS_007.97"
+# Local, gitignored. disc/ holds the cue/bin (or symlinks to them) plus the
+# extracted boot EXE; --disc on the command line overrides this.
+disc = "disc/R4 - Ridge Racer Type 4 (USA).cue"
+load_address = "0x80010000"
+entry_pc = "0x8007D8F4"
+text_size = "0x0009C000"
+# Header s_addr. The CRT at 0x8007D8F4 then sets sp = 0x80200000 itself from
+# its memory-size table, overriding this and SYSTEM.CNF's STACK.
+stack_base = "0x801FFFF0"
+
+# Digests are for data Track 01 (R4 USA is a genuine single-track disc; all
+# music is XA-ADPCM interleaved in R4.STR).
+[prepare_disc]
+out_dir = "disc"
+bin_name = "R4 - Ridge Racer Type 4 (USA).bin"
+cue_name = "R4 - Ridge Racer Type 4 (USA).cue"
+boot_exe = "SLUS_007.97"
+known_sizes = [621421920]
+known_md5 = [
+  "bf1d92037b1b2be83b459c11f0b89eb6",
+]
+known_sha1 = [
+  "75f0dab5c1f71ba80f3d1e2fefd043f3f2b9ee2e",
+]
+known_crc32 = [
+  "1ffb6c27",
+]
+
+[recompiler]
+# First-pass seeds: entry + every direct JAL target in the boot EXE. Grow this
+# from runtime discoveries (dispatch misses), never by editing generated/.
+seeds = "seeds/ghidra_funcs.txt"
+out_dir = "generated"
+strict = true
+
+[runtime]
+debug_port = 4797
+window_title = "Ridge Racer Type 4 Recompiled"
+memcard_dir = "saves"
+# Authentic guest CD timing. R4 streams XA music with a Form-1 data channel
+# (channel 7 carries the elapsed-time words the CPU reads while music plays)
+# and polls GetlocP, so the guest-visible CD must never be sped up. Fast loads,
+# if wanted, come from the framework's host-pacing mod, not from disc_speed.
+disc_speed = "1x"
+# Code overlays: R4.BIN entries 659-672 are linked at 0x801149A8 (the end of
+# BSS) and loaded by the EXE at each mode change (garage, VS car select, time
+# attack / extra trial course info, records, link battle, the libpress movie
+# player). The runtime captures them as they execute and compiles them to
+# native shards in the background; until a shard exists that code runs in the
+# dirty-RAM interpreter. The same region is reused as heap during races, so
+# dispatch is always gated on the resident bytes.
+overlay_cache = true
+overlay_backend = "auto"
+# Runs with cwd = project root (the first ancestor of game.toml holding .git /
+# CMakeLists.txt). The runtime injects PSX_OVERLAY_CACHE_DIR and
+# PSX_OVERLAY_CAPTURES, so no --out-dir/--captures here. /usr/bin/gcc is Apple
+# clang on macOS. --cps must match the (default) CPS game codegen.
+overlay_autocompile_cmd = "python3 psxrecomp/tools/compile_overlays.py --game-toml game.toml --recompiler build-recompiler/psxrecomp-game --runtime-include psxrecomp/runtime/include --cps"
+
+[video]
+# Base 4:3 on the stock psxrecomp renderer. The MMX6 adaptive renderer is
+# carried under renderer/adaptive/ for later widescreen work and is not built
+# by default.
+renderer = "opengl"
+aspect_ratio = "4:3"
+
+[controller]
+# R4 identifies digital (0x41), DualShock (0x73), NeGcon (0x23) and JogCon
+# (0xE3) pads; the framework models digital and DualShock. Digital is the
+# faithful default; DualShock analog steering is selectable in the launcher.
+default_mode = "digital"
+
+# Online mount gate: digests + track count + TOC fingerprint
+# (psxrecomp/docs/NETPLAY.md). required_tracks = 1 is correct for this disc.
+[netplay]
+require_cue = true
+required_tracks = 1
+required_disc_fp = "b76ecb8e9556e320af49a52ef1a2db484e54e361b5d4b624011ca06c552ea5d2"
+
+# ── Audit-specific config (consumed by psxrecomp/tools/*.py and tests) ──
+[audit]
+[[audit.regions]]
+name        = "Text"
+rom_start   = "0x800"          # offset within the PS-X EXE file (skip header)
+rom_end     = "0x9C800"        # rom_start + text_size
+vaddr_base  = "0x80010000"
+
+# Address normalization: KSEG masking only (game loads contiguously, no remaps).
+[audit.normalize]
+kseg_mask = "0x1FFFFFFF"

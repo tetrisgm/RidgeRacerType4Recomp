@@ -1,0 +1,46 @@
+# R4: Ridge Racer Type 4 — progressive symbol map (partial decomp)
+# Discover → label here → manipulate via PSX_FN_* (tools/sync_symbols.py).
+# Gate emit=true only when the entry is safe to own for AOT / host hooks.
+# See psxrecomp/docs/SYMBOLS.md.
+
+[[func]]
+pc = 0x8007D8F4
+name = "BootEntry"
+emit = false
+status = "guessed"
+note = "SYSTEM.CNF / EXE entry PC (probe seed)"
+
+[[func]]
+pc = 0x8001E67C
+name = "R4_Main"
+emit = false
+status = "guessed"
+note = "called by the CRT after InitHeap(0x801149AC, 0xE3658); calls SetMem(2)"
+
+[[func]]
+pc = 0x80012288
+name = "R4Bin_Init"
+emit = false
+status = "guessed"
+note = "CdSearchFile \\R4.BIN;1, reads its 934-entry sector table, builds {CdlLOC,count} at 0x80109658"
+
+[[func]]
+pc = 0x80012234
+name = "R4Bin_EntryIndex"
+emit = false
+status = "guessed"
+note = "(group, sub) -> R4.BIN entry index; group 0 = 0x292+sub (overlays are entries 659-672)"
+
+[[func]]
+pc = 0x80012924
+name = "R4Bin_ReadAsync"
+emit = false
+status = "guessed"
+note = "(index, dest) starts an async sector read of one R4.BIN entry"
+
+[[func]]
+pc = 0x80012A50
+name = "R4Bin_ReadPoll"
+emit = false
+status = "guessed"
+note = "polls the R4Bin_ReadAsync transfer for completion"

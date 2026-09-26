@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+# Launch a local build straight into the game (no launcher).
+#
+#   tools/run_r4.sh [build-dir] [extra runtime args]
+# Default build dir: build (configure with -DPSX_DEBUG_TOOLS=ON for the TCP
+# debug server on port 4797 that tools/dbg.py and tools/pad.py drive).
+set -euo pipefail
+ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+BUILD="${1:-build}"
+[[ $# -gt 0 ]] && shift
+DISC="$ROOT/disc/R4 - Ridge Racer Type 4 (USA).cue"
+exec "$ROOT/$BUILD/r4-runtime" --game "$ROOT/$BUILD/game.toml" --disc "$DISC" --no-launcher "$@"

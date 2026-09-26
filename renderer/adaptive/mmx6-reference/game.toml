@@ -1,0 +1,206 @@
+[game]
+name = "Mega Man X6"
+id = "SLUS-01395"
+exe = "mmx6/SLUS_013.95"
+disc = "mmx6/Mega Man X6 (USA) (v1.1).cue"
+load_address = "0x80010000"
+entry_pc = "0x80054AD8"
+text_size = "0x0007F000"
+stack_base = "0x801FFFF0"
+
+[recompiler]
+bios_config = "psxrecomp-v4/bios/SCPH1001.toml"
+seeds = "seeds/ghidra_funcs.txt"
+# bios_thunks = "seeds/mmx6_bios_thunks.txt"  # optional; add once BIOS thunks are inventoried
+out_dir = "generated"
+strict = true
+# Widescreen hooks: BG layer bounds, screen-space dialogue classification, and
+# paired actor draw/lifetime extents. Inactive with the enhancement off.
+mod_function_entry_funcs = ["0x800270D0", "0x80026ECC", "0x800232D4", "0x800239CC", "0x80023ED8", "0x800241D4", "0x80022E44", "0x8002CBFC", "0x8002CCB0", "0x80029D18", "0x80029E7C", "0x8002CB50", "0x8002CD6C", "0x800F9334"]
+
+[runtime]
+debug_port = 4490
+window_title = "MegaManX6Recomp"
+memcard_dir = "saves"
+# Disc speed + fast loads — the architecturally-correct model.
+#
+# Speeding the GUEST-VISIBLE CD device (disc_speed="4x"/"instant") is
+# fundamentally unsafe: it changes how many VBlanks/callbacks fall between the
+# game's state transitions, so timing-sensitive titles break. MMX6 proves it —
+# at 4x/instant it wedges at boot because its Psy-Q VSync callback (which ticks a
+# counter the loader busy-waits on, func 0x80060ADC / counter 0x8008C8E4) is torn
+# down early when the read completes "too fast", so the counter freezes and the
+# wait never returns. (The CD response arbiter + authentic command latencies in
+# cdrom.c are still correct and shipped; they just can't make device-instant
+# safe.) Mature emulators treat raw CD speedup as best-effort/per-game for this
+# reason.
+#
+# The SAFE way to get fast loads is to keep AUTHENTIC guest CD timing (so nothing
+# breaks) and instead FAST-FORWARD THE WHOLE GUEST TIMELINE during loads — run
+# every authentic VBlank/callback/sector at the host's full speed and skip
+# presentation. cdrom_load_in_progress() detects the CD burst (XA/FMV excluded,
+# post-handoff only) and main.cpp drops wall-clock pacing while it's active.
+# Result: real load time shrinks with zero timing breakage.
+#
+# That mechanism is now reached ONLY through the Mods catalog — "Fast Loading
+# (host pacing)" / "CD Speed", both default-off. The old `turbo_loads = true`
+# key here is deprecated and ignored by the framework; do not reinstate it. It
+# had no launcher control, so players could not turn it off, and it fast-
+# forwarded the WARNING screen and other timed scenes (issue #14).
+disc_speed   = "1x"     # authentic guest CD timing (never breaks game timing)
+# Overlay acceleration: compile the dirty-RAM overlay (ROCK_X6.DAT) to native
+# instead of interpreting it. backend=auto => gcc (full-C overlay DLLs, the
+# production path) since an autocompile cmd is wired. Background pipeline:
+# capture overlay candidates -> compile_overlays.py spawns gcc -> DLLs in
+# build-modern/cache/SLUS-01395/ -> loader rescans + loads. --cps matches the
+# CPS-on generated code (REQUIRED or DLLs misbehave); --gcc is the mingw abspath.
+overlay_cache = true
+# Tier selection: "auto" (default) = gcc if a gcc toolchain is present (dev /
+# production shard authoring), else the bundled toolchain-free tcc. Other values:
+# "gcc", "tcc", "auto-no-gcc" (dev: force tcc even with gcc present, to test the
+# user path). Priority is static > gcc shard > tcc shard > interp.
+overlay_backend = "auto"
+# The compile's WRITE cache + READ captures are NOT specified here: the runtime
+# injects PSX_OVERLAY_CACHE_DIR / PSX_OVERLAY_CAPTURES (the loader's canonical
+# <exe>/cache and <exe>/overlay_captures.json) so the write can never drift from
+# where the loader reads. This is just the compile RECIPE (compiler + tool paths).
+overlay_autocompile_cmd = "py -3 psxrecomp-v4/tools/compile_overlays.py --game-toml game.toml --recompiler psxrecomp-v4/recompiler/build/psxrecomp-game.exe --runtime-include psxrecomp-v4/runtime/include --cps"
+# tcc fallback: NO explicit cmd — when the backend resolves to tcc the runtime
+# constructs the command from the self-contained toolchain bundled beside the exe
+# (<exe>/overlay_toolchain/: embedded python + tcc + recompiler + script + headers).
+# An explicit overlay_autocompile_cmd_tcc here would override that (dev escape hatch).
+
+[video]
+# renderer: GPU-authoritative OpenGL is the DEFAULT as of 2026-07-03. The
+# intermittent black-frame flicker (ISSUES.md #7 — the reason v0.0.2 shipped
+# software) was root-caused and fixed in psxrecomp: flush_cpu_upload merged
+# disjoint CPU→VRAM uploads into one union box painted from the stale CPU mirror;
+# fix = exact pending-rect list. GL is now validated clean incl. the Rainy
+# Turtloid repro. Software stays selectable in the launcher (Settings → Renderer).
+renderer = "opengl"
+
+# aspect_ratio: native presentation. MMX6 ships 4:3 (authentic).
+#
+# Widescreen is now owned by the mods/preloaded mmx6.enhancement.widescreen
+# package (see [widescreen] offer below), not by a Settings row — the
+# mmx6.widescreen activation plugin selects 16:9 or adaptive 21:9 after the mod
+# plan commits. This value stays the authentic default and is what a player
+# gets with the mod disabled; the [widescreen] full_2d + bg2d hooks are always
+# compiled in and stay inert at 4:3.
+aspect_ratio = "4:3"
+
+# offer_frame_interpolation = false: presentation-only frame interpolation is
+# owned by the mods/preloaded mmx6.enhancement.frame-interpolation package, so
+# the launcher omits its Settings row (the shared PSX launcher profile turns
+# that row on for every title) and the runtime ignores a value an older build
+# persisted into settings.toml. The mmx6.frame-interpolation plugin applies the
+# selected output rate. One control per feature.
+offer_frame_interpolation = false
+
+# FMV skipping belongs exclusively to the opt-in Tweaks mod features for the
+# Capcom logo and opening movie. Keep the deprecated generic runtime switch off,
+# hide its launcher row, and ignore any stale value left in settings.toml by an
+# older release.
+auto_skip_fmv = false
+offer_skip_fmv = false
+
+# Controller defaults. Mega Man X6 probes the pad with the DualShock config
+# command (0x43) at init and will NOT poll buttons (0x42) until it detects an
+# analog-capable controller — a plain digital pad leaves the game with no input.
+# So present a DualShock (analog) by default: default_analog=true pins port 1 to
+# PAD_MODE_ANALOG (id 0x73), which the corrected SIO config state machine
+# (runtime/src/sio.c) now negotiates correctly. The launcher's per-player
+# DualShock toggle / controller-mode selector overrides this (persisted to
+# settings.toml); leaving it analog is the "forced DualShock" default.
+[controller]
+default_analog = true
+deadzone       = 12000
+# MMX6 hard-requires a DualShock (it won't poll buttons without an analog pad),
+# so the "Hybrid" launcher pad mode doesn't apply — hide it, leaving Analog and
+# D-Pad as the only choices.
+allow_hybrid   = false
+
+multitap_analog = false
+# Custom Renderer is enabled through Mods. Fit follows the live drawable;
+# fixed 16:9, 21:9 and 32:9 choices remain available. Disabled stays stock 4:3.
+[widescreen]
+full_2d = true
+# Retail main state 0A owns the stage loop. Menus, including the 512px
+# stage-select carousel, keep their native frame and hide neighboring pages.
+gameplay_state_addr = "0x800CCED0"
+gameplay_state_values = ["0x0000000A"]
+# offer = false: widescreen activation belongs to the mod catalog, not generic
+# Settings. The launcher omits the aspect rows entirely and the runtime ignores
+# a 16:9/21:9 that an older build persisted into settings.toml; the
+# mmx6.widescreen plugin applies the player's choice after the mod plan commits
+# (framework: runtime/src/main.cpp, psx_mod_set_fixed_display_aspect).
+offer = false
+# The plugin supplies the aspect policy, including uncapped Fit (0, 0).
+offer_ultrawide = true
+# Clear reveal pixels at background initialization. Host packet mode also clears
+# each submitted background generation so resizing cannot retain old geometry.
+clear_reveal = true
+# The player and enemy health/ability meters share a stable ordering-table
+# packet pool distinct from the stage tile packets. Corner-anchor only that
+# half-open source range (left-third packets left, right-third packets right);
+# the broad heuristic stays off because MMX6 also draws scenery as fixed sprites.
+nw_left_hud_packet_lo = "0x000E3400"
+nw_left_hud_packet_hi = "0x000E4100"
+
+# Intro-stage overlay actor deactivation. The green robot's 32px bounds are
+# discarded at the native 320px viewport, so its whole sprite pops while still
+# visible in the reveal. Move the left bias and signed right compare out by the
+# live widescreen margin, plus a 32px off-screen guard. Overlay variants with different bytes at these
+# addresses remain untouched; all hooks are identity at 4:3.
+[widescreen.cull]
+guard_pixels = 32
+# Only widen enemy lifetime and respawn-reset bounds. Native placement strips
+# must remain exact: widening them starts NPC/boss scripts before X arrives.
+# The plugin runs filtered supplemental enemy scans for the revealed space.
+bias_sites = ["0x801F2118", "0x80029FDC"]
+bias_lower_sites = ["0x80029FD0"]
+slti_sites = ["0x801F210C"]
+
+# Legacy background helper sites remain in generated code. Custom Renderer
+# registers a separate DMA arena, making these helpers identity: the native
+# producer keeps its 21-column loop and 64-column ring. Extra authored tiles
+# are appended by src/mods/mmx6_adaptive_background.c. Regen after site changes.
+#   count_site:    0x800271d4  li s6,0x15        (column count)
+#   startcol_site: 0x80027188  andi v1,v1,0x3f   (start tile column)
+#   startx_site:   0x800271a0  sra s4,v0,0x10    (start screen-x)
+[widescreen.bg2d]
+count_site    = "0x800271d4"
+startcol_site = "0x80027188"
+startx_site   = "0x800271a0"
+# Legacy leading-edge helpers, also identity with the custom packet arena.
+#   stream_left_site:  0x80027424  addiu a1,s1,-0x10
+#   stream_right_site: 0x80027444  addiu a1,s1,0x10
+stream_left_site  = "0x80027424"
+stream_right_site = "0x80027444"
+# Custom mode keeps the original packet base and 1000-tile budget. Extra tiles
+# occupy checked, double-buffered host slices, never the legacy relocated RAM.
+bufbase_site = "0x80026dc4"
+cap_site     = "0x80027278"
+# Full tile-ring initializer. Its entry is the precise stage/background dirty
+# event used to invalidate only the old host-side reveal pixels before the new
+# stage submits its background (regen required).
+init_func    = "0x800269f4"
+
+# ── Audit-specific config (consumed by psxrecomp-v4/tools/*.py and tests) ──
+# Schema mirrors psxrecomp-v4/bios/SCPH1001.toml. Paths are relative to the
+# project root.
+
+[audit]
+# Dynamic discovery — functions are found by walking control flow from
+# entry_pc. No Ghidra function-starts file is required to bootstrap.
+
+# Code region: text segment is contiguous from load_address for text_size bytes.
+[[audit.regions]]
+name        = "Text"
+rom_start   = "0x800"          # offset within the PS-X EXE file (skip header)
+rom_end     = "0x7F800"        # rom_start + text_size
+vaddr_base  = "0x80010000"
+
+# Address normalization: KSEG masking only (game loads contiguously, no remaps).
+[audit.normalize]
+kseg_mask = "0x1FFFFFFF"

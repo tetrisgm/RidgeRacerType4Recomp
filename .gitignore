@@ -1,0 +1,82 @@
+# Build outputs
+/build/
+/build-*/
+/out/
+/.happypath/
+
+# Recompiler output (derivative of copyrighted game code — regenerate locally)
+/generated/
+
+# Release packaging artifacts
+/release-stage/
+/dist/
+*.zip
+
+# Local PlayStation assets (disc image, extracted boot EXE, BIOS, memory cards)
+/r4/
+/disc/
+/prepared_disc/
+/isos/
+/bios/
+/saves/
+.settings/
+
+# Disc / image / memcard formats
+*.bin
+*.cue
+*.iso
+*.img
+*.sub
+*.ccd
+*.mcd
+*.mcr
+*.chd
+*.car
+SCPH*.BIN
+
+# Local path/config stubs written beside the exe or repo root
+bios.cfg
+disc.cfg
+rom.cfg
+settings.toml
+
+# Ghidra: keep instructions.txt + scripts/ + annotations/, drop the live DB + dumps
+/ghidra/projects/
+*.gpr
+*.rep/
+*.lock
+*.lock~
+
+# Local analysis scratch (GPU captures, parity dumps, asset rips)
+/analysis/
+
+# Local editor / cache files
+.vs/
+.vscode/
+.DS_Store
+*.user
+*.log
+
+# Runtime artifacts from psx-runtime launches
+psx_crash.txt
+psx_last_run_report.json
+psx_screenshot.bmp
+psx_screenshot.png
+psx_freeze_heartbeat.json
+starvation_dump.jsonl
+overlay_captures.json
+
+# Diagnostic dumps from debug-server probes (root-level only)
+/*.json
+!/catalog_identity.json
+/*.bmp
+/*.png
+/_*.txt
+/_*.hex
+/_*.c
+
+# Python caches
+__pycache__/
+
+# Adaptive-renderer build products (renderer/adaptive/materialize.sh)
+/generated-adaptive/

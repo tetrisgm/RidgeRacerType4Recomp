@@ -1,0 +1,135 @@
+# RidgeRacerType4Recomp
+
+<p align="center">
+  <img src="recomp/launcher/boxart.png" alt="R4: Ridge Racer Type 4 box art" width="280">
+</p>
+
+> _In-development preview, not a finished port — expect rough edges._
+
+R4: Ridge Racer Type 4 (USA, SLUS-00797) statically recompiled to a native
+executable with [psxrecomp](https://github.com/RetroPortingToolKit/psxrecomp)
+and [recomp-ui](https://github.com/RetroPortingToolKit/recomp-ui), structured
+after [MegaManX6Recomp](https://github.com/mstan/MegaManX6Recomp).
+
+## What This Is
+
+The game's MIPS code is machine-translated ahead of time into C, then compiled
+into a native program that runs the game's own logic on psxrecomp's simulation
+of the PS1 hardware (GPU, SPU, GTE, MDEC, CD-ROM, pads, memory cards) and the
+real, recompiled PS1 BIOS — no high-level emulation shims.
+
+This repository holds the game-specific configuration, seeds, tools and build
+glue. It does **not** contain the disc image, a retail BIOS, generated game C,
+or decompiled game code. Builds use the MIT-licensed OpenBIOS from PCSX-Redux;
+bring your own legally obtained disc.
+
+Important files:
+
+- `game.toml`: identity, disc digests, recompiler/runtime/video/controller/netplay config.
+- `seeds/`, `annotations/`, `symbols.toml`: recompiler inputs grown from RE work.
+- `tools/regen.sh`: regenerate OpenBIOS + game C from the disc.
+- `tools/run_r4.sh`, `tools/dbg.py`, `tools/pad.py`, `tools/smoke.py`: run and drive a debug build.
+- `renderer/adaptive/`: the MMX6 adaptive widescreen renderer, carried for later (not built by default).
+- `DISC.md`: Redump-verified disc identity. `ISSUES.md`: issue log.
+- `docs/framework_pin_history.md`: why each submodule pin moved.
+
+## Status
+
+**Bring-up preview.** Boots, plays races, and runs 2-player VS Battle over
+netplay. Not yet verified end to end (see `ISSUES.md`).
+
+| Area | State |
+|---|---|
+| BIOS boot | Works — recompiled OpenBIOS, HLE boot-skip and full LLE intro |
+| Intro / attract movies (MDEC + XA) | Play; Start skips after the Namco logo |
+| Menus, Grand Prix setup, race | Work |
+| Audio (SPU + XA music) | Works |
+| Code overlays (R4.BIN) | Captured and compiled to native shards in the background |
+| VS Battle (2P split screen) | Works over netplay (delay-sync and rollback, digests match) |
+| Link battle (link cable) | Not supported (no SIO1 model) |
+| Renderer | Stock psxrecomp OpenGL at 4:3; software selectable |
+| Widescreen | Not yet — adaptive renderer carried in `renderer/adaptive/` |
+
+## Building From Source (macOS)
+
+Requirements: Xcode command-line tools, `brew install cmake ninja python`,
+and R4: Ridge Racer Type 4 (USA, SLUS-00797) as the Redump bin/cue (verify
+against `DISC.md`). Do not convert it to a 2048-byte `.iso`: that drops the
+Mode-2 Form-2 XA sectors the music and movies stream from. Linux and Windows
+follow `psxrecomp/docs/BUILDING.md`.
+
+```sh
+git clone --recurse-submodules <this repo> && cd ridgeracertype4
+mkdir -p disc   # put (or symlink) the .cue and .bin here
+tools/regen.sh --disc "disc/R4 - Ridge Racer Type 4 (USA).cue"
+cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DPSX_DEBUG_TOOLS=ON
+cmake --build build --target psx-runtime
+build/r4-runtime            # launcher; or tools/run_r4.sh build to go straight in
+```
+
+`tools/regen.sh` builds the recompiler into `build-recompiler/` on first use,
+verifies the disc against `game.toml [prepare_disc]`, extracts the boot EXE to
+`disc/`, and writes `generated/`. Re-run it after changing seeds, annotations,
+recompiler config, or the `psxrecomp` submodule. Drop `-DPSX_DEBUG_TOOLS=ON`
+for a build without the TCP debug server. Netplay needs network access on the
+first configure (libjuice is fetched).
+
+## Configuration
+
+Most options are in the launcher and persist to `settings.toml` beside the
+executable. Defaults live in `game.toml`:
+
+- `[video]` — `renderer` (`opengl` / `software`), `aspect_ratio = "4:3"`.
+- `[controller]` — `default_mode` (`digital`; DualShock analog selectable).
+- `[runtime]` — `disc_speed = "1x"` (authentic; R4 streams XA with a data
+  channel), `overlay_cache` + `overlay_autocompile_cmd` (native overlay shards).
+- `[netplay]` — disc gates: `require_cue`, `required_tracks = 1`, `required_disc_fp`.
+
+## Controls
+
+Keyboard and SDL gamepads per recomp-ui's input settings. In R4's menus
+**Circle is OK** and **Cross is cancel**; in races Cross accelerates by default.
+
+## Netplay
+
+Two players, one per controller port: VS Battle's split screen. Use the
+launcher's NETPLAY page (lobby, LAN, or Direct IP; rollback by default). Both
+players need the same build and the same Redump dump — the `[netplay]` gates
+refuse a mismatched disc. For a local two-instance test from the command line:
+
+```sh
+PSX_NET_MODE=rollback build/r4-runtime --no-launcher --netplay --net-slot 0 \
+  --net-bind 127.0.0.1:7777 --net-session-id 1 --memcard-dir /tmp/p1 --debug-port 4797
+PSX_NET_MODE=rollback build/r4-runtime --no-launcher --netplay --net-slot 1 \
+  --net-bind 127.0.0.1:7778 --net-peer 127.0.0.1:7777 --net-session-id 1 \
+  --memcard-dir /tmp/p2 --debug-port 4798
+```
+
+Details: `psxrecomp/docs/NETPLAY.md`.
+
+## Memory Cards
+
+Standard PS1 `.mcd` images in `saves/`, compatible with common emulators. Local
+only; never commit them.
+
+## Overlay cache
+
+R4 streams code overlays from `R4.BIN`. The runtime records visited overlays in
+`overlay_captures.json` and compiles native shards into `cache/` beside the
+executable. **Do not publish `overlay_captures.json`** — it contains verbatim
+snapshots of the game's code.
+
+## Development Rules
+
+- Real recompiled BIOS and hardware simulation; no HLE shims, no stubs, no
+  hand-edited `generated/`.
+- Framework fixes go to `psxrecomp`, not here. Resolve dispatch misses first.
+- Disc images, generated code, memory cards, Ghidra databases and build outputs
+  stay local. See `CLAUDE.md`.
+
+## License
+
+No license has been chosen for this repository yet. Portions are adapted from
+MegaManX6Recomp under PolyForm Noncommercial 1.0.0 — see
+`THIRD-PARTY-LICENSES/`. R4: Ridge Racer Type 4 is © Namco (Bandai Namco
+Entertainment); this repository contains none of the game's binaries or assets.

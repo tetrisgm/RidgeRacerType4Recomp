@@ -1,0 +1,105 @@
+================================================================
+GHIDRA SETUP — RidgeRacerType4Recomp
+================================================================
+
+Goal: import the R4: Ridge Racer Type 4 (USA) boot executable into
+Ghidra so functions, labels and structs can feed ../seeds/,
+../annotations/ and ../symbols.toml.
+
+Game:    R4: Ridge Racer Type 4 (USA)
+Serial:  SLUS-00797
+Region:  North America (NTSC-U)
+Disc:    Redump-verified (see ../DISC.md)
+
+----------------------------------------------------------------
+CPU / processor
+----------------------------------------------------------------
+The PlayStation CPU is a MIPS R3000A (LSI CW33300 core):
+  - 32-bit, LITTLE-ENDIAN, MIPS I integer ISA
+  - No hardware FPU. Coprocessors are COP0 (system control) and
+    COP2 (the GTE). R4 is GTE-heavy (~5k cop2 ops: RTPT, MVMVA,
+    NCLIP, DPCS/INTPL depth cueing); Ghidra shows them as raw
+    coprocessor instructions — expected, not an error.
+
+  Ghidra language:  MIPS:LE:32:default
+  Compiler spec:    default
+
+----------------------------------------------------------------
+What to import
+----------------------------------------------------------------
+Import the HEADERLESS dump (the 2048-byte PS-EXE header stripped,
+so file offset 0 maps to the load address):
+
+  ghidra/SLUS_007.97_no_header.bin
+
+(Or import disc/SLUS_007.97 as Raw Binary with File Offset 0x800.)
+
+----------------------------------------------------------------
+Load / memory layout
+----------------------------------------------------------------
+  Load address (base):  0x80010000   <-- file offset 0 maps here
+  Entry point (pc0):    0x8007D8F4   (CRT: clears BSS, sets gp)
+  Initial $gp:          header gp0 = 0; the CRT sets gp = 0x800ABFB8
+  Text size:            0x0009C000   (638,976 bytes)
+  End of text:          0x800AC000
+  BSS:                  0x800ABFB8 .. 0x801149A8
+  Stack:                the CRT sets sp = 0x80200000 (not s_addr)
+  main:                 0x8001E67C
+
+Layout inside text: rodata/jump tables 0x80010000..~0x80012000,
+code to ~0x8009E800, data to 0x800AC000. 0x8005F000..0x8006E000 is
+a hand-written assembly renderer: no stack frames, $ra kept in a
+struct, branches across function boundaries, and jalr dispatch
+through a 61-entry table at 0x800A2360 — expect Ghidra's function
+boundaries to be wrong there.
+
+Code overlays: R4.BIN entries 659..672 are loaded at 0x801149A8
+(the end of BSS) at each mode change — garage/save-load, VS car
+select, time attack / extra trial course info, records, link
+battle, and the libpress movie player. Import them separately
+(Raw Binary, base 0x801149A8) when analyzing those modes.
+
+----------------------------------------------------------------
+Project creation
+----------------------------------------------------------------
+1. File -> New Project -> Non-Shared Project.
+2. Name: RidgeRacerType4Recomp
+   Location: <repo>/ghidra/projects/  (gitignored)
+
+----------------------------------------------------------------
+Import steps
+----------------------------------------------------------------
+1. File -> Import File -> ghidra/SLUS_007.97_no_header.bin
+2. Format: Raw Binary; Language: MIPS:LE:32:default;
+   Options... -> Base Address: 0x80010000
+3. Enable "MIPS Constant Reference Analyzer" in auto-analysis.
+4. G -> 0x8007D8F4, Disassemble / Create Function (entry_pc).
+
+----------------------------------------------------------------
+Feeding results back into the project
+----------------------------------------------------------------
+- Recompiler seeds: one 0x-prefixed address per line in
+  ../seeds/ghidra_funcs.txt
+- Function notes: "0xADDRESS, note" rows in
+  ../annotations/SLUS_007.97_annotations.csv (emitted as comments
+  above the function in the generated C)
+- Names: ../symbols.toml, then python3 tools/sync_symbols.py
+
+----------------------------------------------------------------
+Ghidra MCP server (optional, for Claude)
+----------------------------------------------------------------
+Run the GhidrAssistMCP plugin inside Ghidra on port 4444, then copy
+.mcp.json.example -> .mcp.json (server "psx_ghidra", SSE at
+http://localhost:4444/sse).
+
+----------------------------------------------------------------
+Version control
+----------------------------------------------------------------
+Tracked: instructions.txt, scripts/, annotations/
+Not tracked: ghidra/projects/, *.gpr, *.rep/, *.lock, and
+SLUS_007.97_no_header.bin (derivative of copyrighted code).
+
+----------------------------------------------------------------
+Regenerating the headerless dump
+----------------------------------------------------------------
+  tail -c +2049 disc/SLUS_007.97 > ghidra/SLUS_007.97_no_header.bin
