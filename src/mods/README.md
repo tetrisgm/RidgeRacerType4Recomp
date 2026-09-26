@@ -9,8 +9,8 @@ Rules (same as MegaManX6Recomp):
 - One feature domain per source file; `CMakeLists.txt` globs `src/mods/*.c`
   and `*.cpp`.
 - Every feature is default-disabled and enabled only from the launcher's Mods
-  page.
-- Adaptive-renderer plugin sources do not go here — they need the patched
-  framework and live in `renderer/adaptive/src/` (see
-  `renderer/adaptive/README.md`).
+  page. Callbacks do nothing until their package's activation runs.
+- Keep game logic in pure headers (`r4_*_*.h`) so `tests/` can check it
+  without a game build; register every test with ctest in `CMakeLists.txt`.
+- `r4_widescreen_plugin.c`: `r4.enhancement.widescreen` (`docs/WIDESCREEN.md`).
 - See `psxrecomp/docs/MOD_PACKAGES.md`.

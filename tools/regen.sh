@@ -21,8 +21,8 @@ python3 psxrecomp/psxrecomp_cli.py generate --config game.toml --project-root . 
     --no-toolchain-download "$@"
 # GEN_FULL_GLOB is evaluated at configure time, so re-configure existing build
 # trees in case the shard count changed.
-# Only trees configured from this project root (not old recompiler trees or
-# the adaptive build, which point elsewhere).
+# Only trees configured from this project root (not old recompiler trees,
+# which point elsewhere).
 for cache in build*/CMakeCache.txt; do
     [[ -f "$cache" ]] || continue
     home="$(sed -n 's/^CMAKE_HOME_DIRECTORY:INTERNAL=//p' "$cache")"

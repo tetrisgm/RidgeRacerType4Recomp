@@ -48,30 +48,6 @@ file(GLOB R4_MOD_PLUGIN_SOURCES CONFIGURE_DEPENDS
     "${CMAKE_CURRENT_SOURCE_DIR}/src/mods/*.c"
     "${CMAKE_CURRENT_SOURCE_DIR}/src/mods/*.cpp")
 
-# Generated-C directory. "generated" is the stock 4:3 build; the adaptive
-# renderer build (renderer/adaptive/materialize.sh) points this at its own
-# regen from the patched recompiler so the two never share codegen.
-set(R4_GENERATED_DIR "generated" CACHE STRING
-    "Directory (relative to source) holding the recompiled game C")
-
-# MMX6 adaptive renderer, carried for later widescreen work. OFF = the stock
-# psxrecomp renderer (base 4:3). ON requires PSXRECOMP_ROOT to be the patched
-# framework copy materialize.sh produces; R4's own adaptive plugin sources go
-# in renderer/adaptive/src/ (never src/mods/, which the stock build globs).
-option(R4_ADAPTIVE_RENDERER "Build against the patched adaptive-renderer framework" OFF)
-if(R4_ADAPTIVE_RENDERER)
-    if(NOT EXISTS "${PSXRECOMP_ROOT}/runtime/include/ws_view_anchor.h")
-        message(FATAL_ERROR
-            "R4_ADAPTIVE_RENDERER=ON needs the patched framework from "
-            "renderer/adaptive/materialize.sh (PSXRECOMP_ROOT=${PSXRECOMP_ROOT} "
-            "has no ws_view_anchor.h).")
-    endif()
-    file(GLOB R4_ADAPTIVE_SOURCES CONFIGURE_DEPENDS
-        "${CMAKE_CURRENT_SOURCE_DIR}/renderer/adaptive/src/*.c"
-        "${CMAKE_CURRENT_SOURCE_DIR}/renderer/adaptive/src/*.cpp")
-    list(APPEND R4_MOD_PLUGIN_SOURCES ${R4_ADAPTIVE_SOURCES})
-endif()
-
 psxrecomp_add_game_runtime(psx-runtime
     PRELOADED_MODS_DIR "${R4_PRELOADED_MODS}"
     ENABLE_NETPLAY_IF_PRESENT
@@ -84,8 +60,8 @@ psxrecomp_add_game_runtime(psx-runtime
     MAX_PLAYERS 2
     LAUNCHER_BOXART "${CMAKE_CURRENT_SOURCE_DIR}/recomp/launcher/boxart.tga"
     APP_ICON "${CMAKE_CURRENT_SOURCE_DIR}/assets/psxrecomp.ico"
-    GEN_MARKER "${R4_GENERATED_DIR}/SLUS_007.97_dispatch.c"
-    GEN_FULL_GLOB "${R4_GENERATED_DIR}/SLUS_007.97_full_*.c"
+    GEN_MARKER "generated/SLUS_007.97_dispatch.c"
+    GEN_FULL_GLOB "generated/SLUS_007.97_full_*.c"
     CODEGEN_SETUP_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/codegen_setup.c"
     EXTRAS_SOURCES ${R4_MOD_PLUGIN_SOURCES}
 )
