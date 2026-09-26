@@ -32,7 +32,10 @@
  * Gates: pacing 0x180 (races), not paused, race phase 1..3 (overlay modes),
  * the same handler before and after this tick, consecutive ticks, and the
  * framework's plan (OpenGL, flip-aware interpolation, budget). Anything else
- * shows the stock frame for that tick.
+ * shows the stock frame for that tick. Verified in runs: Grand Prix races
+ * (mode 2), Time Attack (mode 1), the attract demo (mode 4) and the replay
+ * after a Time Attack (mode 5); VS split screen (mode 3) is gated off until
+ * a run reaches it (R4_INTERP_SPLIT_ENABLED).
  *
  * Fallback: when the framework cannot run passes at all (no interpolating
  * OpenGL presenter, a renderer mode that declines them, or passes disabled
@@ -96,6 +99,13 @@
 #define R4_SPAD_OT          0x1F800004u
 
 #define R4_MAX_PASSES 16u
+
+/* VS split screen (mode 3, overlay 661) has its draw sequence (seq_split)
+ * from the static analysis, but no run has reached it yet: the VS battle menu
+ * stays disabled without a second connected pad. Until a run verifies it
+ * (render_pass_stats: no aborts, PSX_RENDER_PASS_VERIFY: 0 mismatches, pass
+ * dumps), split screen shows the stock frames like menus do. */
+#define R4_INTERP_SPLIT_ENABLED 0
 
 /* Fallback to frame blend (see the header comment). Ticks are main-loop
  * VSync(0) calls, 30 per second in a race. */
@@ -325,7 +335,7 @@ static uint32_t kmh_of(uint32_t car) {
 
 /* ---- per-mode sequences (race draw paths without logic) -------------- */
 
-static void seq_mode1(R4Call *cc, const R4Blend *b, uint32_t buf) {
+static void seq_time_attack(R4Call *cc, const R4Blend *b, uint32_t buf) {
     R4Call call = *cc;
     uint32_t ot1 = buf + 0x70u, car0 = R4_INTERP_CAR_BASES[0];
     uint32_t tick = rd32(R4_TICK);
@@ -352,7 +362,7 @@ static void seq_mode1(R4Call *cc, const R4Blend *b, uint32_t buf) {
     *cc = call;
 }
 
-static void seq_mode2(R4Call *cc, const R4Blend *b, uint32_t buf) {
+static void seq_grand_prix(R4Call *cc, const R4Blend *b, uint32_t buf) {
     R4Call call = *cc;
     uint32_t ot1 = buf + 0x70u, car0 = R4_INTERP_CAR_BASES[0];
     uint32_t tick = rd32(R4_TICK);
@@ -383,7 +393,7 @@ static void seq_mode2(R4Call *cc, const R4Blend *b, uint32_t buf) {
     *cc = call;
 }
 
-static void seq_mode3(R4Call *cc, const R4Blend *b, uint32_t buf, uint32_t a) {
+static void seq_split(R4Call *cc, const R4Blend *b, uint32_t buf, uint32_t a) {
     R4Call call = *cc;
     uint32_t ot2 = buf + 0xB70u;
     uint32_t tick = rd32(R4_TICK);
@@ -430,7 +440,7 @@ static void seq_mode3(R4Call *cc, const R4Blend *b, uint32_t buf, uint32_t a) {
     *cc = call;
 }
 
-static void seq_mode4(R4Call *cc, const R4Blend *b, uint32_t buf, uint32_t a) {
+static void seq_demo(R4Call *cc, const R4Blend *b, uint32_t buf, uint32_t a) {
     R4Call call = *cc;
     uint32_t ot1 = buf + 0x70u;
     uint32_t sub = rd32(R4_DEMO_SUBMODE), demo_tick = rd32(R4_DEMO_TICK);
@@ -481,7 +491,7 @@ static void seq_mode4(R4Call *cc, const R4Blend *b, uint32_t buf, uint32_t a) {
     *cc = call;
 }
 
-static void seq_mode5(R4Call *cc, const R4Blend *b, uint32_t buf, uint32_t a) {
+static void seq_replay(R4Call *cc, const R4Blend *b, uint32_t buf, uint32_t a) {
     R4Call call = *cc;
     uint32_t ot1 = buf + 0x70u;
     uint32_t f = b->pre_replay_fade;
@@ -535,11 +545,11 @@ static int r4_pass(struct CPUState *cpu, void *user, uint32_t alpha_q16) {
     r4_apply(b, alpha_q16);
 
     switch (b->mode) {
-    case R4_MODE_GP:     seq_mode1(&call, b, buf); break;
-    case R4_MODE_MIRROR: seq_mode2(&call, b, buf); break;
-    case R4_MODE_SPLIT:  seq_mode3(&call, b, buf, alpha_q16); break;
-    case R4_MODE_DEMO:   seq_mode4(&call, b, buf, alpha_q16); break;
-    case R4_MODE_REPLAY: seq_mode5(&call, b, buf, alpha_q16); break;
+    case R4_MODE_TIME_ATTACK: seq_time_attack(&call, b, buf); break;
+    case R4_MODE_GRAND_PRIX:  seq_grand_prix(&call, b, buf); break;
+    case R4_MODE_SPLIT:       seq_split(&call, b, buf, alpha_q16); break;
+    case R4_MODE_DEMO:        seq_demo(&call, b, buf, alpha_q16); break;
+    case R4_MODE_REPLAY:      seq_replay(&call, b, buf, alpha_q16); break;
     default: call.broken = 1; break;
     }
 
@@ -627,10 +637,12 @@ static void r4_loop_head(CPUState *cpu, uint32_t address) {
 static int r4_gates(int mode) {
     uint32_t phase;
     if (mode == R4_MODE_NONE) return 0;
+    if (mode == R4_MODE_SPLIT && !R4_INTERP_SPLIT_ENABLED) return 0;
     if (rd32(R4_PACING) != 0x180u) return 0;
     if (R.pre_paused != 0 || (int8_t)psx_mod_read_byte(R4_PAUSED) != 0) return 0;
     phase = rd32(R4_PHASE);
-    if ((mode == R4_MODE_GP || mode == R4_MODE_MIRROR || mode == R4_MODE_SPLIT) &&
+    if ((mode == R4_MODE_TIME_ATTACK || mode == R4_MODE_GRAND_PRIX ||
+         mode == R4_MODE_SPLIT) &&
         phase - 1u >= 3u)
         return 0;
     if (mode == R4_MODE_DEMO && rd32(R4_DEMO_SUBMODE) >= 2u) return 0;
@@ -704,9 +716,12 @@ static void r4_pass_point(CPUState *cpu, uint32_t address) {
             if (R.passes_ok != kept) {
                 r4_note_images();
                 if (R.logged_mode != mode) {
+                    static const char *const names[] = {
+                        "", "Time Attack", "Grand Prix", "VS split screen",
+                        "attract demo", "replay"};
                     R.logged_mode = mode;
-                    fprintf(stdout, "r4: interpolating race mode %d (%u passes/frame)\n",
-                            mode, (unsigned)n);
+                    fprintf(stdout, "r4: interpolating race mode %d, %s "
+                            "(%u passes/frame)\n", mode, names[mode], (unsigned)n);
                 }
             } else {
                 r4_note_miss(PSX_MOD_RENDER_PASS_READY);

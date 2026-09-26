@@ -42,11 +42,12 @@ static inline int32_t r4_kmh(int16_t raw) {
 /* Race handlers the plugin knows how to redraw (fps_r4 notes, section 2.1). */
 enum {
     R4_MODE_NONE = 0,
-    R4_MODE_GP = 1,        /* Grand Prix race, overlay 660 */
-    R4_MODE_MIRROR = 2,    /* race with rear-view mirror + time limit, overlay 659 */
-    R4_MODE_SPLIT = 3,     /* 2P split screen, overlay 661 */
-    R4_MODE_DEMO = 4,      /* attract / music demo, EXE */
-    R4_MODE_REPLAY = 5     /* after-goal replay, EXE */
+    /* Identified at runtime (handler address at the VSync(0) hook): */
+    R4_MODE_TIME_ATTACK = 1,  /* Time Attack race, overlay 660 */
+    R4_MODE_GRAND_PRIX = 2,   /* Grand Prix race (rear-view mirror, time limit), overlay 659 */
+    R4_MODE_SPLIT = 3,        /* VS 2P split screen, overlay 661 (not reached in a run) */
+    R4_MODE_DEMO = 4,         /* attract / music demo, EXE */
+    R4_MODE_REPLAY = 5        /* replay after a Time Attack goal, EXE */
 };
 
 #define R4_SIG_WORDS 6u
@@ -59,9 +60,9 @@ typedef struct R4ModeSignature {
 /* Overlay handlers share load addresses with other overlays, so the first
  * words of the resident code identify which one is loaded. */
 static const R4ModeSignature R4_MODE_SIGNATURES[] = {
-    { 0x8011729Cu, R4_MODE_GP,
+    { 0x8011729Cu, R4_MODE_TIME_ATTACK,
       { 0x3C04800Fu, 0x3C038010u, 0x8C822F94u, 0x8C63F860u, 0x27BDFFD8u, 0xAFBF0024u } },
-    { 0x80114A38u, R4_MODE_MIRROR,
+    { 0x80114A38u, R4_MODE_GRAND_PRIX,
       { 0x27BDFFC8u, 0x3C03800Fu, 0x8C622F94u, 0x00002021u, 0xAFBF0030u, 0xAFB5002Cu } },
     { 0x80114C30u, R4_MODE_SPLIT,
       { 0x3C04800Fu, 0x3C038010u, 0x8C822F94u, 0x8C63F860u, 0x27BDFFC8u, 0xAFBF0034u } },

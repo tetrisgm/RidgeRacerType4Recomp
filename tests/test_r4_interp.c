@@ -64,16 +64,16 @@ static void test_kmh(void) {
 }
 
 static void test_classify(void) {
-    uint32_t gp[6] = {0x3C04800Fu, 0x3C038010u, 0x8C822F94u, 0x8C63F860u,
+    uint32_t ta[6] = {0x3C04800Fu, 0x3C038010u, 0x8C822F94u, 0x8C63F860u,
                       0x27BDFFD8u, 0xAFBF0024u};
     uint32_t split[6] = {0x3C04800Fu, 0x3C038010u, 0x8C822F94u, 0x8C63F860u,
                          0x27BDFFC8u, 0xAFBF0034u};
-    uint32_t mirror[6] = {0x27BDFFC8u, 0x3C03800Fu, 0x8C622F94u, 0x00002021u,
+    uint32_t gp[6] = {0x27BDFFC8u, 0x3C03800Fu, 0x8C622F94u, 0x00002021u,
                           0xAFBF0030u, 0xAFB5002Cu};
     uint32_t ovl665[6] = {0x27BDFFE8u, 0x00002021u, 0, 0, 0, 0};
-    CHECK(r4_classify_handler(0x8011729Cu, gp) == R4_MODE_GP, "overlay 660 GP race");
+    CHECK(r4_classify_handler(0x8011729Cu, ta) == R4_MODE_TIME_ATTACK, "overlay 660 Time Attack");
     CHECK(r4_classify_handler(0x80114C30u, split) == R4_MODE_SPLIT, "overlay 661 split");
-    CHECK(r4_classify_handler(0x80114A38u, mirror) == R4_MODE_MIRROR, "overlay 659 mirror");
+    CHECK(r4_classify_handler(0x80114A38u, gp) == R4_MODE_GRAND_PRIX, "overlay 659 Grand Prix");
     CHECK(r4_classify_handler(0x80114A38u, ovl665) == R4_MODE_NONE,
           "overlay 665 at the same address is not a race");
     CHECK(r4_classify_handler(0x8011729Cu, split) == R4_MODE_NONE,
