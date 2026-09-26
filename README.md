@@ -135,7 +135,8 @@ snapshots of the game's code.
 
 ## License
 
-No license has been chosen for this repository yet. Portions are adapted from
-MegaManX6Recomp under PolyForm Noncommercial 1.0.0 — see
-`THIRD-PARTY-LICENSES/`. R4: Ridge Racer Type 4 is © Namco (Bandai Namco
+MIT for this repository's own code — see `LICENSE`. Files adapted from
+MegaManX6Recomp (listed in `THIRD-PARTY-LICENSES/README.md`, including
+`renderer/adaptive/`) stay under PolyForm Noncommercial 1.0.0, and the
+`psxrecomp` and `recomp-ui` submodules carry their own licenses. R4: Ridge Racer Type 4 is © Namco (Bandai Namco
 Entertainment); this repository contains none of the game's binaries or assets.

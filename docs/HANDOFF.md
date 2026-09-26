@@ -14,7 +14,7 @@ distributable macOS build.
 
 ## Blockers
 
-None. Open decisions for the owner: repository license (none chosen yet).
+None.
 
 ## References
 
