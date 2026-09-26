@@ -27,9 +27,10 @@ Interpolated (default)
   If the computer cannot draw every in-between frame in time, fewer are drawn
   and the gaps are crossfaded; nothing slows the game down. If the renderer
   cannot draw in-between frames at all (for example in a mode it does not
-  support them in), the package shows Frame blend instead, using the Blend
-  style below, and says so once in the log; it switches back by itself when
-  they are available again.
+  support them in), or none fits the frame time for a whole second (for
+  example at a high internal resolution), the package shows Frame blend
+  instead, using the Blend style below, and says so once in the log; it
+  switches back by itself when they are available again.
 
 Frame blend
   Crossfades the last two finished frames. It is cheaper, but moving objects

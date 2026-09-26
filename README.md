@@ -114,8 +114,9 @@ music are unchanged.
   restored afterwards). No added latency. Grand Prix and Time Attack races,
   the attract demo and the replay after a Time Attack are interpolated; VS
   split screen (not yet tested), menus, pause, results and movies are shown
-  as on a PS1. Where the renderer cannot draw in-between frames at all, the
-  package falls back to Frame blend and says so in the log.
+  as on a PS1. Where the renderer cannot draw in-between frames at all, or
+  none fits the frame time for a whole second (e.g. at a high internal
+  resolution), the package falls back to Frame blend and says so in the log.
 - **Frame blend**: crossfades finished frames (cheaper, ghosts, one frame
   late).
 

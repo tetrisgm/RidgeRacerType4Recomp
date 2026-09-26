@@ -43,6 +43,11 @@
  * rolled back, the presenter is switched to the player's frame blend and the
  * log says so once. Passes are tried again when the framework reports them
  * available (after a back-off when they failed while reported available).
+ * A plan shed for time is not a failure, but when every plan of a whole
+ * second of race ticks is shed (a machine that cannot afford even one pass
+ * at this internal resolution or aspect), the presenter shows the frame
+ * blend too instead of repeating each game frame; the plugin keeps planning
+ * every tick and goes back to passes on the first tick that affords one.
  *
  * The two entry hooks belong to the manifest [[plugin]] id "r4.framerate"
  * (psx_mod_register_function_entry_plugin). psxrecomp runs a function-entry
@@ -113,6 +118,9 @@
 #define R4_RETRY_MIN_TICKS  30u    /* first retry after a failed resume: ~1 s */
 #define R4_RETRY_MAX_TICKS  960u   /* back-off cap: ~32 s */
 #define R4_RETRY_RESET_TICKS 300u  /* ~10 s of pass images resets the back-off */
+#define R4_SHED_FALLBACK_TICKS 30u /* race ticks in a row shed for time: ~1 s */
+/* r4_unavailable_reason() for a fallback because every plan was shed. */
+#define R4_STATUS_SHED 0x100u
 
 typedef struct R4Capture {
     int32_t car[R4_INTERP_CAR_COUNT][R4_INTERP_CAR_FIELD_COUNT];
@@ -156,12 +164,13 @@ static struct {
     /* fallback to frame blend */
     uint32_t fallback_blend;   /* the Blend style option */
     int in_fallback;
-    unsigned misses, good;
+    int fallback_shed;         /* in_fallback because every plan was shed */
+    unsigned misses, good, sheds;
     uint64_t retry_at;
     unsigned retry_wait;
     int logged_fallback, logged_resume;
     /* diagnostics */
-    uint64_t ticks, interpolated, gated, passes_ok, fallbacks;
+    uint64_t ticks, interpolated, gated, passes_ok, fallbacks, shed_fallbacks;
     int logged_mode;
 } R;
 
@@ -570,6 +579,8 @@ static const char *r4_unavailable_reason(uint32_t status) {
         return "the renderer declines them in its current mode";
     case PSX_MOD_RENDER_PASS_DISABLED:
         return "disabled after repeated faults";
+    case R4_STATUS_SHED:
+        return "none fits the frame time at this setting";
     default:
         return "every pass was refused or rolled back";
     }
@@ -577,12 +588,19 @@ static const char *r4_unavailable_reason(uint32_t status) {
 
 static void r4_enter_fallback(uint32_t status) {
     R.in_fallback = 1;
+    R.fallback_shed = status == R4_STATUS_SHED;
     R.misses = 0;
+    R.sheds = 0;
     R.good = 0;
     R.fallbacks++;
-    R.retry_at = R.ticks + R.retry_wait;
-    R.retry_wait = R.retry_wait * 2u > R4_RETRY_MAX_TICKS ? R4_RETRY_MAX_TICKS
-                                                          : R.retry_wait * 2u;
+    if (R.fallback_shed) {
+        /* Left by the first affordable plan, not by the back-off. */
+        R.shed_fallbacks++;
+    } else {
+        R.retry_at = R.ticks + R.retry_wait;
+        R.retry_wait = R.retry_wait * 2u > R4_RETRY_MAX_TICKS
+                           ? R4_RETRY_MAX_TICKS : R.retry_wait * 2u;
+    }
     psx_mod_set_frame_interpolation_blend(R.fallback_blend);
     if (!R.logged_fallback) {
         R.logged_fallback = 1;
@@ -592,33 +610,47 @@ static void r4_enter_fallback(uint32_t status) {
     }
 }
 
-/* In fallback: go back to passes once the framework says they can run. */
-static int r4_try_resume(void) {
-    if (R.ticks < R.retry_at ||
-        psx_mod_render_pass_status() != PSX_MOD_RENDER_PASS_READY)
-        return 0;
+/* Leave the fallback: passes supply the in-between frames again. */
+static void r4_leave_fallback(void) {
     R.in_fallback = 0;
+    R.fallback_shed = 0;
     R.misses = 0;
+    R.sheds = 0;
     psx_mod_set_frame_interpolation_blend(PSX_MOD_FRAME_INTERPOLATION_HOLD);
     if (!R.logged_resume) {
         R.logged_resume = 1;
         fprintf(stdout, "r4: render passes available again; interpolated "
                 "frames resumed\n");
     }
+}
+
+/* In fallback: go back to passes once the framework says they can run. */
+static int r4_try_resume(void) {
+    if (R.ticks < R.retry_at ||
+        psx_mod_render_pass_status() != PSX_MOD_RENDER_PASS_READY)
+        return 0;
+    r4_leave_fallback();
     return 1;
 }
 
 /* A race tick that wanted passes and got no image. status: why the plan
  * was empty, or READY when passes ran and none was kept. Budget shedding
  * and transient refusals (fast-forward, netplay, a busy machine) are not
- * misses: the presenter holds the stock frame for those ticks. */
+ * misses: the presenter holds the stock frame for those ticks, until a whole
+ * second of ticks has been shed (r4_note_shed). */
 static void r4_note_miss(uint32_t status) {
     R.good = 0;
     if (++R.misses >= R4_FALLBACK_MISSES) r4_enter_fallback(status);
 }
 
+/* A race tick whose plan was shed for time (status READY, no phases). */
+static void r4_note_shed(void) {
+    if (++R.sheds >= R4_SHED_FALLBACK_TICKS) r4_enter_fallback(R4_STATUS_SHED);
+}
+
 static void r4_note_images(void) {
     R.misses = 0;
+    R.sheds = 0;
     if (++R.good >= R4_RETRY_RESET_TICKS) R.retry_wait = R4_RETRY_MIN_TICKS;
 }
 
@@ -673,7 +705,13 @@ static void r4_pass_point(CPUState *cpu, uint32_t address) {
     continuous = R.prev_valid && R.prev_mode == mode &&
                  (mode == R4_MODE_DEMO ? demo_tick == R.prev_demo_tick + 1u
                                        : tick == R.prev_tick + 1u);
-    if (continuous && (!R.in_fallback || r4_try_resume())) {
+    n = 0;
+    if (continuous && R.in_fallback && R.fallback_shed) {
+        /* Blending because every plan was shed: keep planning, and go back
+         * to passes on the first tick that affords one. */
+        n = psx_mod_render_pass_plan(2u, 1u, alphas, R4_MAX_PASSES);
+        if (n) r4_leave_fallback();
+    } else if (continuous && (!R.in_fallback || r4_try_resume())) {
         /* Ask the presenter which phases of the coming frame it will show:
          * the frame flips at the next VBlank and is first presented one
          * VBlank later, for two VBlanks (0x180 pacing). */
@@ -684,7 +722,14 @@ static void r4_pass_point(CPUState *cpu, uint32_t address) {
                 status == PSX_MOD_RENDER_PASS_BACKEND ||
                 status == PSX_MOD_RENDER_PASS_DISABLED)
                 r4_note_miss(status);
-        } else {
+            else if (status == PSX_MOD_RENDER_PASS_READY)
+                r4_note_shed();
+            else
+                R.sheds = 0;   /* transient: fast-forward, busy, session */
+        }
+    }
+    {
+        if (n) {
             uint64_t kept = R.passes_ok;
             uint32_t b = rd32(R4_FRAME_COUNTER) & 1u;
             uint32_t disp = R4_BUF_BASE + b * R4_BUF_STRIDE + 0x5Cu;
@@ -760,7 +805,9 @@ void r4_interp_activate(int enabled, uint32_t fallback_blend) {
     R.logged_mode = 0;
     R.fallback_blend = fallback_blend;
     R.in_fallback = 0;
+    R.fallback_shed = 0;
     R.misses = 0;
+    R.sheds = 0;
     R.good = 0;
     R.retry_at = 0;
     R.retry_wait = R4_RETRY_MIN_TICKS;

@@ -8,7 +8,9 @@
  *    BACKEND or DISABLED), or passes keep being refused, the presenter is
  *    switched to the player's frame blend, logged once, and passes are tried
  *    again when they are available (with a back-off after failed resumes).
- *    Budget shedding and transient refusals (fast-forward) never fall back.
+ *    Transient refusals (fast-forward) and short budget shedding never fall
+ *    back; a whole second of shed plans does, and the first plan that
+ *    affords a pass goes back to passes without a back-off.
  *
  * The mod API is a mock with a flat guest RAM; the plugin is the real one,
  * driven through the attract demo's gates. Build/run: ctest -R r4_interp_plugin */
@@ -206,6 +208,40 @@ int main(void) {
     tick(&cpu);
     tick(&cpu);
     CHECK(s_passes == 8, "passes resume after shedding and fast-forward");
+
+    /* Every plan shed for a whole second (a machine that cannot afford one
+     * pass at this setting, e.g. a high internal resolution): frame blend
+     * instead of repeated game frames; planning continues every tick, with
+     * no further blend switches, and the first affordable plan resumes. */
+    s_shed = 1;
+    for (int i = 0; i < 29; i++) tick(&cpu);
+    CHECK(s_blend == PSX_MOD_FRAME_INTERPOLATION_HOLD && s_blend_calls == 0,
+          "29 shed ticks: still holding");
+    tick(&cpu);
+    CHECK(s_blend == PSX_MOD_FRAME_INTERPOLATION_LINEAR && s_blend_calls == 1,
+          "30 shed ticks in a row: the presenter shows the frame blend");
+    {
+        int plans = s_plans, passes = s_passes;
+        for (int i = 0; i < 100; i++) tick(&cpu);
+        CHECK(s_plans == plans + 100, "still planning every tick while shed");
+        CHECK(s_blend_calls == 1 && s_passes == passes,
+              "no passes and no HOLD flapping while every plan is shed");
+        s_shed = 0;
+        tick(&cpu);
+        CHECK(s_blend == PSX_MOD_FRAME_INTERPOLATION_HOLD && s_blend_calls == 2,
+              "first affordable plan: HOLD restored at once");
+        CHECK(s_passes == passes + 1, "and the same tick renders a pass");
+    }
+    /* A shed streak broken by a tick with images starts over. */
+    s_shed = 1;
+    for (int i = 0; i < 20; i++) tick(&cpu);
+    s_shed = 0;
+    tick(&cpu);
+    s_shed = 1;
+    for (int i = 0; i < 20; i++) tick(&cpu);
+    s_shed = 0;
+    CHECK(s_blend_calls == 2, "two 20-tick shed streaks: no fallback");
+    s_blend_calls = 0;
 
     /* The renderer declines passes (a mode without them, e.g. a hi-res
      * window): frame blend after three race ticks, logged once. */
