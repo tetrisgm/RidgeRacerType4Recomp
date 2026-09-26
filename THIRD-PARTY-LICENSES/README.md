@@ -12,8 +12,7 @@ Files copied or adapted from it:
 
 - `tools/mdis.py`, `tools/dumpgrep.py` (copied; port/usage adjusted)
 - `tools/dbg.py`, `tools/stackwalk.py` (rewritten from the MMX6 originals)
-- `ghidra/instructions.txt`, `annotations/SLUS_007.97_annotations.csv` header,
-  `.mcp.json.example` (adapted)
+- `ghidra/instructions.txt`, `.mcp.json.example` (adapted)
 - `renderer/adaptive/` — the adaptive renderer framework patch and the
   `mmx6-reference/` game-side sources (carried verbatim; see
   `renderer/adaptive/README.md`)

@@ -1,4 +1,3 @@
-# address, note
-# Human-readable notes on function purpose, emitted as [NOTE] comments above
-# the matching function in the generated C. address = 0x-prefixed KSEG0 PC.
-# Note text may contain commas. Add rows as functions are identified in Ghidra.
+# R4 function notes for the recompiler: one "0xPC, note" row per line.
+# pc is the KSEG0 function start; the note may contain commas and is emitted
+# as a [NOTE] comment above that function in the generated C.
