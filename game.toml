@@ -63,11 +63,11 @@ disc_speed = "1x"
 # dispatch is always gated on the resident bytes.
 overlay_cache = true
 overlay_backend = "auto"
-# Runs with cwd = project root (the first ancestor of game.toml holding .git /
-# CMakeLists.txt). The runtime injects PSX_OVERLAY_CACHE_DIR and
-# PSX_OVERLAY_CAPTURES, so no --out-dir/--captures here. /usr/bin/gcc is Apple
-# clang on macOS. --cps must match the (default) CPS game codegen.
-overlay_autocompile_cmd = "python3 psxrecomp/tools/compile_overlays.py --game-toml game.toml --recompiler build-recompiler/psxrecomp-game --runtime-include psxrecomp/runtime/include --cps"
+# No overlay_autocompile_cmd here: on a player's machine the setup-host
+# rebuild installs overlay_toolchain/ beside the exe and the runtime builds the
+# compile command from it; a command set here would override that. Dev runs
+# pass the dev command through PSX_OVERLAY_AUTOCOMPILE_CMD (tools/run_r4.sh,
+# tools/run_r4.cmd).
 
 [video]
 # Base 4:3 on the stock psxrecomp renderer. The MMX6 adaptive renderer is

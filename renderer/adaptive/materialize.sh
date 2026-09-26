@@ -60,13 +60,8 @@ if [[ "${1:-}" == "--configure" ]]; then
         -DCMAKE_BUILD_TYPE=Release
     cmake --build "$DST/recompiler/build" --target psxrecomp-game psxrecomp-bios
     (cd "$DST" && bash tools/regen_bios.sh --config bios/OpenBIOS.toml)
-    # Same game config, generated into $GEN_DIR, and overlay shards compiled by
-    # the PATCHED recompiler against the patched headers (overlay ABI 24): an
-    # ABI-23 shard from the stock toolchain would be rejected at load time.
+    # Same game config, generated into $GEN_DIR instead of generated/.
     sed -e "s#^out_dir = \"generated\"#out_dir = \"$GEN_DIR\"#" \
-        -e "s#--recompiler build-recompiler/psxrecomp-game#--recompiler build-adaptive/psxrecomp/recompiler/build/psxrecomp-game#" \
-        -e "s#--runtime-include psxrecomp/runtime/include#--runtime-include build-adaptive/psxrecomp/runtime/include#" \
-        -e "s#python3 psxrecomp/tools/compile_overlays.py#python3 build-adaptive/psxrecomp/tools/compile_overlays.py#" \
         "$ROOT/game.toml" > "$ROOT/build-adaptive/game.adaptive.toml"
     (cd "$ROOT" && "$DST/recompiler/build/psxrecomp-game" \
         --config build-adaptive/game.adaptive.toml --project-root "$ROOT")
@@ -75,4 +70,7 @@ if [[ "${1:-}" == "--configure" ]]; then
         -DR4_GENERATED_DIR="$GEN_DIR" -DR4_ADAPTIVE_RENDERER=ON
     echo "configured: cmake --build \"$BUILD_DIR\" --target psx-runtime"
     echo "run with:   \"$BUILD_DIR/r4-runtime\" --game \"$ROOT/build-adaptive/game.adaptive.toml\""
+    # Overlay shards must come from the PATCHED toolchain (overlay ABI 24); an
+    # ABI-23 shard from the stock emitters would be rejected at load time.
+    echo "overlays:   PSX_OVERLAY_AUTOCOMPILE_CMD='python3 build-adaptive/psxrecomp/tools/compile_overlays.py --game-toml build-adaptive/game.adaptive.toml --recompiler build-adaptive/psxrecomp/recompiler/build/psxrecomp-game --runtime-include build-adaptive/psxrecomp/runtime/include --cps'"
 fi

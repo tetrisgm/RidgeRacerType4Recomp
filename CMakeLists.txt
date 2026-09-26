@@ -9,6 +9,19 @@ if(NOT EXISTS "${PSXRECOMP_ROOT}/runtime/runtime.cmake")
         "or set -DPSXRECOMP_ROOT=<path-to-psxrecomp>.")
 endif()
 
+# macOS: portable binaries by default, both for the release setup host and for
+# the game a player builds from it. Use the static SDL3 psxrecomp pins rather
+# than a Homebrew dylib, skip recomp-ui's optional FreeType/HarfBuzz (emoji
+# stay outline glyphs), and target a macOS older than the build machine.
+# Cache defaults, so a local -D still overrides them.
+if(APPLE)
+    set(CMAKE_OSX_DEPLOYMENT_TARGET "11.0" CACHE STRING "Minimum macOS version")
+    set(CMAKE_DISABLE_FIND_PACKAGE_SDL3 ON CACHE BOOL
+        "Use psxrecomp's pinned static SDL3, not a system dylib")
+    set(CMAKE_DISABLE_FIND_PACKAGE_Freetype ON CACHE BOOL
+        "Skip optional FreeType/HarfBuzz (Homebrew dylibs)")
+endif()
+
 project(RidgeRacerType4Recomp LANGUAGES C CXX)
 
 # --- Opt-in product surfaces (OFF by default in the framework) -------------
@@ -77,28 +90,13 @@ psxrecomp_add_game_runtime(psx-runtime
 
 # Stage runtime configs next to the exe for direct build/ launches. Only copy
 # files that exist -- never fail POST_BUILD when game_options.toml is absent.
-# On Windows the staged game.toml names the recompiler with its .exe suffix:
-# the runtime checks the overlay_autocompile_cmd paths literally there.
-set(R4_STAGED_GAME_TOML "${CMAKE_CURRENT_SOURCE_DIR}/game.toml")
-if(WIN32)
-    file(READ "${CMAKE_CURRENT_SOURCE_DIR}/game.toml" _r4_game_toml)
-    string(REPLACE "build-recompiler/psxrecomp-game " "build-recompiler/psxrecomp-game.exe "
-        _r4_game_toml "${_r4_game_toml}")
-    set(R4_STAGED_GAME_TOML "${CMAKE_CURRENT_BINARY_DIR}/game.win.toml")
-    file(WRITE "${R4_STAGED_GAME_TOML}" "${_r4_game_toml}")
-    set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS
-        "${CMAKE_CURRENT_SOURCE_DIR}/game.toml")
-endif()
-add_custom_command(TARGET psx-runtime POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different
-        "${R4_STAGED_GAME_TOML}" "$<TARGET_FILE_DIR:psx-runtime>/game.toml"
-    COMMENT "Staging game.toml"
-    VERBATIM)
-if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/game_options.toml")
-    add_custom_command(TARGET psx-runtime POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different
-            "${CMAKE_CURRENT_SOURCE_DIR}/game_options.toml"
-            "$<TARGET_FILE_DIR:psx-runtime>/game_options.toml"
-        COMMENT "Staging game_options.toml"
-        VERBATIM)
-endif()
+foreach(_R4_RUNTIME_CONFIG game.toml game_options.toml)
+    if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/${_R4_RUNTIME_CONFIG}")
+        add_custom_command(TARGET psx-runtime POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different
+                "${CMAKE_CURRENT_SOURCE_DIR}/${_R4_RUNTIME_CONFIG}"
+                "$<TARGET_FILE_DIR:psx-runtime>/${_R4_RUNTIME_CONFIG}"
+            COMMENT "Staging ${_R4_RUNTIME_CONFIG}"
+            VERBATIM)
+    endif()
+endforeach()

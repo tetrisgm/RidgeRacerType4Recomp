@@ -80,3 +80,8 @@ __pycache__/
 
 # Adaptive-renderer build products (renderer/adaptive/materialize.sh)
 /generated-adaptive/
+
+# Local symlinks (disc/, build trees) in feature worktrees
+/disc
+/build-*
+/generated

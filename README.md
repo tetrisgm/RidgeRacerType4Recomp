@@ -64,8 +64,15 @@ mkdir -p disc   # put (or symlink) the .cue and .bin here
 tools/regen.sh --disc "disc/R4 - Ridge Racer Type 4 (USA).cue"
 cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DPSX_DEBUG_TOOLS=ON
 cmake --build build --target psx-runtime
-build/r4-runtime            # launcher; or tools/run_r4.sh build to go straight in
+tools/run_r4.sh build       # straight into the game; or build/r4-runtime for the launcher
 ```
+
+Code overlays (R4.BIN menus) compile to native shards in the background only
+when `PSX_OVERLAY_AUTOCOMPILE_CMD` is set; `tools/run_r4.sh` / `run_r4.cmd`
+set it for dev runs. Launching `build/r4-runtime` directly works, but those
+menus stay in the interpreter. Release builds made by the setup host use the
+`overlay_toolchain/` it installs instead, which is why `game.toml` does not
+carry a dev compile command.
 
 **Windows** builds the same way from an MSYS2 **MINGW64** shell
 (`pacman -S mingw-w64-x86_64-{gcc,cmake,ninja,python} git`): run the same
@@ -73,12 +80,12 @@ build/r4-runtime            # launcher; or tools/run_r4.sh build to go straight 
 `tools\run_r4.cmd`, which also puts MinGW64 on PATH so background overlay
 compiles can find `python3` and `gcc`. The exe imports only Windows system DLLs.
 
-`tools/regen.sh` builds the recompiler into `build-recompiler/` on first use,
+`tools/regen.sh` builds the recompiler into `psxrecomp/recompiler/build/` on first use,
 verifies the disc against `game.toml [prepare_disc]`, extracts the boot EXE to
 `disc/`, and writes `generated/`. Re-run it after changing seeds, annotations,
 recompiler config, or the `psxrecomp` submodule. Drop `-DPSX_DEBUG_TOOLS=ON`
-for a build without the TCP debug server. Netplay needs network access on the
-first configure (libjuice is fetched).
+for a build without the TCP debug server. The first configure needs network
+access: libjuice (netplay) is fetched, and on macOS the pinned static SDL3.
 
 ## Configuration
 
@@ -88,7 +95,7 @@ executable. Defaults live in `game.toml`:
 - `[video]` — `renderer` (`opengl` / `software`), `aspect_ratio = "4:3"`.
 - `[controller]` — `default_mode` (`digital`; DualShock analog selectable).
 - `[runtime]` — `disc_speed = "1x"` (authentic; R4 streams XA with a data
-  channel), `overlay_cache` + `overlay_autocompile_cmd` (native overlay shards).
+  channel), `overlay_cache` (native overlay shards; see Building From Source).
 - `[netplay]` — disc gates: `require_cue`, `required_tracks = 1`, `required_disc_fp`.
 
 ## Controls
