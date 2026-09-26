@@ -44,6 +44,11 @@ known_crc32 = [
 seeds = "seeds/ghidra_funcs.txt"
 out_dir = "generated"
 strict = true
+# Trusted mod entry hooks (inert unless a package plugin registers for them).
+# R4 Frame Rate (src/mods/r4_interp.c): VSync 0x8008B330 is the render-pass
+# point (main loop VSync(0), ra 0x8001E7E4); ClearOTagR 0x80093418 marks the
+# loop head (ra 0x8001E764), before the race handler runs.
+mod_function_entry_funcs = ["0x8008B330", "0x80093418"]
 
 [runtime]
 debug_port = 4797

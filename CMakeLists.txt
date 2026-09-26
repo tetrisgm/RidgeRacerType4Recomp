@@ -100,3 +100,24 @@ foreach(_R4_RUNTIME_CONFIG game.toml game_options.toml)
             VERBATIM)
     endif()
 endforeach()
+
+# ---- R4 unit tests (pure C, no runtime or disc needed) --------------------
+# Run: cmake --build build --target test_r4_frame_rate test_r4_interp &&
+#      ctest --test-dir build --output-on-failure
+enable_testing()
+foreach(_r4_test r4_frame_rate r4_interp)
+    add_executable(test_${_r4_test} EXCLUDE_FROM_ALL tests/test_${_r4_test}.c)
+    target_include_directories(test_${_r4_test} PRIVATE src/mods)
+    add_test(NAME ${_r4_test}_build
+             COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}
+                     --target test_${_r4_test})
+    add_test(NAME ${_r4_test} COMMAND test_${_r4_test})
+    set_tests_properties(${_r4_test} PROPERTIES DEPENDS ${_r4_test}_build)
+endforeach()
+find_package(Python3 COMPONENTS Interpreter)
+if(Python3_Interpreter_FOUND)
+    # src/mods/r4_interp_fields.h must match tools/data/r4_interp_fields.json.
+    add_test(NAME r4_interp_fields_current
+             COMMAND ${Python3_EXECUTABLE}
+                     ${CMAKE_CURRENT_SOURCE_DIR}/tools/gen_r4_interp_fields.py --check)
+endif()
