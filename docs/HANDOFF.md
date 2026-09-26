@@ -2,15 +2,13 @@
 
 ## Current work
 
-Distribution (`feat/distribution`, PR tetrisgm/RidgeRacerType4Recomp#1, draft):
-setup-host zips for macOS (universal, ad-hoc signed) and Windows x64, built by
-`tools/package_release.sh` on the Mac and on the PC (MSYS2). Player flow tested
-end to end on both headlessly; GUI click-through pending with the owner.
-psxrecomp is pinned to upstream master `4d7311c8` (#393, #394, #395 merged;
-see `docs/framework_pin_history.md`). Remaining: the owner's GUI
-click-through and the publish decision. Worktrees: `~/dev/ridgeracertype4-wt/distribution` (Mac) and
-`C:\Users\Shokunin\dev\ridgeracertype4-wt\distribution` (PC, synced by git
-bundle).
+v0.1.0 (preview) released 2026-09-26: setup-host zips for macOS (universal,
+ad-hoc signed) and Windows x64 at
+https://github.com/tetrisgm/RidgeRacerType4Recomp/releases/tag/v0.1.0 (repo
+public). Built with `tools/package_release.sh` on the Mac and on the PC (MSYS2);
+player flow verified end to end headlessly on both. Pending: the owner's GUI
+click-through of the setup wizard. Next feature (later): widescreen via the
+adaptive renderer in `renderer/adaptive/`, as a worktree pair with psxrecomp PRs.
 
 ## Blockers
 
