@@ -41,6 +41,25 @@ dirty-RAM interpreter. Shards persist in `<build>/cache/`. Ahead-of-time
 shards need an R4.BIN extraction method (a cumulative start-sector table, which
 `tools/aot_overlay_pipeline.py` does not read yet).
 
+## #6 — Widescreen (R4 Custom Renderer) limitations — OPEN (enhancement)
+
+The `r4.enhancement.widescreen` mod (experimental, off by default; see
+`docs/WIDESCREEN.md`) widens the frames of R4's five race handlers (the
+race overlays 659/660/661, the attract demo and the after-goal run). Known
+limits:
+
+- Extra Trial and link-battle races (overlays 666/667) stay 4:3 until their
+  frame handlers are added to the race predicate.
+- On Vulkan and the software renderer the rear-view mirror is missing in wide
+  races (only OpenGL copies the canonical 4:3 image into the wide surface);
+  framework follow-up U7 in the enhancement plan.
+- The 2P VS divider stops at the 4:3 edges (framework follow-up U8). The 2P
+  split itself has not been checked on screen: VS Battle needs a second pad,
+  and netplay VS always runs stock 4:3.
+- The mod's entry hooks belong to its manifest plugin (`r4.widescreen`):
+  psxrecomp runs them only while the resolved mod plan activates it, so never
+  in netplay or while the package is disabled.
+
 ## Watch items
 
 - `psxrecomp` hard-codes four MotK PCs (`gpu.c`, `psx_netplay_rb.c`); two fall
