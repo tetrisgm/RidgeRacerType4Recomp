@@ -27,7 +27,6 @@ Notes
 -----
 - Best on OpenGL (the default). On Vulkan and the software renderer the
   rear-view mirror is not shown while a race is wide.
-- The 2-player divider line stops at the 4:3 edges.
 - Netplay always plays stock 4:3; mods are cleared for netplay sessions.
 - Changing it needs no rebuild; the widening code is in every build and
   does nothing while this package is disabled.

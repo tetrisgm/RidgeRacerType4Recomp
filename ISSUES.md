@@ -50,12 +50,14 @@ limits:
 
 - Extra Trial and link-battle races (overlays 666/667) stay 4:3 until their
   frame handlers are added to the race predicate.
-- On Vulkan and the software renderer the rear-view mirror is missing in wide
-  races (only OpenGL copies the canonical 4:3 image into the wide surface);
-  framework follow-up U7 in the enhancement plan.
-- The 2P VS divider stops at the 4:3 edges (framework follow-up U8). The 2P
-  split itself has not been checked on screen: VS Battle needs a second pad,
-  and netplay VS always runs stock 4:3.
+- The rear-view mirror needs OpenGL in wide races: only OpenGL copies the
+  canonical 4:3 column (where the mirror is drawn) into the wide surface. On
+  the software renderer it shows solid black (checked); Vulkan was not run
+  (not built on macOS) and has the same code shape. Framework follow-up U7 in
+  the enhancement plan.
+- Netplay VS always runs stock 4:3 (mods are cleared). Offline 2P VS widens
+  correctly (checked at 16:9, 21:9 and 32:9 with `tools/pad2.py` supplying
+  pad 2; the divider spans the full width).
 - The mod's entry hooks belong to its manifest plugin (`r4.widescreen`):
   psxrecomp runs them only while the resolved mod plan activates it, so never
   in netplay or while the package is disabled.

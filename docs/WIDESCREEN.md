@@ -72,10 +72,30 @@ tools/mod_state.py build --clear                        # back to stock
   list size before and after the union.
 - `R4_WS_PVS=0` turns the course-list union off for an A/B.
 - Headless runs never engage native-wide; use a window.
+- psxrecomp engages a wide view in its present path, on the first frame it
+  presents after game entry. TCP `turbo` skips that path, so a run whose turbo
+  goes on during boot stays 4:3 until a frame is presented. `tools/smoke.py`
+  pauses turbo at the main menu until `ws_nw` reports `mode` 2; do the same
+  in other scripts (`python3 tools/dbg.py ws_nw` shows the mode).
 - `ctest --test-dir build -R r4_widescreen` runs the helper unit test and the
   cull-list check. Configure with `-DR4_BUILD_TESTS=ON` first; the tests are
   off by default because `tests/` and `tools/` are not in the release zip. The
   cull-list check registers only when `disc/SLUS_007.97` and a regen exist.
+
+### 2P VS Battle
+
+VS Battle needs a second pad. Without framework changes:
+
+1. Put `[controller]` `p2_device = "gamepad"` in `build/settings.toml`. With
+   no controller attached, port 2 still reports a connected, idle pad
+   (`pad_status`), which enables VS Battle in the main menu.
+2. Drive pad 1 with `set_input` (`tools/pad.py`) as usual and pad 2 with
+   `tools/pad2.py BUTTONS FRAMES`. It writes the button bytes of R4's two
+   port-2 receive buffers once per guest frame (`0x8010C2FA` and
+   `0x8011459D`, active-low pad word, low byte first; pad 1's are at
+   `0x8010C2D2` and `0x8011457A`). Car Select Preset Player 2 needs pad 2's
+   Circle (`tools/pad2.py circle 12`); pad 1 then picks the course and
+   starts. It writes guest RAM, so use it for captures only.
 
 ## Measurements (macOS arm64, OpenGL)
 
@@ -94,27 +114,42 @@ savestate. Wider-than-32:9 rows force the cull margin with `ws_margin`:
 | margin 1024 | 1024 | 65% | 82% |
 
 The heap never overflows, and the GTE saturates screen X at ±1024 (about
-65:9) anyway, so Fit stays uncapped.
+65:9) anyway, so Fit stays uncapped. In a 2P VS race the high-water mark was
+46% standing at 32:9 and up to 55% driving at 21:9.
 
 The course-list union measurably fills holes: on the attract demo at 32:9 it
 restores missing scenery at the left edge at 3 of 8 sampled frames (for
 example a black void above a cliff road, and background buildings behind an
 overpass) and leaves the other frames byte-identical.
 
-With the mod off, a build with these changes matches a build of the previous
-master frame for frame: guest write, PC, MMIO, scratchpad and cycle
-fingerprints are identical for 20000 frames of the no-input attract loop
-(including the attract race), and display frames of that race are
-pixel-identical.
+With the mod off, a build with these changes matches a build of current
+upstream (R4 master with psxrecomp `16382d22` and recomp-ui `65833d7`) frame
+for frame: guest write, PC, MMIO, scratchpad and cycle fingerprints are
+identical for 16000 frames of the no-input boot, intro, title and attract
+demo race, both when each build runs native overlay shards its own emitter
+compiled from the same capture store and when both start with an empty shard
+cache. The same binary with a warm versus a cold shard cache differs from
+frame 194 (RAM write values only), and upstream's build does exactly the
+same. An earlier round (previous master, shards off) also found the attract
+race's display frames pixel-identical. The change does move both
+overlay-cache keys (the codegen tag for every title, R4's config hash), so the
+first run after an upgrade rebuilds R4's shards.
+
+2P VS split screen (16:9, 21:9, 32:9 standing; 21:9 driving): each half widens to both window
+edges, each half's RANK and minimap sit at the left edge and its laps, time,
+tachometer and speed at the right edge, and the divider (rows 118-121) is one
+colour across the full width at every aspect.
 
 ## Limitations
 
 - Extra Trial and link-battle races (overlays 666/667) are not widened yet;
   their frame handlers need adding to the race predicate.
-- Vulkan and software renderers do not show the rear-view mirror in wide
-  races (only OpenGL copies the canonical 4:3 image into the wide surface).
-- The 2P divider stops at the 4:3 edges. The 2P split has not been checked on
-  screen (VS Battle needs a second pad).
+- The rear-view mirror needs OpenGL in wide races. The mirror is drawn
+  inside the 4:3 column, so it reaches only canonical VRAM; OpenGL copies
+  that column into the wide surface at present, the software and Vulkan
+  renderers do not. On software the mirror shows solid black (checked at
+  21:9). Vulkan is not built on macOS, so it was not run; the statement
+  rests on its code, which has no such copy.
 - The entry hooks run only while the mod plan activates `r4.widescreen`:
   psxrecomp clears its hook table on every plan commit and netplay clear and
   rebuilds it only after activation, so a session whose plan lacks this
