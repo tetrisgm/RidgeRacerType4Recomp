@@ -23,6 +23,7 @@ if(APPLE)
 endif()
 
 project(RidgeRacerType4Recomp LANGUAGES C CXX)
+include(CTest)
 
 # --- Opt-in product surfaces (OFF by default in the framework) -------------
 # PSX_NETPLAY must be set BEFORE runtime.cmake is included: that is where
@@ -41,7 +42,8 @@ include("${PSXRECOMP_ROOT}/runtime/runtime.cmake")
 # (see psxrecomp/docs/MOD_PACKAGES.md, "How bundled/ gets staged").
 set(R4_PRELOADED_MODS "${CMAKE_CURRENT_SOURCE_DIR}/mods/preloaded")
 
-# Trusted, statically linked mod plugins (none yet).
+# Trusted, statically linked mod plugins (src/mods/README.md), selected by the
+# packages in mods/preloaded/packages.
 file(GLOB R4_MOD_PLUGIN_SOURCES CONFIGURE_DEPENDS
     "${CMAKE_CURRENT_SOURCE_DIR}/src/mods/*.c"
     "${CMAKE_CURRENT_SOURCE_DIR}/src/mods/*.cpp")
@@ -100,3 +102,20 @@ foreach(_R4_RUNTIME_CONFIG game.toml game_options.toml)
             VERBATIM)
     endif()
 endforeach()
+
+# Unit tests for game-side helpers (no game data needed): ctest --test-dir build
+if(BUILD_TESTING)
+    add_executable(r4-widescreen-tests tests/test_r4_widescreen.c)
+    target_include_directories(r4-widescreen-tests PRIVATE src/mods)
+    add_test(NAME r4_widescreen_helpers COMMAND r4-widescreen-tests)
+    find_package(Python3 QUIET COMPONENTS Interpreter)
+    if(Python3_FOUND AND EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/disc/SLUS_007.97"
+       AND EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/generated/SLUS_007.97_full.ranges")
+        # game.toml's [widescreen.cull] lists must match a fresh scan.
+        add_test(NAME r4_widescreen_cull_sites
+            COMMAND "${Python3_EXECUTABLE}"
+                "${CMAKE_CURRENT_SOURCE_DIR}/tools/r4_ws_scan.py"
+                --check "${CMAKE_CURRENT_SOURCE_DIR}/game.toml"
+            WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}")
+    endif()
+endif()
