@@ -99,10 +99,41 @@ if(R4_BUILD_TESTS AND BUILD_TESTING)
             "${CMAKE_CURRENT_SOURCE_DIR}/src/mods")
         add_test(NAME r4_widescreen_helpers COMMAND r4-widescreen-tests)
     endif()
-    # game.toml's [widescreen.cull] lists must match a fresh scan of the local
-    # disc; registered only where the disc and a regen are present.
+    # R4 Frame Rate, pure C (no runtime or disc needed). The executables are
+    # built on demand by the *_build tests, so a plain
+    #   ctest --test-dir build -R r4_ --output-on-failure
+    # builds and runs them.
+    function(r4_frame_rate_test name)
+        add_executable(test_${name} EXCLUDE_FROM_ALL ${ARGN})
+        target_include_directories(test_${name} PRIVATE
+            "${CMAKE_CURRENT_SOURCE_DIR}/src/mods" "${PSXRECOMP_ROOT}/runtime/include")
+        add_test(NAME ${name}_build
+                 COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}
+                         --target test_${name})
+        add_test(NAME ${name} COMMAND test_${name})
+        set_tests_properties(${name} PROPERTIES DEPENDS ${name}_build)
+    endfunction()
+    # Option parsing.
+    if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_r4_frame_rate.c")
+        r4_frame_rate_test(r4_frame_rate
+            "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_r4_frame_rate.c")
+    endif()
+    # Interpolation math and the field table.
+    if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_r4_interp.c")
+        r4_frame_rate_test(r4_interp
+            "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_r4_interp.c")
+    endif()
+    # The interpolation plugin itself against a mock mod API (rolled-back
+    # passes, fallback to frame blend).
+    if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_r4_interp_plugin.c")
+        r4_frame_rate_test(r4_interp_plugin
+            "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_r4_interp_plugin.c"
+            "${CMAKE_CURRENT_SOURCE_DIR}/src/mods/r4_interp.c")
+    endif()
     find_package(Python3 QUIET COMPONENTS Interpreter)
     if(Python3_FOUND)
+        # game.toml's [widescreen.cull] lists must match a fresh scan of the
+        # local disc; registered only where the disc and a regen are present.
         if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/tools/r4_ws_scan.py")
             if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/disc/SLUS_007.97")
                 if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/generated/SLUS_007.97_full.ranges")
@@ -113,6 +144,13 @@ if(R4_BUILD_TESTS AND BUILD_TESTING)
                         WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}")
                 endif()
             endif()
+        endif()
+        # src/mods/r4_interp_fields.h must match tools/data/r4_interp_fields.json.
+        if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/tools/gen_r4_interp_fields.py")
+            add_test(NAME r4_interp_fields_current
+                COMMAND "${Python3_EXECUTABLE}"
+                    "${CMAKE_CURRENT_SOURCE_DIR}/tools/gen_r4_interp_fields.py" --check
+                WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}")
         endif()
     endif()
 endif()

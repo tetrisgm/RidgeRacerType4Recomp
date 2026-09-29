@@ -44,11 +44,13 @@ known_crc32 = [
 seeds = "seeds/ghidra_funcs.txt"
 out_dir = "generated"
 strict = true
-# Entry hooks for r4.enhancement.widescreen (src/mods/r4_widescreen_plugin.c).
-# The recompiler emits a psx_mod_function_entry() call at each of these
-# functions; the plugin's callbacks do nothing unless that package is enabled.
-# Changing this list needs tools/regen.sh.
+# Trusted mod entry hooks. The recompiler emits a psx_mod_function_entry() call
+# at each of these functions; they are inert unless a package plugin registers
+# for them (upstream runs a hook only while the resolved plan activates
+# the plugin id that registered it). Changing this list
+# needs tools/regen.sh.
 mod_function_entry_funcs = [
+  # r4.enhancement.widescreen (src/mods/r4_widescreen_plugin.c):
   # the 18 HUD producers (src/mods/r4_widescreen_hud.h)
   "0x8003C4B4", "0x80021DDC", "0x8002BEA4", "0x800212E0", "0x80021134", "0x80021614",
   "0x80021960", "0x8002C0F8", "0x8002C194", "0x80021774", "0x80021C38", "0x80034444",
@@ -57,10 +59,15 @@ mod_function_entry_funcs = [
   "0x80020A98", "0x80021A20", "0x80021BA4", "0x80022340", "0x80034B50", "0x800207D4",
   "0x8006E4D0", "0x8006F2B0", "0x8002E554", "0x8006F00C", "0x80074AD8", "0x800374F8",
   "0x80070A58",
-  # ClearOTagR (clear a buffer's HUD tags) and DrawOTag (tag the frame's HUD)
+  # ClearOTagR (clear a buffer's HUD tags; also R4 Frame Rate's loop head,
+  # ra 0x8001E764, before the race handler runs) and DrawOTag (tag the
+  # frame's HUD)
   "0x80093418", "0x80093520",
   # course visibility list: heading octant, first list consumer
   "0x8006F584", "0x8007166C",
+  # r4.enhancement.frame-rate (src/mods/r4_interp.c): VSync, the render-pass
+  # point (main loop VSync(0), ra 0x8001E7E4)
+  "0x8008B330",
 ]
 
 [runtime]
