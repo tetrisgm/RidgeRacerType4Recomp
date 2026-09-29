@@ -29,7 +29,7 @@ Important files:
 - `seeds/`, `annotations/`, `symbols.toml`: recompiler inputs grown from RE work.
 - `tools/regen.sh`: regenerate OpenBIOS + game C from the disc.
 - `tools/run_r4.sh`, `tools/dbg.py`, `tools/pad.py`, `tools/smoke.py`: run and drive a debug build.
-- `renderer/adaptive/`: the MMX6 adaptive widescreen renderer, carried for later (not built by default).
+- `src/mods/`, `mods/preloaded/`: game-owned mods (widescreen); see `docs/WIDESCREEN.md`.
 - `DISC.md`: Redump-verified disc identity. `ISSUES.md`: issue log.
 - `docs/framework_pin_history.md`: why each submodule pin moved.
 
@@ -49,7 +49,7 @@ netplay. Not yet verified end to end (see `ISSUES.md`).
 | Link battle (link cable) | Not supported (no SIO1 model) |
 | Renderer | Stock psxrecomp OpenGL at 4:3; software selectable |
 | Internal resolution | Native to 8K presets (Settings → Display), OpenGL |
-| Widescreen | Not yet — adaptive renderer carried in `renderer/adaptive/` |
+| Widescreen | Mods > Display > R4 Custom Renderer (experimental, off by default): native-wide races, Fit to Window / 16:9 / 21:9 / 32:9 |
 
 ## Building From Source (macOS, Windows)
 
@@ -87,6 +87,9 @@ verifies the disc against `game.toml [prepare_disc]`, extracts the boot EXE to
 recompiler config, or the `psxrecomp` submodule. Drop `-DPSX_DEBUG_TOOLS=ON`
 for a build without the TCP debug server. The first configure needs network
 access: libjuice (netplay) is fetched, and on macOS the pinned static SDL3.
+Add `-DR4_BUILD_TESTS=ON` to register the developer tests (`tests/`,
+`tools/`), then run `ctest --test-dir build`. They are off by default because
+the release zip ships neither directory.
 
 ## Configuration
 
@@ -99,6 +102,36 @@ executable. Defaults live in `game.toml`:
 - `[runtime]` — `disc_speed = "1x"` (authentic; R4 streams XA with a data
   channel), `overlay_cache` (native overlay shards; see Building From Source).
 - `[netplay]` — disc gates: `require_cue`, `required_tracks = 1`, `required_disc_fp`.
+
+## Frame rate (optional mod)
+
+Mods -> Frame Rate -> **R4 Frame Rate** (experimental, off by default) shows
+races at the display's refresh rate or at 60 / 100 / 120 / 200 / 240 / 300 FPS.
+The game itself still runs at its original 30 Hz: lap times, AI, input and
+music are unchanged.
+
+- **Interpolated** (default): the race is redrawn between game frames with
+  the cars and camera part of the way to the next frame, by the game's own
+  draw code inside a psxrecomp render pass (frozen guest time, everything
+  restored afterwards). No added latency. Grand Prix and Time Attack races,
+  the attract demo and the replay after a Time Attack are interpolated; VS
+  split screen (not yet tested), menus, pause, results and movies are shown
+  as on a PS1. Where the renderer cannot draw in-between frames at all, or
+  more than a quarter of the last second's frames get none in time (e.g. at
+  a high internal resolution), the package falls back to Frame blend and
+  says so in the log; it returns once at most a tenth of them would miss out.
+- **Frame blend**: crossfades finished frames (cheaper, ghosts, one frame
+  late).
+
+It needs the OpenGL renderer and turns vsync off. A monitor shows at most its
+own refresh rate, so rates above it cost more without showing more motion
+(with vsync off they can show as tearing instead).
+If the machine cannot draw every in-between frame, fewer are drawn and the
+gaps between them crossfaded; in-between frames are planned into the time
+the presenter would otherwise wait. Netplay sessions run without mods.
+Details and credits:
+`mods/preloaded/packages/r4.enhancement.frame-rate/1.0.0/README.txt`,
+`src/mods/r4_interp.c`, `psxrecomp/docs/RENDER_PASSES.md`.
 
 ## Internal resolution
 
@@ -182,7 +215,7 @@ snapshots of the game's code.
 ## License
 
 MIT for this repository's own code — see `LICENSE`. Files adapted from
-MegaManX6Recomp (listed in `THIRD-PARTY-LICENSES/README.md`, including
-`renderer/adaptive/`) stay under PolyForm Noncommercial 1.0.0, and the
+MegaManX6Recomp (listed in `THIRD-PARTY-LICENSES/README.md`) stay under
+PolyForm Noncommercial 1.0.0, and the
 `psxrecomp` and `recomp-ui` submodules carry their own licenses. R4: Ridge Racer Type 4 is © Namco (Bandai Namco
 Entertainment); this repository contains none of the game's binaries or assets.
