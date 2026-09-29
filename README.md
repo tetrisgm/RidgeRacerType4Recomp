@@ -29,7 +29,7 @@ Important files:
 - `seeds/`, `annotations/`, `symbols.toml`: recompiler inputs grown from RE work.
 - `tools/regen.sh`: regenerate OpenBIOS + game C from the disc.
 - `tools/run_r4.sh`, `tools/dbg.py`, `tools/pad.py`, `tools/smoke.py`: run and drive a debug build.
-- `renderer/adaptive/`: the MMX6 adaptive widescreen renderer, carried for later (not built by default).
+- `src/mods/`, `mods/preloaded/`: game-owned mods (widescreen); see `docs/WIDESCREEN.md`.
 - `DISC.md`: Redump-verified disc identity. `ISSUES.md`: issue log.
 - `docs/framework_pin_history.md`: why each submodule pin moved.
 
@@ -48,7 +48,7 @@ netplay. Not yet verified end to end (see `ISSUES.md`).
 | VS Battle (2P split screen) | Works over netplay (delay-sync and rollback, digests match) |
 | Link battle (link cable) | Not supported (no SIO1 model) |
 | Renderer | Stock psxrecomp OpenGL at 4:3; software selectable |
-| Widescreen | Not yet — adaptive renderer carried in `renderer/adaptive/` |
+| Widescreen | Mods > Display > R4 Custom Renderer (experimental, off by default): native-wide races, Fit to Window / 16:9 / 21:9 / 32:9 |
 
 ## Building From Source (macOS, Windows)
 
@@ -176,7 +176,7 @@ snapshots of the game's code.
 ## License
 
 MIT for this repository's own code — see `LICENSE`. Files adapted from
-MegaManX6Recomp (listed in `THIRD-PARTY-LICENSES/README.md`, including
-`renderer/adaptive/`) stay under PolyForm Noncommercial 1.0.0, and the
+MegaManX6Recomp (listed in `THIRD-PARTY-LICENSES/README.md`) stay under
+PolyForm Noncommercial 1.0.0, and the
 `psxrecomp` and `recomp-ui` submodules carry their own licenses. R4: Ridge Racer Type 4 is © Namco (Bandai Namco
 Entertainment); this repository contains none of the game's binaries or assets.

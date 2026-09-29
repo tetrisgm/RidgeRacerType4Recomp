@@ -41,6 +41,40 @@ dirty-RAM interpreter. Shards persist in `<build>/cache/`. Ahead-of-time
 shards need an R4.BIN extraction method (a cumulative start-sector table, which
 `tools/aot_overlay_pipeline.py` does not read yet).
 
+## #6 — Widescreen (R4 Custom Renderer) limitations — OPEN (enhancement)
+
+The `r4.enhancement.widescreen` mod (experimental, off by default; see
+`docs/WIDESCREEN.md`) widens the frames of R4's five race handlers (the
+race overlays 659/660/661, the attract demo and the after-goal run). Known
+limits:
+
+- Extra Trial and link-battle races (overlays 666/667) stay 4:3 until their
+  frame handlers are added to the race predicate.
+- Fit to Window past about 65:9 (a short, very wide window): the GTE's
+  screen-X range lets the course reach 703 px right of the 4:3 frame (1024 px
+  on the left), so the rest of the right reveal renders black under the
+  right-hand HUD, and past about 89:9 the left edge too. Fit stays uncapped
+  by owner decision (a cap only if the primitive heap forces one); see
+  `docs/WIDESCREEN.md`.
+- A wall right beside the car: R4's course renderers drop geometry whose
+  vertices all lie nearer than GTE SZ 288/290. In 4:3 that near plane is
+  outside the frame; in a wide view, with the car against a wall, the
+  columns on that side past it show the scenery behind the wall (about 30
+  columns at 21:9, 140-190 at 32:9 in one measurement; none at 16:9).
+  Filling it needs a wide-view near plane, which no `[widescreen.cull]` site
+  kind covers; see `docs/WIDESCREEN.md`.
+- The rear-view mirror needs OpenGL in wide races: only OpenGL copies the
+  canonical 4:3 column (where the mirror is drawn) into the wide surface. On
+  the software renderer it shows solid black (checked); Vulkan was not run
+  (not built on macOS) and has the same code shape. Framework follow-up U7 in
+  the enhancement plan.
+- Netplay VS always runs stock 4:3 (mods are cleared). Offline 2P VS widens
+  correctly (checked at 16:9, 21:9 and 32:9 with `tools/pad2.py` supplying
+  pad 2; the divider spans the full width).
+- The mod's entry hooks belong to its manifest plugin (`r4.widescreen`):
+  psxrecomp runs them only while the resolved mod plan activates it, so never
+  in netplay or while the package is disabled.
+
 ## Watch items
 
 - `psxrecomp` hard-codes four MotK PCs (`gpu.c`, `psx_netplay_rb.c`); two fall
