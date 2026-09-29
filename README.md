@@ -115,16 +115,18 @@ music are unchanged.
   the attract demo and the replay after a Time Attack are interpolated; VS
   split screen (not yet tested), menus, pause, results and movies are shown
   as on a PS1. Where the renderer cannot draw in-between frames at all, or
-  none fits the frame time for a whole second (e.g. at a high internal
-  resolution), the package falls back to Frame blend and says so in the log.
+  more than a quarter of the last second's frames get none in time (e.g. at
+  a high internal resolution), the package falls back to Frame blend and
+  says so in the log; it returns once at most a tenth of them would miss out.
 - **Frame blend**: crossfades finished frames (cheaper, ghosts, one frame
   late).
 
 It needs the OpenGL renderer and turns vsync off. A monitor shows at most its
 own refresh rate, so rates above it cost more without showing more motion
 (with vsync off they can show as tearing instead).
-If the machine cannot draw every in-between frame, fewer are drawn and
-crossfaded; the game never slows down. Netplay sessions run without mods.
+If the machine cannot draw every in-between frame, fewer are drawn and the
+gaps between them crossfaded; in-between frames are planned into the time
+the presenter would otherwise wait. Netplay sessions run without mods.
 Details and credits:
 `mods/preloaded/packages/r4.enhancement.frame-rate/1.0.0/README.txt`,
 `src/mods/r4_interp.c`, `psxrecomp/docs/RENDER_PASSES.md`.

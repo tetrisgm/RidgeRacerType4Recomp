@@ -43,11 +43,15 @@
  * rolled back, the presenter is switched to the player's frame blend and the
  * log says so once. Passes are tried again when the framework reports them
  * available (after a back-off when they failed while reported available).
- * A plan shed for time is not a failure, but when every plan of a whole
- * second of race ticks is shed (a machine that cannot afford even one pass
- * at this internal resolution or aspect), the presenter shows the frame
- * blend too instead of repeating each game frame; the plugin keeps planning
- * every tick and goes back to passes on the first tick that affords one.
+ * A plan shed for time is not a failure, but a race tick that gets no pass
+ * is held for its two VBlanks with no crossfade. When more than a quarter
+ * of the last second's planned race ticks were shed (a machine that affords
+ * passes for only some frames, or none at this internal resolution or
+ * aspect), the presenter shows the frame blend instead of alternating
+ * interpolated and held frames. The plugin keeps planning every tick without
+ * rendering, and goes back to passes once at most a tenth of a whole
+ * second's plans would have been shed (the gap between the two thresholds
+ * keeps it from flapping).
  *
  * The two entry hooks belong to the manifest [[plugin]] id "r4.framerate"
  * (psx_mod_register_function_entry_plugin). psxrecomp runs a function-entry
@@ -118,8 +122,14 @@
 #define R4_RETRY_MIN_TICKS  30u    /* first retry after a failed resume: ~1 s */
 #define R4_RETRY_MAX_TICKS  960u   /* back-off cap: ~32 s */
 #define R4_RETRY_RESET_TICKS 300u  /* ~10 s of pass images resets the back-off */
-#define R4_SHED_FALLBACK_TICKS 30u /* race ticks in a row shed for time: ~1 s */
-/* r4_unavailable_reason() for a fallback because every plan was shed. */
+/* Shedding for time: the outcomes of the last R4_SHED_WINDOW plans (~1 s of
+ * race ticks) are remembered. R4_SHED_FALLBACK_MIN of them shed (more than
+ * a quarter) enters the fallback; while in it, a full window of plans with
+ * at most R4_SHED_RESUME_MAX shed (a tenth) leaves it. */
+#define R4_SHED_WINDOW       30u
+#define R4_SHED_FALLBACK_MIN 8u
+#define R4_SHED_RESUME_MAX   3u
+/* r4_unavailable_reason() for a fallback because too many plans were shed. */
 #define R4_STATUS_SHED 0x100u
 
 typedef struct R4Capture {
@@ -164,8 +174,10 @@ static struct {
     /* fallback to frame blend */
     uint32_t fallback_blend;   /* the Blend style option */
     int in_fallback;
-    int fallback_shed;         /* in_fallback because every plan was shed */
-    unsigned misses, good, sheds;
+    int fallback_shed;         /* in_fallback because too many plans were shed */
+    unsigned misses, good;
+    uint32_t shed_bits;        /* last R4_SHED_WINDOW plans, 1 = shed */
+    unsigned shed_seen;        /* plans in shed_bits (up to R4_SHED_WINDOW) */
     uint64_t retry_at;
     unsigned retry_wait;
     int logged_fallback, logged_resume;
@@ -580,7 +592,7 @@ static const char *r4_unavailable_reason(uint32_t status) {
     case PSX_MOD_RENDER_PASS_DISABLED:
         return "disabled after repeated faults";
     case R4_STATUS_SHED:
-        return "none fits the frame time at this setting";
+        return "too few fit the frame time at this setting";
     default:
         return "every pass was refused or rolled back";
     }
@@ -590,11 +602,12 @@ static void r4_enter_fallback(uint32_t status) {
     R.in_fallback = 1;
     R.fallback_shed = status == R4_STATUS_SHED;
     R.misses = 0;
-    R.sheds = 0;
+    R.shed_bits = 0;
+    R.shed_seen = 0;
     R.good = 0;
     R.fallbacks++;
     if (R.fallback_shed) {
-        /* Left by the first affordable plan, not by the back-off. */
+        /* Left by the plans' own outcomes, not by the back-off. */
         R.shed_fallbacks++;
     } else {
         R.retry_at = R.ticks + R.retry_wait;
@@ -615,7 +628,8 @@ static void r4_leave_fallback(void) {
     R.in_fallback = 0;
     R.fallback_shed = 0;
     R.misses = 0;
-    R.sheds = 0;
+    R.shed_bits = 0;
+    R.shed_seen = 0;
     psx_mod_set_frame_interpolation_blend(PSX_MOD_FRAME_INTERPOLATION_HOLD);
     if (!R.logged_resume) {
         R.logged_resume = 1;
@@ -636,21 +650,30 @@ static int r4_try_resume(void) {
 /* A race tick that wanted passes and got no image. status: why the plan
  * was empty, or READY when passes ran and none was kept. Budget shedding
  * and transient refusals (fast-forward, netplay, a busy machine) are not
- * misses: the presenter holds the stock frame for those ticks, until a whole
- * second of ticks has been shed (r4_note_shed). */
+ * misses: the presenter holds the stock frame for those ticks, until too
+ * many of the last second's ticks have been shed (r4_note_plan). */
 static void r4_note_miss(uint32_t status) {
     R.good = 0;
     if (++R.misses >= R4_FALLBACK_MISSES) r4_enter_fallback(status);
 }
 
-/* A race tick whose plan was shed for time (status READY, no phases). */
-static void r4_note_shed(void) {
-    if (++R.sheds >= R4_SHED_FALLBACK_TICKS) r4_enter_fallback(R4_STATUS_SHED);
+static unsigned r4_popcount(uint32_t v) {
+    unsigned n = 0;
+    for (; v; v &= v - 1u) n++;
+    return n;
+}
+
+/* A plan made while READY: shed for time (no phases) or not. Returns the
+ * shed plans among the last R4_SHED_WINDOW. */
+static unsigned r4_note_plan(int shed) {
+    R.shed_bits = ((R.shed_bits << 1) | (shed ? 1u : 0u)) &
+                  ((1u << R4_SHED_WINDOW) - 1u);
+    if (R.shed_seen < R4_SHED_WINDOW) R.shed_seen++;
+    return r4_popcount(R.shed_bits);
 }
 
 static void r4_note_images(void) {
     R.misses = 0;
-    R.sheds = 0;
     if (++R.good >= R4_RETRY_RESET_TICKS) R.retry_wait = R4_RETRY_MIN_TICKS;
 }
 
@@ -707,10 +730,17 @@ static void r4_pass_point(CPUState *cpu, uint32_t address) {
                                        : tick == R.prev_tick + 1u);
     n = 0;
     if (continuous && R.in_fallback && R.fallback_shed) {
-        /* Blending because every plan was shed: keep planning, and go back
-         * to passes on the first tick that affords one. */
+        /* Blending because too many plans were shed: keep planning without
+         * rendering (a pass image would interrupt the crossfade), and go back
+         * to passes when a whole window of plans was rarely shed. */
         n = psx_mod_render_pass_plan(2u, 1u, alphas, R4_MAX_PASSES);
-        if (n) r4_leave_fallback();
+        if (n || psx_mod_render_pass_status() == PSX_MOD_RENDER_PASS_READY) {
+            unsigned shed = r4_note_plan(n == 0);
+            if (n && R.shed_seen >= R4_SHED_WINDOW && shed <= R4_SHED_RESUME_MAX)
+                r4_leave_fallback();
+            else
+                n = 0;
+        }
     } else if (continuous && (!R.in_fallback || r4_try_resume())) {
         /* Ask the presenter which phases of the coming frame it will show:
          * the frame flips at the next VBlank and is first presented one
@@ -722,10 +752,12 @@ static void r4_pass_point(CPUState *cpu, uint32_t address) {
                 status == PSX_MOD_RENDER_PASS_BACKEND ||
                 status == PSX_MOD_RENDER_PASS_DISABLED)
                 r4_note_miss(status);
-            else if (status == PSX_MOD_RENDER_PASS_READY)
-                r4_note_shed();
-            else
-                R.sheds = 0;   /* transient: fast-forward, busy, session */
+            else if (status == PSX_MOD_RENDER_PASS_READY &&
+                     r4_note_plan(1) >= R4_SHED_FALLBACK_MIN)
+                r4_enter_fallback(R4_STATUS_SHED);
+            /* transient (fast-forward, busy, session): not a plan */
+        } else {
+            (void)r4_note_plan(0);
         }
     }
     {
@@ -807,7 +839,8 @@ void r4_interp_activate(int enabled, uint32_t fallback_blend) {
     R.in_fallback = 0;
     R.fallback_shed = 0;
     R.misses = 0;
-    R.sheds = 0;
+    R.shed_bits = 0;
+    R.shed_seen = 0;
     R.good = 0;
     R.retry_at = 0;
     R.retry_wait = R4_RETRY_MIN_TICKS;

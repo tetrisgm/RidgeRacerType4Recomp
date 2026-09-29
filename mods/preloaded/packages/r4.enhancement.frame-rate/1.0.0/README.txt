@@ -24,13 +24,17 @@ Interpolated (default)
   The HUD (speed, rev meter, timers) still updates 30 times a second, as it
   does on a PlayStation.
 
-  If the computer cannot draw every in-between frame in time, fewer are drawn
-  and the gaps are crossfaded; nothing slows the game down. If the renderer
-  cannot draw in-between frames at all (for example in a mode it does not
-  support them in), or none fits the frame time for a whole second (for
-  example at a high internal resolution), the package shows Frame blend
-  instead, using the Blend style below, and says so once in the log; it
-  switches back by itself when they are available again.
+  In-between frames are planned into the time the computer spent waiting in
+  the previous frame. If not all of a game frame's in-between frames fit,
+  fewer are drawn and the gaps between them are crossfaded. A game frame
+  that gets none is held for its full 1/30 s, as on a PlayStation; when that
+  happens to more than a quarter of the last second's frames (a computer
+  that affords only some of them, or a high internal resolution), the
+  package shows Frame blend instead, using the Blend style below, and goes
+  back to Interpolated once no more than a tenth of a second's frames would
+  get none. It does the same when the renderer cannot draw in-between
+  frames at all (for example in a mode it does not support them in), and
+  says so once in the log.
 
 Frame blend
   Crossfades the last two finished frames. It is cheaper, but moving objects
@@ -48,7 +52,8 @@ Notes
   show as tearing instead); "Display refresh" is the best choice unless you
   know you want something else.
 - Each in-between frame redraws the race, so high rates need a fast
-  computer; when it falls behind, fewer in-between frames are drawn.
+  computer; when it falls behind, fewer in-between frames are drawn, and
+  when too few fit, Frame blend is shown.
 - Online (netplay) sessions always run without mods.
 
 Credits
