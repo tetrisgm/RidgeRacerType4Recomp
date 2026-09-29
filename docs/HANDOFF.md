@@ -18,10 +18,8 @@ Frame rate: the default-off `r4.enhancement.frame-rate` mod (Display refresh
 or 60–300 FPS; Interpolated via psxrecomp render passes, or Frame blend; logic
 stays 30 Hz), on psxrecomp#421/#423/#424.
 
-Internal resolution (Native to true 8K): R4 PR #4 is ready on psxrecomp
-master (#425–#427) and waits only for RetroPortingToolKit/recomp-ui#71 (the
-Settings row); then re-pin recomp-ui to the merged master and merge #4 with
-the recorded resolution (R4 `README.md`, pin history).
+Internal resolution: Native to true 8K presets (Settings → Display, OpenGL,
+default Native), on psxrecomp#425–#427 and RetroPortingToolKit/recomp-ui#71.
 
 ## Blockers
 
@@ -34,6 +32,7 @@ None.
 - Widescreen: `docs/WIDESCREEN.md`; cull lists `tools/r4_ws_scan.py`.
 - Frame rate: `README.md` (Frame rate) and the package README; field table
   `tools/gen_r4_interp_fields.py`.
+- Internal resolution presets: `README.md` (Internal resolution), `tools/res_matrix.py`.
 - Verification loop: `tools/run_r4.sh build` + `tools/smoke.py <out-dir>`;
   rollback determinism: `PSX_RB_SELFCHECK=1 PSX_RB_SELFCHECK_MASH=1`.
 - A/B guest identity (mod off, warm vs cold shards):

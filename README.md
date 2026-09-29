@@ -48,6 +48,7 @@ netplay. Not yet verified end to end (see `ISSUES.md`).
 | VS Battle (2P split screen) | Works over netplay (delay-sync and rollback, digests match) |
 | Link battle (link cable) | Not supported (no SIO1 model) |
 | Renderer | Stock psxrecomp OpenGL at 4:3; software selectable |
+| Internal resolution | Native to 8K presets (Settings → Display), OpenGL |
 | Widescreen | Mods > Display > R4 Custom Renderer (experimental, off by default): native-wide races, Fit to Window / 16:9 / 21:9 / 32:9 |
 
 ## Building From Source (macOS, Windows)
@@ -95,7 +96,8 @@ the release zip ships neither directory.
 Most options are in the launcher and persist to `settings.toml` beside the
 executable. Defaults live in `game.toml`:
 
-- `[video]` — `renderer` (`opengl` / `software`), `aspect_ratio = "4:3"`.
+- `[video]` — `renderer` (`opengl` / `software`), `aspect_ratio = "4:3"`,
+  `resolution_reference_lines = 240` (see Internal resolution).
 - `[controller]` — `default_mode` (`digital`; DualShock analog selectable).
 - `[runtime]` — `disc_speed = "1x"` (authentic; R4 streams XA with a data
   channel), `overlay_cache` (native overlay shards; see Building From Source).
@@ -130,6 +132,43 @@ the presenter would otherwise wait. Netplay sessions run without mods.
 Details and credits:
 `mods/preloaded/packages/r4.enhancement.frame-rate/1.0.0/README.txt`,
 `src/mods/r4_interp.c`, `psxrecomp/docs/RENDER_PASSES.md`.
+
+## Internal resolution
+
+**Settings → Display → Internal resolution** renders the game at a higher
+resolution instead of stretching 320×240 (OpenGL). It is off (Native) by
+default and takes effect when the game starts.
+
+| Preset | Scale | Race frame | Notes |
+|---|---|---|---|
+| Native | 1× | 320×240 | Unchanged |
+| 720p | 3× | 960×720 | |
+| 1080p | 5× | 1600×1200 | Resolved down to the window |
+| 1440p | 6× | 1920×1440 | |
+| 4K | 9× | 2880×2160 | |
+| 5K | 12× | 3840×2880 | |
+| 8K | 18× | 5760×4320 | Past a 16384 GPU texture limit (Apple GPUs) only the displayed frame is kept at 8K |
+| Match display | monitor height ÷ 240 | | Your monitor's pixel height |
+
+- The menus are 480-line screens, so they render at twice the target and are
+  resolved down; movies are unchanged.
+- Textures stay the game's own; edges, geometry and the rear-view mirror get
+  sharper. Wobbling polygons are the PS1's integer vertex snap, magnified.
+- On a Mac, any preset above Native gives the game window a Retina (full
+  pixel density) drawable.
+- The GPU can lower a preset it cannot hold; the log line and the `video_info`
+  debug command show the scale actually used. On an Apple M4 the 4:3 race
+  measured 58.8 guest frames/s at 8K (60 is full speed) in a debug-tools
+  build with its per-frame readback off; with widescreen, 8K is slower (32:9
+  about 45). A release build was not measured.
+- At 8K on a GPU with a 16384 texture limit (Apple GPUs), widescreen's Fit
+  to Window goes up to about 34:9; a wider window is pillarboxed.
+- Netplay: your own view only. Other players are unaffected and may use a
+  different setting. Widescreen and frame-rate options, when present, are mods
+  and are turned off for netplay; internal resolution is not.
+- `PSX_INTERNAL_RESOLUTION=4k` (or any preset id, or a number of lines)
+  overrides the setting for one run. `tools/res_matrix.py` checks every preset
+  against a savestate.
 
 ## Controls
 

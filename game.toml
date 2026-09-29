@@ -99,6 +99,11 @@ overlay_backend = "auto"
 # (Mods > Display > R4 Custom Renderer), which selects the aspect itself.
 renderer = "opengl"
 aspect_ratio = "4:3"
+# Internal resolution presets (Settings -> Display) divide their target height
+# by this: R4's races are 320x240 progressive, so 4K is 9x and 8K is 18x. Its
+# 480i menus render at twice the target and are resolved down. The shipped
+# default stays Native (no internal_resolution key).
+resolution_reference_lines = 240
 
 # Native-wide rendering for r4.enhancement.widescreen (docs/WIDESCREEN.md).
 # Inert at 4:3: every cull site below is the identity while the margin is 0.
