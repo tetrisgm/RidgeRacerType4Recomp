@@ -150,9 +150,10 @@ colour across the full width at every aspect.
 - **Fit to Window past about 65:9.** The GTE clamps projected screen X to
   -1024..1023, and R4's 4:3 frame is screen X 0..319 (projection centre
   160), so the course is drawn at most 1024 px left of the 4:3 frame and
-  703 px right of it. Up to a per-side margin of 703 (about 64.7:9) both
-  reveals fill. In a shorter, wider window the columns past that on the
-  right stay black, so the picture is lopsided and the right-hand HUD
+  703 px right of it. Up to a per-side margin of 703 (about 64.7:9) the
+  GTE's range limits neither reveal (a wall right beside the car is a
+  separate limit, below). In a shorter, wider window the columns past that
+  on the right stay black, so the picture is lopsided and the right-hand HUD
   (laps, time, speed, tachometer) sits over that black band; past a margin
   of 1024 (about 89:9) the left edge goes black too. Measured from one
   Grand Prix savestate with the window resized live (black columns
@@ -161,6 +162,23 @@ colour across the full width at every aspect.
   0 dispatch misses and the heap at most 54%. Fit still follows the window
   (uncapped by the owner's rule above; nothing overflows); a fixed view, or a
   less extreme window, avoids it.
+- **A wall right beside the car.** R4's hand-written course renderers
+  (`0x8005F000..0x8006E000`) have a near plane: a polygon is dropped when
+  its near-depth test finds every vertex at GTE SZ 290 or less (16
+  renderers), and a subdivided piece when every vertex is below SZ 288.
+  The edge of that plane (screen X = 160 + H * d / 288 for a wall at
+  distance d beside the camera) stayed outside the 4:3 frame in every run;
+  a wide view looks further to the side, so with the car against a wall the
+  columns on that side past the edge show the scenery behind the wall
+  instead of the wall.
+  The band depends on how close the camera is to the wall, not on the
+  internal resolution or on a missed cull site: the edge moves with the
+  car, and adding every heading octant's course blocks to the list changes
+  nothing. Measured from one Grand Prix savestate with the car scraping the
+  right wall: about 30 of 560 columns at 21:9, 140-190 of 854 at 32:9, none
+  at 16:9 there; wider Fit windows show more. Filling it would mean moving
+  the near plane in wide views, a depth test the `[widescreen.cull]` site
+  kinds do not cover.
 - Extra Trial and link-battle races (overlays 666/667) are not widened yet;
   their frame handlers need adding to the race predicate.
 - The rear-view mirror needs OpenGL in wide races. The mirror is drawn
