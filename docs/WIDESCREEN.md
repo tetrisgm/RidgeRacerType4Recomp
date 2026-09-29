@@ -56,7 +56,7 @@ of their R4 (JP) "60 FPS + 16:9" patch, re-mapped to the US executable.
 
 Changing either list needs `tools/regen.sh`. `bgez_sites` and
 `clip_edge_x_load_sites` need psxrecomp with those kinds
-(`feat/adaptive-widescreen`, on upstream master).
+(RetroPortingToolKit/psxrecomp#422, in master).
 
 ## Testing it
 
@@ -126,17 +126,18 @@ restores missing scenery at the left edge at 3 of 8 sampled frames (for
 example a black void above a cliff road, and background buildings behind an
 overpass) and leaves the other frames byte-identical.
 
-With the mod off, a build with these changes matches a build of current
-upstream (R4 master with psxrecomp `44a45d3c` and recomp-ui `65833d7`) frame
-for frame: guest write, PC, MMIO, scratchpad and cycle fingerprints are
-identical for 16000 frames of the no-input boot, intro, title and attract
-demo race, both when each build runs native overlay shards its own emitter
-compiled from the same capture store and when both start with an empty shard
-cache. The same binary with a warm versus a cold shard cache differs from
-frame 194 (RAM write values only), and upstream's build does exactly the
-same. An earlier round (previous master, shards off) also found the attract
-race's display frames pixel-identical. The change does move both
-overlay-cache keys (the codegen tag for every title, R4's config hash), so the
+With the mod off, a build with these changes matches R4 master re-pinned to
+the same psxrecomp (`470f03b7`) and recomp-ui (`65833d7`) frame for frame:
+`psxrecomp/tools/fp_identity.py` judges 12000 frames of the no-input boot,
+intro, title and attract demo race IDENTICAL on every guest-fact column
+(cycles, MMIO, scratchpad, main-RAM write count and sum), with no tolerance,
+both when the two builds load native overlay shards from one seed and when
+both start with an empty shard cache. The warm-versus-cold split earlier
+builds showed from frame 194 was a framework bug (psxrecomp #417 and #418):
+the same binary warm and cold is now IDENTICAL too, apart from 497 one-write
+VBlank straddles the tool tolerates. An earlier round (older master, shards
+off) also found the attract race's display frames pixel-identical. The
+change moves R4's overlay config hash (the hooks and cull lists), so the
 first run after an upgrade rebuilds R4's shards.
 
 2P VS split screen (16:9, 21:9, 32:9 standing; 21:9 driving): each half widens to both window

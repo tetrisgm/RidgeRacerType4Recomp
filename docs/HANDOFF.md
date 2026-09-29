@@ -9,10 +9,10 @@ public). Built with `tools/package_release.sh` on the Mac and on the PC (MSYS2);
 player flow verified end to end headlessly on both. Pending: the owner's GUI
 click-through of the setup wizard.
 
-Widescreen: branch `feat/adaptive-widescreen` (this repo) with psxrecomp
-`feat/adaptive-widescreen` (on upstream master) adds the default-off
-`r4.enhancement.widescreen` mod (`docs/WIDESCREEN.md`) and retires the
-carried `renderer/adaptive/`. Re-pin psxrecomp after the upstream merge.
+Widescreen: the default-off `r4.enhancement.widescreen` mod
+(`docs/WIDESCREEN.md`) on psxrecomp master (the cull kinds and line batching
+of RetroPortingToolKit/psxrecomp#422); the carried `renderer/adaptive/` is
+retired.
 
 ## Blockers
 
@@ -25,3 +25,6 @@ None.
 - Widescreen: `docs/WIDESCREEN.md`; cull lists `tools/r4_ws_scan.py`.
 - Verification loop: `tools/run_r4.sh build` + `tools/smoke.py <out-dir>`;
   rollback determinism: `PSX_RB_SELFCHECK=1 PSX_RB_SELFCHECK_MASH=1`.
+- A/B guest identity (mod off, warm vs cold shards):
+  `psxrecomp/tools/fp_identity.py` with
+  `--launch 'tools/run_r4.sh {build} --debug-port {port} {headless}'`.
