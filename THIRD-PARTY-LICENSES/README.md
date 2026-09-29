@@ -13,9 +13,21 @@ Files copied or adapted from it:
 - `tools/mdis.py`, `tools/dumpgrep.py` (copied; port/usage adjusted)
 - `tools/dbg.py`, `tools/stackwalk.py` (rewritten from the MMX6 originals)
 - `ghidra/instructions.txt`, `.mcp.json.example` (adapted)
-- `renderer/adaptive/` — the adaptive renderer framework patch and the
-  `mmx6-reference/` game-side sources (carried verbatim; see
-  `renderer/adaptive/README.md`)
+
+The widescreen mod (`src/mods/r4_widescreen_*`,
+`mods/preloaded/packages/r4.enhancement.widescreen/`) follows the
+custom-renderer pattern of TombaRecomp and MegaManX6Recomp (a default-off mod
+package that activates a trusted plugin). It is written fresh against
+psxrecomp's `mod_plugins.h`; no code is copied from either project, so it is
+MIT like the rest of this repository.
+
+## dogewow2048 — R4 (JP) "60 FPS + 16:9" patch analysis
+
+The widescreen mod's HUD producer classes and anchoring thresholds and its
+race-scene test are derived from an analysis of dogewow2048's R4 (Japan)
+60 FPS / 16:9 cheat, re-mapped to the US executable. Credit to dogewow2048.
+The cheat itself and any Japanese-version extracts are not part of this
+repository.
 
 ## psxrecomp and recomp-ui
 

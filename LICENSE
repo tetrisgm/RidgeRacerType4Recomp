@@ -22,7 +22,7 @@ SOFTWARE.
 
 --------------------------------------------------------------------------------
 Exceptions: the files listed in THIRD-PARTY-LICENSES/README.md as adapted from
-MegaManX6Recomp (including everything under renderer/adaptive/) remain under
+MegaManX6Recomp remain under
 the PolyForm Noncommercial License 1.0.0 of their author, and the psxrecomp and
 recomp-ui submodules carry their own licenses. Those files are not covered by
 the MIT grant above.

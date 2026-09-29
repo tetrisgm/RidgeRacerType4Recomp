@@ -24,6 +24,15 @@ endif()
 
 project(RidgeRacerType4Recomp LANGUAGES C CXX)
 
+# Developer tests. OFF by default: tests/, tools/ and the disc are not in the
+# setup-host zip, and the player's Generate & rebuild configures this file with
+# no -DBUILD_TESTING=OFF, so an unconditional include(CTest) would register
+# sources the zip cannot build. Configure with -DR4_BUILD_TESTS=ON to get them.
+option(R4_BUILD_TESTS "Register R4's developer tests (needs tests/ and tools/)" OFF)
+if(R4_BUILD_TESTS)
+    include(CTest)
+endif()
+
 # --- Opt-in product surfaces (OFF by default in the framework) -------------
 # PSX_NETPLAY must be set BEFORE runtime.cmake is included: that is where
 # recomp-net / the lobby client / rbengine are wired. ENABLE_NETPLAY_IF_PRESENT
@@ -41,34 +50,11 @@ include("${PSXRECOMP_ROOT}/runtime/runtime.cmake")
 # (see psxrecomp/docs/MOD_PACKAGES.md, "How bundled/ gets staged").
 set(R4_PRELOADED_MODS "${CMAKE_CURRENT_SOURCE_DIR}/mods/preloaded")
 
-# Trusted, statically linked mod plugins (none yet).
+# Trusted, statically linked mod plugins (src/mods/README.md), selected by the
+# packages in mods/preloaded/packages.
 file(GLOB R4_MOD_PLUGIN_SOURCES CONFIGURE_DEPENDS
     "${CMAKE_CURRENT_SOURCE_DIR}/src/mods/*.c"
     "${CMAKE_CURRENT_SOURCE_DIR}/src/mods/*.cpp")
-
-# Generated-C directory. "generated" is the stock 4:3 build; the adaptive
-# renderer build (renderer/adaptive/materialize.sh) points this at its own
-# regen from the patched recompiler so the two never share codegen.
-set(R4_GENERATED_DIR "generated" CACHE STRING
-    "Directory (relative to source) holding the recompiled game C")
-
-# MMX6 adaptive renderer, carried for later widescreen work. OFF = the stock
-# psxrecomp renderer (base 4:3). ON requires PSXRECOMP_ROOT to be the patched
-# framework copy materialize.sh produces; R4's own adaptive plugin sources go
-# in renderer/adaptive/src/ (never src/mods/, which the stock build globs).
-option(R4_ADAPTIVE_RENDERER "Build against the patched adaptive-renderer framework" OFF)
-if(R4_ADAPTIVE_RENDERER)
-    if(NOT EXISTS "${PSXRECOMP_ROOT}/runtime/include/ws_view_anchor.h")
-        message(FATAL_ERROR
-            "R4_ADAPTIVE_RENDERER=ON needs the patched framework from "
-            "renderer/adaptive/materialize.sh (PSXRECOMP_ROOT=${PSXRECOMP_ROOT} "
-            "has no ws_view_anchor.h).")
-    endif()
-    file(GLOB R4_ADAPTIVE_SOURCES CONFIGURE_DEPENDS
-        "${CMAKE_CURRENT_SOURCE_DIR}/renderer/adaptive/src/*.c"
-        "${CMAKE_CURRENT_SOURCE_DIR}/renderer/adaptive/src/*.cpp")
-    list(APPEND R4_MOD_PLUGIN_SOURCES ${R4_ADAPTIVE_SOURCES})
-endif()
 
 psxrecomp_add_game_runtime(psx-runtime
     PRELOADED_MODS_DIR "${R4_PRELOADED_MODS}"
@@ -82,8 +68,8 @@ psxrecomp_add_game_runtime(psx-runtime
     MAX_PLAYERS 2
     LAUNCHER_BOXART "${CMAKE_CURRENT_SOURCE_DIR}/recomp/launcher/boxart.tga"
     APP_ICON "${CMAKE_CURRENT_SOURCE_DIR}/assets/psxrecomp.ico"
-    GEN_MARKER "${R4_GENERATED_DIR}/SLUS_007.97_dispatch.c"
-    GEN_FULL_GLOB "${R4_GENERATED_DIR}/SLUS_007.97_full_*.c"
+    GEN_MARKER "generated/SLUS_007.97_dispatch.c"
+    GEN_FULL_GLOB "generated/SLUS_007.97_full_*.c"
     CODEGEN_SETUP_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/codegen_setup.c"
     EXTRAS_SOURCES ${R4_MOD_PLUGIN_SOURCES}
 )
@@ -100,3 +86,33 @@ foreach(_R4_RUNTIME_CONFIG game.toml game_options.toml)
             VERBATIM)
     endif()
 endforeach()
+
+# Developer tests (R4_BUILD_TESTS above): ctest --test-dir build -R r4_
+# Every path is behind its own if(EXISTS ...) so the setup-host packager's
+# CMakeLists gate treats them as optional (none of them ship).
+if(R4_BUILD_TESTS AND BUILD_TESTING)
+    # Pure widescreen helpers, no game data needed.
+    if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_r4_widescreen.c")
+        add_executable(r4-widescreen-tests
+            "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_r4_widescreen.c")
+        target_include_directories(r4-widescreen-tests PRIVATE
+            "${CMAKE_CURRENT_SOURCE_DIR}/src/mods")
+        add_test(NAME r4_widescreen_helpers COMMAND r4-widescreen-tests)
+    endif()
+    # game.toml's [widescreen.cull] lists must match a fresh scan of the local
+    # disc; registered only where the disc and a regen are present.
+    find_package(Python3 QUIET COMPONENTS Interpreter)
+    if(Python3_FOUND)
+        if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/tools/r4_ws_scan.py")
+            if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/disc/SLUS_007.97")
+                if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/generated/SLUS_007.97_full.ranges")
+                    add_test(NAME r4_widescreen_cull_sites
+                        COMMAND "${Python3_EXECUTABLE}"
+                            "${CMAKE_CURRENT_SOURCE_DIR}/tools/r4_ws_scan.py"
+                            --check "${CMAKE_CURRENT_SOURCE_DIR}/game.toml"
+                        WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}")
+                endif()
+            endif()
+        endif()
+    endif()
+endif()

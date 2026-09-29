@@ -1,0 +1,50 @@
+format_version = 7
+id = "r4.enhancement.widescreen"
+version = "1.0.0"
+name = "R4 Custom Renderer"
+author = "Shokunin"
+description = "Native-wide widescreen for R4 races: real extra pixels at the sides, HUD at the window edges. Fit to Window follows the window with no upper aspect limit. Stock 4:3 when disabled."
+license = "MIT"
+resolver = "declarative"
+save_compatibility = "shared"
+
+# Presentation only: no disc overlay, so no disc_sha256 is needed.
+[[target]]
+game_id = "SLUS-00797"
+
+[[feature]]
+id = "widescreen"
+name = "Custom Renderer"
+description = "Disabled by default. Races render wider than 4:3 with real extra scenery at the sides, and the HUD moves to the window edges. Menus, results, the garage and movies stay 4:3. Best on OpenGL; on Vulkan and software the rear-view mirror is missing in wide races. Netplay always plays stock 4:3."
+group = "Display"
+channel = "experimental"
+default_enabled = false
+
+[[option]]
+feature = "widescreen"
+id = "aspect"
+label = "View"
+description = "Fit to Window follows live resizing from 4:3 with no upper aspect limit; past about 65:9 the course ends before the right edge. Fixed ratios keep their aspect whatever the window shape."
+group = "Display"
+type = "choice"
+default = "Fit"
+
+[[option.choice]]
+value = "Fit"
+label = "Fit to Window"
+
+[[option.choice]]
+value = "16:9"
+label = "16:9"
+
+[[option.choice]]
+value = "21:9"
+label = "21:9"
+
+[[option.choice]]
+value = "32:9"
+label = "32:9"
+
+[[plugin]]
+feature = "widescreen"
+id = "r4.widescreen"
