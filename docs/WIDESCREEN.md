@@ -2,7 +2,9 @@
 
 `r4.enhancement.widescreen` is a default-off, experimental mod: **Mods >
 Display > R4 Custom Renderer**. View: **Fit to Window** (the default; follows
-the window from 4:3 with no upper aspect limit), **16:9**, **21:9**, **32:9**.
+the window from 4:3 with no upper aspect limit, but past about 65:9 the course
+ends short of the right edge: see [Limitations](#limitations)), **16:9**,
+**21:9**, **32:9**.
 
 Races render wider than 4:3 with real extra pixels: the game submits the
 geometry beyond the 4:3 edges and the HUD sits at the window edges. Menus, the
@@ -113,9 +115,11 @@ savestate. Wider-than-32:9 rows force the cull margin with `ws_margin`:
 | 64:9 | 693 | 64% | 74% |
 | margin 1024 | 1024 | 65% | 82% |
 
-The heap never overflows, and the GTE saturates screen X at ±1024 (about
-65:9) anyway, so Fit stays uncapped. In a 2P VS race the high-water mark was
-46% standing at 32:9 and up to 55% driving at 21:9.
+The heap never overflows, so Fit stays uncapped (the owner's rule: cap it only
+if the heap forces a cap). The GTE's screen-X range does not make very wide
+windows harmless, though: past about 65:9 the extra width on the right renders
+black (see [Limitations](#limitations)). In a 2P VS race the high-water mark
+was 46% standing at 32:9 and up to 55% driving at 21:9.
 
 The course-list union measurably fills holes: on the attract demo at 32:9 it
 restores missing scenery at the left edge at 3 of 8 sampled frames (for
@@ -123,7 +127,7 @@ example a black void above a cliff road, and background buildings behind an
 overpass) and leaves the other frames byte-identical.
 
 With the mod off, a build with these changes matches a build of current
-upstream (R4 master with psxrecomp `16382d22` and recomp-ui `65833d7`) frame
+upstream (R4 master with psxrecomp `44a45d3c` and recomp-ui `65833d7`) frame
 for frame: guest write, PC, MMIO, scratchpad and cycle fingerprints are
 identical for 16000 frames of the no-input boot, intro, title and attract
 demo race, both when each build runs native overlay shards its own emitter
@@ -142,6 +146,20 @@ colour across the full width at every aspect.
 
 ## Limitations
 
+- **Fit to Window past about 65:9.** The GTE clamps projected screen X to
+  -1024..1023, and R4's 4:3 frame is screen X 0..319 (projection centre
+  160), so the course is drawn at most 1024 px left of the 4:3 frame and
+  703 px right of it. Up to a per-side margin of 703 (about 64.7:9) both
+  reveals fill. In a shorter, wider window the columns past that on the
+  right stay black, so the picture is lopsided and the right-hand HUD
+  (laps, time, speed, tachometer) sits over that black band; past a margin
+  of 1024 (about 89:9) the left edge goes black too. Measured from one
+  Grand Prix savestate with the window resized live (black columns
+  left/right): margin 661 (about 62:9) 0/0; 764 (about 69:9) 0/61; 995
+  (about 87:9) 0/292; 1160 (99:9) 136/457; 1318 (about 111:9) 294/615, with
+  0 dispatch misses and the heap at most 54%. Fit still follows the window
+  (uncapped by the owner's rule above; nothing overflows); a fixed view, or a
+  less extreme window, avoids it.
 - Extra Trial and link-battle races (overlays 666/667) are not widened yet;
   their frame handlers need adding to the race predicate.
 - The rear-view mirror needs OpenGL in wide races. The mirror is drawn

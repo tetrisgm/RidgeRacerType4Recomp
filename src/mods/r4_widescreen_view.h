@@ -11,7 +11,8 @@
 typedef struct {
     uint32_t numerator;    /* fixed aspect that shapes the first window */
     uint32_t denominator;
-    int fit;               /* 1: follow the window afterwards, no upper limit */
+    int fit;               /* 1: follow the window afterwards, no upper limit
+                              (past ~65:9 the right edge renders black) */
 } R4WidescreenView;
 
 /* "16:9", "21:9" and "32:9" are fixed views. "Fit" and anything unknown

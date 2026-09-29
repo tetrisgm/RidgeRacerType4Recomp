@@ -50,6 +50,12 @@ limits:
 
 - Extra Trial and link-battle races (overlays 666/667) stay 4:3 until their
   frame handlers are added to the race predicate.
+- Fit to Window past about 65:9 (a short, very wide window): the GTE's
+  screen-X range lets the course reach 703 px right of the 4:3 frame (1024 px
+  on the left), so the rest of the right reveal renders black under the
+  right-hand HUD, and past about 89:9 the left edge too. Fit stays uncapped
+  by owner decision (a cap only if the primitive heap forces one); see
+  `docs/WIDESCREEN.md`.
 - The rear-view mirror needs OpenGL in wide races: only OpenGL copies the
   canonical 4:3 column (where the mirror is drawn) into the wide surface. On
   the software renderer it shows solid black (checked); Vulkan was not run

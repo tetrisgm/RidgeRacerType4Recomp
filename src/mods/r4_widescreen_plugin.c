@@ -363,7 +363,10 @@ static void r4_widescreen_activate(void)
     R4WidescreenView view = r4_widescreen_view(choice);
     (void)psx_mod_set_fixed_display_aspect(view.numerator, view.denominator);
     if (view.fit)
-        (void)psx_mod_set_adaptive_display_aspect(0u, 0u);  /* no upper limit */
+        /* No upper limit (owner decision; the heap never overflows). Past
+         * about 65:9 the right reveal outruns the GTE's screen-X range and
+         * renders black (docs/WIDESCREEN.md, Limitations). */
+        (void)psx_mod_set_adaptive_display_aspect(0u, 0u);
     psx_mod_set_world_scene_predicate(r4_race_scene);
     if (s_hooks_registered != R4_WS_HOOK_COUNT)
         fprintf(stderr, "[r4-ws] only %d of %d entry hooks registered\n",

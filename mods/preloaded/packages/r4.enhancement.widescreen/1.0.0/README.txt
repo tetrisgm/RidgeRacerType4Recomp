@@ -12,7 +12,9 @@ edges of the window.
 
 View
   Fit to Window  Follows the window as you resize it, from 4:3 with no upper
-                 aspect limit. The window opens at 16:9.
+                 aspect limit. The window opens at 16:9. In a window wider
+                 than about 65:9 the course ends before the right edge, and
+                 that side (with the speed and lap display) shows black.
   16:9, 21:9, 32:9
                  Fixed ratios; the picture keeps that aspect whatever the
                  window shape.
