@@ -162,23 +162,66 @@ colour across the full width at every aspect.
   0 dispatch misses and the heap at most 54%. Fit still follows the window
   (uncapped by the owner's rule above; nothing overflows); a fixed view, or a
   less extreme window, avoids it.
-- **A wall right beside the car.** R4's hand-written course renderers
-  (`0x8005F000..0x8006E000`) have a near plane: a polygon is dropped when
-  its near-depth test finds every vertex at GTE SZ 290 or less (16
-  renderers), and a subdivided piece when every vertex is below SZ 288.
-  The edge of that plane (screen X = 160 + H * d / 288 for a wall at
-  distance d beside the camera) stayed outside the 4:3 frame in every run;
-  a wide view looks further to the side, so with the car against a wall the
-  columns on that side past the edge show the scenery behind the wall
-  instead of the wall.
-  The band depends on how close the camera is to the wall, not on the
-  internal resolution or on a missed cull site: the edge moves with the
-  car, and adding every heading octant's course blocks to the list changes
-  nothing. Measured from one Grand Prix savestate with the car scraping the
-  right wall: about 30 of 560 columns at 21:9, 140-190 of 854 at 32:9, none
-  at 16:9 there; wider Fit windows show more. Filling it would mean moving
-  the near plane in wide views, a depth test the `[widescreen.cull]` site
-  kinds do not cover.
+- **A wall right beside the car.** With the car against a wall, or nosing
+  into one, the columns on that side past a vertical edge show the scenery
+  behind the wall. This is not a widescreen bug: the stock 4:3 game shows
+  it too. A wide view shows more of the side, so it reveals the band more
+  often and for longer.
+  - **At 4:3.** In one Grand Prix savestate the car noses into the right
+    wall. Stock 4:3 frames of the recompiled game, with no mods, show the
+    band's edge at X = 137, 185 and 286 on three sampled frames (ticks
+    1226, 1229 and 1232). The 32:9 frames of the same ticks show it at the
+    same canonical columns (wide 404, 452 and 553). These frames were not
+    compared against Beetle.
+  - **One cause: the GTE's perspective divide.** R4 projects races with
+    H = 290 (`SetGeomScreen` at `0x8001ED54`). For a vertex at depth
+    SZ <= H/2 = 145, or behind the camera, H/SZ saturates just under 2.0
+    and sets FLAG bit 17, as Beetle's GTE does. Every such vertex lands at
+    screen X = 160 + 2x, where x is its offset to the side of the camera.
+    For a wall at distance d beside the camera, everything on it nearer
+    than depth 145 collapses onto the line X = 160 + 2d, and the wall is
+    drawn only up to that line. The line is inside the frame when
+    160 + 2d < 320 + m, where m is the per-side reveal: d < 80 at 4:3, 106
+    at 16:9, 140 at 21:9 and 213 at 32:9. A wall far enough away to keep
+    the line out of the 4:3 frame can still show it in a wide view.
+    In a second savestate, with the car scraping the right wall, one 32:9
+    frame (tick 1280) shows this directly. The GTE projection ring has the
+    wall at x = 143, with depths from 41 down to -950, all projected to
+    X = 445. The last wall polygon in that frame's GP0 stream ends at
+    X = 445, and the band starts at wide column 712 = 445 + 267 (142 of 854
+    columns). At d = 143 only 32:9 shows it; the same ticks at 21:9, 16:9
+    and 4:3 show nothing. Projecting those vertices without saturation
+    changes these frames (see Tried and rejected).
+  - **A second cause, not found yet.** The nose-in band does not respond
+    to the divide. At tick 1235 its saturated wall vertices (x about 109)
+    project to X = 377, next to the band edge (canonical 376, off the 4:3
+    frame), but projecting them without saturation, masking the GTE
+    error flags and dropping the near compares, all at once at 32:9,
+    changed the first sampled frame (tick 1226) and left the next four
+    pixel-identical. Something else removes that wall geometry, for example
+    another reject in the course renderers before or after projection.
+  - **Not the cause: the near compares.** R4's course renderers drop a
+    polygon when every vertex has SZ <= 290 (16 renderers), or a
+    subdivided piece when every vertex has SZ < 288. Forcing the 290 bound
+    to 0 while wide changed no pixels in 25 frames sampled from both
+    savestates at 32:9, and scaling it down changed none in 14. The 288
+    test didn't run in any capture. Adding the neighbouring course blocks
+    to the draw list changed nothing. Masking the GTE error flags while
+    wide changed at most 113 pixels in a frame (a one- or two-column
+    sliver at the band edge) and never filled the band.
+  - **Tried and rejected.** An unsaturated divide while wide (vertices in
+    front of the camera but nearer than H/2 projected exactly) fills the
+    side-scrape band in some frames. In others it draws slanted wedges,
+    because polygons that also have a vertex behind the camera still
+    project wrongly.
+  - **What a fix needs.** For the divide case, each course polygon has to
+    be clipped against a near plane in camera space before projection.
+    That means changing R4's hand-written course renderers
+    (`0x8005F000..0x8006E000`: 16 polygon renderers and their subdivision
+    paths), for example with a native replacement of the course draw
+    behind this mod. The nose-in case needs its cause found first;
+    near-plane clipping alone may not remove it. No `[widescreen.cull]`
+    site kind can do either.
 - Extra Trial and link-battle races (overlays 666/667) are not widened yet;
   their frame handlers need adding to the race predicate.
 - The rear-view mirror needs OpenGL in wide races. The mirror is drawn
