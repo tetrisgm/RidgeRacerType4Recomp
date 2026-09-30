@@ -29,6 +29,9 @@ Notes
 -----
 - Best on OpenGL (the default). On Vulkan and the software renderer the
   rear-view mirror is not shown while a race is wide.
+- With the car right against a wall, the edge on that side can show the
+  scenery behind the wall. The stock 4:3 game does this too; a wide view
+  shows more of the side, so you see it more often.
 - Netplay always plays stock 4:3; mods are cleared for netplay sessions.
 - Changing it needs no rebuild; the widening code is in every build and
   does nothing while this package is disabled.

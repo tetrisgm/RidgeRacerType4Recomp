@@ -56,13 +56,21 @@ limits:
   right-hand HUD, and past about 89:9 the left edge too. Fit stays uncapped
   by owner decision (a cap only if the primitive heap forces one); see
   `docs/WIDESCREEN.md`.
-- A wall right beside the car: R4's course renderers drop geometry whose
-  vertices all lie nearer than GTE SZ 288/290. In 4:3 that near plane is
-  outside the frame; in a wide view, with the car against a wall, the
-  columns on that side past it show the scenery behind the wall (about 30
-  columns at 21:9, 140-190 at 32:9 in one measurement; none at 16:9).
-  Filling it needs a wide-view near plane, which no `[widescreen.cull]` site
-  kind covers; see `docs/WIDESCREEN.md`.
+- A wall right beside the car: with the car against a wall, or nosing into
+  one, the columns on that side past a vertical edge show the scenery behind
+  the wall. The stock 4:3 game shows it too (edge at X = 137, 185 and 286 in
+  three frames of one nose-in savestate); wide views reveal it more often.
+  One cause is the GTE's perspective divide, which saturates for vertices at
+  depth <= H/2 (145) or behind the camera, as Beetle's does, so the near
+  part of a wall at distance d collapses onto X = 160 + 2d. That line is in
+  the frame when d < 80 at 4:3, 106 at 16:9, 140 at 21:9 and 213 at 32:9;
+  in a side-scrape savestate at d = 143 only 32:9 shows it (142 of 854
+  columns). The nose-in band doesn't respond to the divide, so it has a
+  second cause, not found yet. R4's SZ 288/290 near compares are not the
+  cause: moving them changes no pixels. A fix needs near-plane clipping
+  inside R4's course renderers for the divide case, and the second cause
+  found; no `[widescreen.cull]` site kind can do either. An unsaturated
+  wide-view divide was tried and draws wedges. See `docs/WIDESCREEN.md`.
 - The rear-view mirror needs OpenGL in wide races: only OpenGL copies the
   canonical 4:3 column (where the mirror is drawn) into the wide surface. On
   the software renderer it shows solid black (checked); Vulkan was not run
