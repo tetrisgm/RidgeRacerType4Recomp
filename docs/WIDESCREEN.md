@@ -145,6 +145,24 @@ edges, each half's RANK and minimap sit at the left edge and its laps, time,
 tachometer and speed at the right edge, and the divider (rows 118-121) is one
 colour across the full width at every aspect.
 
+Split screen draws its far road through per-primitive texture windows: about
+515 GP0(E2h) window changes per game frame, against 29 in a 1P race. psxrecomp's
+OpenGL renderer ends a draw batch at each one, and in widescreen every batch
+that reaches the margins is drawn a second time into the wide surface. With Fit
+at Match display, 2P draws about 180 batches per game frame and 1P about 28.
+`game.toml` sets `[video] texture_window_batching = true`, which lets the
+renderer batch across texture windows (each vertex carries its own window):
+about 17 batches per game frame in 2P and 10 in 1P.
+
+The key needs psxrecomp RetroPortingToolKit/psxrecomp#467 (merged). Measured
+on an M4 under heavy load from other work, 2P at Fit and Match display went
+from 39-43 to 50-58 guest VBlanks/s and 1P from 50 to 57. Neither reached 60
+under that load, so the numbers are relative: with the key, 2P costs about
+what 1P does. The image is the same with it off and on: paused 2P and 1P
+frames at 4K, Match display and 8K, at 4:3 and Fit, give the same frame at
+internal resolution, wide surface and window capture, and the guest runs
+identically. `PSX_GL_TEXWIN_BATCH=0` turns it off for one run.
+
 ## Limitations
 
 - **Fit to Window past about 65:9.** The GTE clamps projected screen X to
