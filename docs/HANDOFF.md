@@ -2,28 +2,33 @@
 
 ## Current work
 
-v0.1.0 (preview) released 2026-09-26: setup-host zips for macOS (universal,
-ad-hoc signed) and Windows x64 at
-https://github.com/tetrisgm/RidgeRacerType4Recomp/releases/tag/v0.1.0 (repo
-public). Built with `tools/package_release.sh` on the Mac and on the PC (MSYS2);
-player flow verified end to end headlessly on both. Pending: the owner's GUI
-click-through of the setup wizard.
+Released: v0.1.0 (2026-09-26, setup-host zips). Master has widescreen (#2),
+Frame Rate (#3), internal resolution (#4) and near-wall docs (#5); they are
+still default-off on master.
 
-Widescreen: the default-off `r4.enhancement.widescreen` mod
-(`docs/WIDESCREEN.md`) on psxrecomp master (the cull kinds and line batching
-of RetroPortingToolKit/psxrecomp#422); the carried `renderer/adaptive/` is
-retired.
-
-Frame rate: the default-off `r4.enhancement.frame-rate` mod (Display refresh
-or 60–300 FPS; Interpolated via psxrecomp render passes, or Frame blend; logic
-stays 30 Hz), on psxrecomp#421/#423/#424.
-
-Internal resolution: Native to true 8K presets (Settings → Display, OpenGL,
-default Native), on psxrecomp#425–#427 and RetroPortingToolKit/recomp-ui#71.
+In progress (2026-10-01), on local branches on the dev Mac. The full state,
+branch heads, worktrees and next steps are in `analysis/HANDOFF-LOCAL.md`
+(gitignored; it exists only on that Mac):
+- **Bundled releases (held):** branch `feat/bundled-releases` moves R4 to
+  upstream's bundled compiled-release model (`generated/` committed, local
+  packaging, OpenBIOS only, no CI), with v0.2.0 notes. Pushing waits for the
+  owner.
+- **Visual fidelity, all on by default for R4:** Max Detail (draw distance,
+  no distance LOD), PGXP stability, 2P fixes, dynamic aspect (Fit), Frame Rate
+  at display refresh (opportunistic, never slowing the game), Match display
+  uncapped, and dynamic resolution. Framework PRs:
+  RetroPortingToolKit/psxrecomp#467 (2P batching), #468 (draw-distance
+  clamps), #470 (PGXP), #460 (overlay arch), #449 (release notices).
+  Opportunistic render passes, pass cost and dynamic resolution are local and
+  unreviewed.
 
 ## Blockers
 
-None.
+- The owner must decide on pushing `generated/` (it embeds the EXE's code
+  words) before the bundled-release branch, and v0.2.0, can land.
+- Open bug: in a test build the image jumps back and forth between two moments
+  during a race. It is probably in the new opportunistic Frame Rate work; see
+  `analysis/HANDOFF-LOCAL.md` §4. Fix it before publishing that work.
 
 ## References
 
