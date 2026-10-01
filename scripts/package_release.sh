@@ -72,6 +72,33 @@ cp "${UI}/LICENSE" "${EXE_DIR}/licenses/recomp-ui-LICENSE"
 cp "${UI}/assets/common/fonts/NOTICE.md" "${EXE_DIR}/assets/fonts/NOTICE.md"
 cp "${UI}/assets/common/img/NOTICE.md" "${EXE_DIR}/assets/img/NOTICE.md"
 EXTRA+=(--runtime-file licenses/recomp-ui-LICENSE)
+# Statically linked libraries whose licenses (MIT) ask for their notice in
+# binary copies, and that no framework packager stages: Dear ImGui (recomp-ui's
+# launcher UI), recomp-net and retcomm-rbengine (netplay).
+# tools/package_release.sh requires all three in every zip.
+NOTICES=(
+  "recomp-ui/src/third_party/imgui/LICENSE.txt|dear-imgui-LICENSE.txt"
+  "psxrecomp/lib/recomp-net/LICENSE|recomp-net-LICENSE"
+  "psxrecomp/lib/retcomm-rbengine/LICENSE|retcomm-rbengine-LICENSE"
+)
+# Windows: the MinGW-w64 C runtime startup code and winpthreads are linked
+# statically into r4-runtime.exe and both emitters; winpthreads' license asks
+# for its notice in binary copies. Taken from the MSYS2 packages they were
+# linked from.
+case "${ARTIFACT_TAG}" in
+  windows-*)
+    MSYS_LIC="${MINGW_PREFIX:-/mingw64}/share/licenses"
+    NOTICES+=("${MSYS_LIC}/winpthreads/COPYING|winpthreads-COPYING"
+              "${MSYS_LIC}/crt/COPYING.MinGW-w64-runtime.txt|mingw-w64-runtime-COPYING.txt")
+    ;;
+esac
+for _n in "${NOTICES[@]}"; do
+  _src="${_n%%|*}"; _dst="${_n##*|}"
+  [[ "${_src}" == /* ]] || _src="${ROOT}/${_src}"
+  [[ -f "${_src}" ]] || { echo "error: missing notice ${_src}" >&2; exit 1; }
+  cp "${_src}" "${EXE_DIR}/licenses/${_dst}"
+  EXTRA+=(--runtime-file "licenses/${_dst}")
+done
 # TinyCC's license. The Windows overlay toolchain ships TinyCC (LGPL-2.1) in
 # overlay_toolchain/tcc/, but the pinned tcc-0.9.27-win64-bin.zip has no
 # license file and the framework packager adds none. Stage the LGPL-2.1 text

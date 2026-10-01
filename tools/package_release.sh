@@ -108,7 +108,14 @@ else
   # never hand them the wrong runtime DLLs.
   EMIT_ARGS+=(-DPSXRECOMP_STATIC_CLI=ON)
   unset TOOLCHAIN_DIR PSXRECOMP_TOOLCHAIN_DIR RETCOMM_TOOLCHAIN_DIR BPE_TOOLCHAIN_DIR || true
-  export PSXRECOMP_RUNTIME_BIN_DIR=/mingw64/bin
+  # The framework packager copies libgcc_s_seh-1, libstdc++-6 and
+  # libwinpthread-1 from this dir into overlay_toolchain/ whether or not
+  # anything imports them. Nothing does: r4-runtime.exe and both emitters are
+  # static (gated below), and tcc and the embedded Python need none of them.
+  # Point it at an empty dir so no unused GCC runtime ships; the packager's DLL
+  # bundler still fails the release if the exe ever imports one.
+  mkdir -p "$REL/.no-mingw-dlls"
+  export PSXRECOMP_RUNTIME_BIN_DIR="$REL/.no-mingw-dlls"
   EXE=r4-runtime.exe; SFX=.exe
 fi
 # No build-machine paths in shipped binaries (__FILE__ in libjuice's logging,
@@ -140,6 +147,13 @@ for b in "${BINS[@]}"; do
     fi
     [[ "$(otool -l "$b" | awk '/LC_BUILD_VERSION/{f=1} f&&/minos/{print $2; f=0}' | sort -u)" == "11.0" ]] \
       || { echo "minos is not 11.0: $b" >&2; exit 1; }
+  else
+    # Static: no MinGW/SDL/zlib DLL imports, so none has to ship beside it.
+    IMPORTS="$(objdump -p "$b" | awk '/DLL Name:/{print $3}')"
+    [[ -n "$IMPORTS" ]] || { echo "no import table read from $b" >&2; exit 1; }
+    if grep -iE '^(lib|sdl|zlib)' <<< "$IMPORTS"; then
+      echo "non-system DLL imports above in $b" >&2; exit 1
+    fi
   fi
   # Leak gate: the release dir and the builder's home, in every spelling the
   # binary could carry. strings goes to a file first -- grep -q on a pipe under
@@ -180,15 +194,26 @@ for A in "${ARTS[@]}"; do
   Z="dist/r4-$V-$A.zip"
   L="$(python3 -c 'import sys,zipfile; print("\n".join(zipfile.ZipFile(sys.argv[1]).namelist()))' "$Z")"
   # 1. It is the game: executable, OpenBIOS, runtime data, both R4 mods, and
-  #    the notices for everything it carries (recomp-ui's come from
-  #    scripts/package_release.sh).
-  for f in "$EXE" psx_game_version.txt bios/openbios.bin bios/OpenBIOS.LICENSE game.toml \
-           game_options.toml DISC.md LICENSE README.txt \
-           THIRD-PARTY-LICENSES/README.md licenses/psxrecomp-LICENSE \
-           licenses/recomp-ui-LICENSE assets/fonts/NOTICE.md assets/img/NOTICE.md \
-           "overlay_toolchain/psxrecomp-game$SFX" "overlay_toolchain/psxrecomp-bios$SFX"; do
+  #    the notices its components' licenses ask for (recomp-ui's, Dear ImGui's,
+  #    recomp-net's, retcomm-rbengine's and, on Windows, the MinGW-w64
+  #    runtime's and winpthreads' come from scripts/package_release.sh).
+  NEED=("$EXE" psx_game_version.txt bios/openbios.bin bios/OpenBIOS.LICENSE game.toml
+        game_options.toml DISC.md LICENSE README.txt
+        THIRD-PARTY-LICENSES/README.md licenses/psxrecomp-LICENSE
+        licenses/recomp-ui-LICENSE assets/fonts/NOTICE.md assets/img/NOTICE.md
+        licenses/dear-imgui-LICENSE.txt licenses/recomp-net-LICENSE
+        licenses/retcomm-rbengine-LICENSE
+        "overlay_toolchain/psxrecomp-game$SFX" "overlay_toolchain/psxrecomp-bios$SFX")
+  if [[ $PLATFORM == windows ]]; then
+    NEED+=(licenses/winpthreads-COPYING licenses/mingw-w64-runtime-COPYING.txt)
+  fi
+  for f in "${NEED[@]}"; do
     grep -qxF -- "$f" <<< "$L" || { echo "missing $f in $Z" >&2; exit 1; }
   done
+  # No GCC runtime DLLs: nothing shipped imports them (see PSXRECOMP_RUNTIME_BIN_DIR).
+  if grep -iE '(^|/)(libgcc_s_[^/]*|libstdc\+\+-[^/]*|libwinpthread-[^/]*)\.dll$' <<< "$L"; then
+    echo "unused GCC runtime DLLs above in $Z" >&2; exit 1
+  fi
   for p in assets/fonts/ licenses/ mods/bundled/r4.enhancement.widescreen/ \
            mods/bundled/r4.enhancement.frame-rate/; do
     grep -q "^$p" <<< "$L" || { echo "missing $p in $Z" >&2; exit 1; }
