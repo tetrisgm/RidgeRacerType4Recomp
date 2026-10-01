@@ -88,11 +88,10 @@ disc_speed = "1x"
 # dispatch is always gated on the resident bytes.
 overlay_cache = true
 overlay_backend = "auto"
-# No overlay_autocompile_cmd here: on a player's machine the setup-host
-# rebuild installs overlay_toolchain/ beside the exe and the runtime builds the
-# compile command from it; a command set here would override that. Dev runs
-# pass the dev command through PSX_OVERLAY_AUTOCOMPILE_CMD (tools/run_r4.sh,
-# tools/run_r4.cmd).
+# No overlay_autocompile_cmd here: the release zip ships overlay_toolchain/
+# beside the exe and the runtime builds the compile command from it; a command
+# set here would override that. Dev runs pass the dev command through
+# PSX_OVERLAY_AUTOCOMPILE_CMD (tools/run_r4.sh, tools/run_r4.cmd).
 
 [video]
 # Faithful 4:3 by default. Widescreen is the r4.enhancement.widescreen mod

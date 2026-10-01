@@ -9,10 +9,11 @@ if(NOT EXISTS "${PSXRECOMP_ROOT}/runtime/runtime.cmake")
         "or set -DPSXRECOMP_ROOT=<path-to-psxrecomp>.")
 endif()
 
-# macOS: portable binaries by default, both for the release setup host and for
-# the game a player builds from it. Use the static SDL3 psxrecomp pins rather
-# than a Homebrew dylib, skip recomp-ui's optional FreeType/HarfBuzz (emoji
-# stay outline glyphs), and target a macOS older than the build machine.
+# macOS: portable binaries by default, for release builds
+# (tools/package_release.sh) and local ones. Use the static SDL3 psxrecomp
+# pins rather than a Homebrew dylib, skip recomp-ui's optional
+# FreeType/HarfBuzz (emoji stay outline glyphs), and target a macOS older than
+# the build machine.
 # Cache defaults, so a local -D still overrides them.
 if(APPLE)
     set(CMAKE_OSX_DEPLOYMENT_TARGET "11.0" CACHE STRING "Minimum macOS version")
@@ -24,10 +25,9 @@ endif()
 
 project(RidgeRacerType4Recomp LANGUAGES C CXX)
 
-# Developer tests. OFF by default: tests/, tools/ and the disc are not in the
-# setup-host zip, and the player's Generate & rebuild configures this file with
-# no -DBUILD_TESTING=OFF, so an unconditional include(CTest) would register
-# sources the zip cannot build. Configure with -DR4_BUILD_TESTS=ON to get them.
+# Developer tests. OFF by default: they need tests/, tools/ and the local disc,
+# and release builds never run them. Configure with -DR4_BUILD_TESTS=ON to get
+# them.
 option(R4_BUILD_TESTS "Register R4's developer tests (needs tests/ and tools/)" OFF)
 if(R4_BUILD_TESTS)
     include(CTest)
@@ -42,7 +42,7 @@ if(EXISTS "${PSXRECOMP_ROOT}/lib/recomp-net/CMakeLists.txt")
         "Link recomp-net rollback/delay-sync netplay (needs recomp-net)" FORCE)
 endif()
 set(PSX_SETUP_WIZARD ON CACHE BOOL
-    "Advertise first-run setup wizard + Generate & rebuild in recomp-ui" FORCE)
+    "First-run setup wizard in recomp-ui (the disc picker of a full build)" FORCE)
 include("${PSXRECOMP_ROOT}/runtime/runtime.cmake")
 
 # This project's own mod catalog. The FRAMEWORK stages it -- together with its
@@ -88,8 +88,8 @@ foreach(_R4_RUNTIME_CONFIG game.toml game_options.toml)
 endforeach()
 
 # Developer tests (R4_BUILD_TESTS above): ctest --test-dir build -R r4_
-# Every path is behind its own if(EXISTS ...) so the setup-host packager's
-# CMakeLists gate treats them as optional (none of them ship).
+# Every path is behind its own if(EXISTS ...), so a checkout without tests/ or
+# tools/ still configures (none of them ship).
 if(R4_BUILD_TESTS AND BUILD_TESTING)
     # Pure widescreen helpers, no game data needed.
     if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_r4_widescreen.c")
