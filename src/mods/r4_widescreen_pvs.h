@@ -20,10 +20,13 @@
 
 #define R4_PVS_LIST_ADDR       0x8010E3C0u   /* count, then pointers */
 #define R4_PVS_LIST_MAX        255u
-#define R4_PVS_TABLE_PTR_ADDR  0x800F39D0u   /* -> u32 table[sections][9] */
+#define R4_PVS_TABLE_PTR_ADDR  0x800F39D0u   /* -> u32 table[sections][8] */
 #define R4_PVS_BLOCK_BASE_ADDR 0x800F3064u   /* -> blocks, 0x50 bytes each */
 #define R4_PVS_BLOCK_STRIDE    0x50u
-#define R4_PVS_COLUMNS         9u            /* 8 octants + one extra column */
+/* One entry per heading octant: 0x8006F5AC indexes table[section * 8 +
+ * octant]. (This said 9, so from section 1 on the union read the entries of
+ * other sections and octants.) */
+#define R4_PVS_COLUMNS         8u
 
 /* Append each of add[0..nadd) to list[0..*count) unless already present,
  * stopping at cap. Returns how many were appended. */
