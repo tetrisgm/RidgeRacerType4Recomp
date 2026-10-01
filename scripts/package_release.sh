@@ -72,6 +72,21 @@ cp "${UI}/LICENSE" "${EXE_DIR}/licenses/recomp-ui-LICENSE"
 cp "${UI}/assets/common/fonts/NOTICE.md" "${EXE_DIR}/assets/fonts/NOTICE.md"
 cp "${UI}/assets/common/img/NOTICE.md" "${EXE_DIR}/assets/img/NOTICE.md"
 EXTRA+=(--runtime-file licenses/recomp-ui-LICENSE)
+# TinyCC's license. The Windows overlay toolchain ships TinyCC (LGPL-2.1) in
+# overlay_toolchain/tcc/, but the pinned tcc-0.9.27-win64-bin.zip has no
+# license file and the framework packager adds none. Stage the LGPL-2.1 text
+# there as COPYING before the toolchain is staged (it only adds to that
+# folder); tools/package_release.sh requires it in the Windows zip. Drop this
+# at the psxrecomp pin whose packager ships TinyCC's license itself.
+case "${ARTIFACT_TAG}" in
+  windows-*)
+    TCC_LICENSE="${ROOT}/THIRD-PARTY-LICENSES/TinyCC-LGPL-2.1.txt"
+    [[ -f "${TCC_LICENSE}" ]] || { echo "error: missing ${TCC_LICENSE}" >&2; exit 1; }
+    mkdir -p "${EXE_DIR}/overlay_toolchain/tcc"
+    cp "${TCC_LICENSE}" "${EXE_DIR}/overlay_toolchain/tcc/COPYING"
+    EXTRA+=(--runtime-file overlay_toolchain/tcc/COPYING)
+    ;;
+esac
 
 cd "${ROOT}"
 exec bash "${PACKAGER}" \

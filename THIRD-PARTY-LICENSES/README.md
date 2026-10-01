@@ -45,6 +45,16 @@ are Copyright (c) 2011-2015 by tyPoland Lukasz Dziedzic, SIL Open Font
 License 1.1 (<https://scripts.sil.org/OFL>); each font file also carries its
 copyright and license in its own metadata.
 
+## TinyCC (Windows release zips) — LGPL-2.1
+
+Windows release zips carry the unmodified TinyCC 0.9.27 win64 binaries in
+`overlay_toolchain/tcc/` (the `tcc-0.9.27-win64-bin.zip` psxrecomp's
+`tools/release_stage.py` pins), by Fabrice Bellard and contributors, licensed
+under the GNU Lesser General Public License 2.1 (`TinyCC-LGPL-2.1.txt`,
+shipped as `overlay_toolchain/tcc/COPYING`). The game runs it as a separate
+program to compile code overlays; nothing links against it. Source:
+<https://download.savannah.gnu.org/releases/tinycc/tcc-0.9.27.tar.bz2>.
+
 ## Box art
 
 `recomp/launcher/boxart.*` comes from

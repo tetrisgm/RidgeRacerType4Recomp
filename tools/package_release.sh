@@ -194,7 +194,13 @@ for A in "${ARTS[@]}"; do
     grep -q "^$p" <<< "$L" || { echo "missing $p in $Z" >&2; exit 1; }
   done
   # TinyCC (LGPL-2.1, Windows overlay compiler) must ship with its license
-  # (psxrecomp THIRD_PARTY_ATTRIBUTION.md).
+  # (psxrecomp THIRD_PARTY_ATTRIBUTION.md; scripts/package_release.sh stages
+  # it). Windows players have no compiler of their own, so tcc must ship too.
+  if [[ $PLATFORM == windows ]]; then
+    for f in overlay_toolchain/tcc/tcc.exe overlay_toolchain/tcc/COPYING; do
+      grep -qxF -- "$f" <<< "$L" || { echo "missing $f in $Z" >&2; exit 1; }
+    done
+  fi
   if grep -q '^overlay_toolchain/tcc/' <<< "$L" &&
      ! grep -iqE '^overlay_toolchain/tcc/([^/]+/)*[^/]*(copying|licen[cs]e|lgpl)[^/]*$' <<< "$L"; then
     echo "overlay_toolchain/tcc/ ships without the TinyCC LGPL-2.1 license in $Z" >&2; exit 1
