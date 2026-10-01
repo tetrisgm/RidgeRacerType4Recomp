@@ -1,0 +1,572 @@
+/* R4 Max Detail (r4.enhancement.max-detail) against a mock mod API.
+ *
+ *   - pure helpers: option parsing (a missing or unknown value keeps the
+ *     most detail), the car LOD tables (the cull distance never moves), the
+ *     course visibility merge shared with the widescreen plugin (r4_pvs.h:
+ *     section count, wrap-around, nearest-first order, the cross product
+ *     with wide octants, the 255 cap, invalid guest data, the exact
+ *     widescreen octant union it replaced, and a mock table laid out with
+ *     the game's 8-octant stride);
+ *   - the plugin itself (src/mods/r4_max_detail_plugin.c): its hooks and
+ *     plugin id, inert before activation, the draw-distance clamp switch per
+ *     option, the course renderer writes, the course-list union only at
+ *     Maximum, only below about 30:9 and only from the course draw paths
+ *     (both return-address gates), and the car table put back to Stock after
+ *     a save state made with Always full.
+ *
+ * Build/run: ctest -R r4_max_detail */
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#include "cpu_state.h"
+#include "mod_plugins.h"
+#include "r4_max_detail.h"
+#include "r4_pvs.h"
+
+static int failures;
+#define CHECK(c, m) do { if (!(c)) { fprintf(stderr, "FAIL: %s\n", m); failures++; } } while (0)
+
+/* ---- guest memory ------------------------------------------------------ */
+static uint8_t s_ram[2u * 1024u * 1024u];
+static uint8_t s_spad[1024];
+static int s_spad_writes, s_ram_half_writes;
+
+static uint8_t *at(uint32_t a) {
+    if ((a & 0xFFFFFC00u) == 0x1F800000u) return &s_spad[a & 0x3FFu];
+    return &s_ram[a & 0x1FFFFFu];
+}
+uint8_t psx_mod_read_byte(uint32_t a) { return *at(a); }
+uint16_t psx_mod_read_half(uint32_t a) { uint16_t v; memcpy(&v, at(a), 2); return v; }
+uint32_t psx_mod_read_word(uint32_t a) { uint32_t v; memcpy(&v, at(a), 4); return v; }
+void psx_mod_write_half(uint32_t a, uint16_t v) {
+    if ((a & 0xFFFFFC00u) == 0x1F800000u) s_spad_writes++;
+    else s_ram_half_writes++;
+    memcpy(at(a), &v, 2);
+}
+void psx_mod_write_word(uint32_t a, uint32_t v) { memcpy(at(a), &v, 4); }
+static uint32_t rd32(uint32_t a) { return psx_mod_read_word(a); }
+static uint16_t rd16(uint32_t a) { return psx_mod_read_half(a); }
+static void put_car_table(const int16_t rows[R4_MD_CAR_LOD_ROWS][3]);
+static int car_table_is(const int16_t rows[R4_MD_CAR_LOD_ROWS][3]);
+
+/* ---- the mod API the plugin uses ---------------------------------------- */
+#define MAX_HOOKS 8
+static struct { char id[32]; uint32_t addr; PSXModFunctionEntryCallback cb; } s_hooks[MAX_HOOKS];
+static int s_nhooks;
+int psx_mod_register_function_entry_plugin(const char *id, uint32_t address,
+                                           PSXModFunctionEntryCallback cb) {
+    if (!id || !address || !cb || s_nhooks == MAX_HOOKS) return 0;
+    for (int i = 0; i < s_nhooks; i++)
+        if (strcmp(s_hooks[i].id, id) == 0 &&
+            ((s_hooks[i].addr ^ address) & 0x1FFFFFFFu) == 0u)
+            return 0;
+    snprintf(s_hooks[s_nhooks].id, sizeof s_hooks[0].id, "%s", id);
+    s_hooks[s_nhooks].addr = address;
+    s_hooks[s_nhooks++].cb = cb;
+    return 1;
+}
+static PSXModActivationCallback s_activate;
+static char s_activation_id[32];
+int psx_mod_register_activation_plugin(const char *id, PSXModActivationCallback cb) {
+    snprintf(s_activation_id, sizeof s_activation_id, "%s", id);
+    s_activate = cb;
+    return 1;
+}
+static PSXModVBlankCallback s_vblank;
+static char s_vblank_id[32];
+int psx_mod_register_vblank_plugin(const char *id, PSXModVBlankCallback cb) {
+    snprintf(s_vblank_id, sizeof s_vblank_id, "%s", id);
+    s_vblank = cb;
+    return 1;
+}
+static const char *s_options[4][2];   /* option id, value (NULL = unset) */
+int psx_mod_option_value(const char *pkg, const char *feature, const char *option,
+                         char *out, uint32_t out_size) {
+    if (strcmp(pkg, "r4.enhancement.max-detail") != 0 || strcmp(feature, "max-detail") != 0)
+        return 0;
+    for (int i = 0; i < 4; i++)
+        if (s_options[i][0] && strcmp(s_options[i][0], option) == 0 && s_options[i][1]) {
+            snprintf(out, out_size, "%s", s_options[i][1]);
+            return 1;
+        }
+    return 0;
+}
+static int s_clamp = -1, s_clamp_sites = 1;
+int psx_mod_set_draw_distance_clamp(int enabled) { s_clamp = enabled ? 1 : 0; return s_clamp_sites; }
+int psx_mod_draw_distance_clamp_enabled(void) { return s_clamp == 1; }
+static int32_t s_margin;
+int32_t psx_mod_widescreen_x_margin(void) { return s_margin; }
+static int s_game_started = 1;
+int psx_mod_game_started(void) { return s_game_started; }
+
+static PSXModFunctionEntryCallback hook(uint32_t addr) {
+    for (int i = 0; i < s_nhooks; i++)
+        if (s_hooks[i].addr == addr) return s_hooks[i].cb;
+    return NULL;
+}
+static void set_options(const char *draw, const char *course, const char *cars,
+                        const char *split) {
+    s_options[0][0] = "draw_distance"; s_options[0][1] = draw;
+    s_options[1][0] = "course";        s_options[1][1] = course;
+    s_options[2][0] = "cars";          s_options[2][1] = cars;
+    s_options[3][0] = "split_screen";  s_options[3][1] = split;
+}
+
+/* ---- a mock course: NSEC sections x 8 octants ---------------------------- */
+/* Laid out with the game's own stride, not R4_PVS_COLUMNS: the lookup at
+ * 0x8006F5D8 is `sll s0,s0,3; addu s0,s0,v0` (table[section * 8 + octant]).
+ * The widescreen plugin once read it with 9 columns; this catches that. */
+#define GAME_COLUMNS 8u
+#define NSEC 10u
+#define TABLE 0x80100000u
+#define ENTRIES 0x80101000u
+#define BLOCKS 0x80140000u
+/* Section s, octant o holds blocks 100*s + 10*o + {0, 1} (two each). */
+static uint32_t block_ptr(uint32_t s, uint32_t o, uint32_t k) {
+    return BLOCKS + R4_PVS_BLOCK_STRIDE * (100u * s + 10u * o + k);
+}
+static void build_course(uint32_t per_entry) {
+    memset(s_ram, 0, sizeof s_ram);
+    psx_mod_write_word(R4_PVS_TABLE_PTR_ADDR, TABLE);
+    psx_mod_write_word(R4_PVS_BLOCK_BASE_ADDR, BLOCKS);
+    psx_mod_write_word(R4_TRACK_SEGMENT_COUNT_ADDR, NSEC * 5u);
+    uint32_t e = ENTRIES;
+    for (uint32_t s = 0; s < NSEC; s++)
+        for (uint32_t o = 0; o < GAME_COLUMNS; o++) {
+            psx_mod_write_word(TABLE + 4u * (s * GAME_COLUMNS + o), e);
+            psx_mod_write_word(e, per_entry);
+            for (uint32_t k = 0; k < per_entry; k++)
+                psx_mod_write_half(e + 4u + 2u * k, (uint16_t)(100u * s + 10u * o + k));
+            e += 4u + 2u * per_entry;
+            e = (e + 3u) & ~3u;
+        }
+}
+/* The frame list as 0x8006EB58 leaves it: section s, octant o. */
+static void load_list(uint32_t s, uint32_t o, uint32_t per_entry) {
+    psx_mod_write_word(R4_PVS_LIST_ADDR, per_entry);
+    for (uint32_t k = 0; k < per_entry; k++)
+        psx_mod_write_word(R4_PVS_LIST_ADDR + 4u + 4u * k, block_ptr(s, o, k));
+}
+static uint32_t list_at(uint32_t i) { return rd32(R4_PVS_LIST_ADDR + 4u + 4u * i); }
+static int list_has(uint32_t p) {
+    uint32_t n = rd32(R4_PVS_LIST_ADDR);
+    for (uint32_t i = 0; i < n; i++) if (list_at(i) == p) return 1;
+    return 0;
+}
+
+/* The widescreen plugin's octant union before it moved to r4_pvs_merge. */
+static void old_ws_merge(uint32_t section, uint32_t octant, int reach) {
+    uint32_t table = rd32(R4_PVS_TABLE_PTR_ADDR), blocks = rd32(R4_PVS_BLOCK_BASE_ADDR);
+    uint32_t list[R4_PVS_LIST_MAX], count = rd32(R4_PVS_LIST_ADDR);
+    for (uint32_t i = 0; i < count; i++) list[i] = rd32(R4_PVS_LIST_ADDR + 4u + 4u * i);
+    uint32_t before = count;
+    for (int d = 1; d <= reach; d++)
+        for (int side = -1; side <= 1; side += 2) {
+            uint32_t oct = (octant + 8u + (uint32_t)(side * d)) & 7u;
+            uint32_t entry = rd32(table + 4u * (section * GAME_COLUMNS + oct));
+            uint32_t n = rd32(entry), add[R4_PVS_LIST_MAX];
+            for (uint32_t i = 0; i < n; i++)
+                add[i] = blocks + R4_PVS_BLOCK_STRIDE * rd16(entry + 4u + 2u * i);
+            (void)r4_pvs_union(list, &count, add, n, R4_PVS_LIST_MAX);
+        }
+    for (uint32_t i = before; i < count; i++) psx_mod_write_word(R4_PVS_LIST_ADDR + 4u + 4u * i, list[i]);
+    if (count != before) psx_mod_write_word(R4_PVS_LIST_ADDR, count);
+}
+
+/* ---- pure helpers -------------------------------------------------------- */
+static void test_options(void) {
+    R4MdOptions o = r4_md_options(NULL, NULL, NULL, NULL);
+    CHECK(o.draw == R4_MD_DRAW_MAXIMUM && o.course_full && o.cars_full && o.split_same,
+          "unset options keep the most detail");
+    o = r4_md_options("bogus", "", "x", "?");
+    CHECK(o.draw == R4_MD_DRAW_MAXIMUM && o.course_full && o.cars_full && o.split_same,
+          "unknown values keep the most detail");
+    o = r4_md_options("stock", "stock", "stock", "stock");
+    CHECK(o.draw == R4_MD_DRAW_STOCK && !o.course_full && !o.cars_full && !o.split_same,
+          "all stock");
+    CHECK(!r4_md_clamp_on(o) && r4_md_section_reach(o) == 0 && !r4_md_course_hook_active(o),
+          "stock does nothing");
+    o = r4_md_options("extended", "full", "full", "same");
+    CHECK(o.draw == R4_MD_DRAW_EXTENDED && r4_md_clamp_on(o) && r4_md_section_reach(o) == 0,
+          "extended: clamp only");
+    o = r4_md_options("maximum", "stock", "stock", "same");
+    CHECK(r4_md_clamp_on(o) && r4_md_section_reach(o) == 2 && r4_md_course_hook_active(o),
+          "maximum: clamp and two sections; split alone runs the course hook");
+    CHECK(r4_md_section_reach_for(o, 0) == 2 && r4_md_section_reach_for(o, 1) == 2,
+          "two sections from 4:3 to just under 30:9");
+    CHECK(r4_md_section_reach_for(o, 2) == 0 && r4_md_section_reach_for(o, 3) == 0,
+          "no sections from about 30:9, in 1P and 2P (PS1 frame budget)");
+    o = r4_md_options("extended", "full", "full", "same");
+    CHECK(r4_md_section_reach_for(o, 0) == 0 && r4_md_section_reach_for(o, 1) == 0,
+          "extended never adds sections");
+}
+
+static void test_car_tables(void) {
+    for (unsigned r = 0; r < R4_MD_CAR_LOD_ROWS; r++) {
+        CHECK(r4_md_car_lod_full[r][2] == R4_MD_CAR_CULL,
+              "every view culls at the stock forward distance, never beyond");
+        if (r != 1)
+            CHECK(r4_md_car_lod_stock[r][2] == r4_md_car_lod_full[r][2],
+                  "the forward cull distance (T2) never changes");
+        CHECK(r4_md_car_lod_full[r][0] <= r4_md_car_lod_full[r][1] &&
+                  r4_md_car_lod_full[r][1] <= r4_md_car_lod_full[r][2],
+              "full rows are ordered");
+        CHECK(r4_md_car_lod_full[r][0] >= r4_md_car_lod_stock[r][0] &&
+                  r4_md_car_lod_full[r][1] >= r4_md_car_lod_stock[r][1],
+              "full never lowers a stock distance");
+    }
+    CHECK(r4_md_car_lod_stock[1][2] == 4096 && r4_md_car_lod_full[1][0] == 672,
+          "the mirror draws cars as far as ahead but keeps its near model close");
+}
+
+static void test_pvs(void) {
+    CHECK(r4_pvs_section_step(0, -1, 10) == 9 && r4_pvs_section_step(9, 2, 10) == 1 &&
+              r4_pvs_section_step(4, -2, 10) == 2,
+          "sections wrap around the circuit");
+    build_course(2);
+    CHECK(r4_pvs_section_count(rd32) == NSEC, "section count from the segment count");
+    psx_mod_write_word(R4_TRACK_SEGMENT_COUNT_ADDR, 466u);
+    CHECK(r4_pvs_section_count(rd32) == 94u, "a partial section counts");
+    psx_mod_write_word(R4_TRACK_SEGMENT_COUNT_ADDR, 0u);
+    CHECK(r4_pvs_section_count(rd32) == 0u, "no course: no sections");
+    psx_mod_write_word(R4_TRACK_SEGMENT_COUNT_ADDR, NSEC * 5u);
+
+    /* Two sections each way, own octant: nearest first, wrapping at 0. */
+    load_list(0, 3, 2);
+    R4PvsMerge m = r4_pvs_merge(rd32, rd16, psx_mod_write_word, 0, 3, NSEC, 2, 0);
+    CHECK(m.ok && m.before == 2 && m.after == 10 && rd32(R4_PVS_LIST_ADDR) == 10,
+          "four sections added");
+    const uint32_t order[4] = { 9, 1, 8, 2 };
+    for (int i = 0; i < 4; i++)
+        CHECK(list_at(2u + 2u * (uint32_t)i) == block_ptr(order[i], 3, 0) &&
+                  list_at(3u + 2u * (uint32_t)i) == block_ptr(order[i], 3, 1),
+              "section order is -1, +1, -2, +2");
+    /* Idempotent: a second merge adds nothing. */
+    m = r4_pvs_merge(rd32, rd16, psx_mod_write_word, 0, 3, NSEC, 2, 0);
+    CHECK(m.ok && m.before == 10 && m.after == 10, "merge is idempotent");
+
+    /* With wide octants: the full cross product, own entry not repeated. */
+    load_list(5, 0, 2);
+    m = r4_pvs_merge(rd32, rd16, psx_mod_write_word, 5, 0, NSEC, 1, 1);
+    CHECK(m.after == 2u * 9u, "3 sections x 3 octants");
+    for (uint32_t s = 4; s <= 6; s++)
+        for (int d = -1; d <= 1; d++)
+            CHECK(list_has(block_ptr(s, (uint32_t)(8 + d) & 7u, 0)),
+                  "every section x octant pair present");
+    CHECK(list_at(2) == block_ptr(5, 7, 0) && list_at(4) == block_ptr(5, 1, 0) &&
+              list_at(6) == block_ptr(4, 0, 0),
+          "own section's octants first, then neighbours");
+
+    /* octant(): yaw 0xFFF wraps to octant 0, 45 degrees per octant. */
+    CHECK(r4_pvs_octant(0x0000u) == 0u && r4_pvs_octant(0x00FFu) == 0u &&
+              r4_pvs_octant(0x0100u) == 1u && r4_pvs_octant(0x0EFFu) == 7u &&
+              r4_pvs_octant(0x0F00u) == 0u && r4_pvs_octant(0x1300u) == 2u,
+          "octant from yaw as 0x8006F584 computes it");
+    CHECK(R4_PVS_COLUMNS == GAME_COLUMNS, "the table has one column per octant");
+
+    /* Without a section count only the octants are added. */
+    load_list(5, 0, 2);
+    m = r4_pvs_merge(rd32, rd16, psx_mod_write_word, 5, 0, 0u, 2, 1);
+    CHECK(m.after == 6, "no section count: octants only");
+    load_list(5, 0, 2);
+    m = r4_pvs_merge(rd32, rd16, psx_mod_write_word, 99, 0, NSEC, 2, 0);
+    CHECK(m.ok && m.after == 2, "a section past the course adds nothing");
+
+    /* The 255 cap keeps the nearest additions. */
+    build_course(60);
+    load_list(5, 0, 60);
+    m = r4_pvs_merge(rd32, rd16, psx_mod_write_word, 5, 0, NSEC, 2, 0);
+    CHECK(m.after == R4_PVS_LIST_MAX, "capped at 255");
+    CHECK(list_has(block_ptr(4, 0, 59)) && list_has(block_ptr(6, 0, 59)) &&
+              list_has(block_ptr(3, 0, 59)) && list_has(block_ptr(7, 0, 14)) &&
+              !list_has(block_ptr(7, 0, 15)),
+          "the cap cuts the last (farthest) section added");
+
+    /* Invalid guest data writes nothing. */
+    build_course(2);
+    load_list(5, 0, 2);
+    psx_mod_write_word(R4_PVS_LIST_ADDR, 300u);
+    m = r4_pvs_merge(rd32, rd16, psx_mod_write_word, 5, 0, NSEC, 2, 1);
+    CHECK(!m.ok && rd32(R4_PVS_LIST_ADDR) == 300u, "an oversized list is left alone");
+    load_list(5, 0, 2);
+    psx_mod_write_word(R4_PVS_TABLE_PTR_ADDR, 0x1F800000u);
+    m = r4_pvs_merge(rd32, rd16, psx_mod_write_word, 5, 0, NSEC, 2, 1);
+    CHECK(!m.ok && rd32(R4_PVS_LIST_ADDR) == 2u, "a bad table pointer is left alone");
+
+    /* With no section reach the merge is the old widescreen union. */
+    for (int reach = 0; reach <= 2; reach++)
+        for (uint32_t o = 0; o < 8; o++) {
+            build_course(3);
+            load_list(2, o, 3);
+            old_ws_merge(2, o, reach);
+            uint32_t want[R4_PVS_LIST_MAX], n = rd32(R4_PVS_LIST_ADDR);
+            for (uint32_t i = 0; i < n; i++) want[i] = list_at(i);
+            load_list(2, o, 3);
+            m = r4_pvs_merge(rd32, rd16, psx_mod_write_word, 2, o, NSEC, 0, reach);
+            int same = m.after == n;
+            for (uint32_t i = 0; same && i < n; i++) same = list_at(i) == want[i];
+            CHECK(same, "widescreen octant union unchanged");
+        }
+}
+
+/* ---- the plugin ------------------------------------------------------------ */
+static CPUState s_cpu;
+
+static void course_draw(uint32_t section, uint32_t octant, uint32_t merge_ra) {
+    /* 0x8006F5AC calls octant(a0 = 0x1F800008) with s0 = section, ra 0x8006F5D8. */
+    psx_mod_write_word(0x1F800008u + 0x14u, (octant << 9) - 0x100u + 0x1000u);
+    s_cpu.gpr[4] = 0x1F800008u;
+    s_cpu.gpr[16] = section;
+    s_cpu.gpr[31] = 0x8006F5D8u;
+    hook(0x8006F584u)(&s_cpu, 0x8006F584u);
+    s_cpu.gpr[31] = merge_ra;
+    hook(0x8007166Cu)(&s_cpu, 0x8007166Cu);
+}
+
+static void test_plugin(void) {
+    CHECK(strcmp(s_activation_id, "r4.maxdetail") == 0 && s_activate, "activation registered");
+    CHECK(s_nhooks == 4, "four entry hooks");
+    for (int i = 0; i < s_nhooks; i++)
+        CHECK(strcmp(s_hooks[i].id, "r4.maxdetail") == 0, "hooks belong to r4.maxdetail");
+    CHECK(hook(0x80060F94u) && hook(0x8006F584u) && hook(0x8007166Cu) && hook(0x80093520u),
+          "hooks: course renderer, octant, course list, DrawOTag");
+
+    /* Before activation every hook is inert. */
+    build_course(2);
+    load_list(5, 0, 2);
+    s_spad_writes = 0;
+    psx_mod_write_half(R4_MD_COURSE_FAR_ADDR, 5120u);
+    psx_mod_write_half(R4_MD_COURSE_2P_ADDR, 1u);
+    s_spad_writes = 0;
+    hook(0x80060F94u)(&s_cpu, 0x80060F94u);
+    course_draw(5, 0, 0x8006F02Cu);
+    CHECK(s_spad_writes == 0 && rd16(R4_MD_COURSE_FAR_ADDR) == 5120u &&
+              rd32(R4_PVS_LIST_ADDR) == 2u,
+          "inactive: nothing written");
+    put_car_table(r4_md_car_lod_full);
+    s_ram_half_writes = 0;
+    if (s_vblank) s_vblank();
+    CHECK(s_vblank && s_ram_half_writes == 0 && car_table_is(r4_md_car_lod_full),
+          "inactive: the VBlank callback writes nothing");
+    put_car_table(r4_md_car_lod_stock);
+
+    /* Defaults: everything on. */
+    set_options(NULL, NULL, NULL, NULL);
+    s_activate();
+    CHECK(s_clamp == 1, "default: draw-distance clamp on");
+    hook(0x80060F94u)(&s_cpu, 0x80060F94u);
+    CHECK(rd16(R4_MD_COURSE_FAR_ADDR) == 0x7FFFu && rd16(R4_MD_COURSE_2P_ADDR) == 0u,
+          "default: full course detail and 1P subdivision");
+    course_draw(5, 0, 0x8006F02Cu);
+    CHECK(rd32(R4_PVS_LIST_ADDR) == 10u && list_has(block_ptr(3, 0, 1)) &&
+              list_has(block_ptr(7, 0, 0)),
+          "default: two sections each way");
+    load_list(5, 0, 2);
+    course_draw(5, 0, 0x8006F090u);
+    CHECK(rd32(R4_PVS_LIST_ADDR) == 10u, "the alternate course draw path merges too");
+    load_list(5, 0, 2);
+    course_draw(5, 0, 0x8006F140u);   /* the rear-view mirror draws without 0x8007166C */
+    CHECK(rd32(R4_PVS_LIST_ADDR) == 2u, "another caller: no merge");
+    /* octant() called from anywhere but the list lookup captures nothing. */
+    load_list(5, 0, 2);
+    psx_mod_write_word(0x1F800008u + 0x14u, 0xF00u);
+    s_cpu.gpr[4] = 0x1F800008u;
+    s_cpu.gpr[16] = 5u;
+    s_cpu.gpr[31] = 0x8006F600u;
+    hook(0x8006F584u)(&s_cpu, 0x8006F584u);
+    s_cpu.gpr[31] = 0x8006F02Cu;
+    hook(0x8007166Cu)(&s_cpu, 0x8007166Cu);
+    CHECK(rd32(R4_PVS_LIST_ADDR) == 2u, "octant() from another caller: no capture, no merge");
+    load_list(5, 0, 2);
+    s_cpu.gpr[31] = 0x8006F02Cu;
+    hook(0x8007166Cu)(&s_cpu, 0x8007166Cu);
+    CHECK(rd32(R4_PVS_LIST_ADDR) == 2u, "no octant captured this frame: no merge");
+    /* A live wide view adds the neighbouring sections' wide octants too. */
+    s_margin = 53;
+    load_list(5, 0, 2);
+    course_draw(5, 0, 0x8006F02Cu);
+    CHECK(rd32(R4_PVS_LIST_ADDR) == 2u * 15u &&
+              list_has(block_ptr(3, 7, 0)) && list_has(block_ptr(7, 1, 1)) &&
+              list_has(block_ptr(5, 1, 0)),
+          "wide: five sections x three octants");
+    /* 29:9 (one wide octant each side): still two sections. */
+    s_margin = 227;
+    load_list(5, 0, 2);
+    course_draw(5, 0, 0x8006F02Cu);
+    CHECK(rd32(R4_PVS_LIST_ADDR) == 2u * 15u, "29:9: five sections x three octants");
+    /* From about 30:9 (two wide octants), 1P or split screen: no sections;
+     * the widescreen plugin adds the camera section's octants. */
+    for (int split = 0; split <= 1; split++) {
+        s_margin = 267;
+        psx_mod_write_half(R4_MD_COURSE_2P_ADDR, (uint16_t)split);
+        load_list(5, 0, 2);
+        course_draw(5, 0, 0x8006F02Cu);
+        CHECK(rd32(R4_PVS_LIST_ADDR) == 2u, "32:9: no neighbouring sections");
+        s_margin = 240;
+        load_list(5, 0, 2);
+        course_draw(5, 0, 0x8006F02Cu);
+        CHECK(rd32(R4_PVS_LIST_ADDR) == 2u, "30:9: no neighbouring sections");
+    }
+    psx_mod_write_half(R4_MD_COURSE_2P_ADDR, 0u);
+    s_margin = 0;
+
+    /* Extended: clamp, no course-list union. */
+    set_options("extended", "full", "full", "same");
+    s_activate();
+    load_list(5, 0, 2);
+    course_draw(5, 0, 0x8006F02Cu);
+    CHECK(s_clamp == 1 && rd32(R4_PVS_LIST_ADDR) == 2u, "extended: clamp only");
+
+    /* Stock everything: the hooks leave the game alone. */
+    set_options("stock", "stock", "stock", "stock");
+    s_activate();
+    CHECK(s_clamp == 0, "stock: clamp off");
+    psx_mod_write_half(R4_MD_COURSE_FAR_ADDR, 5120u);
+    psx_mod_write_half(R4_MD_COURSE_2P_ADDR, 1u);
+    s_spad_writes = 0;
+    hook(0x80060F94u)(&s_cpu, 0x80060F94u);
+    load_list(5, 0, 2);
+    course_draw(5, 0, 0x8006F02Cu);
+    CHECK(s_spad_writes == 0 && rd16(R4_MD_COURSE_FAR_ADDR) == 5120u &&
+              rd16(R4_MD_COURSE_2P_ADDR) == 1u && rd32(R4_PVS_LIST_ADDR) == 2u,
+          "stock: course values and list untouched");
+
+    /* Split screen alone. */
+    set_options("stock", "stock", "stock", "same");
+    s_activate();
+    psx_mod_write_half(R4_MD_COURSE_FAR_ADDR, 5120u);
+    psx_mod_write_half(R4_MD_COURSE_2P_ADDR, 1u);
+    hook(0x80060F94u)(&s_cpu, 0x80060F94u);
+    CHECK(rd16(R4_MD_COURSE_FAR_ADDR) == 5120u && rd16(R4_MD_COURSE_2P_ADDR) == 0u,
+          "split alone: only the 2P flag");
+
+    /* Course detail alone. */
+    set_options("stock", "full", "stock", "stock");
+    s_activate();
+    psx_mod_write_half(R4_MD_COURSE_FAR_ADDR, 0xFFFFu);   /* the mirror's "all far" */
+    psx_mod_write_half(R4_MD_COURSE_2P_ADDR, 1u);
+    hook(0x80060F94u)(&s_cpu, 0x80060F94u);
+    CHECK(rd16(R4_MD_COURSE_FAR_ADDR) == 0x7FFFu && rd16(R4_MD_COURSE_2P_ADDR) == 1u,
+          "course alone: only the far threshold, mirror included");
+
+    /* A build whose game.toml lists no clamp sites still runs the rest. */
+    s_clamp_sites = 0;
+    set_options(NULL, NULL, NULL, NULL);
+    s_activate();
+    hook(0x80060F94u)(&s_cpu, 0x80060F94u);
+    CHECK(rd16(R4_MD_COURSE_FAR_ADDR) == 0x7FFFu, "no clamp sites: course detail still on");
+    s_clamp_sites = 1;
+
+    /* The trace hook is inert without R4_MD_TRACE. */
+    s_cpu.gpr[4] = 0x800ADCA0u + 0xB6Cu;
+    hook(0x80093520u)(&s_cpu, 0x80093520u);
+}
+
+/* ---- car table after a save state ------------------------------------------ */
+static void put_car_table(const int16_t rows[R4_MD_CAR_LOD_ROWS][3]) {
+    for (unsigned r = 0; r < R4_MD_CAR_LOD_ROWS; r++)
+        for (unsigned i = 0; i < 3u; i++)
+            psx_mod_write_half(R4_MD_CAR_LOD_TABLE + 6u * r + 2u * i, (uint16_t)rows[r][i]);
+}
+static int car_row_is(unsigned r, const int16_t want[3]) {
+    for (unsigned i = 0; i < 3u; i++)
+        if ((int16_t)rd16(R4_MD_CAR_LOD_TABLE + 6u * r + 2u * i) != want[i]) return 0;
+    return 1;
+}
+static int car_table_is(const int16_t rows[R4_MD_CAR_LOD_ROWS][3]) {
+    for (unsigned r = 0; r < R4_MD_CAR_LOD_ROWS; r++)
+        if (!car_row_is(r, rows[r])) return 0;
+    return 1;
+}
+
+static void test_car_restore(void) {
+    CHECK(strcmp(s_vblank_id, "r4.maxdetail") == 0 && s_vblank, "VBlank callback registered");
+
+    /* Always full: the plan's patches own the table; the callback never writes. */
+    set_options(NULL, NULL, NULL, NULL);
+    s_activate();
+    put_car_table(r4_md_car_lod_stock);
+    s_ram_half_writes = 0;
+    s_vblank();
+    CHECK(s_ram_half_writes == 0 && car_table_is(r4_md_car_lod_stock),
+          "cars full: the callback leaves the table to the plan");
+
+    /* A fresh session at Car detail = Stock reads but never writes. */
+    set_options("maximum", "full", "stock", "stock");
+    s_activate();
+    s_ram_half_writes = 0;
+    s_vblank();
+    CHECK(s_ram_half_writes == 0, "stock table, stock cars: no writes");
+
+    /* A save state made with Always full, loaded at Car detail = Stock. */
+    put_car_table(r4_md_car_lod_full);
+    s_vblank();
+    CHECK(car_table_is(r4_md_car_lod_stock), "full table restored to stock");
+    s_ram_half_writes = 0;
+    s_vblank();
+    CHECK(s_ram_half_writes == 0, "restored once, then idle");
+
+    /* ... at Car detail = Stock, Split screen = same: rows 0-2 back to stock;
+     * the 2P rows are the plan's (it re-applies the 1P row on every load). */
+    set_options("maximum", "full", "stock", "same");
+    s_activate();
+    put_car_table(r4_md_car_lod_full);
+    s_vblank();
+    CHECK(car_row_is(0, r4_md_car_lod_stock[0]) && car_row_is(1, r4_md_car_lod_stock[1]) &&
+              car_row_is(2, r4_md_car_lod_stock[2]) && car_row_is(3, r4_md_car_lod_full[3]) &&
+              car_row_is(4, r4_md_car_lod_full[4]),
+          "split same, stock cars: 1P, mirror and TV rows restored, 2P rows left to the plan");
+    /* A fresh EXE before and after the plan's entry writes: never touched, so
+     * the plan's guard check at the entry sees the stock bytes. */
+    put_car_table(r4_md_car_lod_stock);
+    s_game_started = 0;
+    s_ram_half_writes = 0;
+    s_vblank();
+    CHECK(s_ram_half_writes == 0, "before the EXE entry: nothing");
+    s_game_started = 1;
+    s_vblank();
+    CHECK(s_ram_half_writes == 0 && car_table_is(r4_md_car_lod_stock),
+          "split same, stock cars, stock table: the plan's 2P rows are not pre-empted");
+    put_car_table(r4_md_car_lod_full);
+    s_game_started = 0;
+    s_vblank();
+    CHECK(car_table_is(r4_md_car_lod_full), "before the EXE entry: a full table stays too");
+    s_game_started = 1;
+
+    /* A state made with Split screen = same, loaded with it at Stock. */
+    static const int16_t split_rows[R4_MD_CAR_LOD_ROWS][3] = {
+        { 672, 3200, 8704 }, { -1, 2560, 4096 }, { 4096, 8192, 8704 },
+        { 672, 3200, 8704 }, { 672, 3200, 8704 },
+    };
+    set_options("maximum", "full", "stock", "stock");
+    s_activate();
+    put_car_table(split_rows);
+    s_vblank();
+    CHECK(car_table_is(r4_md_car_lod_stock), "2P rows back to their stock values");
+
+    /* A table the package never writes (another EXE) stays untouched. */
+    static const int16_t other[R4_MD_CAR_LOD_ROWS][3] = {
+        { 600, 3000, 8000 }, { -1, 2000, 4000 }, { 4000, 8000, 8000 },
+        { 300, 3000, 8000 }, { 100, 2000, 8000 },
+    };
+    put_car_table(other);
+    s_ram_half_writes = 0;
+    s_vblank();
+    CHECK(s_ram_half_writes == 0 && car_table_is(other), "an unknown table is left alone");
+    put_car_table(r4_md_car_lod_stock);
+}
+
+int main(void) {
+    test_options();
+    test_car_tables();
+    test_pvs();
+    test_plugin();
+    test_car_restore();
+    if (failures) {
+        fprintf(stderr, "test_r4_max_detail: %d failure(s)\n", failures);
+        return 1;
+    }
+    printf("test_r4_max_detail: OK\n");
+    return 0;
+}

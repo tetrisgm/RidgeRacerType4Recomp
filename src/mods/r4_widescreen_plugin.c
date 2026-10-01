@@ -63,11 +63,6 @@ static int s_hooks_registered;
 #define R4_BUF_HEAP         0x1670u
 #define R4_BUF_HEAP_END     0x22688u      /* heap: 0x21018 bytes */
 #define R4_BUF_TAIL_END     0x22778u      /* persistent HUD packets */
-#define R4_PVS_OCTANT_FN    0x8006F584u   /* octant(a0 = camera) */
-#define R4_PVS_OCTANT_RA    0x8006F5D8u   /* ... called by the list lookup */
-#define R4_PVS_MERGE_FN     0x8007166Cu   /* first consumer of the list */
-#define R4_PVS_MERGE_RA1    0x8006F02Cu   /* course draw, path 1 */
-#define R4_PVS_MERGE_RA2    0x8006F090u   /* course draw, path 2 */
 #define R4_CLEAR_OTAG_FN    0x80093418u
 #define R4_DRAW_OTAG_FN     0x80093520u
 
@@ -257,7 +252,7 @@ static void r4_ws_pvs_octant(CPUState *cpu, uint32_t address)
     /* 0x8006F5AC: s0 = section (set in this call's delay slot), octant from
      * the camera yaw exactly as this function computes it. */
     s_pvs.section = cpu->gpr[16];
-    s_pvs.octant = (((rd32(cpu->gpr[4] + 0x14u) & 0xFFFu) + 0x100u) >> 9) & 7u;
+    s_pvs.octant = r4_pvs_octant(rd32(cpu->gpr[4] + 0x14u));
     s_pvs.valid = 1;
 }
 

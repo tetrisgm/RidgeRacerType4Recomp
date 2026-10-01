@@ -74,6 +74,10 @@ mod_function_entry_funcs = [
   # r4.compat.jogcon-input: normalize R4's internal JogCon mode before its
   # per-frame race-input translator, leaving SIO ID and wheel data unchanged.
   "0x8002961C",
+  # r4.enhancement.max-detail (src/mods/r4_max_detail_plugin.c): the course
+  # renderer dispatcher (course detail, split screen); it also uses the two
+  # course-list hooks and DrawOTag above
+  "0x80060F94",
 ]
 
 [runtime]
@@ -346,6 +350,118 @@ branch_keep_sites = [
   "0x80068EA4",  # fn 80068A6C bnez $at, 0x80069070
   "0x80069DEC",  # fn 800699B4 bnez $at, 0x80069fb8
 ]
+
+# Course renderer far-clip guards (tools/r4_detail_scan.py --emit-toml;
+# --check keeps them in step with the disc). Inert unless R4 Max Detail
+# switches the clamp on: a polygon past the end of the ordering table is
+# then kept in the farthest slot (index 0x1BF) instead of dropped.
+[[draw_distance.clamp]]
+address = "0x80061230"
+expected = "0x2C4A01C0"  # sltiu t2, v0, 0x1C0
+reg = 2
+max = 0x1BF
+
+[[draw_distance.clamp]]
+address = "0x80061DEC"
+expected = "0x2C4A01C0"  # sltiu t2, v0, 0x1C0
+reg = 2
+max = 0x1BF
+
+[[draw_distance.clamp]]
+address = "0x80062A80"
+expected = "0x2C4A01C0"  # sltiu t2, v0, 0x1C0
+reg = 2
+max = 0x1BF
+
+[[draw_distance.clamp]]
+address = "0x800634FC"
+expected = "0x2C4A01C0"  # sltiu t2, v0, 0x1C0
+reg = 2
+max = 0x1BF
+
+[[draw_distance.clamp]]
+address = "0x80064034"
+expected = "0x2C4A01C0"  # sltiu t2, v0, 0x1C0
+reg = 2
+max = 0x1BF
+
+[[draw_distance.clamp]]
+address = "0x80064C38"
+expected = "0x2C4A01C0"  # sltiu t2, v0, 0x1C0
+reg = 2
+max = 0x1BF
+
+[[draw_distance.clamp]]
+address = "0x80065914"
+expected = "0x2C4A01C0"  # sltiu t2, v0, 0x1C0
+reg = 2
+max = 0x1BF
+
+[[draw_distance.clamp]]
+address = "0x800663CC"
+expected = "0x2C4A01C0"  # sltiu t2, v0, 0x1C0
+reg = 2
+max = 0x1BF
+
+[[draw_distance.clamp]]
+address = "0x80066FF8"
+expected = "0x2441FFFF"  # addiu at, v0, -1 (then sltiu at, at, 0x1BF)
+reg = 2
+max = 0x1BF
+
+[[draw_distance.clamp]]
+address = "0x80067400"
+expected = "0x2C4A01C0"  # sltiu t2, v0, 0x1C0
+reg = 2
+max = 0x1BF
+
+[[draw_distance.clamp]]
+address = "0x80067F7C"
+expected = "0x2C4A01C0"  # sltiu t2, v0, 0x1C0
+reg = 2
+max = 0x1BF
+
+[[draw_distance.clamp]]
+address = "0x80068BCC"
+expected = "0x2C4A01C0"  # sltiu t2, v0, 0x1C0
+reg = 2
+max = 0x1BF
+
+[[draw_distance.clamp]]
+address = "0x80069B14"
+expected = "0x2C4A01C0"  # sltiu t2, v0, 0x1C0
+reg = 2
+max = 0x1BF
+
+[[draw_distance.clamp]]
+address = "0x8006AAF0"
+expected = "0x2C4A01C0"  # sltiu t2, v0, 0x1C0
+reg = 2
+max = 0x1BF
+
+[[draw_distance.clamp]]
+address = "0x8006B5B4"
+expected = "0x2C4A01C0"  # sltiu t2, v0, 0x1C0
+reg = 2
+max = 0x1BF
+
+[[draw_distance.clamp]]
+address = "0x8006C118"
+expected = "0x2C4A01C0"  # sltiu t2, v0, 0x1C0
+reg = 2
+max = 0x1BF
+
+[[draw_distance.clamp]]
+address = "0x8006CD68"
+expected = "0x2C4A01C0"  # sltiu t2, v0, 0x1C0
+reg = 2
+max = 0x1BF
+
+[[draw_distance.clamp]]
+address = "0x8006DBEC"
+expected = "0x2441FFFF"  # addiu at, v0, -1 (then sltiu at, at, 0x1BF)
+reg = 2
+max = 0x1BF
 
 [controller]
 # R4 identifies digital (0x41), DualShock (0x73), NeGcon (0x23) and JogCon

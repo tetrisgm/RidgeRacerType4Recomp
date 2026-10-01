@@ -44,6 +44,24 @@
 #define R4_TRACK_SEGMENT_COUNT_ADDR 0x800AC084u
 #define R4_PVS_SECTIONS_MAX    1024u
 
+/* Hook points both plugins use. The lookup at 0x8006F5AC calls octant()
+ * with the section already in s0 (set in the jal's delay slot) and then
+ * indexes the table at R4_PVS_OCTANT_RA; 0x8007166C is the list's first
+ * consumer on the two main course draw paths (the mirror does not call it).
+ * tools/r4_detail_scan.py --check holds every value here to the game's code. */
+#define R4_PVS_OCTANT_FN    0x8006F584u   /* octant(a0 = camera) */
+#define R4_PVS_OCTANT_RA    0x8006F5D8u   /* return into the list lookup */
+#define R4_PVS_MERGE_FN     0x8007166Cu   /* first consumer of the list */
+#define R4_PVS_MERGE_RA1    0x8006F02Cu   /* course draw, path 1 */
+#define R4_PVS_MERGE_RA2    0x8006F090u   /* course draw, path 2 */
+
+/* The camera's heading octant from its yaw word (a0 + 0x14), exactly as
+ * octant() computes it. */
+static inline uint32_t r4_pvs_octant(uint32_t yaw)
+{
+    return (((yaw & 0xFFFu) + 0x100u) >> 9) & 7u;
+}
+
 typedef uint32_t (*R4PvsRead32)(uint32_t address);
 typedef uint16_t (*R4PvsRead16)(uint32_t address);
 typedef void (*R4PvsWrite32)(uint32_t address, uint32_t value);

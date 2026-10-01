@@ -10,7 +10,8 @@ Rules (same as MegaManX6Recomp):
   and `*.cpp`.
 - Features are enabled only from the launcher's Mods page and callbacks do
   nothing until their package's activation runs. Default state is a per-feature
-  product choice; most features are disabled by default.
+  product choice (R4 Max Detail, for one, is on by default); the package off is
+  the stock game.
 - Keep game logic in pure headers (`r4_*_*.h`) so `tests/` can check it
   without a game build; register every test with ctest in `CMakeLists.txt`,
   inside its `R4_BUILD_TESTS` block and behind `if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/...")`
@@ -20,4 +21,6 @@ Rules (same as MegaManX6Recomp):
   (`docs/HIDE_REAR_VIEW_MIRROR.md`); defaults on by request.
 - `r4_camera_look_plugin.c`: `r4.enhancement.camera-lookaround` (package
   `README.txt`); right-stick look-around in single-player races.
+- `r4_max_detail_plugin.c`: `r4.enhancement.max-detail` (`docs/MAX_DETAIL.md`).
+- `r4_pvs.h`: the course visibility list helpers both plugins share.
 - See `psxrecomp/docs/MOD_PACKAGES.md`.

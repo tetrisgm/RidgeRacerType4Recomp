@@ -9,6 +9,7 @@ bundled package on or off without clicking through the launcher.
   tools/mod_state.py build --enable r4.enhancement.widescreen/widescreen aspect=Fit
   tools/mod_state.py build --enable r4.enhancement.widescreen/widescreen aspect=21:9
   tools/mod_state.py build --disable psx.enhancement.pgxp/pgxp   # a default-on feature off
+  tools/mod_state.py build --disable r4.enhancement.max-detail/max-detail
   tools/mod_state.py build --clear          # every feature back to its default
 
 The package version is read from build/mods/bundled/<package>/. Local only:
@@ -35,7 +36,8 @@ def main():
     ap = argparse.ArgumentParser(description=__doc__.split('\n')[0])
     ap.add_argument('build', help='build directory holding the runtime')
     ap.add_argument('--enable', metavar='PACKAGE/FEATURE')
-    ap.add_argument('--disable', metavar='PACKAGE/FEATURE')
+    ap.add_argument('--disable', metavar='PACKAGE/FEATURE',
+                    help='switch a default-on feature off')
     ap.add_argument('--clear', action='store_true')
     ap.add_argument('values', nargs='*', metavar='option=value')
     args = ap.parse_args()

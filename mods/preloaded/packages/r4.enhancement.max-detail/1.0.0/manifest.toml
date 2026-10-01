@@ -1,0 +1,160 @@
+format_version = 7
+id = "r4.enhancement.max-detail"
+version = "1.0.0"
+name = "R4 Max Detail"
+author = "Shokunin"
+description = "Removes R4's distance-based detail reductions: longer draw distance, full course textures and shading at every distance, full car models, and split screen at the 1P level. On by default; every part can be set back to stock."
+license = "MIT"
+resolver = "declarative"
+save_compatibility = "shared"
+
+# The car table writes below are guarded by the stock bytes of the US boot
+# EXE (DISC.md); a different EXE leaves the game unmodified.
+[[target]]
+game_id = "SLUS-00797"
+
+[[feature]]
+id = "max-detail"
+name = "Max Detail"
+description = "On by default. R4 lowers detail with distance to fit the PlayStation's budget; this draws everything at full detail instead. Game logic is unchanged. Netplay always plays stock."
+group = "Detail"
+channel = "experimental"
+default_enabled = true
+
+[[option]]
+feature = "max-detail"
+id = "draw_distance"
+label = "Draw distance"
+description = "Stock drops course polygons past the end of the game's depth table, so far bridges and buildings pop in late. Extended keeps them, drawn behind everything nearer. Maximum also loads the road and scenery of the two track sections ahead and behind, which fills distant stretches the stock game leaves empty; from about 30:9 wide it draws what Extended draws, which keeps the game at full speed."
+group = "Detail"
+type = "choice"
+default = "maximum"
+
+[[option.choice]]
+value = "maximum"
+label = "Maximum (Recommended)"
+
+[[option.choice]]
+value = "extended"
+label = "Extended"
+
+[[option.choice]]
+value = "stock"
+label = "Stock"
+
+[[option]]
+feature = "max-detail"
+id = "course"
+label = "Course detail"
+description = "Always full keeps full-resolution textures and smooth shading on the course at every distance and in the rear-view mirror. Stock switches distant course polygons (and everything in the mirror) to a half-resolution texture with flat shading."
+group = "Detail"
+type = "choice"
+default = "full"
+
+[[option.choice]]
+value = "full"
+label = "Always full (Recommended)"
+
+[[option.choice]]
+value = "stock"
+label = "Stock"
+
+[[option]]
+feature = "max-detail"
+id = "cars"
+label = "Car detail"
+description = "Always full draws every car with its full model (3D wheels, full-resolution texture) out to the normal car draw distance, and the rear-view mirror shows cars as far back as you see them ahead. Stock swaps in simpler models a short way off."
+group = "Detail"
+type = "choice"
+default = "full"
+
+[[option.choice]]
+value = "full"
+label = "Always full (Recommended)"
+
+[[option.choice]]
+value = "stock"
+label = "Stock"
+
+[[option]]
+feature = "max-detail"
+id = "split_screen"
+label = "Split screen"
+description = "Same as 1P gives each half of a two-player race the 1P course subdivision and car models. Stock uses coarser subdivision and closer car model switches in two-player races."
+group = "Detail"
+type = "choice"
+default = "same"
+
+[[option.choice]]
+value = "same"
+label = "Same as 1P (Recommended)"
+
+[[option.choice]]
+value = "stock"
+label = "Stock"
+
+# Car models: 0x8009F228 holds, per view, the distances (s16 T0, T1, T2) up
+# to which the full model, the simpler model and any model is drawn. Rows:
+# 1P, rear-view mirror, TV/replay, 2P, 2P alternate. T2 (8704) is the car
+# draw distance and is never raised: past it R4's car transform overflows
+# and draws far cars huge and misplaced.
+[[patch]]
+feature = "max-detail"
+target = "main_exe"
+address = 0x8009F228
+expected = "a0 02 80 0c 00 22"
+replace = "00 22 00 22 00 22"
+when = { cars = "full" }
+
+[[patch]]
+feature = "max-detail"
+target = "main_exe"
+address = 0x8009F22E
+expected = "ff ff 00 0a 00 10"
+replace = "a0 02 00 22 00 22"
+when = { cars = "full" }
+
+[[patch]]
+feature = "max-detail"
+target = "main_exe"
+address = 0x8009F234
+expected = "00 10 00 20 00 22"
+replace = "00 22 00 22 00 22"
+when = { cars = "full" }
+
+[[patch]]
+feature = "max-detail"
+target = "main_exe"
+address = 0x8009F23A
+expected = "40 01 80 0c 00 22"
+replace = "00 22 00 22 00 22"
+when = { cars = "full" }
+
+[[patch]]
+feature = "max-detail"
+target = "main_exe"
+address = 0x8009F240
+expected = "a0 00 00 0a 00 22"
+replace = "00 22 00 22 00 22"
+when = { cars = "full" }
+
+# Split screen = same as 1P with stock cars: both 2P rows take the 1P row.
+[[patch]]
+feature = "max-detail"
+target = "main_exe"
+address = 0x8009F23A
+expected = "40 01 80 0c 00 22"
+replace = "a0 02 80 0c 00 22"
+when = { cars = "stock", split_screen = "same" }
+
+[[patch]]
+feature = "max-detail"
+target = "main_exe"
+address = 0x8009F240
+expected = "a0 00 00 0a 00 22"
+replace = "a0 02 80 0c 00 22"
+when = { cars = "stock", split_screen = "same" }
+
+[[plugin]]
+feature = "max-detail"
+id = "r4.maxdetail"
