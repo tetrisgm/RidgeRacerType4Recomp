@@ -19,11 +19,12 @@ of the PS1 hardware (GPU, SPU, GTE, MDEC, CD-ROM, pads, memory cards) and the
 real, recompiled PS1 BIOS — no high-level emulation shims.
 
 This repository holds the game-specific configuration, seeds, tools and build
-glue, plus `generated/`: the game's code machine-translated to C, committed so
-that a release can ship the compiled game. It does **not** contain the disc
-image, the game's data, a BIOS dump, or any code derived from a retail BIOS.
-Builds use the MIT-licensed OpenBIOS from PCSX-Redux; bring your own legally
-obtained disc.
+glue, plus `generated/`: the boot EXE's code machine-translated to C,
+committed so that a release can ship the compiled game. The C keeps every
+original MIPS instruction word next to its translation (see License). The
+repository does **not** contain the disc image, the game's data, a BIOS dump,
+or any code derived from a retail BIOS. Builds use the MIT-licensed OpenBIOS
+from PCSX-Redux; bring your own legally obtained disc.
 
 Important files:
 
@@ -106,6 +107,8 @@ follow `psxrecomp/docs/BUILDING.md`.
 ```sh
 git clone --recurse-submodules <this repo> && cd ridgeracertype4
 mkdir -p disc   # put (or symlink) the .cue and .bin here
+# emitters for the dev overlay compiles tools/run_r4.sh sets up
+bash psxrecomp/tools/ci/build_emitters.sh --framework psxrecomp --build-dir build-recompiler
 cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DPSX_DEBUG_TOOLS=ON
 cmake --build build --target psx-runtime
 tools/run_r4.sh build       # straight into the game; or build/r4-runtime for the launcher
@@ -125,13 +128,16 @@ rewrites `generated/`. The recompiled BIOS backends come with the `psxrecomp`
 submodule. Drop `-DPSX_DEBUG_TOOLS=ON` for a build without the TCP debug
 server. The first configure downloads the pinned static SDL3 on macOS (libjuice
 for netplay is vendored). Add `-DR4_BUILD_TESTS=ON` to register the developer
-tests (`tests/`, `tools/`), then run `ctest --test-dir build`.
+tests (`tests/`, `tools/`), then run `ctest --test-dir build`. The
+widescreen cull-site check among them reads the disc's `.bin` in `disc/`; the
+configure warns when it is missing.
 
 Code overlays (R4.BIN menus) compile to native shards in the background only
 when `PSX_OVERLAY_AUTOCOMPILE_CMD` is set; `tools/run_r4.sh` / `run_r4.cmd`
-set it for dev runs, using the emitters in `build-recompiler/` (run
-`tools/regen.sh` once, or `psxrecomp/tools/ci/build_emitters.sh`). Launching
-`build/r4-runtime` directly works, but those menus stay in the interpreter.
+set it for dev runs, using the emitters in `build-recompiler/` (the quick
+start builds them, and so does `tools/regen.sh`; `tools/run_r4.sh` says when
+they are missing). Launching `build/r4-runtime` directly works, but those
+menus stay in the interpreter.
 Release zips ship an `overlay_toolchain/` instead, which is why `game.toml`
 does not carry a dev compile command.
 
@@ -149,9 +155,11 @@ throwaway clone of a commit: `dist/r4-<version>-macos-arm64.zip` and
 `-windows-x64.zip` from an MSYS2 MINGW64 shell. It links the committed
 `generated/` C and only the OpenBIOS backend, packages with psxrecomp's
 `tools/package_game_release.sh` (through `scripts/package_release.sh`), and
-checks every zip: the game, both R4 mods and `overlay_toolchain/` are in it;
-sources, generated C, disc data and BIOS dumps are not. Releases are built
-locally; there is no CI workflow.
+checks every zip: the game, both R4 mods, `overlay_toolchain/` (the two
+emitters, runtime headers and a Python runtime the game compiles overlays
+with) and the third-party notices are in it; R4 and framework sources,
+generated C, emitters at the root, disc data and BIOS images other than
+OpenBIOS are not. Releases are built locally; there is no CI workflow.
 
 ## Configuration
 
@@ -270,8 +278,8 @@ snapshots of the game's code.
 
 - Real recompiled BIOS and hardware simulation; no HLE shims, no stubs, no
   hand-edited `generated/`.
-- Framework fixes go to `psxrecomp`, not here. Resolve dispatch and segment
-  misses first.
+- Framework fixes go to `psxrecomp`, not here. Resolve dispatch misses first
+  (`tools/smoke.py` reports segment misses beside them).
 - Disc images, BIOS dumps, memory cards, Ghidra databases and build outputs
   stay local. `generated/` is committed: regenerate it, never hand-edit it.
   See `CLAUDE.md`.
@@ -281,7 +289,19 @@ snapshots of the game's code.
 MIT for this repository's own code — see `LICENSE`. Files adapted from
 MegaManX6Recomp (listed in `THIRD-PARTY-LICENSES/README.md`) stay under
 PolyForm Noncommercial 1.0.0, and the
-`psxrecomp` and `recomp-ui` submodules carry their own licenses. R4: Ridge Racer Type 4 is © Namco (Bandai Namco
-Entertainment). Neither this repository nor its release zips contain the disc
-image or the game's data and assets; `generated/` and the compiled game are
-the game's code translated by psxrecomp, and need your own disc to run.
+`psxrecomp` and `recomp-ui` submodules carry their own licenses; release zips
+carry their notices in `licenses/` and `assets/`. R4: Ridge Racer Type 4 is
+© Namco (Bandai Namco Entertainment). Neither this repository nor its release
+zips contain the disc image or the game's data (models, textures, audio,
+movies, the `R4.BIN` overlays). Two things in them do come from the game:
+
+- `generated/` is the boot EXE's code translated to C by psxrecomp, and the
+  compiled game is built from it. psxrecomp keeps each original MIPS
+  instruction word beside its translation (in a comment and as an argument
+  to the PGXP hooks), so the EXE's code section can be read back out of
+  `generated/`; its data section is not there.
+- The launcher's box art (`recomp/launcher/boxart.*`, shipped as
+  `assets/img/boxart.tga`) is the game's cover; see
+  `THIRD-PARTY-LICENSES/README.md`.
+
+The compiled game needs your own disc to run.
