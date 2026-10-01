@@ -5,8 +5,10 @@
 # only on a build configured the same way.
 #
 # Ships the COMPILED game built from this repo's committed generated/ C:
-# executable, runtime data, bundled OpenBIOS, mod catalog, overlay toolchain.
-# No sources, emitters, CLI, generated C, or BIOS dumps.
+# executable, runtime data, bundled OpenBIOS, mod catalog, overlay toolchain
+# (overlay_toolchain/: the two emitters, runtime headers, a Python runtime),
+# third-party notices. No R4 or framework sources, no generated C, no CLI, no
+# emitters at the root, no disc data, no BIOS image other than OpenBIOS.
 #
 # Usage:
 #   scripts/package_release.sh <build-dir> <artifact-tag> [recompiler-build-dir]
@@ -52,6 +54,24 @@ for _doc in DISC.md LICENSE; do
 done
 # Third-party notices (box art credit, MegaManX6Recomp), path kept.
 EXTRA+=(--runtime-file THIRD-PARTY-LICENSES/README.md)
+# recomp-ui's notices. r4-runtime links recomp-ui (MIT) and ships its fonts and
+# flag sheet (OFL-1.1, CC BY-SA 4.0), but the framework packager stages only
+# psxrecomp's own notices. Put recomp-ui's beside the exe: the NOTICE.md files
+# travel with assets/, the license goes in as licenses/recomp-ui-LICENSE.
+# tools/package_release.sh requires all three in every zip.
+if [[ -d "${ROOT}/${BUILD_DIR}" ]]; then EXE_DIR="${ROOT}/${BUILD_DIR}"; else EXE_DIR="${BUILD_DIR}"; fi
+UI="${ROOT}/recomp-ui"
+for _f in LICENSE assets/common/fonts/NOTICE.md assets/common/img/NOTICE.md; do
+  [[ -f "${UI}/${_f}" ]] || { echo "error: missing recomp-ui/${_f}" >&2; exit 1; }
+done
+for _d in assets/fonts assets/img; do
+  [[ -d "${EXE_DIR}/${_d}" ]] || { echo "error: ${EXE_DIR}/${_d} missing -- build psx-runtime first" >&2; exit 1; }
+done
+mkdir -p "${EXE_DIR}/licenses"
+cp "${UI}/LICENSE" "${EXE_DIR}/licenses/recomp-ui-LICENSE"
+cp "${UI}/assets/common/fonts/NOTICE.md" "${EXE_DIR}/assets/fonts/NOTICE.md"
+cp "${UI}/assets/common/img/NOTICE.md" "${EXE_DIR}/assets/img/NOTICE.md"
+EXTRA+=(--runtime-file licenses/recomp-ui-LICENSE)
 
 cd "${ROOT}"
 exec bash "${PACKAGER}" \

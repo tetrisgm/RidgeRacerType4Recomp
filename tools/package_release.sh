@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 # Build this platform's bundled release zip(s): the compiled game, built from
-# the committed generated/ C, with no disc data, no BIOS dump, no sources and
-# no emitters at the root. Players unzip, run r4-runtime and pick their disc.
+# the committed generated/ C, with no disc data, no BIOS dump, no R4 or
+# framework sources, no generated C and no emitters at the root
+# (overlay_toolchain/ carries the emitters, runtime headers and a Python).
+# Players unzip, run r4-runtime and pick their disc.
 #
 #   tools/package_release.sh [git-ref]        (default: HEAD)
 #
@@ -177,30 +179,48 @@ done
 for A in "${ARTS[@]}"; do
   Z="dist/r4-$V-$A.zip"
   L="$(python3 -c 'import sys,zipfile; print("\n".join(zipfile.ZipFile(sys.argv[1]).namelist()))' "$Z")"
-  # 1. It is the game: executable, OpenBIOS, runtime data, both R4 mods.
+  # 1. It is the game: executable, OpenBIOS, runtime data, both R4 mods, and
+  #    the notices for everything it carries (recomp-ui's come from
+  #    scripts/package_release.sh).
   for f in "$EXE" psx_game_version.txt bios/openbios.bin bios/OpenBIOS.LICENSE game.toml \
            game_options.toml DISC.md LICENSE README.txt \
-           THIRD-PARTY-LICENSES/README.md "overlay_toolchain/psxrecomp-game$SFX" \
-           "overlay_toolchain/psxrecomp-bios$SFX"; do
+           THIRD-PARTY-LICENSES/README.md licenses/psxrecomp-LICENSE \
+           licenses/recomp-ui-LICENSE assets/fonts/NOTICE.md assets/img/NOTICE.md \
+           "overlay_toolchain/psxrecomp-game$SFX" "overlay_toolchain/psxrecomp-bios$SFX"; do
     grep -qxF -- "$f" <<< "$L" || { echo "missing $f in $Z" >&2; exit 1; }
   done
   for p in assets/fonts/ licenses/ mods/bundled/r4.enhancement.widescreen/ \
            mods/bundled/r4.enhancement.frame-rate/; do
     grep -q "^$p" <<< "$L" || { echo "missing $p in $Z" >&2; exit 1; }
   done
+  # TinyCC (LGPL-2.1, Windows overlay compiler) must ship with its license
+  # (psxrecomp THIRD_PARTY_ATTRIBUTION.md).
+  if grep -q '^overlay_toolchain/tcc/' <<< "$L" &&
+     ! grep -iqE '^overlay_toolchain/tcc/([^/]+/)*[^/]*(copying|licen[cs]e|lgpl)[^/]*$' <<< "$L"; then
+    echo "overlay_toolchain/tcc/ ships without the TinyCC LGPL-2.1 license in $Z" >&2; exit 1
+  fi
   # 2. It is not a build kit: no framework tree, CLI, root emitters, sources,
-  #    generated C, tools or tests.
+  #    generated C, tools or tests. Source-like files are allowed only where the
+  #    toolchain needs them: Python's and TinyCC's own trees, and the runtime
+  #    headers (.h, .c.inc) in overlay_toolchain/include/.
   if grep -E '^(psxrecomp|recomp-ui|generated|seeds|annotations|src|tools|tests|toolchain|ghidra|disc|saves|cache|build[^/]*)/|^(psxrecomp_cli\.py|psxrecomp-game|psxrecomp-bios|CMakeLists\.txt|codegen_setup\.)' <<< "$L"; then
     echo "build-kit content above in $Z" >&2; exit 1
   fi
-  if grep -E '\.(c|h|cpp)$' <<< "$L" | grep -v '^overlay_toolchain/'; then
-    echo "sources above outside overlay_toolchain/ in $Z" >&2; exit 1
+  if grep -iE '\.(c|cc|cpp|h|hpp|inc)$' <<< "$L" \
+       | grep -vE '^overlay_toolchain/(python|tcc)/|^overlay_toolchain/include/[^/]+\.(h|inc)$'; then
+    echo "sources above outside the toolchain's own trees in $Z" >&2; exit 1
   fi
-  # 3. No disc, extracted EXE, BIOS dump, memory card, capture or cheat file;
-  #    the only image is OpenBIOS. BIOS profile TOMLs are text the toolchain needs.
-  if grep -iE '(^|/)SCPH[^/]*$|SLUS_007\.97|\.(cue|iso|img|chd|ccd|sub|mcd|mcr|cht)$|(^|/)(overlay_captures\.json|settings\.toml|bios\.cfg|disc\.cfg|state\.toml)$|^mods/installed/' <<< "$L" \
-       | grep -v '\.toml$' | grep -v '^overlay_toolchain/bios/'; then
+  # 3. No disc, extracted EXE, BIOS dump or BIOS C, memory card, capture or
+  #    cheat file; the only image is OpenBIOS. The BIOS profile TOMLs and seed
+  #    lists the toolchain needs are the only files allowed in
+  #    overlay_toolchain/{bios,recompiler}/, and the only SCPH-named ones.
+  if grep -iE '(^|/)SCPH[^/]*$|SLUS_007\.97|\.(cue|iso|img|chd|ccd|sub|mcd|mcr|cht|rom)$|(^|/)(overlay_captures\.json|settings\.toml|bios\.cfg|disc\.cfg|state\.toml)$|^mods/installed/' <<< "$L" \
+       | grep -vE '^overlay_toolchain/bios/[A-Za-z0-9_-]+\.toml$'; then
     echo "disc / BIOS / per-machine files above in $Z" >&2; exit 1
+  fi
+  if grep -E '^overlay_toolchain/(bios|recompiler)/' <<< "$L" \
+       | grep -vE '^overlay_toolchain/bios/[A-Za-z0-9_-]+\.toml$|^overlay_toolchain/recompiler/seeds/[A-Za-z0-9_-]+\.json$'; then
+    echo "files above in overlay_toolchain/{bios,recompiler}/ are not BIOS profiles or seed lists in $Z" >&2; exit 1
   fi
   if grep -iE '\.bin$' <<< "$L" | grep -vxF bios/openbios.bin; then
     echo "unexpected .bin above in $Z" >&2; exit 1
