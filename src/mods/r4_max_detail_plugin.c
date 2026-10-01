@@ -11,7 +11,14 @@
  *     list (r4_pvs.h, shared with the widescreen plugin);
  *   - car detail: guarded [[patch]] writes in the package manifest; with Car
  *     detail = Stock a VBlank callback puts back the stock rows a save state
- *     made with Always full carried in.
+ *     made with Always full carried in;
+ *   - car reflections: at the env-map car draw's entry (0x80014A90), in a
+ *     live race drawn without a widescreen margin, the game's "off" page (-1)
+ *     becomes the page race init and replays use (10); a view that turns wide
+ *     gets the -1 back;
+ *   - mirror scenery (off by default): the rear-view mirror's course list
+ *     count is read before the mirror's block limit lowers it (0x80071704)
+ *     and put back before the list is used (0x8006EDEC).
  *
  * Everything is inert unless the package is enabled: the entry hooks run
  * only while the resolved mod plan activates this plugin (psxrecomp rebuilds
@@ -24,6 +31,7 @@
 #include "cpu_state.h"
 #include "r4_max_detail.h"
 #include "r4_pvs.h"
+#include "r4_widescreen_scene.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -39,7 +47,7 @@ static int s_hooks_registered;
 #define R4_MD_REGISTER_ENTRY(address, callback) \
     (s_hooks_registered += \
          psx_mod_register_function_entry_plugin(PLUGIN_ID, (address), (callback)))
-#define R4_MD_HOOK_COUNT 4
+#define R4_MD_HOOK_COUNT 7
 
 /* ---- guest layout (US) ------------------------------------------------- */
 #define R4_DRAW_OTAG_FN     0x80093520u   /* trace only */
@@ -64,9 +72,15 @@ static struct {
     uint32_t section, octant;
 } s_pvs;
 static struct {
+    int valid;
+    uint32_t built;   /* the mirror list's count before the limit */
+} s_mirror;
+static int s_env_wrote;   /* the reflection page holds this plugin's write */
+static struct {
     uint32_t frames, course_calls, heap_max, heap_limit_hits;
     uint32_t ot1_max, ot2_max, pvs_frames, pvs_before_max, pvs_after_max, pvs_added;
     uint32_t nsec;
+    uint32_t env_calls, env_writes, env_offs, mirror_lists, mirror_now_max, mirror_after_max;
 } s_stat;
 
 static uint32_t rd32(uint32_t a) { return psx_mod_read_word(a); }
@@ -125,6 +139,67 @@ static void r4_md_pvs_merge(CPUState *cpu, uint32_t address)
         if (m.before > s_stat.pvs_before_max) s_stat.pvs_before_max = m.before;
         if (m.after > s_stat.pvs_after_max) s_stat.pvs_after_max = m.after;
         s_stat.pvs_added += m.after - m.before;
+    }
+}
+
+/* ---- car reflections --------------------------------------------------------- */
+
+/* 0x80014A90 draws one car body part with the environment map, or returns 0
+ * at once when the page word is negative (the caller then draws the plain
+ * mesh). Both of its reads of the page follow this entry with no store in
+ * between, so the part is drawn with the page written here. */
+static void r4_md_env(CPUState *cpu, uint32_t address)
+{
+    (void)cpu;
+    (void)address;
+    if (!s_enabled || !s_opt.reflections) return;
+    if (s_trace) s_stat.env_calls++;
+    uint32_t page = rd32(R4_MD_ENV_TPAGE_ADDR);
+    if ((int32_t)page >= 0 && !s_env_wrote) return;   /* the game's own page */
+    int live = rd32(R4_RACE_PHASE_ADDR) >= 1u && r4_in_race(rd32, rd16);
+    if (!live || (int32_t)page < 0) s_env_wrote = 0;  /* the game set it since */
+    int wide = psx_mod_widescreen_x_margin() > 0;
+    int act = r4_md_reflections_action(s_opt, live, wide, page, s_env_wrote);
+    if (act == R4_MD_ENV_WRITE_ON) {
+        psx_mod_write_word(R4_MD_ENV_TPAGE_ADDR, R4_MD_ENV_TPAGE_RACE);
+        s_env_wrote = 1;
+        if (s_trace) s_stat.env_writes++;
+    } else if (act == R4_MD_ENV_WRITE_OFF) {
+        psx_mod_write_word(R4_MD_ENV_TPAGE_ADDR, 0xFFFFFFFFu);
+        s_env_wrote = 0;
+        if (s_trace) s_stat.env_offs++;
+    }
+}
+
+/* ---- mirror scenery --------------------------------------------------------- */
+
+/* 0x80071704 (the mirror's block limit), called by the mirror draw right
+ * after it built the list: remember the full count. */
+static void r4_md_mirror_limit(CPUState *cpu, uint32_t address)
+{
+    (void)address;
+    s_mirror.valid = 0;
+    if (!s_enabled || !s_opt.mirror_full || cpu->gpr[31] != R4_MD_MIRROR_LIMIT_RA) return;
+    s_mirror.built = rd32(R4_MD_LIST_ADDR);
+    s_mirror.valid = 1;
+}
+
+/* 0x8006EDEC (the list's first consumer), from the mirror draw: put the
+ * count back. The limit wrote only the count word, so the block pointers
+ * past it are still the ones 0x8006EB58 built. */
+static void r4_md_mirror_list(CPUState *cpu, uint32_t address)
+{
+    (void)address;
+    if (!s_enabled || !s_mirror.valid) return;
+    s_mirror.valid = 0;
+    if (cpu->gpr[31] != R4_MD_MIRROR_LIST_RA) return;
+    uint32_t now = rd32(R4_MD_LIST_ADDR);
+    uint32_t want = r4_md_mirror_count(s_opt, s_mirror.built, now);
+    if (want != now) psx_mod_write_word(R4_MD_LIST_ADDR, want);
+    if (s_trace) {
+        s_stat.mirror_lists++;
+        if (now > s_stat.mirror_now_max) s_stat.mirror_now_max = now;
+        if (want > s_stat.mirror_after_max) s_stat.mirror_after_max = want;
     }
 }
 
@@ -200,18 +275,23 @@ static void r4_md_draw_otag(CPUState *cpu, uint32_t address)
         fprintf(stdout,
                 "[r4-md] heap_max=0x%X/0x%X (%u%%) limit_hits=%u ot1_max=%u ot2_max=%u "
                 "course_calls=%u pvs sections=%u before_max=%u after_max=%u added=%u/%u frames "
-                "clamp=%d\n",
+                "clamp=%d env=%u/%u mirror=%u->%u (%u lists) env_off=%u\n",
                 (unsigned)s_stat.heap_max, (unsigned)(R4_BUF_HEAP_END - R4_BUF_HEAP),
                 (unsigned)(100u * s_stat.heap_max / (R4_BUF_HEAP_END - R4_BUF_HEAP)),
                 (unsigned)s_stat.heap_limit_hits, (unsigned)s_stat.ot1_max,
                 (unsigned)s_stat.ot2_max, (unsigned)s_stat.course_calls,
                 (unsigned)s_stat.nsec, (unsigned)s_stat.pvs_before_max,
                 (unsigned)s_stat.pvs_after_max, (unsigned)s_stat.pvs_added,
-                (unsigned)s_stat.pvs_frames, psx_mod_draw_distance_clamp_enabled());
+                (unsigned)s_stat.pvs_frames, psx_mod_draw_distance_clamp_enabled(),
+                (unsigned)s_stat.env_writes, (unsigned)s_stat.env_calls,
+                (unsigned)s_stat.mirror_now_max, (unsigned)s_stat.mirror_after_max,
+                (unsigned)s_stat.mirror_lists, (unsigned)s_stat.env_offs);
         fflush(stdout);
         s_stat.heap_max = s_stat.ot1_max = s_stat.ot2_max = s_stat.course_calls = 0;
         s_stat.pvs_before_max = s_stat.pvs_after_max = 0;
         s_stat.pvs_added = s_stat.pvs_frames = 0;
+        s_stat.env_calls = s_stat.env_writes = s_stat.env_offs = 0;
+        s_stat.mirror_lists = s_stat.mirror_now_max = s_stat.mirror_after_max = 0;
     }
 }
 
@@ -224,19 +304,23 @@ static void r4_md_option(const char *id, char *out, size_t cap)
 
 static void r4_max_detail_activate(void)
 {
-    char draw[16], course[16], cars[16], split[16];
+    char draw[16], course[16], cars[16], split[16], reflections[16], mirror[16];
     const char *env = getenv("R4_MD_TRACE");
     s_trace = env && env[0] == '1';
     env = getenv("R4_MD_SECTIONS");
     s_sections_override = env ? atoi(env) : -1;
     memset(&s_pvs, 0, sizeof s_pvs);
+    memset(&s_mirror, 0, sizeof s_mirror);
+    s_env_wrote = 0;
     memset(&s_stat, 0, sizeof s_stat);
     s_car_restore_logged = 0;
     r4_md_option("draw_distance", draw, sizeof draw);
     r4_md_option("course", course, sizeof course);
     r4_md_option("cars", cars, sizeof cars);
     r4_md_option("split_screen", split, sizeof split);
-    s_opt = r4_md_options(draw, course, cars, split);
+    r4_md_option("reflections", reflections, sizeof reflections);
+    r4_md_option("mirror", mirror, sizeof mirror);
+    s_opt = r4_md_options(draw, course, cars, split, reflections, mirror);
     s_clamp_available = psx_mod_set_draw_distance_clamp(r4_md_clamp_on(s_opt));
     s_enabled = 1;
     if (r4_md_clamp_on(s_opt) && !s_clamp_available)
@@ -245,9 +329,10 @@ static void r4_max_detail_activate(void)
     if (s_hooks_registered != R4_MD_HOOK_COUNT)
         fprintf(stderr, "[r4-md] only %d of %d entry hooks registered\n",
                 s_hooks_registered, R4_MD_HOOK_COUNT);
-    fprintf(stdout, "[r4-md] active: draw=%d course=%d cars=%d split=%d clamp=%d\n",
+    fprintf(stdout, "[r4-md] active: draw=%d course=%d cars=%d split=%d reflections=%d "
+                    "mirror=%d clamp=%d\n",
             (int)s_opt.draw, s_opt.course_full, s_opt.cars_full, s_opt.split_same,
-            psx_mod_draw_distance_clamp_enabled());
+            s_opt.reflections, s_opt.mirror_full, psx_mod_draw_distance_clamp_enabled());
     fflush(stdout);
 }
 
@@ -257,6 +342,9 @@ PSX_MOD_CONSTRUCTOR(r4_register_max_detail)
     R4_MD_REGISTER_ENTRY(R4_PVS_OCTANT_FN, r4_md_pvs_octant);
     R4_MD_REGISTER_ENTRY(R4_PVS_MERGE_FN, r4_md_pvs_merge);
     R4_MD_REGISTER_ENTRY(R4_DRAW_OTAG_FN, r4_md_draw_otag);
+    R4_MD_REGISTER_ENTRY(R4_MD_ENV_RENDER_FN, r4_md_env);
+    R4_MD_REGISTER_ENTRY(R4_MD_MIRROR_LIMIT_FN, r4_md_mirror_limit);
+    R4_MD_REGISTER_ENTRY(R4_MD_MIRROR_LIST_FN, r4_md_mirror_list);
     (void)psx_mod_register_activation_plugin(PLUGIN_ID, r4_max_detail_activate);
     (void)psx_mod_register_vblank_plugin(PLUGIN_ID, r4_md_vblank);
 }

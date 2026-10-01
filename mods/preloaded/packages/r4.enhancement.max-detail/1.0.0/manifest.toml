@@ -3,7 +3,7 @@ id = "r4.enhancement.max-detail"
 version = "1.0.0"
 name = "R4 Max Detail"
 author = "Shokunin"
-description = "Removes R4's distance-based detail reductions: longer draw distance, full course textures and shading at every distance, full car models, and split screen at the 1P level. On by default; every part can be set back to stock."
+description = "Removes R4's distance-based detail reductions: longer draw distance, full course textures and shading at every distance, full car models, split screen at the 1P level and reflective cars in races, plus an optional full rear-view mirror. On by default; every part can be set back to stock."
 license = "MIT"
 resolver = "declarative"
 save_compatibility = "shared"
@@ -92,6 +92,42 @@ label = "Same as 1P (Recommended)"
 [[option.choice]]
 value = "stock"
 label = "Stock"
+
+[[option]]
+feature = "max-detail"
+id = "reflections"
+label = "Car reflections"
+description = "On gives the cars their reflective bodies during the race too, as in the fly-by, replays and the attract demo. Stock turns them off from the start signal to the finish line, as R4 does on a PS1. For now On applies only to 4:3 views: widened views keep Stock, because the widescreen renderer draws the reflective parts many times slower."
+group = "Detail"
+type = "choice"
+default = "on"
+
+[[option.choice]]
+value = "on"
+label = "On (Recommended)"
+
+[[option.choice]]
+value = "stock"
+label = "Stock"
+
+# Off by default (owner decision, 2026-10-01): it costs the emulated PS1
+# the most time of anything in this package (docs/MAX_DETAIL.md).
+[[option]]
+feature = "max-detail"
+id = "mirror"
+label = "Mirror scenery"
+description = "Full draws all the scenery behind you in the rear-view mirror. Stock draws only the nearest few track blocks there, as on a PS1. Full takes the emulated PlayStation longer each frame, and with a full grid of cars around it can drop below 30 FPS."
+group = "Detail"
+type = "choice"
+default = "stock"
+
+[[option.choice]]
+value = "stock"
+label = "Stock (Recommended)"
+
+[[option.choice]]
+value = "full"
+label = "Full"
 
 # Car models: 0x8009F228 holds, per view, the distances (s16 T0, T1, T2) up
 # to which the full model, the simpler model and any model is drawn. Rows:

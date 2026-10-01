@@ -17,16 +17,20 @@ It also ties the plugin's guest constants to the game's own code: the
 course visibility lookup at 0x8006F5AC indexes its table as
 table[section * 8 + octant] (`sll s0,s0,3; addu s0,s0,v0`), which is
 R4_PVS_COLUMNS in src/mods/r4_pvs.h, and the octant and course-list hooks
-gate on return addresses that must follow their `jal`s.
+gate on return addresses that must follow their `jal`s. The same holds
+for the car-reflection hook (the env-map car draw reads the page word that
+the setter writes) and the rear-view mirror's limit and list hooks.
 
   tools/r4_detail_scan.py --emit-toml          print the [[draw_distance.clamp]] block
   tools/r4_detail_scan.py --check game.toml    game.toml, the manifest and the
                                                plugin's guest layout match the EXE
   tools/r4_detail_scan.py --check-manifest     the manifest alone (no disc): the
-                                               package is on by default with the
-                                               most detail, every option has Stock,
-                                               and the car patches are exactly the
-                                               car tables in r4_max_detail.h
+                                               package is on by default, every
+                                               option has Stock and the owner's
+                                               default (the most detail, except
+                                               Mirror scenery: Stock), and the
+                                               car patches are exactly the car
+                                               tables in r4_max_detail.h
 
 The EXE comes from disc/SLUS_007.97 or, without it, from the disc image's
 root directory (tools/r4_ws_scan.py's reader). Exit status 0 = consistent.
@@ -59,6 +63,13 @@ EXPECTED_SITES = 18
 CAR_TABLE = 0x8009F228
 CAR_ROWS = 5
 CAR_CULL = 8704
+
+# r4_max_detail.h entry hooks game.toml must list (besides the course renderer).
+HOOK_DEFINES = (
+    ('R4_MD_ENV_RENDER_FN', 'the env-map car part draw (car reflections)'),
+    ('R4_MD_MIRROR_LIMIT_FN', "the rear-view mirror's block limit (mirror scenery)"),
+    ('R4_MD_MIRROR_LIST_FN', "the mirror list's first consumer (mirror scenery)"),
+)
 
 
 def beqz(w, reg):
@@ -143,9 +154,12 @@ def check_game_toml(sites, path):
                       f'({len(have)} listed, {len(want)} found); '
                       'regenerate with tools/r4_detail_scan.py --emit-toml')
     hooks = [int(x, 16) for x in cfg.get('recompiler', {}).get('mod_function_entry_funcs', [])]
-    if RENDERERS[0] not in hooks:
-        errors.append(f'{path}: mod_function_entry_funcs lacks the course renderer '
-                      f'0x{RENDERERS[0]:08X} (R4 Max Detail course hook)')
+    need = [(RENDERERS[0], 'the course renderer (course hook)')]
+    need += [(c_define(MD_H, name), what) for name, what in HOOK_DEFINES]
+    for a, what in need:
+        if a not in hooks:
+            errors.append(f'{path}: mod_function_entry_funcs lacks 0x{a:08X}, '
+                          f'{what} (R4 Max Detail)')
     return errors
 
 
@@ -212,6 +226,53 @@ def jal(target):
     return 0x0C000000 | ((target & 0x0FFFFFFF) >> 2)
 
 
+def lui_lo(addr):
+    """(%hi, %lo) as a lui / signed-offset pair reaches `addr`."""
+    return ((addr + 0x8000) >> 16) & 0xFFFF, addr & 0xFFFF
+
+
+def md_layout():
+    """r4_max_detail.h's reflection and mirror constants, as instruction words
+    the game must hold at those addresses."""
+    env_fn = c_define(MD_H, 'R4_MD_ENV_RENDER_FN')
+    page = c_define(MD_H, 'R4_MD_ENV_TPAGE_ADDR')
+    race_page = c_define(MD_H, 'R4_MD_ENV_TPAGE_RACE')
+    lim_fn = c_define(MD_H, 'R4_MD_MIRROR_LIMIT_FN')
+    lim_ra = c_define(MD_H, 'R4_MD_MIRROR_LIMIT_RA')
+    list_fn = c_define(MD_H, 'R4_MD_MIRROR_LIST_FN')
+    list_ra = c_define(MD_H, 'R4_MD_MIRROR_LIST_RA')
+    lst = c_define(MD_H, 'R4_MD_LIST_ADDR')
+    if lst != c_define(PVS_H, 'R4_PVS_LIST_ADDR'):
+        raise SystemExit(f'{MD_H}: R4_MD_LIST_ADDR is not r4_pvs.h R4_PVS_LIST_ADDR')
+    ph, pl = lui_lo(page)
+    lh, ll = lui_lo(lst)
+    setter = env_fn - 0x0C
+    return [
+        # setter(a0): lui v0,%hi(page); jr ra; sw a0,%lo(page)(v0)
+        (setter + 0x00, 0x3C020000 | ph, f'lui v0,%hi(0x{page:08X}) (R4_MD_ENV_TPAGE_ADDR)'),
+        (setter + 0x08, 0xAC440000 | pl, f'sw a0,%lo(0x{page:08X})(v0)'),
+        # the env-map draw reads the page twice: bgez at entry+0x34, the tpage at +0x58
+        (env_fn + 0x28, 0x3C110000 | ph, f'lui s1,%hi(0x{page:08X})'),
+        (env_fn + 0x2C, 0x8E220000 | pl, f'lw v0,%lo(0x{page:08X})(s1)'),
+        (env_fn + 0x34, 0x04410003, 'bgez v0 (draw only with a page >= 0)'),
+        (env_fn + 0x58, 0x8E240000 | pl, f'lw a0,%lo(0x{page:08X})(s1)'),
+        # race init, the after-goal run and replays set the race page themselves
+        (0x8003D3E0, jal(setter), 'jal setter (race init)'),
+        (0x8003D3E4, 0x24040000 | race_page, f'addiu a0,zero,{race_page} (R4_MD_ENV_TPAGE_RACE)'),
+        (0x8005EB78, jal(setter), 'jal setter (replay / attract frame)'),
+        (0x8005EB7C, 0x24040000 | race_page, f'addiu a0,zero,{race_page}'),
+        # the mirror draw: list built, limit, count lowered, GTE set-up, consumer
+        (lim_ra - 0x10, jal(0x8006EB58), 'jal 0x8006EB58 (mirror list build)'),
+        (lim_ra - 0x08, jal(lim_fn), f'jal 0x{lim_fn:08X} (R4_MD_MIRROR_LIMIT_RA - 8)'),
+        (lim_ra + 0x00, 0x3C040000 | lh, f'lui a0,%hi(0x{lst:08X})'),
+        (lim_ra + 0x04, 0x8C830000 | ll, f'lw v1,%lo(0x{lst:08X})(a0) (the count)'),
+        (lim_ra + 0x0C, 0x0043182B, 'sltu v1,v0,v1'),
+        (lim_ra + 0x18, 0xAC820000 | ll, f'sw v0,%lo(0x{lst:08X})(a0) (only the count)'),
+        (lim_ra + 0x1C, jal(0x8006EF88), 'jal 0x8006EF88 (GTE set-up)'),
+        (list_ra - 0x08, jal(list_fn), f'jal 0x{list_fn:08X} (R4_MD_MIRROR_LIST_RA - 8)'),
+    ]
+
+
 def check_guest_layout(seg):
     """The course visibility lookup at 0x8006F5AC and the hooks' return-address
     gates, as the plugin and r4_pvs.h encode them."""
@@ -244,11 +305,12 @@ def check_guest_layout(seg):
     ]
     want += [(ra - 0x08, jal(merge_fn), f'jal 0x{merge_fn:08X} (R4_PVS_MERGE_RA - 8)')
              for ra in merge_ras]
+    want += md_layout()
     for a, w, what in want:
         got = seg.word(a)
         if got != w:
             errors.append(f'0x{a:08X}: expected `{what}` = 0x{w:08X}, the EXE holds '
-                          f'0x{got:08X}; r4_pvs.h disagrees with the game')
+                          f'0x{got:08X}; r4_pvs.h or r4_max_detail.h disagrees with the game')
     return errors
 
 
@@ -256,10 +318,11 @@ def check_guest_layout(seg):
 
 FEATURE = 'max-detail'
 PLUGIN_ID = 'r4.maxdetail'
-# Owner decision (2026-10-01): on by default, every option at its most detail,
-# and every option can be set back to stock.
+# Owner decisions (2026-10-01): on by default with every option at its most
+# detail, Car reflections on ("On in races"), Mirror scenery off ("Separate
+# option, off"); every option can be set back to stock.
 DEFAULTS = {'draw_distance': 'maximum', 'course': 'full', 'cars': 'full',
-            'split_screen': 'same'}
+            'split_screen': 'same', 'reflections': 'on', 'mirror': 'stock'}
 
 
 def row_bytes(row):
@@ -300,7 +363,7 @@ def check_manifest_policy(path):
         values = [c.get('value') for c in o.get('choice', [])]
         if o.get('default') != want:
             errors.append(f'{path}: option {oid} defaults to {o.get("default")!r}, '
-                          f'expected {want!r} (the most detail)')
+                          f'expected {want!r} (owner decision)')
         if not values or values[0] != want or 'stock' not in values:
             errors.append(f'{path}: option {oid} choices {values} must list {want!r} '
                           "first and offer 'stock'")
@@ -338,8 +401,8 @@ def main():
             print('FAIL:', e, file=sys.stderr)
         if errors:
             return 1
-        print('r4_detail_scan: the manifest is on by default at the most detail, '
-              'and its car patches match r4_max_detail.h')
+        print('r4_detail_scan: the manifest is on by default with the owner\'s '
+              'option defaults, and its car patches match r4_max_detail.h')
         return 0
     seg, _md5 = ws.load_exe(args.exe, ws.default_bin_image())
     sites = scan(seg)
@@ -369,8 +432,8 @@ def main():
         print('FAIL:', e, file=sys.stderr)
     if errors:
         return 1
-    print(f'r4_detail_scan: {len(sites)} clamp sites, the car-table patches and the '
-          'course-list lookup match the EXE')
+    print(f'r4_detail_scan: {len(sites)} clamp sites, the car-table patches, the '
+          'course-list lookup and the reflection and mirror hooks match the EXE')
     return 0
 
 

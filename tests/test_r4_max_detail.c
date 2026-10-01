@@ -11,8 +11,11 @@
  *     plugin id, inert before activation, the draw-distance clamp switch per
  *     option, the course renderer writes, the course-list union only at
  *     Maximum, only below about 30:9 and only from the course draw paths
- *     (both return-address gates), and the car table put back to Stock after
- *     a save state made with Always full.
+ *     (both return-address gates), the car table put back to Stock after
+ *     a save state made with Always full, car reflections (only over the
+ *     game's "off" page and only in a live race) and mirror scenery (the
+ *     mirror list's count put back, only between the mirror draw's two
+ *     return-address gates).
  *
  * Build/run: ctest -R r4_max_detail */
 #include <stdio.h>
@@ -23,6 +26,7 @@
 #include "mod_plugins.h"
 #include "r4_max_detail.h"
 #include "r4_pvs.h"
+#include "r4_widescreen_scene.h"
 
 static int failures;
 #define CHECK(c, m) do { if (!(c)) { fprintf(stderr, "FAIL: %s\n", m); failures++; } } while (0)
@@ -80,12 +84,13 @@ int psx_mod_register_vblank_plugin(const char *id, PSXModVBlankCallback cb) {
     s_vblank = cb;
     return 1;
 }
-static const char *s_options[4][2];   /* option id, value (NULL = unset) */
+#define NOPTS 6
+static const char *s_options[NOPTS][2];   /* option id, value (NULL = unset) */
 int psx_mod_option_value(const char *pkg, const char *feature, const char *option,
                          char *out, uint32_t out_size) {
     if (strcmp(pkg, "r4.enhancement.max-detail") != 0 || strcmp(feature, "max-detail") != 0)
         return 0;
-    for (int i = 0; i < 4; i++)
+    for (int i = 0; i < NOPTS; i++)
         if (s_options[i][0] && strcmp(s_options[i][0], option) == 0 && s_options[i][1]) {
             snprintf(out, out_size, "%s", s_options[i][1]);
             return 1;
@@ -105,12 +110,20 @@ static PSXModFunctionEntryCallback hook(uint32_t addr) {
         if (s_hooks[i].addr == addr) return s_hooks[i].cb;
     return NULL;
 }
+/* The four distance options; Car reflections and Mirror scenery unset
+ * (their defaults: on, stock) unless set_extra() follows. */
 static void set_options(const char *draw, const char *course, const char *cars,
                         const char *split) {
     s_options[0][0] = "draw_distance"; s_options[0][1] = draw;
     s_options[1][0] = "course";        s_options[1][1] = course;
     s_options[2][0] = "cars";          s_options[2][1] = cars;
     s_options[3][0] = "split_screen";  s_options[3][1] = split;
+    s_options[4][0] = "reflections";   s_options[4][1] = NULL;
+    s_options[5][0] = "mirror";        s_options[5][1] = NULL;
+}
+static void set_extra(const char *reflections, const char *mirror) {
+    s_options[4][1] = reflections;
+    s_options[5][1] = mirror;
 }
 
 /* ---- a mock course: NSEC sections x 8 octants ---------------------------- */
@@ -176,30 +189,70 @@ static void old_ws_merge(uint32_t section, uint32_t octant, int reach) {
 
 /* ---- pure helpers -------------------------------------------------------- */
 static void test_options(void) {
-    R4MdOptions o = r4_md_options(NULL, NULL, NULL, NULL);
+    R4MdOptions o = r4_md_options(NULL, NULL, NULL, NULL, NULL, NULL);
     CHECK(o.draw == R4_MD_DRAW_MAXIMUM && o.course_full && o.cars_full && o.split_same,
           "unset options keep the most detail");
-    o = r4_md_options("bogus", "", "x", "?");
+    CHECK(o.reflections && !o.mirror_full,
+          "unset: car reflections on, mirror scenery stock (owner defaults)");
+    o = r4_md_options("bogus", "", "x", "?", "maybe", "on");
     CHECK(o.draw == R4_MD_DRAW_MAXIMUM && o.course_full && o.cars_full && o.split_same,
           "unknown values keep the most detail");
-    o = r4_md_options("stock", "stock", "stock", "stock");
-    CHECK(o.draw == R4_MD_DRAW_STOCK && !o.course_full && !o.cars_full && !o.split_same,
+    CHECK(o.reflections && !o.mirror_full,
+          "unknown values keep the defaults: reflections on, mirror stock");
+    o = r4_md_options("stock", "stock", "stock", "stock", "stock", "stock");
+    CHECK(o.draw == R4_MD_DRAW_STOCK && !o.course_full && !o.cars_full && !o.split_same &&
+              !o.reflections && !o.mirror_full,
           "all stock");
     CHECK(!r4_md_clamp_on(o) && r4_md_section_reach(o) == 0 && !r4_md_course_hook_active(o),
           "stock does nothing");
-    o = r4_md_options("extended", "full", "full", "same");
+    o = r4_md_options(NULL, NULL, NULL, NULL, "on", "full");
+    CHECK(o.reflections && o.mirror_full, "reflections on, mirror full");
+    o = r4_md_options("extended", "full", "full", "same", NULL, NULL);
     CHECK(o.draw == R4_MD_DRAW_EXTENDED && r4_md_clamp_on(o) && r4_md_section_reach(o) == 0,
           "extended: clamp only");
-    o = r4_md_options("maximum", "stock", "stock", "same");
+    o = r4_md_options("maximum", "stock", "stock", "same", NULL, NULL);
     CHECK(r4_md_clamp_on(o) && r4_md_section_reach(o) == 2 && r4_md_course_hook_active(o),
           "maximum: clamp and two sections; split alone runs the course hook");
     CHECK(r4_md_section_reach_for(o, 0) == 2 && r4_md_section_reach_for(o, 1) == 2,
           "two sections from 4:3 to just under 30:9");
     CHECK(r4_md_section_reach_for(o, 2) == 0 && r4_md_section_reach_for(o, 3) == 0,
           "no sections from about 30:9, in 1P and 2P (PS1 frame budget)");
-    o = r4_md_options("extended", "full", "full", "same");
+    o = r4_md_options("extended", "full", "full", "same", NULL, NULL);
     CHECK(r4_md_section_reach_for(o, 0) == 0 && r4_md_section_reach_for(o, 1) == 0,
           "extended never adds sections");
+
+    /* Car reflections: only over the game's "off" page, only in a live race,
+     * only without a widescreen margin; a wide view takes back our own write. */
+    o = r4_md_options(NULL, NULL, NULL, NULL, NULL, NULL);
+    CHECK(r4_md_reflections_action(o, 1, 0, 0xFFFFFFFFu, 0) == R4_MD_ENV_WRITE_ON,
+          "race, 4:3, page -1: write the race page");
+    CHECK(r4_md_reflections_action(o, 0, 0, 0xFFFFFFFFu, 0) == 0,
+          "not a race (menus set -1 too): no");
+    CHECK(r4_md_reflections_action(o, 1, 0, 10u, 0) == 0 &&
+              r4_md_reflections_action(o, 1, 0, 25u, 0) == 0 &&
+              r4_md_reflections_action(o, 1, 0, 0u, 0) == 0 &&
+              r4_md_reflections_action(o, 1, 1, 10u, 0) == 0,
+          "a page the game set itself is never touched, 4:3 or wide");
+    CHECK(r4_md_reflections_action(o, 1, 0, 10u, 1) == 0, "our page in 4:3 stays");
+    CHECK(r4_md_reflections_action(o, 1, 1, 0xFFFFFFFFu, 0) == 0,
+          "wide view: reflections stay stock (native-wide cost)");
+    CHECK(r4_md_reflections_action(o, 1, 1, 10u, 1) == R4_MD_ENV_WRITE_OFF,
+          "the view turned wide: our page is taken back");
+    CHECK(r4_md_reflections_action(o, 0, 1, 10u, 1) == 0,
+          "outside a live race our earlier write is the game's business");
+    o = r4_md_options(NULL, NULL, NULL, NULL, "stock", NULL);
+    CHECK(r4_md_reflections_action(o, 1, 0, 0xFFFFFFFFu, 0) == 0 &&
+              r4_md_reflections_action(o, 1, 1, 10u, 1) == 0,
+          "reflections stock: never");
+
+    /* Mirror scenery: put back the built count, never more than 255. */
+    o = r4_md_options(NULL, NULL, NULL, NULL, NULL, NULL);
+    CHECK(r4_md_mirror_count(o, 14u, 5u) == 5u, "mirror stock: the limit stays");
+    o = r4_md_options(NULL, NULL, NULL, NULL, NULL, "full");
+    CHECK(r4_md_mirror_count(o, 14u, 5u) == 14u, "mirror full: the built count");
+    CHECK(r4_md_mirror_count(o, 5u, 5u) == 5u && r4_md_mirror_count(o, 4u, 9u) == 9u,
+          "a count the limit did not lower stays");
+    CHECK(r4_md_mirror_count(o, 256u, 5u) == 5u, "an implausible count is ignored");
 }
 
 static void test_car_tables(void) {
@@ -324,13 +377,49 @@ static void course_draw(uint32_t section, uint32_t octant, uint32_t merge_ra) {
     hook(0x8007166Cu)(&s_cpu, 0x8007166Cu);
 }
 
+/* A frame handler from the race predicate (r4_widescreen_scene.h): state
+ * (major 1, minor 7) -> a handler row at 0x80120000 -> `handler`, whose first
+ * two words are w0, w1 (0, 0 for EXE handlers), at race phase `phase`. */
+static void race_scene(uint32_t handler, uint32_t w0, uint32_t w1, uint32_t phase) {
+    psx_mod_write_half(R4_STATE_MAJOR_ADDR, 1u);
+    psx_mod_write_half(R4_STATE_MINOR_ADDR, 7u);
+    psx_mod_write_word(R4_HANDLER_TABLE_ADDR + 4u, 0x80120000u);
+    psx_mod_write_word(0x80120000u + 4u * 7u, handler);
+    if (w0) {
+        psx_mod_write_word(handler, w0);
+        psx_mod_write_word(handler + 4u, w1);
+    }
+    psx_mod_write_word(R4_RACE_PHASE_ADDR, phase);
+}
+
+static void env_draw(void) {
+    s_cpu.gpr[31] = 0x8002E21Cu;
+    hook(0x80014A90u)(&s_cpu, 0x80014A90u);
+}
+
+/* The mirror draw 0x8006F0C8: the list holds its built count; the limit is
+ * entered (ra 0x8006F0FC), the game lowers the count to `limit`, then the
+ * first consumer is entered (ra 0x8006F128). */
+static void mirror_draw_ra(uint32_t limit, uint32_t limit_ra, uint32_t list_ra) {
+    s_cpu.gpr[31] = limit_ra;
+    hook(0x80071704u)(&s_cpu, 0x80071704u);
+    if (limit < rd32(R4_MD_LIST_ADDR)) psx_mod_write_word(R4_MD_LIST_ADDR, limit);
+    s_cpu.gpr[31] = list_ra;
+    hook(0x8006EDECu)(&s_cpu, 0x8006EDECu);
+}
+static void mirror_draw(uint32_t limit) {
+    mirror_draw_ra(limit, 0x8006F0FCu, 0x8006F128u);
+}
+
 static void test_plugin(void) {
     CHECK(strcmp(s_activation_id, "r4.maxdetail") == 0 && s_activate, "activation registered");
-    CHECK(s_nhooks == 4, "four entry hooks");
+    CHECK(s_nhooks == 7, "seven entry hooks");
     for (int i = 0; i < s_nhooks; i++)
         CHECK(strcmp(s_hooks[i].id, "r4.maxdetail") == 0, "hooks belong to r4.maxdetail");
     CHECK(hook(0x80060F94u) && hook(0x8006F584u) && hook(0x8007166Cu) && hook(0x80093520u),
           "hooks: course renderer, octant, course list, DrawOTag");
+    CHECK(hook(0x80014A90u) && hook(0x80071704u) && hook(0x8006EDECu),
+          "hooks: env-map car draw, mirror limit, mirror list consumer");
 
     /* Before activation every hook is inert. */
     build_course(2);
@@ -344,6 +433,14 @@ static void test_plugin(void) {
     CHECK(s_spad_writes == 0 && rd16(R4_MD_COURSE_FAR_ADDR) == 5120u &&
               rd32(R4_PVS_LIST_ADDR) == 2u,
           "inactive: nothing written");
+    race_scene(0x80114A38u, 0x27BDFFC8u, 0x3C03800Fu, 2u);
+    psx_mod_write_word(R4_MD_ENV_TPAGE_ADDR, 0xFFFFFFFFu);
+    env_draw();
+    CHECK(rd32(R4_MD_ENV_TPAGE_ADDR) == 0xFFFFFFFFu, "inactive: reflections untouched");
+    psx_mod_write_word(R4_MD_LIST_ADDR, 12u);
+    mirror_draw(5u);
+    CHECK(rd32(R4_MD_LIST_ADDR) == 5u, "inactive: the mirror limit stands");
+    load_list(5, 0, 2);
     put_car_table(r4_md_car_lod_full);
     s_ram_half_writes = 0;
     if (s_vblank) s_vblank();
@@ -420,6 +517,7 @@ static void test_plugin(void) {
 
     /* Stock everything: the hooks leave the game alone. */
     set_options("stock", "stock", "stock", "stock");
+    set_extra("stock", "stock");
     s_activate();
     CHECK(s_clamp == 0, "stock: clamp off");
     psx_mod_write_half(R4_MD_COURSE_FAR_ADDR, 5120u);
@@ -431,6 +529,13 @@ static void test_plugin(void) {
     CHECK(s_spad_writes == 0 && rd16(R4_MD_COURSE_FAR_ADDR) == 5120u &&
               rd16(R4_MD_COURSE_2P_ADDR) == 1u && rd32(R4_PVS_LIST_ADDR) == 2u,
           "stock: course values and list untouched");
+    race_scene(0x80114A38u, 0x27BDFFC8u, 0x3C03800Fu, 2u);
+    psx_mod_write_word(R4_MD_ENV_TPAGE_ADDR, 0xFFFFFFFFu);
+    env_draw();
+    psx_mod_write_word(R4_MD_LIST_ADDR, 12u);
+    mirror_draw(5u);
+    CHECK(rd32(R4_MD_ENV_TPAGE_ADDR) == 0xFFFFFFFFu && rd32(R4_MD_LIST_ADDR) == 5u,
+          "stock: no reflections in the race, the mirror limit stands");
 
     /* Split screen alone. */
     set_options("stock", "stock", "stock", "same");
@@ -461,6 +566,131 @@ static void test_plugin(void) {
     /* The trace hook is inert without R4_MD_TRACE. */
     s_cpu.gpr[4] = 0x800ADCA0u + 0xB6Cu;
     hook(0x80093520u)(&s_cpu, 0x80093520u);
+}
+
+/* ---- car reflections ---------------------------------------------------------- */
+static void test_reflections(void) {
+    set_options(NULL, NULL, NULL, NULL);
+    s_activate();
+    /* The Grand Prix race handler (overlay 659), racing. */
+    race_scene(0x80114A38u, 0x27BDFFC8u, 0x3C03800Fu, 2u);
+    psx_mod_write_word(R4_MD_ENV_TPAGE_ADDR, 0xFFFFFFFFu);
+    env_draw();
+    CHECK(rd32(R4_MD_ENV_TPAGE_ADDR) == 10u, "default, live race: the race page");
+    env_draw();
+    CHECK(rd32(R4_MD_ENV_TPAGE_ADDR) == 10u, "and it stays (one write per race)");
+    /* Time Attack (660) and VS (661) race handlers, countdown and racing. */
+    race_scene(0x8011729Cu, 0x3C04800Fu, 0x3C038010u, 1u);
+    psx_mod_write_word(R4_MD_ENV_TPAGE_ADDR, 0xFFFFFFFFu);
+    env_draw();
+    CHECK(rd32(R4_MD_ENV_TPAGE_ADDR) == 10u, "Time Attack: on");
+    race_scene(0x80114C30u, 0x3C04800Fu, 0x3C038010u, 3u);
+    psx_mod_write_word(R4_MD_ENV_TPAGE_ADDR, 0xFFFFFFFFu);
+    env_draw();
+    CHECK(rd32(R4_MD_ENV_TPAGE_ADDR) == 10u, "VS split screen: on");
+    /* The game's own pages are left alone. */
+    psx_mod_write_word(R4_MD_ENV_TPAGE_ADDR, 25u);
+    env_draw();
+    CHECK(rd32(R4_MD_ENV_TPAGE_ADDR) == 25u, "a page >= 0 is the game's");
+    /* Not a live race: a menu handler, the finish and results (phase 4+), or
+     * another overlay at the race handler's address. */
+    race_scene(0x80118A68u, 0x27BDFFD0u, 0x3C048012u, 2u);
+    psx_mod_write_word(R4_MD_ENV_TPAGE_ADDR, 0xFFFFFFFFu);
+    env_draw();
+    CHECK(rd32(R4_MD_ENV_TPAGE_ADDR) == 0xFFFFFFFFu, "a menu that set -1 stays off");
+    race_scene(0x80114A38u, 0x27BDFFC8u, 0x3C03800Fu, 4u);
+    env_draw();
+    CHECK(rd32(R4_MD_ENV_TPAGE_ADDR) == 0xFFFFFFFFu, "phase 4 (finish, results): untouched");
+    race_scene(0x80114A38u, 0x8011555Cu, 0x8011568Cu, 2u);
+    env_draw();
+    CHECK(rd32(R4_MD_ENV_TPAGE_ADDR) == 0xFFFFFFFFu,
+          "another overlay resident at the handler address: untouched");
+    /* The fly-by (phase 0) is the game's: it sets 10 itself. */
+    race_scene(0x80114A38u, 0x27BDFFC8u, 0x3C03800Fu, 0u);
+    psx_mod_write_word(R4_MD_ENV_TPAGE_ADDR, 0xFFFFFFFFu);
+    env_draw();
+    CHECK(rd32(R4_MD_ENV_TPAGE_ADDR) == 0xFFFFFFFFu, "phase 0 (fly-by): untouched");
+    /* A wide view (native-wide renderer): stock reflections. */
+    race_scene(0x80114A38u, 0x27BDFFC8u, 0x3C03800Fu, 2u);
+    s_margin = 53;
+    psx_mod_write_word(R4_MD_ENV_TPAGE_ADDR, 0xFFFFFFFFu);
+    env_draw();
+    CHECK(rd32(R4_MD_ENV_TPAGE_ADDR) == 0xFFFFFFFFu, "wide view: stock reflections");
+    /* 4:3, written; the window turns wide mid-race: the -1 comes back; and
+     * back to 4:3: on again. */
+    s_margin = 0;
+    env_draw();
+    CHECK(rd32(R4_MD_ENV_TPAGE_ADDR) == 10u, "4:3 again: on");
+    s_margin = 227;
+    env_draw();
+    CHECK(rd32(R4_MD_ENV_TPAGE_ADDR) == 0xFFFFFFFFu, "turned wide mid-race: -1 put back");
+    env_draw();
+    CHECK(rd32(R4_MD_ENV_TPAGE_ADDR) == 0xFFFFFFFFu, "and it stays off while wide");
+    s_margin = 0;
+    env_draw();
+    CHECK(rd32(R4_MD_ENV_TPAGE_ADDR) == 10u, "back to 4:3: on");
+    /* After our write the race ends (phase 4: the after-goal run sets 10
+     * itself), then a wide view: the game's page is never taken back. */
+    race_scene(0x80114A38u, 0x27BDFFC8u, 0x3C03800Fu, 4u);
+    env_draw();
+    race_scene(0x80114A38u, 0x27BDFFC8u, 0x3C03800Fu, 2u);
+    s_margin = 53;
+    env_draw();
+    CHECK(rd32(R4_MD_ENV_TPAGE_ADDR) == 10u,
+          "a page set while out of the race is the game's: kept in a wide view");
+    s_margin = 0;
+    psx_mod_write_word(R4_MD_ENV_TPAGE_ADDR, 0xFFFFFFFFu);
+    /* Car reflections = Stock. */
+    set_extra("stock", NULL);
+    s_activate();
+    race_scene(0x80114A38u, 0x27BDFFC8u, 0x3C03800Fu, 2u);
+    env_draw();
+    CHECK(rd32(R4_MD_ENV_TPAGE_ADDR) == 0xFFFFFFFFu, "reflections stock: off in races");
+    /* Reflections alone (every other option Stock) still run. */
+    set_options("stock", "stock", "stock", "stock");
+    set_extra("on", NULL);
+    s_activate();
+    env_draw();
+    CHECK(rd32(R4_MD_ENV_TPAGE_ADDR) == 10u, "reflections alone: on");
+    psx_mod_write_word(R4_MD_ENV_TPAGE_ADDR, 0xFFFFFFFFu);
+}
+
+/* ---- mirror scenery ----------------------------------------------------------- */
+static void test_mirror(void) {
+    /* Default: Stock. */
+    set_options(NULL, NULL, NULL, NULL);
+    s_activate();
+    psx_mod_write_word(R4_MD_LIST_ADDR, 14u);
+    mirror_draw(5u);
+    CHECK(rd32(R4_MD_LIST_ADDR) == 5u, "default: the mirror keeps its stock limit");
+    /* Full. */
+    set_extra(NULL, "full");
+    s_activate();
+    psx_mod_write_word(R4_MD_LIST_ADDR, 14u);
+    mirror_draw(5u);
+    CHECK(rd32(R4_MD_LIST_ADDR) == 14u, "full: the whole list");
+    psx_mod_write_word(R4_MD_LIST_ADDR, 4u);
+    mirror_draw(9u);
+    CHECK(rd32(R4_MD_LIST_ADDR) == 4u, "full: a list under the limit stays as built");
+    /* Both return-address gates. */
+    psx_mod_write_word(R4_MD_LIST_ADDR, 14u);
+    mirror_draw_ra(5u, 0x80071000u, 0x8006F128u);
+    CHECK(rd32(R4_MD_LIST_ADDR) == 5u, "the limit from another caller: nothing kept");
+    psx_mod_write_word(R4_MD_LIST_ADDR, 14u);
+    mirror_draw_ra(5u, 0x8006F0FCu, 0x8006F048u);   /* main course draw's consumer call */
+    CHECK(rd32(R4_MD_LIST_ADDR) == 5u, "the consumer from a main course draw: untouched");
+    /* ... and the remembered count is used once only. */
+    psx_mod_write_word(R4_MD_LIST_ADDR, 3u);
+    s_cpu.gpr[31] = 0x8006F128u;
+    hook(0x8006EDECu)(&s_cpu, 0x8006EDECu);
+    CHECK(rd32(R4_MD_LIST_ADDR) == 3u, "no limit call this frame: nothing put back");
+    /* Mirror scenery alone (every other option Stock). */
+    set_options("stock", "stock", "stock", "stock");
+    set_extra("stock", "full");
+    s_activate();
+    psx_mod_write_word(R4_MD_LIST_ADDR, 21u);
+    mirror_draw(4u);
+    CHECK(rd32(R4_MD_LIST_ADDR) == 21u, "mirror alone: the whole list");
 }
 
 /* ---- car table after a save state ------------------------------------------ */
@@ -562,6 +792,8 @@ int main(void) {
     test_car_tables();
     test_pvs();
     test_plugin();
+    test_reflections();
+    test_mirror();
     test_car_restore();
     if (failures) {
         fprintf(stderr, "test_r4_max_detail: %d failure(s)\n", failures);

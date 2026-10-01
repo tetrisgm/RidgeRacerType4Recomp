@@ -76,8 +76,10 @@ mod_function_entry_funcs = [
   "0x8002961C",
   # r4.enhancement.max-detail (src/mods/r4_max_detail_plugin.c): the course
   # renderer dispatcher (course detail, split screen); it also uses the two
-  # course-list hooks and DrawOTag above
-  "0x80060F94",
+  # course-list hooks and DrawOTag above; the env-map car part draw (car
+  # reflections); the rear-view mirror's block limit and its course list's
+  # first consumer (mirror scenery)
+  "0x80060F94", "0x80014A90", "0x80071704", "0x8006EDEC",
 ]
 
 [runtime]

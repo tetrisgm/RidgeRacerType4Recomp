@@ -21,8 +21,7 @@ Draw distance
   Extended   Far polygons kept, stock visibility lists.
   Stock      As on a PS1.
   Far polygons are drawn behind everything nearer. The rear-view mirror
-  keeps the stock amount of scenery: with more, the PS1 game logic can no
-  longer keep its full frame rate.
+  keeps the stock amount of scenery unless Mirror scenery is Full.
 
 Course detail
   Always full keeps full-resolution textures and smooth shading on the whole
@@ -41,6 +40,30 @@ Split screen
   Same as 1P gives each half of a VS race the 1P course subdivision and car
   models. Split screen already runs at full speed and at the chosen internal
   resolution; this was the one detail it gave up.
+
+Car reflections
+  On (the default) gives the cars their reflective bodies - the glass and
+  paint that mirror the sky and scenery - during the race too. Stock R4
+  shows them in the fly-by before the start, after the finish, in replays
+  and in the attract demo, and turns them off from the start signal to the
+  finish line. For now this applies to 4:3 views only: in a widened view
+  (R4 Custom Renderer with a margin) the widescreen renderer draws the
+  reflective parts many times slower than in 4:3 - at 4K on an Apple M4
+  the frame took ten times longer - and the wider view's extra scenery
+  plus reflections also leaves the emulated PS1 short of time at the race
+  start, so wide views keep Stock. The stock attract demo, which shows
+  reflections, is slow in wide views for the same reason.
+  The reflections take the emulated PS1 a little longer each frame: on one
+  of the four Grand Prix grids measured (seven full car models ahead) the
+  game dropped one or two frames in the first seconds. Set Stock if a
+  perfectly steady start matters more.
+
+Mirror scenery
+  Off (Stock) by default. Full draws all the scenery behind you in the
+  rear-view mirror; Stock draws only the nearest few track blocks there, as
+  on a PS1. Full makes the emulated PlayStation work harder than anything
+  else in this package, and where the PS1 runs short of time the game
+  drops below its 30 FPS race rate, so it stays off unless you want it.
 
 Notes
 -----

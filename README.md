@@ -304,6 +304,13 @@ to fit the PlayStation:
   texture) out to the normal car draw distance.
 - **Split screen** (Same as 1P / Stock): VS races get 1P detail. Split screen
   already renders at the chosen internal resolution.
+- **Car reflections** (On / Stock): reflective car bodies during the race, as
+  in the fly-by and replays (stock R4 turns them off from the start signal to
+  the finish). For now in 4:3 views only: the widescreen renderer draws them
+  many times slower, so widened views keep Stock.
+- **Mirror scenery** (Stock / Full, **off by default**): Full draws all the
+  scenery behind you in the rear-view mirror instead of the nearest few track
+  blocks. It costs the emulated PlayStation the most time of anything here.
 
 Game logic is unchanged. The extra drawing costs the emulated PlayStation
 time; in the races measured (Helter Skelter and the two attract-demo courses,
