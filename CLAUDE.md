@@ -19,16 +19,28 @@ This project inherits, in order:
 
 ## Project rules
 
-- Game binaries (disc image, extracted boot EXE, Ghidra dumps), Ghidra
-  databases, memory cards, overlay captures, and build outputs are **local
+- Game binaries (disc image, extracted boot EXE, Ghidra dumps), BIOS dumps,
+  any C derived from a retail BIOS, Ghidra databases, memory cards, cheat
+  files, overlay captures and shard caches, and build outputs are **local
   only** and must not be committed. See `.gitignore`.
 - Tracked: `game.toml`, `seeds/`, `annotations/`, `symbols.toml`,
   `ghidra/instructions.txt`, `ghidra/scripts/`, `CMakeLists.txt`,
-  `codegen_setup.*`, `src/mods/`, `tests/`, `tools/`, `mods/preloaded/`, docs.
+  `codegen_setup.*`, `src/mods/`, `tests/`, `tools/`, `scripts/`,
+  `mods/preloaded/`, docs, and `generated/` (the recompiled game C).
+- `generated/` is committed because releases are compiled from it
+  (bundled releases, psxrecomp `docs/ci/BUNDLED_RELEASES.md`). Regenerate it
+  with `tools/regen.sh` after any seed, annotation, `[recompiler]` or pin
+  change and commit the result in the same change. The BIOS backends live in
+  the `psxrecomp` submodule, never here.
 - Codegen/runtime fixes belong in the framework (`psxrecomp/`) or in per-game
-  `game.toml` config — never in `generated/*.c`. A fix only this game needs is
-  a smell; prefer a class fix the next title inherits.
-- After every run, resolve all dispatch misses before any other debugging.
+  `game.toml` config — never by hand in `generated/*.c`. A fix only this game
+  needs is a smell; prefer a class fix the next title inherits.
+- Releases are packaged locally with `tools/package_release.sh` (macOS here,
+  Windows on the PC). No GitHub Actions workflows. The zip ships the compiled
+  game and the OpenBIOS image only: no sources, generated C, disc data or
+  BIOS dumps.
+- After every run, resolve all dispatch misses and segment misses before any
+  other debugging.
 - The framework and launcher versions are the `psxrecomp` and `recomp-ui`
   submodule gitlinks. Bump them deliberately; record why in
   `docs/framework_pin_history.md`.
