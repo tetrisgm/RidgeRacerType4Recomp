@@ -45,7 +45,7 @@ enum {
     /* Identified at runtime (handler address at the VSync(0) hook): */
     R4_MODE_TIME_ATTACK = 1,  /* Time Attack race, overlay 660 */
     R4_MODE_GRAND_PRIX = 2,   /* Grand Prix race (rear-view mirror, time limit), overlay 659 */
-    R4_MODE_SPLIT = 3,        /* VS 2P split screen, overlay 661 (not reached in a run) */
+    R4_MODE_SPLIT = 3,        /* VS 2P split screen, overlay 661 */
     R4_MODE_DEMO = 4,         /* attract / music demo, EXE */
     R4_MODE_REPLAY = 5        /* replay after a Time Attack goal, EXE */
 };

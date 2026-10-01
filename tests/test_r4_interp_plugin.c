@@ -14,8 +14,13 @@
  *    pass is rendered, and a full window of 30 plans with at most 3 shed
  *    goes back to passes without a back-off.
  *
+ * 3. VS split screen. The 2P race handler (overlay 661) is interpolated like
+ *    the 1P races while the race runs (phase 1..3), and shows stock frames
+ *    outside it.
+ *
  * The mod API is a mock with a flat guest RAM; the plugin is the real one,
- * driven through the attract demo's gates. Build/run: ctest -R r4_interp_plugin */
+ * driven through the attract demo's gates (and the VS race's for 3).
+ * Build/run: ctest -R r4_interp_plugin */
 #include <setjmp.h>
 #include <stdio.h>
 #include <string.h>
@@ -133,12 +138,24 @@ void psx_dispatch_call(CPUState *cpu, uint32_t addr, uint32_t ra) {
 
 /* ---- the attract demo, one 30 Hz tick at a time ------------------------ */
 static uint32_t s_demo_tick = 10;
+static uint32_t s_race_tick = 100;
 
 static void tick(CPUState *cpu) {
     psx_mod_write_word(0x800ACCC4u, s_demo_tick++);   /* demo tick */
     cpu->gpr[31] = 0x8001E764u;                        /* loop head: ClearOTagR */
     s_otag_hook(cpu, 0x80093418u);
     cpu->gpr[31] = 0x8001E7E4u;                        /* VSync(0) */
+    cpu->gpr[4] = 0;
+    s_vsync_hook(cpu, 0x8008B330u);
+}
+
+/* One VS race tick: the race tick counter (0x800F2F94) advances instead of
+ * the demo's. */
+static void race_tick(CPUState *cpu) {
+    psx_mod_write_word(0x800F2F94u, s_race_tick++);
+    cpu->gpr[31] = 0x8001E764u;
+    s_otag_hook(cpu, 0x80093418u);
+    cpu->gpr[31] = 0x8001E7E4u;
     cpu->gpr[4] = 0;
     s_vsync_hook(cpu, 0x8008B330u);
 }
@@ -359,6 +376,34 @@ int main(void) {
         for (int i = 0; i < 4; i++) tick(&cpu);
         CHECK(s_passes > passes && s_blend == PSX_MOD_FRAME_INTERPOLATION_HOLD,
               "second activation: interpolating with the same hooks");
+    }
+
+    /* VS split screen: overlay 661's handler, identified by its first code
+     * words, is interpolated during the race and not outside it. */
+    {
+        static const uint32_t sig[6] = { 0x3C04800Fu, 0x3C038010u, 0x8C822F94u,
+                                         0x8C63F860u, 0x27BDFFC8u, 0xAFBF0034u };
+        int passes;
+        for (int i = 0; i < 6; i++) psx_mod_write_word(0x80114C30u + 4u * i, sig[i]);
+        psx_mod_write_word(0x80100000u, 0x80114C30u);
+        psx_mod_write_word(0x800FF860u, 2);              /* race phase: running */
+        race_tick(&cpu);                                 /* mode change: no pass yet */
+        passes = s_passes;
+        for (int i = 0; i < 4; i++) race_tick(&cpu);
+        CHECK(s_passes == passes + 4, "VS split screen: every race tick interpolates");
+        psx_mod_write_word(0x800FF860u, 0);              /* before the start */
+        passes = s_passes;
+        for (int i = 0; i < 4; i++) race_tick(&cpu);
+        CHECK(s_passes == passes, "VS split screen: no pass outside the race phases");
+        psx_mod_write_word(0x800FF860u, 4);              /* after the finish */
+        for (int i = 0; i < 4; i++) race_tick(&cpu);
+        CHECK(s_passes == passes, "VS split screen: no pass after the race");
+        psx_mod_write_word(0x80114C30u + 20u, 0);        /* another overlay loaded */
+        psx_mod_write_word(0x800FF860u, 2);
+        for (int i = 0; i < 4; i++) race_tick(&cpu);
+        CHECK(s_passes == passes, "VS split screen: only overlay 661's handler");
+        psx_mod_write_word(0x80100000u, 0x8005E118u);    /* back to the demo */
+        tick(&cpu);
     }
 
     /* Frame blend method: the hooks do nothing. */
