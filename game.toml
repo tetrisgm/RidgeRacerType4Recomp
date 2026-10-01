@@ -115,6 +115,19 @@ resolution_reference_lines = 240
 # widescreen at high internal resolutions costs about what 1P does (see
 # docs/WIDESCREEN.md). PSX_GL_TEXWIN_BATCH=0 turns it off for one run.
 texture_window_batching = true
+# PGXP (psxrecomp docs/ENHANCEMENTS.md G1.11/G1.12). PGXP itself is switched
+# on by the psx.enhancement.pgxp package, default on for R4 together with its
+# precise culling option (mods/preloaded overrides the builtin's defaults),
+# which netplay clears. pgxp_mod_only makes that package the one switch: the
+# geometry_correction / perspective_texturing keys (here or in a player's
+# settings.toml) are not applied and the launcher hides its Perspective
+# textures row. The runtime is built with the PGXP hooks (CMakeLists.txt
+# R4_PGXP), which track 99.8% of R4's polygon vertices, so the tuning keys,
+# inert while PGXP is off, are:
+pgxp_mod_only = true             # the Mods page is the one PGXP switch
+pgxp_tolerance = -1.0            # no clamp: at 0.5 it keeps ~25% of vertices and draws seams
+pgxp_position_fallback = false   # dataflow only: the position cache only mislabels HUD vertices
+pgxp_preserve_projection = true  # exact projection: no residual wobble on near geometry
 
 # Native-wide rendering for r4.enhancement.widescreen (docs/WIDESCREEN.md).
 # Inert at 4:3: every cull site below is the identity while the margin is 0.

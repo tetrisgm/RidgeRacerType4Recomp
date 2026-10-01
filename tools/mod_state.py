@@ -8,6 +8,7 @@ bundled package on or off without clicking through the launcher.
 
   tools/mod_state.py build --enable r4.enhancement.widescreen/widescreen aspect=Fit
   tools/mod_state.py build --enable r4.enhancement.widescreen/widescreen aspect=21:9
+  tools/mod_state.py build --disable psx.enhancement.pgxp/pgxp   # a default-on feature off
   tools/mod_state.py build --clear          # every feature back to its default
 
 The package version is read from build/mods/bundled/<package>/. Local only:
@@ -34,6 +35,7 @@ def main():
     ap = argparse.ArgumentParser(description=__doc__.split('\n')[0])
     ap.add_argument('build', help='build directory holding the runtime')
     ap.add_argument('--enable', metavar='PACKAGE/FEATURE')
+    ap.add_argument('--disable', metavar='PACKAGE/FEATURE')
     ap.add_argument('--clear', action='store_true')
     ap.add_argument('values', nargs='*', metavar='option=value')
     args = ap.parse_args()
@@ -43,14 +45,15 @@ def main():
             os.remove(path)
         print(f'removed {path}')
         return 0
-    if not args.enable or '/' not in args.enable:
-        ap.error('--enable PACKAGE/FEATURE is required')
-    package, feature = args.enable.split('/', 1)
+    which = args.enable or args.disable
+    if not which or '/' not in which or (args.enable and args.disable):
+        ap.error('one of --enable / --disable PACKAGE/FEATURE is required')
+    package, feature = which.split('/', 1)
     lines = ['format_version = 2', '',
              '[[package]]', f'id = {quote(package)}',
              f'version = {quote(bundled_version(args.build, package))}', '',
              '[[feature]]', f'package_id = {quote(package)}', f'id = {quote(feature)}',
-             'enabled = true']
+             'enabled = ' + ('true' if args.enable else 'false')]
     if args.values:
         lines += ['', '[feature.values]']
         for kv in args.values:

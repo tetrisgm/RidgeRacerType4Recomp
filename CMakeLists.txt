@@ -50,6 +50,18 @@ include("${PSXRECOMP_ROOT}/runtime/runtime.cmake")
 # (see psxrecomp/docs/MOD_PACKAGES.md, "How bundled/ gets staged").
 set(R4_PRELOADED_MODS "${CMAKE_CURRENT_SOURCE_DIR}/mods/preloaded")
 
+# PGXP hook build (psxrecomp docs/ENHANCEMENTS.md G1.11): the runtime carries
+# the value-propagation hooks, so psx.enhancement.pgxp (on by default for R4)
+# tracks the sub-pixel position of 99.8% of R4's polygon vertices. With PGXP
+# switched off the guest runs exactly as in the base build. Savestates from a
+# build with the other setting are refused. OFF builds the base flavor, for
+# A/B and identity checks.
+option(R4_PGXP "Build the runtime with the PGXP hooks" ON)
+set(R4_RUNTIME_FLAVOR)
+if(R4_PGXP)
+    set(R4_RUNTIME_FLAVOR PGXP)
+endif()
+
 # Trusted, statically linked mod plugins (src/mods/README.md), selected by the
 # packages in mods/preloaded/packages.
 file(GLOB R4_MOD_PLUGIN_SOURCES CONFIGURE_DEPENDS
@@ -57,6 +69,7 @@ file(GLOB R4_MOD_PLUGIN_SOURCES CONFIGURE_DEPENDS
     "${CMAKE_CURRENT_SOURCE_DIR}/src/mods/*.cpp")
 
 psxrecomp_add_game_runtime(psx-runtime
+    ${R4_RUNTIME_FLAVOR}
     PRELOADED_MODS_DIR "${R4_PRELOADED_MODS}"
     ENABLE_NETPLAY_IF_PRESENT
     NETPLAY_LOBBY_URL "ws://netplay.retcomm.net:8765"
@@ -176,6 +189,36 @@ if(R4_BUILD_TESTS AND BUILD_TESTING)
             else()
                 message(WARNING "R4_BUILD_TESTS: no disc/*.bin, so r4_widescreen_cull_sites "
                     "(game.toml [widescreen.cull] vs the disc) is not registered")
+            endif()
+        endif()
+        # PGXP defaults: the default-on override of the framework's
+        # psx.enhancement.pgxp, the [video] tuning keys, and the runtime
+        # flavor R4_PGXP selects (no disc needed).
+        if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_r4_pgxp.py")
+            add_test(NAME r4_pgxp_defaults
+                COMMAND "${Python3_EXECUTABLE}"
+                    "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_r4_pgxp.py"
+                    --build-dir "${CMAKE_BINARY_DIR}"
+                WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}")
+        endif()
+        # PGXP at boot: the built runtime, headless, from an isolated copy of
+        # its directory: on by default (geometry, texture, culling), off when
+        # the Mods page says so, culling off on its own. Guards the framework's
+        # session-start arming end to end. Needs the debug server and the disc.
+        file(GLOB _R4_DISC_CUES "${CMAKE_CURRENT_SOURCE_DIR}/disc/*.cue")
+        if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_r4_pgxp_boot.py")
+            if(_R4_DISC_CUES AND PSX_DEBUG_TOOLS)
+                list(GET _R4_DISC_CUES 0 _R4_DISC_CUE)
+                add_test(NAME r4_pgxp_boot
+                    COMMAND "${Python3_EXECUTABLE}"
+                        "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_r4_pgxp_boot.py"
+                        --build-dir "${CMAKE_BINARY_DIR}"
+                        --disc "${_R4_DISC_CUE}"
+                    WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}")
+                set_tests_properties(r4_pgxp_boot PROPERTIES TIMEOUT 600)
+            else()
+                message(WARNING "R4_BUILD_TESTS: r4_pgxp_boot needs the disc "
+                    "(disc/*.cue) and PSX_DEBUG_TOOLS, so it is not registered")
             endif()
         endif()
         # src/mods/r4_interp_fields.h must match tools/data/r4_interp_fields.json.
