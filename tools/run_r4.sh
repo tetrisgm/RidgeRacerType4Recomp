@@ -10,9 +10,10 @@ BUILD="${1:-build}"
 [[ $# -gt 0 ]] && shift
 DISC="$ROOT/disc/R4 - Ridge Racer Type 4 (USA).cue"
 # Dev overlay compiles (R4.BIN code overlays -> native shards) with the local
-# emitters and the system compiler. Release builds get theirs from the
-# overlay_toolchain/ the setup host installs, so this lives here, not in
-# game.toml. Runs with cwd = project root.
-: "${PSX_OVERLAY_AUTOCOMPILE_CMD:=python3 psxrecomp/tools/compile_overlays.py --game-toml game.toml --recompiler psxrecomp/recompiler/build/psxrecomp-game --runtime-include psxrecomp/runtime/include --cps}"
+# emitters (tools/regen.sh builds them into build-recompiler/) and the system
+# compiler. Release zips ship overlay_toolchain/ beside the exe and the runtime
+# builds its own command from it, so this lives here, not in game.toml. Runs
+# with cwd = project root.
+: "${PSX_OVERLAY_AUTOCOMPILE_CMD:=python3 psxrecomp/tools/compile_overlays.py --game-toml game.toml --recompiler build-recompiler/psxrecomp-game --runtime-include psxrecomp/runtime/include --cps}"
 export PSX_OVERLAY_AUTOCOMPILE_CMD
 exec "$ROOT/$BUILD/r4-runtime" --game "$ROOT/$BUILD/game.toml" --disc "$DISC" --no-launcher "$@"

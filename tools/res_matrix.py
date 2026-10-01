@@ -105,7 +105,7 @@ def main():
                                            "path": os.path.join(od, "hires.png")},
                                           port=a.port, timeout=180)
             ps = present_shot(os.path.join(od, "present.png"), a.port)
-            miss = cmd({"cmd": "dispatch_stats"}, port=a.port).get("miss_total")
+            ds = cmd({"cmd": "dispatch_stats"}, port=a.port)
             json.dump({"video_info": vi, "frame_perf": perf, "screenshot_hires": hs},
                       open(os.path.join(od, "info.json"), "w"), indent=1)
             allp = perf.get("all", {})
@@ -115,7 +115,8 @@ def main():
                 "hires": "%sx%s" % (hs.get("width"), hs.get("height")),
                 "drawable": "%sx%s" % (vi.get("drawable_w"), vi.get("drawable_h")),
                 "frame_ms": allp.get("total_ms_avg"), "present_gpu_ms": allp.get("present_gpu_ms_avg"),
-                "present_shot": ps.get("wrote"), "dispatch_miss": miss,
+                "present_shot": ps.get("wrote"), "dispatch_miss": ds.get("miss_total"),
+                "segment_miss": ds.get("segment_miss_total"),
             })
         except Exception as exc:  # keep going: one bad preset should not hide the rest
             row["error"] = repr(exc)
