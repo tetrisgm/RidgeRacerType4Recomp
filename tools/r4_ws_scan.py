@@ -30,9 +30,10 @@ Usage (from the repo root)
   tools/r4_ws_scan.py --check game.toml    exit 1 if game.toml's lists drift
   tools/r4_ws_scan.py --report             full per-function report
 
-Inputs default to the local disc (see game.toml): disc/SLUS_007.97, the R4.BIN
-entries read straight from the cue/bin, and generated/SLUS_007.97_full.ranges
-(function starts; run tools/regen.sh once). Read-only.
+Inputs default to the local disc (see game.toml): disc/SLUS_007.97 (read from
+the bin's root directory when it was never extracted, as in a fresh clone),
+the R4.BIN entries read straight from the cue/bin, and the committed
+generated/SLUS_007.97_full.ranges (function starts). Read-only.
 """
 import argparse
 import bisect
@@ -157,8 +158,23 @@ class Seg:
 
 # --- inputs ------------------------------------------------------------------
 
-def load_exe(path):
-    b = open(path, 'rb').read()
+EXE_NAME = 'SLUS_007.97'
+DEFAULT_EXE = os.path.join(ROOT, 'disc', EXE_NAME)
+
+
+def load_exe(path, bin_image=None):
+    """The boot EXE from `path`, or, when `path` is None, disc/SLUS_007.97 if
+    it was extracted and otherwise the copy in the disc image's root
+    directory (identical bytes; a fresh clone has no extracted EXE because
+    generated/ is committed and nothing ran prepare_disc)."""
+    if path is None and os.path.exists(DEFAULT_EXE):
+        path = DEFAULT_EXE
+    if path is not None:
+        b = open(path, 'rb').read()
+    elif bin_image:
+        b = DiscImage(bin_image).read_root_file(EXE_NAME)
+    else:
+        raise SystemExit(f'no {DEFAULT_EXE} and no disc/*.bin to read {EXE_NAME} from')
     tsize = struct.unpack_from('<I', b, 0x1C)[0]
     text = b[0x800:0x800 + tsize]
     return Seg('EXE', EXE_BASE, text[:EXE_CODE_END - EXE_BASE], 'exe'), \
@@ -196,6 +212,11 @@ class DiscImage:
                     struct.unpack_from('<I', data, off + 10)[0]
             off += n
         raise SystemExit(f'{name} not found in the disc root directory')
+
+    def read_root_file(self, name):
+        lba, size = self.find_root_file(name)
+        data = b''.join(self.sector(lba + i) for i in range((size + 2047) // 2048))
+        return data[:size]
 
 
 def load_overlays(bin_image):
@@ -372,7 +393,7 @@ def typo_group(seg, g):
 
 
 def collect(args):
-    exe, exe_md5 = load_exe(args.exe)
+    exe, exe_md5 = load_exe(args.exe, args.bin_image or default_bin_image())
     segs = [exe] + (load_overlays(args.bin_image) if args.bin_image else [])
     sites = defaultdict(list)      # key -> [(addr, word, seg, func, note)]
     report = [f'# r4_ws_scan.py report  EXE md5 {exe_md5}']
@@ -485,7 +506,8 @@ def check(sites, game_toml):
 
 def main():
     ap = argparse.ArgumentParser(description=__doc__.split('\n')[0])
-    ap.add_argument('--exe', default=os.path.join(ROOT, 'disc', 'SLUS_007.97'))
+    ap.add_argument('--exe', default=None,
+                    help='boot EXE (default: disc/SLUS_007.97, else read from the disc image)')
     ap.add_argument('--bin-image', default=None,
                     help='raw .bin of the disc (default: disc/*.bin); R4.BIN is read from it')
     ap.add_argument('--no-overlays', action='store_true', help='scan the EXE only')

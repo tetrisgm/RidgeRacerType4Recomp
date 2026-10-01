@@ -133,9 +133,12 @@ if(R4_BUILD_TESTS AND BUILD_TESTING)
     find_package(Python3 QUIET COMPONENTS Interpreter)
     if(Python3_FOUND)
         # game.toml's [widescreen.cull] lists must match a fresh scan of the
-        # local disc; registered only where the disc and a regen are present.
+        # local disc. The scan reads the boot EXE and R4.BIN from disc/*.bin
+        # (no regen or extracted EXE needed), so it is registered whenever the
+        # disc is there, and says so when it is not.
         if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/tools/r4_ws_scan.py")
-            if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/disc/SLUS_007.97")
+            file(GLOB _R4_DISC_BINS "${CMAKE_CURRENT_SOURCE_DIR}/disc/*.bin")
+            if(_R4_DISC_BINS)
                 if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/generated/SLUS_007.97_full.ranges")
                     add_test(NAME r4_widescreen_cull_sites
                         COMMAND "${Python3_EXECUTABLE}"
@@ -143,6 +146,9 @@ if(R4_BUILD_TESTS AND BUILD_TESTING)
                             --check "${CMAKE_CURRENT_SOURCE_DIR}/game.toml"
                         WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}")
                 endif()
+            else()
+                message(WARNING "R4_BUILD_TESTS: no disc/*.bin, so r4_widescreen_cull_sites "
+                    "(game.toml [widescreen.cull] vs the disc) is not registered")
             endif()
         endif()
         # src/mods/r4_interp_fields.h must match tools/data/r4_interp_fields.json.
