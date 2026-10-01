@@ -2,7 +2,7 @@
  * the View option, the HUD class table and packet walker, the race
  * predicate, and the course-list union. No game data or runtime needed. */
 #include "r4_widescreen_hud.h"
-#include "r4_widescreen_pvs.h"
+#include "r4_pvs.h"
 #include "r4_widescreen_scene.h"
 #include "r4_widescreen_view.h"
 

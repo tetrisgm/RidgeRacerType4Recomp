@@ -27,7 +27,7 @@
 #include "mod_plugins.h"
 #include "cpu_state.h"
 #include "r4_widescreen_hud.h"
-#include "r4_widescreen_pvs.h"
+#include "r4_pvs.h"
 #include "r4_widescreen_scene.h"
 #include "r4_widescreen_view.h"
 
@@ -250,7 +250,7 @@ static void r4_clear_otag(CPUState *cpu, uint32_t address)
 
 /* ---- course visibility ----------------------------------------------------- */
 
-static void r4_pvs_octant(CPUState *cpu, uint32_t address)
+static void r4_ws_pvs_octant(CPUState *cpu, uint32_t address)
 {
     (void)address;
     if (!s_enabled || !s_pvs_union || cpu->gpr[31] != R4_PVS_OCTANT_RA) return;
@@ -261,7 +261,7 @@ static void r4_pvs_octant(CPUState *cpu, uint32_t address)
     s_pvs.valid = 1;
 }
 
-static void r4_pvs_merge(CPUState *cpu, uint32_t address)
+static void r4_ws_pvs_merge(CPUState *cpu, uint32_t address)
 {
     (void)address;
     if (!s_enabled || !s_pvs.valid) return;
@@ -270,30 +270,12 @@ static void r4_pvs_merge(CPUState *cpu, uint32_t address)
     if (ra != R4_PVS_MERGE_RA1 && ra != R4_PVS_MERGE_RA2) return;
     if (!r4_ws_live()) return;
     int reach = r4_pvs_octant_reach(psx_mod_widescreen_x_margin());
-    uint32_t table = rd32(R4_PVS_TABLE_PTR_ADDR);
-    uint32_t blocks = rd32(R4_PVS_BLOCK_BASE_ADDR);
-    if ((table & 0xFFE00003u) != 0x80000000u || (blocks & 0xFFE00000u) != 0x80000000u)
-        return;
-    uint32_t list[R4_PVS_LIST_MAX], count = rd32(R4_PVS_LIST_ADDR);
-    if (count > R4_PVS_LIST_MAX) return;
-    for (uint32_t i = 0; i < count; i++) list[i] = rd32(R4_PVS_LIST_ADDR + 4u + 4u * i);
-    uint32_t before = count;
-    for (int d = 1; d <= reach; d++) {
-        for (int side = -1; side <= 1; side += 2) {
-            uint32_t oct = (s_pvs.octant + 8u + (uint32_t)(side * d)) & 7u;
-            uint32_t entry = rd32(table + 4u * (s_pvs.section * R4_PVS_COLUMNS + oct));
-            if ((entry & 0xFFE00003u) != 0x80000000u) continue;
-            uint32_t n = rd32(entry);
-            if (n > R4_PVS_LIST_MAX) n = R4_PVS_LIST_MAX;
-            uint32_t add[R4_PVS_LIST_MAX];
-            for (uint32_t i = 0; i < n; i++)
-                add[i] = blocks + R4_PVS_BLOCK_STRIDE * rd16(entry + 4u + 2u * i);
-            (void)r4_pvs_union(list, &count, add, n, R4_PVS_LIST_MAX);
-        }
-    }
-    for (uint32_t i = before; i < count; i++)
-        psx_mod_write_word(R4_PVS_LIST_ADDR + 4u + 4u * i, list[i]);
-    if (count != before) psx_mod_write_word(R4_PVS_LIST_ADDR, count);
+    /* The neighbouring octants of the camera's section (r4_pvs.h; R4 Max
+     * Detail adds neighbouring sections through the same helper). */
+    R4PvsMerge m = r4_pvs_merge(rd32, rd16, psx_mod_write_word, s_pvs.section,
+                                s_pvs.octant, 0u, 0, reach);
+    if (!m.ok) return;
+    uint32_t before = m.before, count = m.after;
     if (s_trace) {
         s_stat.pvs_frames++;
         if (before > s_stat.pvs_before_max) s_stat.pvs_before_max = before;
@@ -384,7 +366,7 @@ PSX_MOD_CONSTRUCTOR(r4_register_widescreen)
         R4_WS_REGISTER_ENTRY(r4_hud_closers[i], r4_hud_closer);
     R4_WS_REGISTER_ENTRY(R4_CLEAR_OTAG_FN, r4_clear_otag);
     R4_WS_REGISTER_ENTRY(R4_DRAW_OTAG_FN, r4_draw_otag);
-    R4_WS_REGISTER_ENTRY(R4_PVS_OCTANT_FN, r4_pvs_octant);
-    R4_WS_REGISTER_ENTRY(R4_PVS_MERGE_FN, r4_pvs_merge);
+    R4_WS_REGISTER_ENTRY(R4_PVS_OCTANT_FN, r4_ws_pvs_octant);
+    R4_WS_REGISTER_ENTRY(R4_PVS_MERGE_FN, r4_ws_pvs_merge);
     (void)psx_mod_register_activation_plugin(PLUGIN_ID, r4_widescreen_activate);
 }
