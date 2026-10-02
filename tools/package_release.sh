@@ -34,6 +34,9 @@ set -euo pipefail
 
 SRC="$(cd "$(dirname "$0")/.." && pwd)"
 PYTHON="$(bash "$SRC/tools/select_python.sh")"
+# The framework's overlay-toolchain stager parses TOML using its own Python
+# process.  Give it the same interpreter selected for R4's release checks.
+export PSX_RELEASE_STAGE_PYTHON="$PYTHON"
 REF="${1:-HEAD}"
 SHA="$(git -C "$SRC" rev-parse --verify "$REF^{commit}")"
 REL="${R4_RELEASE_DIR:-$SRC/build-release-clone}"
