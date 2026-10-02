@@ -71,7 +71,10 @@ bash psxrecomp/tools/ci/record_pins.sh
 # BIOS backends match its emitter (the same gates psxrecomp's CI template runs).
 bash psxrecomp/tools/ci/check_boot_exe.sh .
 bash psxrecomp/tools/ci/check_generated.sh --root .
-bash psxrecomp/tools/ci/check_bios_stamps.sh --framework psxrecomp
+# Only the selected backends are linked.  In particular, an OpenBIOS-only
+# package must not depend on the unused retail backend's emitter stamp.
+IFS=';' read -r -a BIOS_STEM_ARRAY <<< "$BIOS_STEMS"
+bash psxrecomp/tools/ci/check_bios_stamps.sh --framework psxrecomp "${BIOS_STEM_ARRAY[@]}"
 # Later feature branches add this gate; use the same selected Python because
 # check_pin_keys.py reads TOML with tomllib.
 if [[ -f tools/check_pin_keys.py ]]; then
