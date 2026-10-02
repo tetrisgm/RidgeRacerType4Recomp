@@ -17,6 +17,10 @@ if [[ -z "${PSX_OVERLAY_AUTOCOMPILE_CMD:-}" && ! -x "$ROOT/build-recompiler/psxr
     echo "note: no build-recompiler/psxrecomp-game, so R4.BIN overlays stay interpreted;" \
          "build it with: bash psxrecomp/tools/ci/build_emitters.sh --framework psxrecomp --build-dir build-recompiler" >&2
 fi
-: "${PSX_OVERLAY_AUTOCOMPILE_CMD:=python3 psxrecomp/tools/compile_overlays.py --game-toml game.toml --recompiler build-recompiler/psxrecomp-game --runtime-include psxrecomp/runtime/include --cps}"
+if [[ -z "${PSX_OVERLAY_AUTOCOMPILE_CMD:-}" ]]; then
+    PYTHON="$(bash "$ROOT/tools/select_python.sh")"
+    printf -v PYTHON_SHELL '%q' "$PYTHON"
+    PSX_OVERLAY_AUTOCOMPILE_CMD="$PYTHON_SHELL psxrecomp/tools/compile_overlays.py --game-toml game.toml --recompiler build-recompiler/psxrecomp-game --runtime-include psxrecomp/runtime/include --cps"
+fi
 export PSX_OVERLAY_AUTOCOMPILE_CMD
 exec "$ROOT/$BUILD/r4-runtime" --game "$ROOT/$BUILD/game.toml" --disc "$DISC" --no-launcher "$@"

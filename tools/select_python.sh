@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Print a Python with tomllib for release verification. Keep the shell's
+# Print a Python with tomllib for R4 tools. Keep the shell's
 # python3 when it works; older macOS installations need a versioned Python.
 set -euo pipefail
 
@@ -23,5 +23,5 @@ for candidate in python3 python3.14 python3.13 python3.12 python3.11; do
     fi
 done
 
-echo "error: release verification needs Python 3.11+ with tomllib" >&2
+echo "error: R4 tools need Python 3.11+ with tomllib" >&2
 exit 2
