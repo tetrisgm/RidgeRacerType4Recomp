@@ -28,10 +28,12 @@
 # SCPH-1001 backend too, as psxrecomp's CI template does.
 #
 # Env: R4_RELEASE_DIR (clone location, default <repo>/build-release-clone),
-#      R4_RELEASE_BIOS_STEMS (default OpenBIOS), JOBS (default: all cores).
+#      R4_RELEASE_BIOS_STEMS (default OpenBIOS), JOBS (default: all cores),
+#      R4_PYTHON (optional Python 3.11+ override for release checks).
 set -euo pipefail
 
 SRC="$(cd "$(dirname "$0")/.." && pwd)"
+PYTHON="$(bash "$SRC/tools/select_python.sh")"
 REF="${1:-HEAD}"
 SHA="$(git -C "$SRC" rev-parse --verify "$REF^{commit}")"
 REL="${R4_RELEASE_DIR:-$SRC/build-release-clone}"
@@ -70,6 +72,11 @@ bash psxrecomp/tools/ci/record_pins.sh
 bash psxrecomp/tools/ci/check_boot_exe.sh .
 bash psxrecomp/tools/ci/check_generated.sh --root .
 bash psxrecomp/tools/ci/check_bios_stamps.sh --framework psxrecomp
+# Later feature branches add this gate; use the same selected Python because
+# check_pin_keys.py reads TOML with tomllib.
+if [[ -f tools/check_pin_keys.py ]]; then
+  "$PYTHON" tools/check_pin_keys.py
+fi
 
 EMIT=build-recompiler
 HOST=build-release
@@ -192,7 +199,7 @@ done
 # --- verify each zip (psxrecomp's CI template checks, plus R4's) -----------------
 for A in "${ARTS[@]}"; do
   Z="dist/r4-$V-$A.zip"
-  L="$(python3 -c 'import sys,zipfile; print("\n".join(zipfile.ZipFile(sys.argv[1]).namelist()))' "$Z")"
+  L="$("$PYTHON" -c 'import sys,zipfile; print("\n".join(zipfile.ZipFile(sys.argv[1]).namelist()))' "$Z")"
   # 1. It is the game: executable, OpenBIOS, runtime data, both R4 mods, and
   #    the notices its components' licenses ask for (recomp-ui's, Dear ImGui's,
   #    recomp-net's, retcomm-rbengine's and, on Windows, the MinGW-w64
@@ -257,7 +264,7 @@ for A in "${ARTS[@]}"; do
     echo "unexpected .bin above in $Z" >&2; exit 1
   fi
   # 4. No developer-channel mods.
-  if python3 - "$Z" <<'PY'
+  if "$PYTHON" - "$Z" <<'PY'
 import re, sys, zipfile
 z = zipfile.ZipFile(sys.argv[1])
 dev = [n for n in z.namelist() if n.endswith("manifest.toml")
