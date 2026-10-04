@@ -1,0 +1,23 @@
+format_version = 7
+id = "r4.enhancement.hide-rear-view-mirror"
+version = "1.0.0"
+name = "Hide Rear-view Mirror"
+author = "Shokunin"
+description = "Hide Ridge Racer Type 4's dedicated rear-view camera pass. Toggle off to restore the stock mirror."
+license = "MIT"
+resolver = "declarative"
+save_compatibility = "shared"
+
+[[target]]
+game_id = "SLUS-00797"
+
+[[feature]]
+id = "hide-mirror"
+name = "Hide Rear-view Mirror"
+description = "Enabled by default. Skips the separate mirror render pass in races; turn it off to restore the stock mirror."
+group = "Display"
+default_enabled = true
+
+[[plugin]]
+feature = "hide-mirror"
+id = "r4.hide-rear-view-mirror"

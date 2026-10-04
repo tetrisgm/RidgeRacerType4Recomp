@@ -8,11 +8,14 @@ Rules (same as MegaManX6Recomp):
 
 - One feature domain per source file; `CMakeLists.txt` globs `src/mods/*.c`
   and `*.cpp`.
-- Every feature is default-disabled and enabled only from the launcher's Mods
-  page. Callbacks do nothing until their package's activation runs.
+- Features are enabled only from the launcher's Mods page and callbacks do
+  nothing until their package's activation runs. Default state is a per-feature
+  product choice; most features are disabled by default.
 - Keep game logic in pure headers (`r4_*_*.h`) so `tests/` can check it
   without a game build; register every test with ctest in `CMakeLists.txt`,
   inside its `R4_BUILD_TESTS` block and behind `if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/...")`
   (a checkout without `tests/` or `tools/` must still configure).
 - `r4_widescreen_plugin.c`: `r4.enhancement.widescreen` (`docs/WIDESCREEN.md`).
+- `r4_hide_rear_view_mirror.c`: `r4.enhancement.hide-rear-view-mirror`
+  (`docs/HIDE_REAR_VIEW_MIRROR.md`); defaults on by request.
 - See `psxrecomp/docs/MOD_PACKAGES.md`.
