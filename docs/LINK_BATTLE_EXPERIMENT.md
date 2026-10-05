@@ -21,7 +21,7 @@ The serial-free bridge needs framework APIs that are under review upstream:
 - RetroPortingToolKit/recomp-ui#80: the LAN page lists
   local rooms without connecting to the online lobby.
 
-This branch pins psxrecomp and recomp-ui to the first and last of those.
+This branch pins psxrecomp and recomp-ui to the first and last of those. `[controller] multitap = false` (from #512) keeps offline play at two standalone pads; `players = 4` only sets the netplay seat count.
 Regenerate the game after changing the framework pin; never edit
 `generated/` directly. Run `tools/launch_link_experimental.sh BUILD_DIR` to
 open the normal graphical launcher with R4's two experimental environment

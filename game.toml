@@ -335,6 +335,9 @@ branch_keep_sites = [
 # (0xE3) pads; the framework models digital and DualShock. Digital is the
 # faithful default; DualShock analog steering is selectable in the launcher.
 default_mode = "digital"
+# players = 4 sets the netplay seat count for experimental Link Battle; R4
+# itself has no multitap support, so offline play keeps two standalone pads.
+multitap = false
 
 # Online mount gate: digests + track count + TOC fingerprint
 # (psxrecomp/docs/NETPLAY.md). required_tracks = 1 is correct for this disc.
