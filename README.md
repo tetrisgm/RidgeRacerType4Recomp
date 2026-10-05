@@ -49,6 +49,7 @@ netplay. Not yet verified end to end (see `ISSUES.md`).
 | Link battle (link cable) | Not supported (no SIO1 model) |
 | Renderer | Stock psxrecomp OpenGL at 4:3; software selectable |
 | Internal resolution | Native to 8K presets (Settings → Display), OpenGL |
+| Dynamic resolution | On by default above Native: steps the internal resolution down (not below 720p) only after sustained missed frame budgets, then back up; Settings → Display → Dynamic resolution turns it off |
 | Widescreen | Mods > Display > R4 Custom Renderer (experimental, off by default): native-wide races, Fit to Window / 16:9 / 21:9 / 32:9 |
 
 ## Building From Source (macOS, Windows)
