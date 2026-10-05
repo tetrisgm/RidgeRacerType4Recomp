@@ -5,7 +5,10 @@
 #include <stdint.h>
 
 #define R4_REAR_MIRROR_ENTRY       0x80070A58u
-#define R4_REAR_MIRROR_GATE        0x8011E860u
+/* lui v1,0x8011 ; sw v0,-0x17a0(v1) at 0x80070A6C/0x80070A74:
+ * 0x80110000 - 0x17a0 = 0x8010E860. The race-setup routine at 0x80070764
+ * clears the same word, and 0x80070788 reads it. */
+#define R4_REAR_MIRROR_GATE        0x8010E860u
 #define R4_REAR_MIRROR_EARLY_RETURN_ARG 0u
 
 typedef struct {
