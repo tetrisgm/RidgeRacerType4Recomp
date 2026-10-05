@@ -510,6 +510,9 @@ default_mode = "analog"
 # (psx_mod_allow_direct_shortcut); otherwise it means Select + Y.
 direct_shortcut = "rewind"
 direct_shortcut_button = "y"
+# players = 4 sets the netplay seat count for experimental Link Battle; R4
+# itself has no multitap support, so offline play keeps two standalone pads.
+multitap = false
 
 # Online mount gate: digests + track count + TOC fingerprint
 # (psxrecomp/docs/NETPLAY.md). required_tracks = 1 is correct for this disc.
