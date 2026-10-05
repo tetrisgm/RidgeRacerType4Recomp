@@ -3,32 +3,34 @@
 ## Current work
 
 Released: v0.1.0 (2026-09-26, setup-host zips). Master has widescreen (#2),
-Frame Rate (#3), internal resolution (#4) and near-wall docs (#5); they are
-still default-off on master.
+Frame Rate (#3), internal resolution (#4) and near-wall docs (#5).
 
-In progress (2026-10-01), on local branches on the dev Mac. The full state,
-branch heads, worktrees and next steps are in `analysis/HANDOFF-LOCAL.md`
-(gitignored; it exists only on that Mac):
-- **Bundled releases (held):** branch `feat/bundled-releases` moves R4 to
-  upstream's bundled compiled-release model (`generated/` committed, local
-  packaging, OpenBIOS only, no CI), with v0.2.0 notes. Pushing waits for the
-  owner.
-- **Visual fidelity, all on by default for R4:** Max Detail (draw distance,
-  no distance LOD), PGXP stability, 2P fixes, dynamic aspect (Fit), Frame Rate
-  at display refresh (opportunistic, never slowing the game), Match display
-  uncapped, and dynamic resolution. Framework PRs:
-  RetroPortingToolKit/psxrecomp#467 (2P batching), #468 (draw-distance
-  clamps), #470 (PGXP), #460 (overlay arch), #449 (release notices).
-  Opportunistic render passes, pass cost and dynamic resolution are local and
-  unreviewed.
+Open R4 PRs (2026-10-05), each with its framework dependencies linked in the
+PR body:
+- #6 hide rear-view mirror (default on);
+- #7 camera look-around (default off) — needs RetroPortingToolKit/psxrecomp#506;
+- #8 JogCon input and native analog default — needs RetroPortingToolKit/recomp-net#25, psxrecomp#507;
+- #9 dynamic resolution on, 720p floor — needs psxrecomp#508, RetroPortingToolKit/recomp-ui#77;
+- #10 (draft) experimental three/four-seat Link Battle — needs psxrecomp#512, #511, recomp-net#26, recomp-ui#80.
+
+Suggested merge order: recomp-net #25, #26; psxrecomp #506, #507, #508,
+#511, #512; recomp-ui #77, #79, #80; then R4 #6, #7, #8, #9, #10, re-pinning
+each R4 branch to the merged framework.
+
+Local only (dev Mac; details in `analysis/HANDOFF-LOCAL.md`, gitignored):
+the held `feat/bundled-releases` branch, the Max Detail and VS-split lanes
+stacked on it, and a release-candidate integration of all of the above.
 
 ## Blockers
 
-- The owner must decide on pushing `generated/` (it embeds the EXE's code
-  words) before the bundled-release branch, and v0.2.0, can land.
-- Open bug: in a test build the image jumps back and forth between two moments
-  during a race. It is probably in the new opportunistic Frame Rate work; see
-  `analysis/HANDOFF-LOCAL.md` §4. Fix it before publishing that work.
+- Owner: push `generated/` (it embeds the EXE's code words) for the bundled
+  release model, or keep holding `feat/bundled-releases` and v0.2.0.
+- Owner: modern controls need a framework design choice (extend the unified
+  external-input layer with button remap, NeGcon pressure and a host-trigger
+  read, or drop the feature).
+- Owner: the opportunistic render-pass / frame-pacing lane conflicts with
+  upstream's rebuilt render passes; port it as new work or drop it. The
+  Unlimited-rate and pass-cost measurements wait on that.
 
 ## References
 
