@@ -367,6 +367,14 @@ PSX_NET_MODE=rollback build/r4-runtime --no-launcher --netplay --net-slot 1 \
 
 Details: `psxrecomp/docs/NETPLAY.md`.
 
+Experimental three/four-seat Link Battle can be opened in the same launcher
+with `tools/launch_link_experimental.sh build`. On its NETPLAY page, choose
+Max Players 3 or 4; each player runs one copy and takes one seat. The wrapper
+enables the game-specific serial-free command bridge and extra views. A full
+four-player race to the finish line is not yet verified; see
+`docs/LINK_BATTLE_EXPERIMENT.md` for what is and the framework PRs it needs.
+Use the usual `build/r4-runtime` for the stock two-player path.
+
 ## Memory Cards
 
 Standard PS1 `.mcd` images in `saves/`, compatible with common emulators. Local

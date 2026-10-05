@@ -8,7 +8,7 @@ name = "R4: Ridge Racer Type 4"
 id = "SLUS-00797"
 # VS Battle is a 2-player horizontal split screen on pads 1 + 2; netplay seats
 # map session slot N to controller port N+1.
-players = 2
+players = 4
 exe = "disc/SLUS_007.97"
 # Local, gitignored. disc/ holds the cue/bin (or symlinks to them) plus the
 # extracted boot EXE; --disc on the command line overrides this.
@@ -86,6 +86,13 @@ mod_function_entry_funcs = [
   "0x80060F94", "0x80014A90", "0x80071704", "0x8006EDEC",
   "0x8006F160", "0x80091320", "0x8002DC00", "0x80015F60", "0x8009375C",
   "0x80096640",
+  # Three/four-seat netplay serial-free setup filters (src/mods/r4_link_netplay.c).
+  "0x8003535C", "0x80035EA0", "0x8009B088", "0x80114AB8", "0x80114C28", "0x801155C4",
+  # Link teardown's zero SIO1 handles must not close the game's CD EvCB.
+  "0x800970A0", "0x80097060",
+  # Link overlay packet, view and HUD sites the same filters guard. Native
+  # overlay shards call entry hooks only for addresses listed here.
+  "0x80115520", "0x80115198", "0x80115310", "0x80115770", "0x80115D90", "0x80115F84", "0x80115FA8", "0x80116024",
 ]
 
 [runtime]

@@ -78,7 +78,7 @@ psxrecomp_add_game_runtime(psx-runtime
     EXE_NAME "r4-runtime"
     DEBUG_PORT 4797
     DEFAULT_GAME_CONFIG_PATH "game.toml"
-    MAX_PLAYERS 2
+    MAX_PLAYERS 4
     LAUNCHER_BOXART "${CMAKE_CURRENT_SOURCE_DIR}/recomp/launcher/boxart.tga"
     APP_ICON "${CMAKE_CURRENT_SOURCE_DIR}/assets/psxrecomp.ico"
     GEN_MARKER "generated/SLUS_007.97_dispatch.c"
@@ -125,6 +125,13 @@ if(R4_BUILD_TESTS AND BUILD_TESTING)
             target_link_libraries(r4-camera-look-tests PRIVATE m)
         endif()
         add_test(NAME r4_camera_look_helpers COMMAND r4-camera-look-tests)
+    endif()
+    if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_r4_link_netplay.c")
+        add_executable(r4-link-netplay-tests
+            "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_r4_link_netplay.c")
+        target_include_directories(r4-link-netplay-tests PRIVATE
+            "${PSXRECOMP_ROOT}/runtime/include")
+        add_test(NAME r4_link_netplay_setup COMMAND r4-link-netplay-tests)
     endif()
     # Pure widescreen helpers, no game data needed.
     if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_r4_widescreen.c")
