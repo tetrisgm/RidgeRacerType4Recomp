@@ -52,7 +52,11 @@ computer from **your own disc**.
 ## Known limitations
 
 - Link-cable battle is not supported.
-- NeGcon and JogCon are not supported; use a DualShock/analog pad or keyboard.
+- Recognized SDL steering wheels now use an emulated JogCon SIO identity and
+  signed steering position. Ordinary gamepads default to R4's native DualShock
+  analog protocol. The JogCon motor command is exposed in emulated device state;
+  wheel force feedback is not translated or hardware-verified. NeGcon emulation
+  remains unavailable in the framework.
 - The first visit to some menus (garage, car select, records) runs slower while
   their code is compiled in the background; later visits are native.
 - Updating: extract a new version to a **new folder** (extracting over an old

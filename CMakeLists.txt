@@ -152,6 +152,11 @@ if(R4_BUILD_TESTS AND BUILD_TESTING)
             "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_r4_interp_plugin.c"
             "${CMAKE_CURRENT_SOURCE_DIR}/src/mods/r4_interp.c")
     endif()
+    if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_r4_jogcon_compat.c")
+        r4_frame_rate_test(r4_jogcon_compat
+            "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_r4_jogcon_compat.c"
+            "${CMAKE_CURRENT_SOURCE_DIR}/src/mods/r4_jogcon_compat.c")
+    endif()
     find_package(Python3 QUIET COMPONENTS Interpreter)
     if(Python3_FOUND)
         # game.toml's [widescreen.cull] lists must match a fresh scan of the
