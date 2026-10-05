@@ -59,6 +59,9 @@ mod_function_entry_funcs = [
   "0x80020A98", "0x80021A20", "0x80021BA4", "0x80022340", "0x80034B50", "0x800207D4",
   "0x8006E4D0", "0x8006F2B0", "0x8002E554", "0x8006F00C", "0x80074AD8", "0x800374F8",
   "0x80070A58", # also r4.enhancement.hide-rear-view-mirror entry hook
+  # r4.enhancement.camera-lookaround: restore the previous eye before the
+  # next guest camera update writes fresh scratch inputs (not at car-draw entry).
+  "0x800738C4",
   # ClearOTagR (clear a buffer's HUD tags; also R4 Frame Rate's loop head,
   # ra 0x8001E764, before the race handler runs) and DrawOTag (tag the
   # frame's HUD)

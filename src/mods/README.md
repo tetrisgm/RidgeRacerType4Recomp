@@ -18,4 +18,6 @@ Rules (same as MegaManX6Recomp):
 - `r4_widescreen_plugin.c`: `r4.enhancement.widescreen` (`docs/WIDESCREEN.md`).
 - `r4_hide_rear_view_mirror.c`: `r4.enhancement.hide-rear-view-mirror`
   (`docs/HIDE_REAR_VIEW_MIRROR.md`); defaults on by request.
+- `r4_camera_look_plugin.c`: `r4.enhancement.camera-lookaround` (package
+  `README.txt`); right-stick look-around in single-player races.
 - See `psxrecomp/docs/MOD_PACKAGES.md`.
