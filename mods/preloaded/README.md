@@ -1,6 +1,8 @@
 # Preloaded mods
 
-Ship reviewed, default-disabled packages here:
+Ship reviewed packages here. Packages are default-disabled unless the owner
+decides otherwise; R4's widescreen and frame-rate packages are on by default
+(`default_enabled = true`, see the README's "On by default"):
 
 ```text
 packages/<package-id>/<version>/

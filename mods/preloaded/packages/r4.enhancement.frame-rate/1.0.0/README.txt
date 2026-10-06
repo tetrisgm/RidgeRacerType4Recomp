@@ -6,8 +6,8 @@ time for, without ever slowing the game down. The game still runs its race
 logic, lap timer, AI, input and music at the original 30 Hz; only what
 reaches the screen changes.
 
-Off by default: tick it under Mods -> Frame Rate (Display refresh,
-Interpolated unless you choose otherwise); your choice is saved.
+On by default: Display refresh, Interpolated. Untick it under Mods -> Frame
+Rate for the stock 30 FPS races; your choice is saved.
 
 How it never slows the game
 ---------------------------

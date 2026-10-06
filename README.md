@@ -48,9 +48,43 @@ netplay. Not yet verified end to end (see `ISSUES.md`).
 | VS Battle (2P split screen) | Works over netplay (delay-sync and rollback, digests match) |
 | Link battle (link cable) | Not supported (no SIO1 model) |
 | Renderer | Stock psxrecomp OpenGL at 4:3; software selectable |
-| Internal resolution | Native to 8K presets (Settings → Display), OpenGL |
+| Internal resolution | Match display by default (no cap); Native to 8K presets (Settings → Display), OpenGL |
 | Dynamic resolution | On by default above Native: steps the internal resolution down (not below 720p) only after sustained missed frame budgets, then back up; Settings → Display → Dynamic resolution turns it off |
-| Widescreen | Mods > Display > R4 Custom Renderer (experimental, off by default): native-wide races, Fit to Window / 16:9 / 21:9 / 32:9 |
+| Widescreen | On by default, Fit to Window (Mods > Display > R4 Custom Renderer): native-wide races, also 16:9 / 21:9 / 32:9 |
+| Frame rate | On by default, Display refresh, Interpolated (Mods > Frame Rate > R4 Frame Rate) |
+
+## On by default
+
+R4 starts with its display enhancements on. Each has an off switch, and a
+choice you make always wins over the default.
+
+| Enhancement | Default | Off switch |
+|---|---|---|
+| Widescreen (R4 Custom Renderer) | On, **Fit to Window**: races fill the window at whatever shape you give it, from 4:3 up | Mods → Display → untick **R4 Custom Renderer** (stock 4:3) |
+| Frame rate (R4 Frame Rate) | On, **Display refresh**, **Interpolated**: in-between frames only in time the game leaves free | Mods → Frame Rate → untick **R4 Frame Rate** (stock 30 FPS races) |
+| Internal resolution | **Match display**: the monitor's full pixel height, no cap | Settings → Display → Internal resolution → **Native** |
+| Dynamic resolution | On, never below **720p**, frame rate first | Settings → Display → **Dynamic resolution** off (the resolution then stays where you set it) |
+
+- **Your choice wins.** Ticking or unticking a mod, or changing one of its
+  options, saves that mod to `mods/state.toml` beside the game; a mod you
+  never touched follows the default of the version you run. An internal
+  resolution or dynamic resolution setting saved in `settings.toml`
+  (Settings → Display) outranks `game.toml`, as does the older
+  `supersampling` factor (every v0.1.0 launcher wrote `supersampling = 1`):
+  such an install stays at Native until you pick Match display.
+- **Keeping full speed.** The game's own frames always come first:
+  in-between frames are drawn only in leftover time and are dropped, never
+  waited for, when none fits. Dynamic resolution steps the internal
+  resolution down (not below 720p) after sustained missed frame budgets, and
+  with `dynamic_resolution_priority = "frame_rate"` also when in-between
+  frames keep being dropped; it steps back up when there is room. It does
+  nothing at Native. See `ISSUES.md` #7 for what still costs speed.
+- **Netplay** is always vanilla: every mod, on by default or not, is cleared
+  for a netplay session on both peers. Internal resolution is your own view
+  and stays.
+- Developers: `tools/mod_state.py build --stock` writes every mod off for a
+  scripted `--no-launcher` run, `--disable PACKAGE/FEATURE` one of them, and
+  `--defaults` removes the file again (the shipped defaults).
 
 ## Building From Source (macOS, Windows)
 
@@ -104,9 +138,10 @@ executable. Defaults live in `game.toml`:
   channel), `overlay_cache` (native overlay shards; see Building From Source).
 - `[netplay]` — disc gates: `require_cue`, `required_tracks = 1`, `required_disc_fp`.
 
-## Frame rate (optional mod)
+## Frame rate
 
-Mods -> Frame Rate -> **R4 Frame Rate** (experimental, off by default) adds
+Mods -> Frame Rate -> **R4 Frame Rate** (on by default: Display refresh,
+Interpolated; untick it for the stock 30 FPS races) adds
 frames between the game's own in races, as many as the computer has time
 for, at up to the display's refresh rate, a fixed 60 / 100 / 120 / 200 / 240
 / 300 FPS, or Unlimited. The game itself still runs at its original 30 Hz: lap times, AI,
@@ -147,8 +182,10 @@ sessions run without mods. Details and credits:
 ## Internal resolution
 
 **Settings → Display → Internal resolution** renders the game at a higher
-resolution instead of stretching 320×240 (OpenGL). It is off (Native) by
-default and takes effect when the game starts.
+resolution instead of stretching 320×240 (OpenGL). R4 defaults to Match
+display (`[video] internal_resolution = "display"` in `game.toml`; the
+framework default is Native) with dynamic resolution on; it takes effect
+when the game starts.
 
 | Preset | Scale | Race frame | Notes |
 |---|---|---|---|

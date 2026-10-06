@@ -43,7 +43,7 @@ shards need an R4.BIN extraction method (a cumulative start-sector table, which
 
 ## #6 — Widescreen (R4 Custom Renderer) limitations — OPEN (enhancement)
 
-The `r4.enhancement.widescreen` mod (experimental, off by default; see
+The `r4.enhancement.widescreen` mod (on by default for R4; see
 `docs/WIDESCREEN.md`) widens the frames of R4's five race handlers (the
 race overlays 659/660/661, the attract demo and the after-goal run). Known
 limits:
@@ -82,6 +82,30 @@ limits:
 - The mod's entry hooks belong to its manifest plugin (`r4.widescreen`):
   psxrecomp runs them only while the resolved mod plan activates it, so never
   in netplay or while the package is disabled.
+
+## #7 — Widescreen at Match display does not hold full speed — OPEN (framework)
+
+Measured 2026-10-05 on an Apple M4 (Retina panel, Match display = 10x,
+shared host under load), debug-tools build, psxrecomp `8100f728`, from race
+savestates holding accelerate:
+
+- 1P Grand Prix with the shipped defaults: 51.5-54.4 guest Hz (60 is full
+  speed); every mod off at Native: 59.9-60.0. 2P VS: 19.6 Hz with the
+  defaults, 60.0 stock.
+- The cost is native-wide at a large surface allocation, not the level
+  rendered: widescreen at a fixed 720p runs 59.8 Hz (1P) and 55-58 (2P);
+  forced to 3x inside a 10x allocation it runs 53-56 (1P, three pairs
+  against 58.8-59.6 inside a 6x allocation); 4:3 at 10x runs 60. Dynamic
+  resolution allocates at the ceiling, so its down steps do not lower the
+  load, and its verify rule undoes them ("down step did not lower the load
+  (not resolution-bound)"). Unconfirmed lead: per-pass load/store of the
+  full-size wide attachments on a tile-based GPU (27 mirror passes a frame).
+- R4 Frame Rate on costs 2-6 Hz there although it draws no in-between frame
+  (0 passes, no leftover time): defaults 51.4-54.4 against 54.6-57.4 with
+  only Frame Rate off. With widescreen off it draws passes and holds 60.
+- Not fixed in R4 (no resolution cap, owner 2026-10-01): needs a framework
+  change (wide surfaces sized to the current level, or fewer full-surface
+  passes) and a Frame Rate presenter that costs nothing when no pass fits.
 
 ## Watch items
 

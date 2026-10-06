@@ -1,7 +1,8 @@
 R4 Custom Renderer (r4.enhancement.widescreen 1.0.0)
 ======================================================
 
-Mods > Display > R4 Custom Renderer. Off by default.
+Mods > Display > R4 Custom Renderer. On by default, with View = Fit to
+Window. Untick it for the stock 4:3 picture; your choice is saved.
 
 What it does
 ------------

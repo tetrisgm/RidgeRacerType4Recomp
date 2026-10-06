@@ -1,7 +1,8 @@
 # Widescreen: R4 Custom Renderer
 
-`r4.enhancement.widescreen` is a default-off, experimental mod: **Mods >
-Display > R4 Custom Renderer**. View: **Fit to Window** (the default; follows
+`r4.enhancement.widescreen` is an R4 mod, **on by default** (owner,
+2026-10-01): **Mods > Display > R4 Custom Renderer**; untick it for the stock
+4:3 picture (the choice is saved in `mods/state.toml`). View: **Fit to Window** (the default; follows
 the window from 4:3 with no upper aspect limit, but past about 65:9 the course
 ends short of the right edge: see [Limitations](#limitations)), **16:9**,
 **21:9**, **32:9**.
@@ -61,12 +62,13 @@ Changing either list needs `tools/regen.sh`. `bgez_sites` and
 ## Testing it
 
 ```sh
-tools/mod_state.py build --enable r4.enhancement.widescreen/widescreen aspect=Fit
+tools/mod_state.py build --defaults                     # shipped defaults: Fit, frame rate on
+tools/mod_state.py build --stock --enable r4.enhancement.widescreen/widescreen aspect=21:9
 R4_WS_TRACE=1 tools/run_r4.sh build --debug-port 4797
 python3 tools/smoke.py /tmp/r4-ws --port 4797
 python3 tools/dbg.py display_aspect num=32 den=9        # fixed views, live
 python3 tools/dbg.py display_aspect num=0 den=0 adaptive=1   # Fit
-tools/mod_state.py build --clear                        # back to stock
+tools/mod_state.py build --stock                        # every mod off: stock 4:3
 ```
 
 - `R4_WS_TRACE=1` logs scene changes (state indices, handler, phase) and, every
