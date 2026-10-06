@@ -207,8 +207,8 @@ for A in "${ARTS[@]}"; do
   Z="dist/r4-$V-$A.zip"
   L="$("$PYTHON" -c 'import sys,zipfile; print("\n".join(zipfile.ZipFile(sys.argv[1]).namelist()))' "$Z")"
   # 1. It is the game: executable, OpenBIOS, runtime data, both R4 mods, and
-  #    the notices its components' licenses ask for (recomp-ui's, Dear ImGui's,
-  #    recomp-net's, retcomm-rbengine's and, on Windows, the MinGW-w64
+  #    the notices its components' licenses ask for (recomp-ui's and TinyCC's
+  #    come from the framework packager; Dear ImGui's, recomp-net's, retcomm-rbengine's and, on Windows, the MinGW-w64
   #    runtime's and winpthreads' come from scripts/package_release.sh).
   NEED=("$EXE" psx_game_version.txt bios/openbios.bin bios/OpenBIOS.LICENSE game.toml
         game_options.toml DISC.md LICENSE README.txt
@@ -232,8 +232,7 @@ for A in "${ARTS[@]}"; do
     grep -q "^$p" <<< "$L" || { echo "missing $p in $Z" >&2; exit 1; }
   done
   # TinyCC (LGPL-2.1, Windows overlay compiler) must ship with its license
-  # (psxrecomp THIRD_PARTY_ATTRIBUTION.md; scripts/package_release.sh stages
-  # it). Windows players have no compiler of their own, so tcc must ship too.
+  # (psxrecomp THIRD_PARTY_ATTRIBUTION.md; the framework packager stages it). Windows players have no compiler of their own, so tcc must ship too.
   if [[ $PLATFORM == windows ]]; then
     for f in overlay_toolchain/tcc/tcc.exe overlay_toolchain/tcc/COPYING; do
       grep -qxF -- "$f" <<< "$L" || { echo "missing $f in $Z" >&2; exit 1; }

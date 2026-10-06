@@ -54,24 +54,10 @@ for _doc in DISC.md LICENSE; do
 done
 # Third-party notices (box art credit, MegaManX6Recomp), path kept.
 EXTRA+=(--runtime-file THIRD-PARTY-LICENSES/README.md)
-# recomp-ui's notices. r4-runtime links recomp-ui (MIT) and ships its fonts and
-# flag sheet (OFL-1.1, CC BY-SA 4.0), but the framework packager stages only
-# psxrecomp's own notices. Put recomp-ui's beside the exe: the NOTICE.md files
-# travel with assets/, the license goes in as licenses/recomp-ui-LICENSE.
-# tools/package_release.sh requires all three in every zip.
+# recomp-ui's license and asset notices, and TinyCC's license in the Windows
+# overlay_toolchain/tcc/, are staged by the framework packager itself.
 if [[ -d "${ROOT}/${BUILD_DIR}" ]]; then EXE_DIR="${ROOT}/${BUILD_DIR}"; else EXE_DIR="${BUILD_DIR}"; fi
-UI="${ROOT}/recomp-ui"
-for _f in LICENSE assets/common/fonts/NOTICE.md assets/common/img/NOTICE.md; do
-  [[ -f "${UI}/${_f}" ]] || { echo "error: missing recomp-ui/${_f}" >&2; exit 1; }
-done
-for _d in assets/fonts assets/img; do
-  [[ -d "${EXE_DIR}/${_d}" ]] || { echo "error: ${EXE_DIR}/${_d} missing -- build psx-runtime first" >&2; exit 1; }
-done
 mkdir -p "${EXE_DIR}/licenses"
-cp "${UI}/LICENSE" "${EXE_DIR}/licenses/recomp-ui-LICENSE"
-cp "${UI}/assets/common/fonts/NOTICE.md" "${EXE_DIR}/assets/fonts/NOTICE.md"
-cp "${UI}/assets/common/img/NOTICE.md" "${EXE_DIR}/assets/img/NOTICE.md"
-EXTRA+=(--runtime-file licenses/recomp-ui-LICENSE)
 # Statically linked libraries whose licenses (MIT) ask for their notice in
 # binary copies, and that no framework packager stages: Dear ImGui (recomp-ui's
 # launcher UI), recomp-net and retcomm-rbengine (netplay).
@@ -99,22 +85,6 @@ for _n in "${NOTICES[@]}"; do
   cp "${_src}" "${EXE_DIR}/licenses/${_dst}"
   EXTRA+=(--runtime-file "licenses/${_dst}")
 done
-# TinyCC's license. The Windows overlay toolchain ships TinyCC (LGPL-2.1) in
-# overlay_toolchain/tcc/, but the pinned tcc-0.9.27-win64-bin.zip has no
-# license file and the framework packager adds none. Stage the LGPL-2.1 text
-# there as COPYING before the toolchain is staged (it only adds to that
-# folder); tools/package_release.sh requires it in the Windows zip. Drop this
-# at the psxrecomp pin whose packager ships TinyCC's license itself.
-case "${ARTIFACT_TAG}" in
-  windows-*)
-    TCC_LICENSE="${ROOT}/THIRD-PARTY-LICENSES/TinyCC-LGPL-2.1.txt"
-    [[ -f "${TCC_LICENSE}" ]] || { echo "error: missing ${TCC_LICENSE}" >&2; exit 1; }
-    mkdir -p "${EXE_DIR}/overlay_toolchain/tcc"
-    cp "${TCC_LICENSE}" "${EXE_DIR}/overlay_toolchain/tcc/COPYING"
-    EXTRA+=(--runtime-file overlay_toolchain/tcc/COPYING)
-    ;;
-esac
-
 cd "${ROOT}"
 exec bash "${PACKAGER}" \
   --root "${ROOT}" \

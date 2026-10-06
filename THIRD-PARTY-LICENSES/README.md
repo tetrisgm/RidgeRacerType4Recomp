@@ -69,8 +69,9 @@ binary copies.
 Windows release zips carry the unmodified TinyCC 0.9.27 win64 binaries in
 `overlay_toolchain/tcc/` (the `tcc-0.9.27-win64-bin.zip` psxrecomp's
 `tools/release_stage.py` pins), by Fabrice Bellard and contributors, licensed
-under the GNU Lesser General Public License 2.1 (`TinyCC-LGPL-2.1.txt`,
-shipped as `overlay_toolchain/tcc/COPYING`). The game runs it as a separate
+under the GNU Lesser General Public License 2.1 (psxrecomp's
+`runtime/licenses/TinyCC-LICENSE.txt`, which its packager ships as
+`overlay_toolchain/tcc/COPYING`). The game runs it as a separate
 program to compile code overlays; nothing links against it. Its complete
 source, `tcc-0.9.27.tar.bz2`, is attached to the same release page as the
 Windows zip, and is also at
