@@ -1,10 +1,15 @@
-/* R4's link setup with three or four synchronized netplay seats.
+/* R4's Link Battle as the online race for two to four synchronized netplay
+ * seats (docs/ONLINE_BATTLE.md).
  *
- * The serial initializers establish guest state and SIO1 events. In a
- * three- or four-seat recomp-net match the events are unused, but the guest RAM
- * initialization remains required. Keep these replacements exclusive to the
- * authenticated US link overlay and the opted-in link session. The packet
- * receive path consumes synchronized seat commands instead of SIO1 bytes. */
+ * Every peer runs the same native mode-4 race: one car per seat, seat order =
+ * session slot order (host first). The serial initializers establish guest
+ * state and SIO1 events; in a recomp-net match the events are unused, but the
+ * guest RAM initialization remains required. Keep these replacements
+ * exclusive to the authenticated US link overlay and the opted-in link
+ * session. The packet receive path consumes synchronized seat commands
+ * instead of SIO1 bytes. Every peer draws every seat's view into one quadrant
+ * of the same frame (guest state stays identical); each peer then presents
+ * only its own seat's quadrant through psx_netplay_present_local_view. */
 #include "mod_plugins.h"
 #include "psx_netplay.h"
 #include "cpu_state.h"
@@ -16,6 +21,26 @@
 
 #define R4_LINK_MODE 0x800F4EF4u
 #define R4_LINK_OVERLAY_BASE 0x801149A8u
+/* Accepted entrants at mode-4 race init (0x8003821C); 2 selects the retail
+ * one-view-per-console layout in the link handler (0x801157A4). */
+#define R4_LINK_ENTRANTS 0x80107328u
+#define R4_LINK_PAUSED 0x800F4E18u
+#define R4_LINK_VIEW_W 160u
+#define R4_LINK_VIEW_H 120u
+
+/* Netplay seats this hook path serves: 2..4, one car each. */
+static int r4_link_seats_ok(int seats)
+{
+    return seats >= 2 && seats <= 4;
+}
+
+/* Quadrant of one seat's view: seat 0 top-left, 1 top-right, 2 bottom-left,
+ * 3 bottom-right, for every seat count. */
+static void r4_link_view_origin(unsigned view, unsigned *x, unsigned *y)
+{
+    *x = (view & 1u) ? R4_LINK_VIEW_W : 0u;
+    *y = view >= 2u ? R4_LINK_VIEW_H : 0u;
+}
 
 /* Expansion-1 mod memory is included in savestates and rollback snapshots. */
 static uint32_t r4_link_brake_ramps;
@@ -32,6 +57,11 @@ static uint32_t r4_link_extra_ot;
 #define R4_LINK_BUFFER_BYTES 0x22778u
 #define R4_LINK_OT_ALLOC_BYTES (4u * R4_LINK_OT_BYTES + 8u)
 static unsigned r4_link_draw_view;
+/* Set by this main-loop iteration's link race handler (0x80115770), cleared
+ * by its final DrawOTag: the OT and HUD packet edits below only touch a
+ * frame whose views the handler just built. Result, menu and loading frames
+ * of mode 4 draw other packets (and would meet stale HUD copies). */
+static unsigned r4_link_views_frame;
 static uint32_t r4_link_hud_start[4], r4_link_hud_end[4];
 static unsigned r4_link_hud_open = 4;
 static uint32_t r4_link_hud_copy_head, r4_link_hud_copy_tail;
@@ -47,7 +77,7 @@ static void r4_link_unlink_extra_hud(struct CPUState *cpu, unsigned seats)
     const uint32_t buffer = psx_mod_read_word(0x800ACDCCu);
     uint32_t prev = 0;
     uint32_t current = cpu->gpr[4];
-    if (seats != 3u && seats != 4u) return;
+    if (seats != 3u && seats != 4u) return; /* extra seats only */
     for (unsigned steps = 0; steps < 32768u; ++steps) {
         if ((current & 3u) || current < buffer ||
             current + 20u > buffer + R4_LINK_BUFFER_BYTES) break;
@@ -84,18 +114,16 @@ static void r4_link_place_rank_packets(unsigned seats)
     const uint32_t buffer = psx_mod_read_word(0x800ACDCCu);
     uint32_t heap = psx_mod_read_word(0x1F800000u);
     const uint32_t base = buffer + 0x22688u;
-    if ((seats != 3u && seats != 4u) || r4_link_buffer_index() > 1u ||
+    if (!r4_link_seats_ok((int)seats) || r4_link_buffer_index() > 1u ||
         (heap & 3u) || heap < buffer ||
         heap + 6u * (seats - 1u) * 20u >
             buffer + R4_LINK_BUFFER_BYTES) return;
     for (unsigned seat = 0; seat < seats; ++seat) {
         const unsigned source_seat = seat & 1u;
+        /* Copies are drawn by the HUD overlay after every view's road. */
         const int clone = seat >= 1u;
-        const int dx = seats == 4u ? (seat & 1u ? 160 : 0) :
-                       (seat == 2u ? 160 : 0);
-        const int dy = seats == 4u ? (seat == 1u ? -120 :
-                                      seat == 2u ? 120 : 0) :
-                       (seat == 2u ? 120 : 0);
+        const int dx = seat & 1u ? 160 : 0;
+        const int dy = seat == 1u ? -120 : seat == 2u ? 120 : 0;
         for (unsigned packet = 0; packet < 6u; ++packet) {
             const uint32_t source = base + 0x78u * source_seat + 20u * packet;
             const uint32_t tag = psx_mod_read_word(source);
@@ -306,17 +334,10 @@ static void r4_link_write_viewport_record(unsigned index,
 static void r4_link_layout_viewport(unsigned seats, unsigned view,
                                     R4LinkViewport *record)
 {
-    unsigned x, y, width, height;
-    if (seats == 3 && view == 0) {
-        x = 0; y = 0; width = 320; height = 120;
-    } else if (seats == 3) {
-        x = view == 1 ? 0 : 160;
-        y = 120; width = 160; height = 120;
-    } else {
-        x = (view & 1u) ? 160 : 0;
-        y = view >= 2 ? 120 : 0;
-        width = 160; height = 120;
-    }
+    unsigned x, y;
+    const unsigned width = R4_LINK_VIEW_W, height = R4_LINK_VIEW_H;
+    (void)seats;
+    r4_link_view_origin(view, &x, &y);
     record->center_x = (uint16_t)(x + width / 2);
     record->center_y = (uint16_t)(y + height / 2);
     record->left = (uint16_t)x;
@@ -369,7 +390,7 @@ static void r4_link_copy_hud_packets(uint32_t root, unsigned seats)
                         const uint32_t xy = psx_mod_read_word(heap + 8u);
                         int x = (int16_t)xy;
                         int y = (int16_t)(xy >> 16);
-                        const int right = seats == 3u || slot == 3u;
+                        const int right = slot == 3u;
                         if (right && x < 96) x += 160;
                         if (!right && x >= 225) x -= 160;
                         /* The game's extra-slot HUD positions may advance
@@ -418,15 +439,10 @@ static void r4_link_place_retail_hud(uint32_t root, unsigned seats)
                 const uint32_t xy = psx_mod_read_word(current + 8u);
                 int x = (int16_t)xy;
                 int y = (int16_t)(xy >> 16);
-                if (seats == 3u && slot == 1u) {
-                    if (x >= 225) x -= 160;
-                    if (y >= 240) y -= 120;
-                    else if (y >= 0 && y < 120) y += 120;
-                } else if (seats == 4u) {
-                    if (slot == 0u && x >= 225) x -= 160;
-                    if (slot == 1u && x < 96) x += 160;
-                    if (y >= 120 && y < 240) y -= 120;
-                }
+                (void)seats;
+                if (slot == 0u && x >= 225) x -= 160;
+                if (slot == 1u && x < 96) x += 160;
+                if (y >= 120 && y < 240) y -= 120;
                 psx_mod_write_word(current + 8u,
                     ((uint32_t)(uint16_t)y << 16) | (uint16_t)x);
                 break;
@@ -438,16 +454,38 @@ static void r4_link_place_retail_hud(uint32_t root, unsigned seats)
     }
 }
 
-static void r4_link_append_hud_overlay(unsigned seats)
+/* Wrap this frame's HUD copies in a full-frame draw area and return the
+ * packet chain's first node; its last node links to `old`. With
+ * `clear_lower` it first fills the lower half black (below `clear_top`):
+ * two seats leave the retail second view's leftover HUD there. Without
+ * `copies` the chain is only that fill. 0 when there is nothing to draw or
+ * no room. */
+static uint32_t r4_link_build_hud_overlay(uint32_t old, int clear_lower,
+                                          uint32_t clear_top, int copies)
 {
-    if (!r4_link_hud_copy_head || !r4_link_hud_copy_tail) return;
-    const uint32_t extra = r4_link_extra_ot_for(seats - 1u);
+    copies = copies && r4_link_hud_copy_head && r4_link_hud_copy_tail;
+    if (!copies && !clear_lower) return 0;
     const uint32_t buffer = psx_mod_read_word(0x800ACDCCu);
-    const uint32_t heap = psx_mod_read_word(0x1F800000u);
-    if (!extra || (heap & 3u) || heap < buffer ||
-        heap + 24u > buffer + R4_LINK_BUFFER_BYTES) return;
-    const uint32_t old = psx_mod_read_word(extra) & 0x00FFFFFFu;
+    uint32_t heap = psx_mod_read_word(0x1F800000u);
+    const uint32_t fill = clear_lower ? 16u : 0u;
+    if ((heap & 3u) || heap < buffer ||
+        heap + 24u + fill > buffer + R4_LINK_BUFFER_BYTES) return 0;
     const uint32_t y = r4_link_buffer_index() ? 240u : 0u;
+    const uint32_t first = heap;
+    if (clear_lower) {
+        /* GP0(02h) fill: absolute VRAM, black. */
+        psx_mod_write_word(heap, 0x03000000u | ((heap + 16u) & 0x00FFFFFFu));
+        psx_mod_write_word(heap + 4u, 0x02000000u);
+        psx_mod_write_word(heap + 8u, (y + clear_top) << 16);
+        psx_mod_write_word(heap + 12u, ((240u - clear_top) << 16) | 320u);
+        heap += 16u;
+        if (!copies) {
+            psx_mod_write_word(heap, 0x01000000u | (old & 0x00FFFFFFu));
+            psx_mod_write_word(heap + 4u, 0xE1000205u);
+            psx_mod_write_word(0x1F800000u, heap + 8u);
+            return first;
+        }
+    }
     psx_mod_write_word(heap, 0x03000000u |
                              (r4_link_hud_copy_head & 0x00FFFFFFu));
     psx_mod_write_word(heap + 4u, 0xE3000000u | (y << 10));
@@ -458,10 +496,51 @@ static void r4_link_append_hud_overlay(unsigned seats)
                        (tail_tag & 0xFF000000u) |
                        ((heap + 16u) & 0x00FFFFFFu));
     /* The next frame's road pass inherits the final GPU draw mode. */
-    psx_mod_write_word(heap + 16u, 0x01000000u | old);
+    psx_mod_write_word(heap + 16u, 0x01000000u | (old & 0x00FFFFFFu));
     psx_mod_write_word(heap + 20u, 0xE1000205u);
-    psx_mod_write_word(extra, heap & 0x00FFFFFFu);
     psx_mod_write_word(0x1F800000u, heap + 24u);
+    return first;
+}
+
+static void r4_link_append_hud_overlay(unsigned seats)
+{
+    const uint32_t extra = r4_link_extra_ot_for(seats - 1u);
+    if (!extra) return;
+    const uint32_t head =
+        r4_link_build_hud_overlay(psx_mod_read_word(extra) & 0x00FFFFFFu,
+                                  0, 0, 1);
+    if (head) psx_mod_write_word(extra, head & 0x00FFFFFFu);
+}
+
+/* Two seats have no private view OTs: draw the HUD copies after the last
+ * node of the frame's own chain (bounded walk, like r4_link_append_ot),
+ * over a black lower half. While paused (any seat count) only the two upper
+ * views are drawn: the native pause menu (y 85..135) is in the frame's own
+ * chain, which the lower views' private OTs would cover, so the lower half
+ * is cleared from just below it instead. */
+static void r4_link_append_root_hud_overlay(uint32_t root, int paused)
+{
+    const uint32_t buffer = psx_mod_read_word(0x800ACDCCu);
+    uint32_t current = root;
+    for (unsigned steps = 0; steps < 32768u; ++steps) {
+        if ((current & 3u) || current < buffer ||
+            current >= buffer + R4_LINK_BUFFER_BYTES) return;
+        const uint32_t tag = psx_mod_read_word(current);
+        const uint32_t next = tag & 0x00FFFFFFu;
+        const uint32_t next_guest = 0x80000000u | next;
+        if (next == 0x00FFFFFFu || next_guest < buffer ||
+            next_guest >= buffer + R4_LINK_BUFFER_BYTES) {
+            if (next != 0x00FFFFFFu &&
+                ((next & 3u) || next >= 0x00200000u)) return;
+            const uint32_t head = r4_link_build_hud_overlay(
+                next, 1, paused ? 136u : R4_LINK_VIEW_H, !paused);
+            if (head)
+                psx_mod_write_word(current, (tag & 0xFF000000u) |
+                                            (head & 0x00FFFFFFu));
+            return;
+        }
+        current = next_guest;
+    }
 }
 
 /* Some prebuilt draw-environment packets use the retail two-view clipping
@@ -470,7 +549,7 @@ static void r4_link_append_hud_overlay(unsigned seats)
  * full-screen HUD packets and unrelated draw state alone. */
 static int r4_link_patch_first_clip(uint32_t root, unsigned view, unsigned seats)
 {
-    if (view >= seats || (seats != 3 && seats != 4)) return 0;
+    if (view >= seats || !r4_link_seats_ok((int)seats)) return 0;
     const uint32_t buffer = psx_mod_read_word(0x800ACDCCu);
     const uint32_t y_offset = r4_link_buffer_index() ? 240u : 0u;
     R4LinkViewport rect;
@@ -509,7 +588,7 @@ static void r4_link_prepare_viewport(unsigned seats, unsigned view)
 {
     const unsigned index = view + 2u;
     R4LinkViewport rect;
-    if ((seats != 3 && seats != 4) || view >= seats) return;
+    if (!r4_link_seats_ok((int)seats) || view >= seats) return;
     if (r4_link_patched_viewport) {
         r4_link_write_viewport_record(r4_link_patched_viewport,
                                        &r4_link_saved_viewport);
@@ -557,7 +636,7 @@ static int r4_link_session(void)
     const char *probe = getenv("PSX_GAME_FILTER_OFFLINE_PROBE");
     const char *experimental = getenv("PSX_R4_LINK_EXPERIMENTAL");
     const int seats = psx_netplay_seat_count();
-    return ((seats == 3 || seats == 4) && experimental &&
+    return (r4_link_seats_ok(seats) && experimental &&
             experimental[0] == '1' && !experimental[1]) ||
            (probe && probe[0] == '1' && !probe[1]);
 }
@@ -639,7 +718,7 @@ static uint32_t r4_link_digital_command(unsigned seat, const PsxNetPad *pad)
 static int r4_link_stage_netplay_commands(void)
 {
     const int seats = psx_netplay_seat_count();
-    if (seats != 3 && seats != 4) return 0;
+    if (!r4_link_seats_ok(seats)) return 0;
     uint32_t words[4] = {0x20000000u, 0x20000000u,
                          0x20000000u, 0x20000000u};
     uint8_t start_held = 0;
@@ -706,20 +785,54 @@ static void r4_link_clear_serial_state(void)
     r4_link_zero_words(0x800ACD98u, 2);
 }
 
+/* Present only this peer's quadrant while the race views are up. The pause
+ * menu spans the whole frame, so a paused race shows every view. */
+static void r4_link_present_local_view(unsigned seats)
+{
+    const int slot = psx_netplay_local_slot();
+    unsigned x, y;
+    if (slot < 0 || (unsigned)slot >= seats ||
+        psx_mod_read_byte(R4_LINK_PAUSED) != 0) return;
+    r4_link_view_origin((unsigned)slot, &x, &y);
+    psx_netplay_present_local_view(x, y, R4_LINK_VIEW_W, R4_LINK_VIEW_H);
+}
+
 static int r4_link_serial_filter(struct CPUState *cpu, uint32_t address)
 {
-    const char *view_probe = getenv("PSX_R4_VIEW_COUNT_PROBE");
     if (((address == 0x80021614u && cpu->gpr[31] == 0x80115F18u) ||
          (address == 0x80021960u && cpu->gpr[31] == 0x80115F24u)) &&
-        view_probe && view_probe[0] == '1' && !view_probe[1] &&
         r4_link_ready() && cpu->gpr[5] >= 2u && cpu->gpr[5] < 4u)
         cpu->gpr[5] &= 1u; /* valid HUD record, unchanged per-car value a0 */
-    if (address == 0x8006F00Cu && view_probe && view_probe[0] == '1' &&
-        !view_probe[1] && r4_link_ready() && r4_link_draw_view >= 2u &&
-        r4_link_draw_view < 4u)
+    if (address == 0x8006F00Cu && r4_link_ready() &&
+        r4_link_draw_view >= 2u && r4_link_draw_view < 4u)
         cpu->gpr[4] &= 1u; /* course renderer has only two view indices */
-    if (address == 0x80093520u && view_probe && view_probe[0] == '1' &&
-        !view_probe[1] && r4_link_ready()) {
+    if (address == 0x801157ECu && r4_link_ready() &&
+        psx_netplay_seat_count() == 2) {
+        /* Two entrants select the retail one-view layout, which draws only
+         * the first car. Take the two-view branch (0x801157D0..E8) instead,
+         * so every peer draws both seats' views: view flag 2, the two-view
+         * OT base, and its LOD flag. The entrant count itself stays 2. */
+        psx_mod_write_word(cpu->gpr[29] + 40u, 2u);
+        psx_mod_write_word(cpu->gpr[29] + 44u,
+                           psx_mod_read_word(0x800ACDCCu) + 0xB70u);
+        psx_mod_write_half(0x1F80005Eu, 1u);
+    }
+    if (r4_link_ready() && psx_netplay_seat_count() == 2) {
+        /* With exactly two entrants the HUD setup (0x8002094C, 0x80021014
+         * at race init 0x8003D328) and the per-frame HUD OT pass
+         * (0x80020A98 from 0x80115F7C) build the one-view HUD. Both peers
+         * draw two views, so let those calls see the two-view entrant count
+         * and restore the real count (2) right after them; rank, results and
+         * the race simulation keep reading 2. Guest-only, so peers agree. */
+        if ((address == 0x8002094Cu && cpu->gpr[31] == 0x8003D330u &&
+             cpu->gpr[4] == 4u) ||
+            (address == 0x80021134u && cpu->gpr[31] == 0x80115F7Cu))
+            psx_mod_write_half(R4_LINK_ENTRANTS, 4u);
+        if ((address == 0x8007807Cu && cpu->gpr[31] == 0x8003D3ACu) ||
+            address == 0x80115F84u)
+            psx_mod_write_half(R4_LINK_ENTRANTS, 2u);
+    }
+    if (address == 0x80093520u && r4_link_ready() && r4_link_views_frame) {
         if (cpu->gpr[31] == 0x8001E808u) {
             r4_link_draw_view = 4;
             r4_link_place_retail_hud(cpu->gpr[4],
@@ -748,8 +861,12 @@ static int r4_link_serial_filter(struct CPUState *cpu, uint32_t address)
             (void)r4_link_patch_first_clip(cpu->gpr[4], 1,
                                             (unsigned)psx_netplay_seat_count());
             const unsigned seats = (unsigned)psx_netplay_seat_count();
-            if (r4_link_append_ot(cpu->gpr[4], seats))
+            const int paused = psx_mod_read_byte(R4_LINK_PAUSED) != 0;
+            if (seats == 2u || paused)
+                r4_link_append_root_hud_overlay(cpu->gpr[4], paused);
+            else if (r4_link_append_ot(cpu->gpr[4], seats))
                 r4_link_append_hud_overlay(seats);
+            r4_link_views_frame = 0;
         }
     }
     if (address == 0x80116024u && r4_link_patched_viewport) {
@@ -763,10 +880,11 @@ static int r4_link_serial_filter(struct CPUState *cpu, uint32_t address)
             if (extra) psx_mod_write_word(0x1F800004u, extra);
         }
     }
-    if (address == 0x80115770u && view_probe && view_probe[0] == '1' &&
-        !view_probe[1] && r4_link_ready()) {
+    if (address == 0x80115770u && r4_link_ready()) {
         const int seats = psx_netplay_seat_count();
-        if (seats == 3 || seats == 4) {
+        if (r4_link_seats_ok(seats)) {
+            r4_link_present_local_view((unsigned)seats);
+            r4_link_views_frame = 1;
             r4_link_draw_view = 0;
             for (unsigned i = 0; i < 4u; ++i)
                 r4_link_hud_start[i] = r4_link_hud_end[i] = 0;
@@ -776,18 +894,15 @@ static int r4_link_serial_filter(struct CPUState *cpu, uint32_t address)
             r4_link_clear_extra_ots();
         }
     }
-    if (address == 0x80115F84u && view_probe && view_probe[0] == '1' &&
-        !view_probe[1] && r4_link_ready())
+    if (address == 0x80115F84u && r4_link_ready())
         r4_link_prepare_viewport((unsigned)psx_netplay_seat_count(), 0);
-    if (view_probe && view_probe[0] == '1' && !view_probe[1] &&
-        r4_link_ready()) {
+    if (r4_link_ready()) {
         if (address == 0x80021774u && cpu->gpr[5] < 4u)
             r4_link_hud_boundary(cpu->gpr[5]);
         if (address == 0x80021134u)
             r4_link_hud_boundary(4);
     }
-    if (address == 0x80115FA8u && view_probe && view_probe[0] == '1' &&
-        !view_probe[1] && r4_link_ready()) {
+    if (address == 0x80115FA8u && r4_link_ready()) {
         const unsigned view = cpu->gpr[17];
         if (view == 1u || view == 2u || view == 3u)
             r4_link_draw_view = view;
@@ -851,22 +966,22 @@ static int r4_link_serial_filter(struct CPUState *cpu, uint32_t address)
         psx_mod_read_half(R4_LINK_MODE) == 4 &&
         psx_mod_read_word(R4_LINK_OVERLAY_BASE) == 9u &&
         psx_mod_read_half(0x800FF838u) == 3) {
-        /* The serial handshake normally reports accepted entrants. Leave the
-         * unused fourth car inactive in a three-peer session. */
+        /* The serial handshake normally reports accepted entrants: one car
+         * per seat, in seat order; the remaining slots stay inactive. */
         for (unsigned slot = 0; slot < 4; ++slot)
             psx_mod_write_byte(0x800AC074u + slot,
-                               psx_netplay_seat_count() == 3 && slot == 3 ? 0 : 1);
+                               (int)slot < psx_netplay_seat_count() ? 1 : 0);
         psx_mod_write_half(0x800FF838u, 2);
         return 0;
     }
     if ((address & 0x1FFFFFFFu) == 0x00115770u &&
-        psx_netplay_seat_count() == 3 && r4_link_ready() &&
+        psx_netplay_seat_count() < 4 && r4_link_ready() &&
         psx_mod_read_half(0x800AC754u) == 4 &&
-        psx_mod_read_byte(0x800AC077u) == 0) {
+        psx_mod_read_byte(0x800AC074u + (unsigned)psx_netplay_seat_count()) == 0) {
         /* The original pair-local roster reserves four slots. Once R4 has
-         * initialized the three accepted cars, exclude the empty fourth
-         * slot from race loops and ranking counts. */
-        psx_mod_write_half(0x800AC754u, 3);
+         * initialized the accepted cars (the first seat-count slots),
+         * exclude the empty slots from race loops and ranking counts. */
+        psx_mod_write_half(0x800AC754u, (uint16_t)psx_netplay_seat_count());
     }
     if (cpu && r4_link_ready() && cpu->gpr[4] == 0u &&
         (((address & 0x1FFFFFFFu) == 0x000970A0u &&
@@ -970,6 +1085,12 @@ PSX_MOD_CONSTRUCTOR(r4_link_netplay_register)
         0x80115310u, r4_link_serial_filter);
     (void)psx_game_register_netplay_function_filter(
         0x80115770u, r4_link_serial_filter);
+    (void)psx_game_register_netplay_function_filter(
+        0x801157ECu, r4_link_serial_filter);
+    (void)psx_game_register_netplay_function_filter(
+        0x8002094Cu, r4_link_serial_filter);
+    (void)psx_game_register_netplay_function_filter(
+        0x8007807Cu, r4_link_serial_filter);
     (void)psx_game_register_netplay_function_filter(
         0x80115D90u, r4_link_serial_filter);
     (void)psx_game_register_netplay_function_filter(

@@ -18,7 +18,19 @@ static uint8_t gpu_dma_ram[4u * 0xB00u + 8u];
 static PsxNetPad sample_pads[4];
 static int sample_pad_valid[4];
 
+static int local_slot;
+static unsigned local_views;
+static uint32_t local_view[4];
 int psx_netplay_seat_count(void) { return seat_count; }
+int psx_netplay_local_slot(void) { return local_slot; }
+void psx_netplay_present_local_view(uint32_t x, uint32_t y,
+                                    uint32_t w, uint32_t h) {
+    local_view[0] = x;
+    local_view[1] = y;
+    local_view[2] = w;
+    local_view[3] = h;
+    ++local_views;
+}
 int psx_netplay_sim_pad(int seat, PsxNetPad *out) {
     if (!out || seat < 0 || seat >= 4 || !sample_pad_valid[seat]) return 0;
     *out = sample_pads[seat];
@@ -84,7 +96,7 @@ int psx_game_register_netplay_function_filter(
 
 int main(void)
 {
-    assert(registrations == 24);
+    assert(registrations == 27);
     assert(setenv("PSX_R4_LINK_EXPERIMENTAL", "1", 1) == 0);
     r4_link_brake_ramps = psx_mod_alloc_guest_memory(4, 4);
     r4_link_extra_view_cameras = psx_mod_alloc_guest_memory(64, 4);
@@ -95,7 +107,10 @@ int main(void)
     psx_mod_write_word(0x801155CCu, 0x0C024AECu);
     ram[R4_LINK_MODE & 0x1FFFFFu] = 4;
     ram[(R4_LINK_MODE + 1u) & 0x1FFFFFu] = 0;
-    seat_count = 2;
+    seat_count = 1; /* a lone peer is not a link session */
+    assert(!r4_link_serial_filter(0, 0x80114C28u));
+    assert(psx_mod_read_word(0x80119004u) == 0x5A5A5A5Au);
+    seat_count = 5;
     assert(!r4_link_serial_filter(0, 0x80114C28u));
     assert(psx_mod_read_word(0x80119004u) == 0x5A5A5A5Au);
     seat_count = 4;
@@ -218,7 +233,6 @@ int main(void)
     psx_mod_write_half(0x800AC754u, 4);
     assert(!r4_link_serial_filter(&cpu, 0x80115770u));
     assert(psx_mod_read_half(0x800AC754u) == 3);
-    assert(setenv("PSX_R4_VIEW_COUNT_PROBE", "1", 1) == 0);
     psx_mod_write_word(0x800ACDCCu, 0x800ADCA0u);
     psx_mod_write_word(0x800AC064u, 123u);
     psx_mod_write_word(0x80115D90u, 0x24140002u);
@@ -324,8 +338,11 @@ int main(void)
         r4_link_layout_viewport(3, view, &expected);
         r4_link_viewport_record(index, &actual);
         assert(memcmp(&actual, &expected, sizeof actual) == 0);
-        assert(psx_mod_read_word(0x800A3D7Cu + 4u * index) ==
-               (view ? 145u : 290u));
+        /* Every seat count uses the same 160x120 quadrants. */
+        assert(actual.left == (view & 1u ? 160u : 0u));
+        assert(actual.top == (view >= 2u ? 120u : 0u));
+        assert(actual.rect_w == 160u && actual.rect_h == 120u);
+        assert(psx_mod_read_word(0x800A3D7Cu + 4u * index) == 145u);
         assert(!r4_link_serial_filter(&cpu, 0x80116024u));
     }
     seat_count = 4;
@@ -364,7 +381,86 @@ int main(void)
                (0x04000000u | (retail & 0x00FFFFFFu)));
         assert(psx_mod_read_word(retail) == 0x04FFFFFFu);
     }
-    unsetenv("PSX_R4_VIEW_COUNT_PROBE");
+    /* Two seats: one car each, both views drawn, each peer presents its own
+     * quadrant (not while the shared pause menu is up). */
+    seat_count = 2;
+    psx_mod_write_half(0x800FF838u, 3);
+    psx_mod_write_word(0x800AC074u, 0x5A5A5A5Au);
+    assert(!r4_link_serial_filter(&cpu, 0x80035EA0u));
+    assert(psx_mod_read_word(0x800AC074u) == 0x00000101u);
+    psx_mod_write_half(0x800AC754u, 4);
+    psx_mod_write_byte(R4_LINK_PAUSED, 0);
+    local_slot = 1;
+    local_views = 0;
+    assert(!r4_link_serial_filter(&cpu, 0x80115770u));
+    assert(psx_mod_read_half(0x800AC754u) == 2);
+    assert(local_views == 1);
+    assert(local_view[0] == 160u && local_view[1] == 0u &&
+           local_view[2] == 160u && local_view[3] == 120u);
+    psx_mod_write_byte(R4_LINK_PAUSED, 1);
+    assert(!r4_link_serial_filter(&cpu, 0x80115770u));
+    assert(local_views == 1);
+    psx_mod_write_byte(R4_LINK_PAUSED, 0);
+    local_slot = 0;
+    seat_count = 4;
+    local_slot = 3;
+    assert(!r4_link_serial_filter(&cpu, 0x80115770u));
+    assert(local_views == 2);
+    assert(local_view[0] == 160u && local_view[1] == 120u);
+    local_slot = 0;
+    seat_count = 2;
+    {
+        const uint32_t sp = 0x801FFE00u;
+        cpu.gpr[29] = sp;
+        psx_mod_write_word(0x800ACDCCu, 0x800ADCA0u);
+        psx_mod_write_half(R4_LINK_ENTRANTS, 2);
+        psx_mod_write_word(sp + 40u, 0);
+        psx_mod_write_word(sp + 44u, 0x800ADCA0u + 0x70u);
+        psx_mod_write_half(0x1F80005Eu, 0);
+        assert(!r4_link_serial_filter(&cpu, 0x801157ECu));
+        assert(psx_mod_read_word(sp + 40u) == 2u);
+        assert(psx_mod_read_word(sp + 44u) == 0x800ADCA0u + 0xB70u);
+        assert(psx_mod_read_half(0x1F80005Eu) == 1u);
+        /* The two-view HUD setup and HUD pass see the two-view entrant
+         * count; the real count returns right after each. */
+        cpu.gpr[4] = 4u;
+        cpu.gpr[31] = 0x8003D330u;
+        assert(!r4_link_serial_filter(&cpu, 0x8002094Cu));
+        assert(psx_mod_read_half(R4_LINK_ENTRANTS) == 4u);
+        cpu.gpr[31] = 0x8003D3ACu;
+        assert(!r4_link_serial_filter(&cpu, 0x8007807Cu));
+        assert(psx_mod_read_half(R4_LINK_ENTRANTS) == 2u);
+        cpu.gpr[31] = 0x80115F7Cu;
+        assert(!r4_link_serial_filter(&cpu, 0x80021134u));
+        assert(psx_mod_read_half(R4_LINK_ENTRANTS) == 4u);
+        assert(!r4_link_serial_filter(&cpu, 0x80115F84u));
+        assert(psx_mod_read_half(R4_LINK_ENTRANTS) == 2u);
+        cpu.gpr[31] = 0x80000000u; /* other callers keep the real count */
+        assert(!r4_link_serial_filter(&cpu, 0x80021134u));
+        assert(psx_mod_read_half(R4_LINK_ENTRANTS) == 2u);
+        /* Three or more entrants already take the two-view branch. */
+        seat_count = 3;
+        psx_mod_write_half(R4_LINK_ENTRANTS, 3);
+        psx_mod_write_word(sp + 40u, 7u);
+        assert(!r4_link_serial_filter(&cpu, 0x801157ECu));
+        assert(psx_mod_read_word(sp + 40u) == 7u);
+    }
+    {
+        /* A mode-4 frame without the race handler (results, Car Select)
+         * keeps its OT: stale HUD copies are never linked in. */
+        const uint32_t buf = 0x800ADCA0u;
+        const uint32_t root = buf + 0x5000u;
+        seat_count = 2;
+        psx_mod_write_word(0x800ACDCCu, buf);
+        psx_mod_write_word(root, 0x00FFFFFFu);
+        r4_link_views_frame = 0;
+        r4_link_hud_copy_head = r4_link_hud_copy_tail = buf + 0x6000u;
+        cpu.gpr[4] = root;
+        cpu.gpr[31] = 0x8001E828u;
+        assert(!r4_link_serial_filter(&cpu, 0x80093520u));
+        assert(psx_mod_read_word(root) == 0x00FFFFFFu);
+        r4_link_hud_copy_head = r4_link_hud_copy_tail = 0;
+    }
     seat_count = 4;
     sample_pad_valid[3] = 1;
     sample_pads[0].buttons = 0x7FFFu; /* Square: native brake ramp */
