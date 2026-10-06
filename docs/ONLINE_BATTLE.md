@@ -96,6 +96,20 @@ two-view branch of the link handler (0x801157EC) and let only the two-view
 HUD setup (race init 0x8002094C) and HUD pass (0x80021134 from 0x80115F7C)
 see the two-view count. The unused lower half is cleared black.
 
+**Widescreen, per player.** `r4.enhancement.widescreen` declares its plugin
+`netplay = "local_view"`, so in a match psxrecomp keeps each player's own
+widescreen choice (feature and View) for that player alone
+(RetroPortingToolKit/psxrecomp, "Own-view mods"). The shared frame, rollback
+snapshots and digests stay stock 4:3 on every peer: the cull margin is 0 and
+the plugin's hooks are parked there. Inside this peer's sandboxed own-view
+draw the margin is its own (its window's Fit aspect or its fixed View), the
+HUD, course-visibility and race-scene hooks run, and the image is kept in its
+native-wide presenter surface; the sandbox discards every guest-side effect.
+So one player can race at 16:9 Fit, another at 21:9 and a third at 4:3 in the
+same match, with nothing negotiated. The Link race handler (0x80115770, link
+overlay) is in the race predicate (`src/mods/r4_widescreen_scene.h`). Paused,
+Results and menus show the canonical 4:3 frame.
+
 **Mode-4 frames without the race.** Results, Car Select and loading frames
 are still mode 4. The OT and HUD edits only run in a frame whose views the
 link race handler built (they once linked stale HUD copies into the Results

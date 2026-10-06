@@ -128,7 +128,8 @@ own refresh rate, so rates above it cost more without showing more motion
 (with vsync off they can show as tearing instead).
 If the machine cannot draw every in-between frame, fewer are drawn and the
 gaps between them crossfaded; in-between frames are planned into the time
-the presenter would otherwise wait. Netplay sessions run without mods.
+the presenter would otherwise wait. Netplay sessions run without mods, except
+widescreen in your own Link Battle view (per player).
 Details and credits:
 `mods/preloaded/packages/r4.enhancement.frame-rate/1.0.0/README.txt`,
 `src/mods/r4_interp.c`, `psxrecomp/docs/RENDER_PASSES.md`.
@@ -164,8 +165,9 @@ default and takes effect when the game starts.
 - At 8K on a GPU with a 16384 texture limit (Apple GPUs), widescreen's Fit
   to Window goes up to about 34:9; a wider window is pillarboxed.
 - Netplay: your own view only. Other players are unaffected and may use a
-  different setting. Widescreen and frame-rate options, when present, are mods
-  and are turned off for netplay; internal resolution is not.
+  different setting. Frame-rate options, when present, are mods and are turned
+  off for netplay; widescreen stays on for your own Link Battle view only;
+  internal resolution is not affected.
 - `PSX_INTERNAL_RESOLUTION=4k` (or any preset id, or a number of lines)
   overrides the setting for one run. `tools/res_matrix.py` checks every preset
   against a savestate.

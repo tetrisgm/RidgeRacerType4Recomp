@@ -227,6 +227,14 @@ static void test_scene(void)
     CHECK(r4_frame_handler(rd, rdh) == 0 && !r4_in_race(rd, rdh), "major out of range");
     setup_scene(2, 1, 90, 0);
     CHECK(r4_frame_handler(rd, rdh) == 0, "minor out of range");
+
+    /* Link Battle race (row1[26], link overlay resident). */
+    setup_scene(2, 1, 26, 0);
+    wr(0x800A0000u + 4u * 26u, 0x80115770u);
+    wr(0x80115770u, 0x3C028010u); wr(0x80115774u, 0x84427328u);
+    CHECK(r4_in_race(rd, rdh) == 1, "Link Battle race widens");
+    wr(0x80115774u, 0x00000000u);
+    CHECK(r4_in_race(rd, rdh) == 0, "Link handler rejected when its overlay is not resident");
     setup_scene(2, 0, 0, 0);
     CHECK(r4_frame_handler(rd, rdh) == 0, "a null row is not followed");
 }

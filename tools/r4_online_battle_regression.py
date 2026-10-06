@@ -55,12 +55,38 @@ class Peers:
         self.n = args.peers
         self.procs, self.handles = [], []
         self.logs = [args.work / f"peer{i}.log" for i in range(self.n)]
+        # --remote-seat: that seat runs on another machine (started there by
+        # the operator, debug port forwarded here); its files come back by scp.
+        self.remote = args.remote_seat
+        self.remote_files = {}
+        self.remote_log_at = 0.0
+
+    def view(self, i):
+        """This seat's own widescreen View ('' = off)."""
+        return self.args.host_widescreen if i == 0 else self.args.guest_widescreen
+
+    def local(self, i):
+        return i != self.remote
 
     def port(self, i):
-        return self.args.debug_port_base + i
+        return self.args.remote_port if not self.local(i) \
+            else self.args.debug_port_base + i
 
     def ask(self, i, name, timeout=5, **fields):
-        return cmd(dict(cmd=name, **fields), port=self.port(i), timeout=timeout)
+        if not self.local(i) and "path" in fields:
+            local = Path(fields["path"])
+            remote = f"{self.args.remote_dir}/shots/{local.name}"
+            self.remote_files[str(local)] = remote
+            fields["path"] = remote
+        return cmd(dict(cmd=name, **fields), port=self.port(i),
+                   timeout=max(timeout, 15) if not self.local(i) else timeout)
+
+    def fetch(self, path):
+        """Bring a file the remote seat wrote back to its local path."""
+        remote = self.remote_files.pop(str(path), None)
+        if remote:
+            subprocess.check_call(["scp", "-q", f"{self.args.remote_ssh}:{remote}",
+                                   str(path)])
 
     def read(self, i, address, length):
         return bytes.fromhex(self.ask(i, "read_ram", addr=hex(address),
@@ -79,15 +105,23 @@ class Peers:
         return self.ask(i, "frame").get("frame", 0)
 
     def log_text(self, i):
-        return self.logs[i].read_text(errors="replace")
+        if not self.local(i) and time.monotonic() - self.remote_log_at > 2:
+            subprocess.call(["scp", "-q",
+                             f"{self.args.remote_ssh}:{self.args.remote_dir}/peer{i}.log",
+                             str(self.logs[i])])
+            self.remote_log_at = time.monotonic()
+        return self.logs[i].read_text(errors="replace") \
+            if self.logs[i].exists() else ""
 
     def digests(self, i):
         """Live core digests by tick, without ticks this peer later rolled
-        back over: a digest logged on a predicted input (rollback mode) is
-        speculative until the rollback replays that tick."""
+        back over: an episode reloads its load tick and every peer in it
+        recomputes load..target, so a digest logged there before the episode
+        (on a predicted input, or a forward frame the resimulation replaces)
+        is superseded by the replay."""
         text = self.log_text(i)
         replayed = [(int(m), int(t)) for m, t in re.findall(
-            r"rb (?:begin|follow) epoch=\d+ mismatch=(\d+) load=\d+ "
+            r"rb (?:begin|follow) epoch=\d+ mismatch=\d+ load=(\d+) "
             r"target=(\d+)", text)]
         return {int(t): c for t, c in re.findall(
             r"rb live dig local sim=(\d+) core=([0-9a-f]+)", text)
@@ -129,6 +163,8 @@ class Peers:
     def provision(self):
         build = self.args.build.resolve()
         for i in range(self.n):
+            if not self.local(i):
+                continue
             d = self.args.work / f"peer{i}"
             if d.exists():
                 shutil.rmtree(d)
@@ -145,15 +181,26 @@ class Peers:
             except OSError:
                 shutil.copy2(build / "r4-runtime", d / "r4peer")
             (d / "memcards").mkdir()
+            # Widescreen is each player's own choice (own view only).
+            view = self.view(i)
+            if view:
+                (d / "mods").mkdir(exist_ok=True)
+                (d / "mods" / "state.toml").write_text(
+                    "format_version = 2\n\n[[feature]]\n"
+                    "package_id = \"r4.enhancement.widescreen\"\n"
+                    "id = \"widescreen\"\nenabled = true\n"
+                    f"[feature.values]\naspect = \"{view}\"\n")
 
     def launch(self):
         a = self.args
         for i in range(self.n):
+            if not self.local(i):
+                continue
             env = os.environ.copy()
             env.update(PSX_NETPLAY="1", PSX_NET_MODE=a.mode,
                        PSX_NET_TRANSPORT="lan", PSX_NET_SLOTS=str(self.n),
                        PSX_NET_SLOT=str(i),
-                       PSX_NET_BIND=f"127.0.0.1:{a.udp_port_base + i}",
+                       PSX_NET_BIND=f"{a.bind_host}:{a.udp_port_base + i}",
                        PSX_NET_SESSION_ID=str(a.session_id),
                        PSX_NETPLAY_HEADLESS_INPUT_PROBE="1",
                        PSX_DEBUG_FMV_QUIET="0", SDL_AUDIODRIVER="dummy")
@@ -196,6 +243,11 @@ class Peers:
                 p.wait()
         for h in self.handles:
             h.close()
+        if self.remote >= 0:
+            if self.args.remote_stop:
+                subprocess.call(["ssh", self.args.remote_ssh, self.args.remote_stop])
+            self.remote_log_at = 0.0
+            self.log_text(self.remote)
 
 
 def car_state(peers, i, seat, ptr=None):
@@ -384,16 +436,34 @@ def presented_window(peers, i, path, full_path=None):
     scaled to 160x120 at `path`, and the canonical display frame (the
     authoritative VRAM, `screenshot`) at `full_path`."""
     raw = path.with_suffix(".window.png")
+    wide = bool(peers.view(i))
     seq = peers.ask(i, "present_shot_seq")["seq"]
     peers.ask(i, "present_shot", path=str(raw))
     peers.wait(lambda: peers.ask(i, "present_shot_seq")["seq"] != seq, 10,
                f"present_shot on peer {i}")
     if full_path is not None:
-        peers.ask(i, "screenshot", path=str(full_path))
+        # Widescreen: "screenshot" would return the presented wide surface;
+        # the canonical 4:3 frame (authoritative VRAM) is screenshot_file.
+        peers.ask(i, "screenshot_file" if wide else "screenshot",
+                  path=str(full_path))
+    # A wide own view is compared on its middle 4:3 (same camera, the extra
+    # columns are beside it).
+    peers.fetch(raw)
+    if full_path is not None:
+        peers.fetch(full_path)
+    vf = ("crop=ih*4/3:ih," if wide else "") + "scale=160:120:flags=area"
     subprocess.check_call(["ffmpeg", "-v", "error", "-y", "-i", str(raw),
-                           "-vf", "scale=160:120:flags=area", str(path)])
-    w, h, _ = png_rgb(raw)
-    return dict(ok=True, width=w, height=h, window=str(raw))
+                           "-vf", vf, str(path)])
+    w, h, rgb = png_rgb(raw)
+    side = max(1, (w - h * 4 // 3) // 2)
+    lit = n = 0
+    for y in range(h // 8, h * 7 // 8, 8):
+        for x in list(range(0, side, 4)) + list(range(w - side, w, 4)):
+            a = 3 * (y * w + x)
+            lit += sum(rgb[a:a + 3]) > 48
+            n += 1
+    return dict(ok=True, width=w, height=h, window=str(raw),
+                side_lit=round(lit / max(1, n), 3))
 
 
 def presented(peers, i, path, full_path=None):
@@ -437,6 +507,7 @@ def local_views(peers, shots, label):
             if dist.index(min(dist)) == i:
                 break
         row = dict(peer=i, presented=[info["width"], info["height"]],
+                   side_lit=info.get("side_lit"),
                    quadrant_distance=dist,
                    best=dist.index(min(dist)),
                    thumb=str(thumb_path))
@@ -448,6 +519,9 @@ def local_views(peers, shots, label):
         rows.append(row)
     ok = all(r["best"] == r["peer"] for r in rows) and \
         all(r.get("local_views", 1) > 0 for r in rows)
+    if peers.args.frontend == "hidden":
+        # A widescreen player's own view has scenery in the side columns.
+        ok = ok and all(r["side_lit"] > 0.5 for r in rows if peers.view(r["peer"]))
     if not ok:
         raise AssertionError(f"local views: {rows}")
     return dict(ok=ok, peers=rows)
@@ -611,6 +685,25 @@ def main():
                    default="headless",
                    help="hidden: OpenGL peers in never-shown windows; each "
                         "draws its own full-screen view (present_shot)")
+    p.add_argument("--host-widescreen", default="",
+                   help="seat 0 enables r4.enhancement.widescreen at this "
+                        "View (Fit, 16:9, 21:9, 32:9) for its own view")
+    p.add_argument("--guest-widescreen", default="",
+                   help="the other seats' own widescreen View (default off)")
+    p.add_argument("--remote-seat", type=int, default=-1,
+                   help="this seat (the last) runs on another machine, started "
+                        "there with the same session env; its debug port is "
+                        "forwarded to --remote-port")
+    p.add_argument("--remote-port", type=int, default=5996)
+    p.add_argument("--remote-ssh", default="pc")
+    p.add_argument("--remote-dir", default="",
+                   help="the remote peer's directory as scp names it "
+                        "(peer<seat>.log and shots/ live there)")
+    p.add_argument("--remote-stop", default="",
+                   help="ssh command that stops the remote peer")
+    p.add_argument("--bind-host", default="127.0.0.1",
+                   help="address local peers bind (the LAN address for a "
+                        "remote seat)")
     p.add_argument("--debug-port-base", type=int, default=5895)
     p.add_argument("--udp-port-base", type=int, default=48841)
     p.add_argument("--session-id", type=int, default=98435)
@@ -656,6 +749,15 @@ def main():
         result["slots"] = [int(m.group(1)) if (m := re.search(
             r"psx_netplay: started transport=\S+ slot=(\d+)",
             peers.log_text(i))) else None for i in range(peers.n)]
+        # Widescreen is per player: each peer's own-view mods, from its log.
+        result["own_view_mods"] = [re.findall(
+            r"netplay keeps (\S+) for this player's own view only",
+            peers.log_text(i)) for i in range(peers.n)]
+        if args.frontend == "hidden":
+            # A widescreen player's 16:9 window (presentation only).
+            for i in range(peers.n):
+                if peers.view(i):
+                    peers.ask(i, "window_size", w=1280, h=720)
         peers.wait(lambda: peers.frame() >= 1200, 120, "boot")
 
         def accepted():

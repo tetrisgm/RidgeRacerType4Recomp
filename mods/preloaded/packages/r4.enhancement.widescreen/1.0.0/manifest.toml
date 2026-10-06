@@ -15,7 +15,7 @@ game_id = "SLUS-00797"
 [[feature]]
 id = "widescreen"
 name = "Custom Renderer"
-description = "Disabled by default. Races render wider than 4:3 with real extra scenery at the sides, and the HUD moves to the window edges. Menus, results, the garage and movies stay 4:3. Best on OpenGL; on Vulkan and software the rear-view mirror is missing in wide races. Netplay always plays stock 4:3."
+description = "Disabled by default. Races render wider than 4:3 with real extra scenery at the sides, and the HUD moves to the window edges. Menus, results, the garage and movies stay 4:3. Best on OpenGL; on Vulkan and software the rear-view mirror is missing in wide races. Online (Link Battle) it applies to your own view only; other players keep their own setting."
 group = "Display"
 channel = "experimental"
 default_enabled = false
@@ -48,3 +48,6 @@ label = "32:9"
 [[plugin]]
 feature = "widescreen"
 id = "r4.widescreen"
+# Online it runs per player, only inside this peer's sandboxed own-view draw
+# (psxrecomp psx_mod_render_local_view); the shared race stays stock 4:3.
+netplay = "local_view"
