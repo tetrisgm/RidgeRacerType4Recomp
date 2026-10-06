@@ -6,13 +6,14 @@
  * over its whole frame instead of every guest VBlank.
  *
  *   method = interpolate  r4_interp.c redraws the race between game frames in
- *                         framework render passes (true in-between positions);
- *                         when no pass applies, the latest frame is held, so
- *                         nothing is ever shown later than stock. While the
- *                         framework cannot run passes at all, it shows the
- *                         frame blend below instead (logged once).
+ *                         framework render passes (true in-between positions),
+ *                         only in time the game leaves free before its next
+ *                         frame is presented. Wherever none fits, or passes
+ *                         are unavailable, the game's own frame is shown as
+ *                         is (HOLD): nothing blended, nothing delayed.
  *   method = blend        crossfade of finished frames (Smooth = linear,
- *                         Sharp = motion-adaptive).
+ *                         Sharp = motion-adaptive), only by the player's
+ *                         choice.
  *
  * Never calls psx_mod_set_native_vblank_rate: that speeds up the machine. */
 #include "mod_plugins.h"
@@ -44,21 +45,38 @@ static void r4_frame_rate_activate(void) {
                 ? PSX_MOD_FRAME_INTERPOLATION_MOTION_ADAPTIVE
                 : PSX_MOD_FRAME_INTERPOLATION_LINEAR;
     psx_mod_set_frame_interpolation_source(PSX_MOD_FRAME_SOURCE_FLIP);
-    /* Interpolated: hold the newest frame wherever no pass image applies;
-     * r4_interp switches to `blend` while passes are unavailable. */
+    /* Interpolated: hold the newest game frame wherever no pass image
+     * applies; never a crossfade. Frame blend: the player's blend style. */
     psx_mod_set_frame_interpolation_blend(
         cfg.method == R4_FRAME_RATE_INTERPOLATE
             ? (uint32_t)PSX_MOD_FRAME_INTERPOLATION_HOLD : blend);
     psx_mod_set_frame_interpolation(cfg.fps);
-    r4_interp_activate(cfg.method == R4_FRAME_RATE_INTERPOLATE, blend);
-    if (cfg.fps)
-        fprintf(stdout, "r4: frame rate %u FPS, %s\n", (unsigned)cfg.fps,
-                cfg.method == R4_FRAME_RATE_INTERPOLATE ? "interpolated"
-                                                         : "frame blend");
-    else
-        fprintf(stdout, "r4: frame rate follows the display, %s\n",
-                cfg.method == R4_FRAME_RATE_INTERPOLATE ? "interpolated"
-                                                         : "frame blend");
+    if (cfg.method == R4_FRAME_RATE_INTERPOLATE) {
+        /* Both reset at every session start, so set them on each activation.
+         * CHANGED: present only new pictures (a game frame or a pass image),
+         * so a held frame costs no host time and the rate is a ceiling, not
+         * a workload. LEFTOVER: passes only in host time the game leaves
+         * free before its frame is due, stopped at that deadline. Frame
+         * blend changes the picture at every output and runs no passes, so
+         * it keeps the defaults. The #ifdefs keep an older runtime building
+         * (PSX_MOD_FRAME_INTERPOLATION_UNLIMITED came with the present API). */
+#ifdef PSX_MOD_FRAME_INTERPOLATION_UNLIMITED
+        psx_mod_set_frame_interpolation_present(PSX_MOD_FRAME_PRESENT_CHANGED);
+#endif
+#ifdef PSX_MOD_RENDER_PASS_LEFTOVER
+        psx_mod_set_render_pass_budget(PSX_MOD_RENDER_PASS_LEFTOVER);
+#endif
+    }
+    r4_interp_activate(cfg.method == R4_FRAME_RATE_INTERPOLATE);
+    {
+        const char *how = cfg.method == R4_FRAME_RATE_INTERPOLATE
+            ? "interpolated in leftover time, the game's frames elsewhere"
+            : "frame blend";
+        if (cfg.fps)
+            fprintf(stdout, "r4: frame rate %u FPS, %s\n", (unsigned)cfg.fps, how);
+        else
+            fprintf(stdout, "r4: frame rate follows the display, %s\n", how);
+    }
 }
 
 PSX_MOD_CONSTRUCTOR(r4_frame_rate_register) {

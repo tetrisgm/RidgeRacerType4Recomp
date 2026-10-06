@@ -4,15 +4,17 @@
  *    by longjmp, so r4_pass never reaches its own return. The plugin's hooks
  *    must keep working on the next tick: a stale "inside a pass" flag would
  *    switch interpolation off for the rest of the process.
- * 2. Fallback. When the framework cannot run passes (status NO_PRESENTER,
- *    BACKEND or DISABLED), or passes keep being refused, the presenter is
- *    switched to the player's frame blend, logged once, and passes are tried
- *    again when they are available (with a back-off after failed resumes).
- *    Transient refusals (fast-forward) and occasional budget shedding never
- *    fall back. More than a quarter of the last 30 plans shed does (a held
- *    frame between interpolated ones is a 15 Hz stutter); while blending no
- *    pass is rendered, and a full window of 30 plans with at most 3 shed
- *    goes back to passes without a back-off.
+ * 2. No fallback. Wherever the plan has nothing (no pass fits the time the
+ *    game leaves free, fast-forward, passes unavailable or disabled), the
+ *    presenter keeps holding the game's own frame: the plugin never switches
+ *    it to a crossfade, keeps planning every race tick, and draws again as
+ *    soon as a plan has phases (no back-off, no probing of its own: psxrecomp
+ *    only ever plans into leftover time).
+ * 3. Pass order. The planned phases run middle first, then the middles of
+ *    each half, so a plan cut short at its deadline still splits the frame
+ *    evenly; a pass psxrecomp does not start is simply skipped.
+ * 4. Gated ticks (menus, results, pause, VS split screen here) plan nothing.
+ * 5. Method = Frame blend: the hooks do nothing.
  *
  * The mod API is a mock with a flat guest RAM; the plugin is the real one,
  * driven through the attract demo's gates. Build/run: ctest -R r4_interp_plugin */
@@ -81,11 +83,14 @@ int psx_mod_set_frame_interpolation_blend(uint32_t mode) {
 static jmp_buf s_watchdog;
 static int s_in_fn, s_abort_next, s_passes, s_calls_in_pass;
 static uint8_t s_ram_ck[sizeof s_ram], s_spad_ck[sizeof s_spad];
-/* Framework state the fallback reads: status, a plan shed for time (always,
- * or every s_shed_every-th plan), and passes the framework refuses without
- * running them. */
+/* Framework state: status, a plan with nothing that fits (always, or every
+ * s_shed_every-th plan), how many evenly spaced phases a plan returns, and
+ * how many passes of a plan it starts before the deadline (-1: all). */
 static uint32_t s_status = PSX_MOD_RENDER_PASS_READY;
-static int s_shed, s_shed_every, s_refuse_passes, s_plans;
+static int s_shed, s_shed_every, s_refuse_passes, s_plans, s_plan_n = 1;
+static int s_start_limit = -1, s_started_in_plan;
+static uint32_t s_order[16];
+static int s_order_n;
 
 uint32_t psx_mod_render_pass_status(void) { return s_status; }
 
@@ -94,10 +99,14 @@ uint32_t psx_mod_render_pass_plan(uint32_t period, uint32_t shown,
     (void)period; (void)shown;
     if (!alpha_q16 || max == 0) return 0;
     s_plans++;
+    s_started_in_plan = 0;
+    s_order_n = 0;
     if (s_status != PSX_MOD_RENDER_PASS_READY || s_shed) return 0;
     if (s_shed_every && s_plans % s_shed_every == 0) return 0;
-    alpha_q16[0] = 32768u;
-    return 1;
+    for (int i = 0; i < s_plan_n && (uint32_t)i < max; i++)
+        alpha_q16[i] = (uint32_t)(65536u * (uint32_t)(i + 1) /
+                                  (uint32_t)(s_plan_n + 1));
+    return (uint32_t)s_plan_n;
 }
 
 int psx_mod_render_pass(CPUState *cpu, const PSXModRenderPass *pass,
@@ -105,6 +114,10 @@ int psx_mod_render_pass(CPUState *cpu, const PSXModRenderPass *pass,
     CPUState ck = *cpu;
     volatile int ok = 0;
     if (s_refuse_passes) return 0;
+    if (s_order_n < 16) s_order[s_order_n++] = pass->alpha_q16;
+    /* Past the deadline: psxrecomp does not start it. */
+    if (s_start_limit >= 0 && s_started_in_plan >= s_start_limit) return 0;
+    s_started_in_plan++;
     s_passes++;
     memcpy(s_ram_ck, s_ram, sizeof s_ram);
     memcpy(s_spad_ck, s_spad, sizeof s_spad);
@@ -169,11 +182,11 @@ int main(void) {
     CHECK(r4_interp_register_hooks() == 2 && s_register_calls == 2,
           "a second register call changes nothing");
     if (!s_vsync_hook || !s_otag_hook) return 1;
-    r4_interp_activate(1, PSX_MOD_FRAME_INTERPOLATION_LINEAR);
+    r4_interp_activate(1);
     CHECK(s_register_calls == 2 && s_register_refused == 0,
           "activation does not register again (a repeat would return 0)");
     CHECK(s_blend == PSX_MOD_FRAME_INTERPOLATION_HOLD && s_blend_calls == 0,
-          "activation with registered hooks: no fallback");
+          "activation with registered hooks: the presenter blend untouched");
 
     tick(&cpu);                                         /* first tick: history */
     tick(&cpu);
@@ -193,178 +206,107 @@ int main(void) {
     s_abort_next = 1;
     s_calls_in_pass = 0;
     tick(&cpu);
-    r4_interp_activate(1, PSX_MOD_FRAME_INTERPOLATION_LINEAR);
+    r4_interp_activate(1);
     tick(&cpu);
     tick(&cpu);
     CHECK(s_passes == 6, "activation starts clean after a rolled-back pass");
     CHECK(s_blend_calls == 0, "passes working: the presenter blend is never touched");
 
-    /* ---- 2. fallback --------------------------------------------------- */
-    /* Occasional shedding (plan empty, status READY) and fast-forward are
-     * not reasons to leave interpolation. */
-    s_shed = 1;
-    for (int i = 0; i < 7; i++) tick(&cpu);
-    s_shed = 0;
-    s_status = PSX_MOD_RENDER_PASS_FAST_FORWARD;
-    for (int i = 0; i < 40; i++) tick(&cpu);
-    s_status = PSX_MOD_RENDER_PASS_READY;
-    CHECK(s_blend_calls == 0, "7 shed ticks and fast-forward keep HOLD");
-    tick(&cpu);
-    tick(&cpu);
-    CHECK(s_passes == 8, "passes resume after shedding and fast-forward");
-    for (int i = 0; i < 30; i++) tick(&cpu);   /* the 7 shed ticks age out */
+    /* ---- 2. no fallback ------------------------------------------------ */
     {
-        /* One tick in ten shed (3 per second): held frames stay rare. */
-        int passes = s_passes;
-        s_shed_every = 10;
+        int passes = s_passes, plans = s_plans;
+        /* Nothing fits the leftover time (a high internal resolution), for
+         * many seconds: the game's frames, held; planning goes on. */
+        s_shed = 1;
+        for (int i = 0; i < 600; i++) tick(&cpu);
+        s_shed = 0;
+        CHECK(s_blend_calls == 0 && s_blend == PSX_MOD_FRAME_INTERPOLATION_HOLD,
+              "20 s of plans with nothing that fits: HOLD, never a crossfade");
+        CHECK(s_plans == plans + 600 && s_passes == passes,
+              "every race tick still plans, none draws");
+        tick(&cpu);
+        CHECK(s_passes == passes + 1,
+              "the first plan that fits draws at once (no back-off)");
+        /* Some fit, some don't: each frame as it comes. */
+        passes = s_passes;
+        s_shed_every = 2;
         for (int i = 0; i < 300; i++) tick(&cpu);
         s_shed_every = 0;
-        CHECK(s_blend_calls == 0, "10 % shed over 10 s: still interpolating");
-        CHECK(s_passes == passes + 270, "and every affordable tick renders");
+        CHECK(s_blend_calls == 0 && s_passes == passes + 150,
+              "half the plans fit: those draw, the rest hold; no crossfade");
+        /* Unavailable (no presenter, a backend mode without passes, passes
+         * disabled after faults) and fast-forward: held, no crossfade. */
+        static const uint32_t why[] = {
+            PSX_MOD_RENDER_PASS_NO_PRESENTER, PSX_MOD_RENDER_PASS_BACKEND,
+            PSX_MOD_RENDER_PASS_DISABLED, PSX_MOD_RENDER_PASS_FAST_FORWARD};
+        for (unsigned w = 0; w < 4; w++) {
+            s_status = why[w];
+            for (int i = 0; i < 100; i++) tick(&cpu);
+            s_status = PSX_MOD_RENDER_PASS_READY;
+            passes = s_passes;
+            tick(&cpu);
+            CHECK(s_blend_calls == 0 && s_passes == passes + 1,
+                  "unavailable then ready: held meanwhile, draws at once");
+        }
+        /* Passes refused or rolled back every tick: still held. */
+        s_refuse_passes = 1;
+        for (int i = 0; i < 100; i++) tick(&cpu);
+        s_refuse_passes = 0;
+        CHECK(s_blend_calls == 0, "refused passes: held, no crossfade");
     }
 
-    /* Every other tick shed: interpolated frames alternating with held ones
-     * (a 15 Hz stutter) are worse than a steady frame blend. */
-    s_shed_every = 2;
+    /* ---- 3. pass order --------------------------------------------------- */
     {
-        int t;
-        for (t = 0; t < 30 && s_blend_calls == 0; t++) tick(&cpu);
-        CHECK(s_blend == PSX_MOD_FRAME_INTERPOLATION_LINEAR && s_blend_calls == 1,
-              "half the plans shed: the presenter shows the frame blend");
-        CHECK(t <= 16, "within about half a second");
-    }
-    {
-        int plans = s_plans, passes = s_passes;
-        for (int i = 0; i < 200; i++) tick(&cpu);
-        CHECK(s_plans == plans + 200, "still planning every tick while blending");
-        CHECK(s_passes == passes && s_blend_calls == 1,
-              "no passes and no HOLD flapping while half the plans are shed");
-    }
-    /* A fifth shed (6 of 30): between the thresholds, so it stays. */
-    s_shed_every = 5;
-    {
-        int passes = s_passes;
-        for (int i = 0; i < 120; i++) tick(&cpu);
-        CHECK(s_blend_calls == 1 && s_passes == passes,
-              "20 % shed while blending: still blending (hysteresis)");
-    }
-    /* A tenth shed (3 of 30): back to passes once a window of plans made
-     * while blending shows it, and they stay. */
-    s_shed_every = 10;
-    {
-        int t, passes = s_passes;
-        for (t = 0; t < 60 && s_blend_calls == 1; t++) tick(&cpu);
-        CHECK(s_blend == PSX_MOD_FRAME_INTERPOLATION_HOLD && s_blend_calls == 2,
-              "10 % shed while blending: HOLD restored");
-        CHECK(t <= 30, "after one window of plans");
-        CHECK(s_passes == passes + 1, "and the same tick renders a pass");
-        for (int i = 0; i < 300; i++) tick(&cpu);
-        CHECK(s_blend_calls == 2, "and 10 % shed keeps interpolating");
-    }
-    s_shed_every = 0;
-
-    /* Nothing affordable at all (e.g. a high internal resolution): frame
-     * blend after 8 ticks; no plan affordable, no resume. */
-    for (int i = 0; i < 30; i++) tick(&cpu);    /* a clean window */
-    s_shed = 1;
-    for (int i = 0; i < 7; i++) tick(&cpu);
-    CHECK(s_blend == PSX_MOD_FRAME_INTERPOLATION_HOLD && s_blend_calls == 2,
-          "7 shed ticks: still holding");
-    tick(&cpu);
-    CHECK(s_blend == PSX_MOD_FRAME_INTERPOLATION_LINEAR && s_blend_calls == 3,
-          "8 shed ticks of the last 30: frame blend");
-    for (int i = 0; i < 100; i++) tick(&cpu);
-    CHECK(s_blend_calls == 3, "every plan shed: stays on the frame blend");
-    s_shed = 0;
-    {
-        int passes = s_passes;
-        for (int i = 0; i < 26; i++) tick(&cpu);
-        CHECK(s_blend_calls == 3 && s_passes == passes,
-              "26 affordable plans: 4 of the last 30 still shed");
+        s_plan_n = 3;
         tick(&cpu);
-        CHECK(s_blend == PSX_MOD_FRAME_INTERPOLATION_HOLD && s_blend_calls == 4 &&
-              s_passes == passes + 1, "27 (3 of 30 shed): passes resume");
+        CHECK(s_order_n == 3 && s_order[0] == 32768u && s_order[1] == 16384u &&
+              s_order[2] == 49152u,
+              "three phases: the middle first, then the quarters");
+        s_plan_n = 7;
+        tick(&cpu);
+        CHECK(s_order_n == 7 && s_order[0] == 65536u * 4u / 8u &&
+              s_order[1] == 65536u * 2u / 8u && s_order[2] == 65536u * 6u / 8u,
+              "seven phases: the middle, then the middles of each half");
+        {
+            uint32_t seen = 0;
+            for (int i = 0; i < s_order_n; i++)
+                for (int j = 0; j < 7; j++)
+                    if (s_order[i] == 65536u * (uint32_t)(j + 1) / 8u) seen |= 1u << j;
+            CHECK(seen == 0x7Fu, "every planned phase runs exactly once");
+        }
+        s_plan_n = 16;
+        tick(&cpu);
+        CHECK(s_order_n == 16, "sixteen phases: all sixteen run");
+        /* Psxrecomp starts only one before the deadline: it is the middle. */
+        {
+            int passes = s_passes;
+            s_plan_n = 3;
+            s_start_limit = 1;
+            tick(&cpu);
+            CHECK(s_passes == passes + 1 && s_order[0] == 32768u,
+                  "a plan cut short after one pass drew the middle one");
+            s_start_limit = -1;
+        }
+        s_plan_n = 1;
     }
-    s_blend_calls = 0;
 
-    /* The renderer declines passes (a mode without them, e.g. a hi-res
-     * window): frame blend after three race ticks, logged once. */
-    s_status = PSX_MOD_RENDER_PASS_BACKEND;
-    tick(&cpu);
-    tick(&cpu);
-    CHECK(s_blend == PSX_MOD_FRAME_INTERPOLATION_HOLD, "two misses: still holding");
-    tick(&cpu);
-    CHECK(s_blend == PSX_MOD_FRAME_INTERPOLATION_LINEAR && s_blend_calls == 1,
-          "third miss: the presenter shows the player's frame blend");
+    /* ---- 4. gated ticks plan nothing -------------------------------------- */
     {
         int plans = s_plans;
-        for (int i = 0; i < 40; i++) tick(&cpu);
-        CHECK(s_plans == plans, "no plans while passes stay unavailable");
-        CHECK(s_blend_calls == 1, "and no further blend switches");
-    }
-    /* Available again: back to passes (HOLD) on the next race tick. */
-    s_status = PSX_MOD_RENDER_PASS_READY;
-    {
-        int passes = s_passes;
-        tick(&cpu);
-        CHECK(s_blend == PSX_MOD_FRAME_INTERPOLATION_HOLD && s_blend_calls == 2,
-              "passes available again: HOLD restored");
-        CHECK(s_passes == passes + 1, "and the same tick renders a pass");
-    }
-
-    /* Passes refused although the framework reports them available: fall
-     * back, and retry only after a back-off that doubles per failure. */
-    s_refuse_passes = 1;
-    tick(&cpu); tick(&cpu); tick(&cpu);
-    CHECK(s_blend == PSX_MOD_FRAME_INTERPOLATION_LINEAR && s_blend_calls == 3,
-          "refused passes: frame blend");
-    {
-        int plans = s_plans, calls, t;
-        for (t = 0; t < 200 && s_plans == plans; t++) tick(&cpu);
-        CHECK(t == 60, "second fallback retries after 60 ticks (doubled back-off)");
-        CHECK(s_blend == PSX_MOD_FRAME_INTERPOLATION_HOLD, "the retry holds again");
-        tick(&cpu); tick(&cpu);
-        calls = s_blend_calls;
-        CHECK(calls == 5 && s_blend == PSX_MOD_FRAME_INTERPOLATION_LINEAR,
-              "still refused: three misses and back to blend");
-    }
-    s_refuse_passes = 0;
-    {
-        int t, passes = s_passes;
-        for (t = 0; t < 300 && s_passes == passes; t++) tick(&cpu);
-        CHECK(s_passes > passes && s_blend == PSX_MOD_FRAME_INTERPOLATION_HOLD,
-              "passes work again after the back-off: interpolating");
-    }
-
-    /* Disabled after faults, with the Sharp blend style chosen. */
-    r4_interp_activate(1, PSX_MOD_FRAME_INTERPOLATION_MOTION_ADAPTIVE);
-    s_status = PSX_MOD_RENDER_PASS_DISABLED;
-    for (int i = 0; i < 5; i++) tick(&cpu);
-    CHECK(s_blend == PSX_MOD_FRAME_INTERPOLATION_MOTION_ADAPTIVE,
-          "fallback uses the player's blend style");
-    s_status = PSX_MOD_RENDER_PASS_READY;
-
-    /* A later session activates again (e.g. an offline rematch): nothing is
-     * registered again, and the same hooks keep interpolating. */
-    {
-        int passes;
-        /* As r4_frame_rate_activate does: HOLD first, then the plugin. */
-        psx_mod_set_frame_interpolation_blend(PSX_MOD_FRAME_INTERPOLATION_HOLD);
-        r4_interp_activate(1, PSX_MOD_FRAME_INTERPOLATION_LINEAR);
-        CHECK(s_register_calls == 2 && s_register_refused == 0,
-              "second activation: no registration, no refusal");
+        psx_mod_write_word(0x800AC794u, 0x100u);        /* not race pacing */
+        for (int i = 0; i < 10; i++) tick(&cpu);
+        CHECK(s_plans == plans, "gated ticks: no plan");
+        psx_mod_write_word(0x800AC794u, 0x180u);
         tick(&cpu);
         tick(&cpu);
-        passes = s_passes;
-        for (int i = 0; i < 4; i++) tick(&cpu);
-        CHECK(s_passes > passes && s_blend == PSX_MOD_FRAME_INTERPOLATION_HOLD,
-              "second activation: interpolating with the same hooks");
+        CHECK(s_plans == plans + 1, "back in the race: plans from the second tick");
+        CHECK(s_blend_calls == 0, "gating never touches the presenter blend");
     }
 
-    /* Frame blend method: the hooks do nothing. */
+    /* ---- 5. Frame blend method: the hooks do nothing ---------------------- */
     {
         int plans = s_plans, calls = s_blend_calls;
-        r4_interp_activate(0, PSX_MOD_FRAME_INTERPOLATION_LINEAR);
+        r4_interp_activate(0);
         for (int i = 0; i < 5; i++) tick(&cpu);
         CHECK(s_plans == plans && s_blend_calls == calls,
               "method = blend: no plans, no blend switches");

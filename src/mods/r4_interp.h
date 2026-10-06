@@ -17,10 +17,9 @@ extern "C" {
 int r4_interp_register_hooks(void);
 
 /* Called from the package's activation callback. enabled = method is
- * "interpolate". fallback_blend (PSX_MOD_FRAME_INTERPOLATION_LINEAR or
- * _MOTION_ADAPTIVE) is what the presenter shows while render passes are
- * unavailable. */
-void r4_interp_activate(int enabled, uint32_t fallback_blend);
+ * "interpolate" (the presenter is set to HOLD: wherever no pass image
+ * applies, the game's own frame is shown). */
+void r4_interp_activate(int enabled);
 
 #ifdef __cplusplus
 }
