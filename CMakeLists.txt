@@ -124,7 +124,7 @@ if(R4_BUILD_TESTS AND BUILD_TESTING)
             "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_r4_interp.c")
     endif()
     # The interpolation plugin itself against a mock mod API (rolled-back
-    # passes, fallback to frame blend).
+    # passes, no fallback crossfade, middle-first pass order).
     if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_r4_interp_plugin.c")
         r4_frame_rate_test(r4_interp_plugin
             "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_r4_interp_plugin.c"
@@ -144,6 +144,16 @@ if(R4_BUILD_TESTS AND BUILD_TESTING)
                         WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}")
                 endif()
             endif()
+        endif()
+        # The pinned psxrecomp reads every game.toml [video] key and has the
+        # mod API R4's plugins rely on. Skipped (with the list) while R4 is
+        # ahead of its pin; the strict form refuses that state for a release.
+        if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/tools/check_pin_keys.py")
+            add_test(NAME r4_pin_keys
+                COMMAND "${Python3_EXECUTABLE}"
+                    "${CMAKE_CURRENT_SOURCE_DIR}/tools/check_pin_keys.py" --ctest
+                WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}")
+            set_tests_properties(r4_pin_keys PROPERTIES SKIP_RETURN_CODE 77)
         endif()
         # src/mods/r4_interp_fields.h must match tools/data/r4_interp_fields.json.
         if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/tools/gen_r4_interp_fields.py")
