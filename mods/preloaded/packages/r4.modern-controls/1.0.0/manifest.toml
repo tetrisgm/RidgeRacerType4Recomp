@@ -1,0 +1,41 @@
+format_version = 7
+id = "r4.modern-controls"
+version = "1.0.0"
+name = "R4 Controls"
+author = "Shokunin"
+description = "Modern trigger gas and brake, stick steering, face-button shifting, R1 camera and Y Rewind; Classic restores R4's stock controls."
+license = "MIT"
+resolver = "declarative"
+save_compatibility = "shared"
+
+[[target]]
+game_id = "SLUS-00797"
+
+[[feature]]
+id = "modern-controls"
+name = "Controls"
+description = "Modern: in races on a gamepad with analog triggers, RT is gas and LT is brake (native analog NeGcon pressure), the left stick steers, Square / Circle shift down / up, R1 changes the camera view and Y opens Rewind (enable Rewind in Settings). Menus, keyboards and pads without triggers keep the stock controls. Classic, or this feature off: R4's stock controls, unchanged."
+group = "Controllers"
+channel = "stable"
+default_enabled = true
+
+[[option]]
+feature = "modern-controls"
+id = "scheme"
+label = "Control scheme"
+description = "Modern maps gas and brake to the analog triggers. Classic is R4's original layout: Cross accelerates, Square brakes, and Rewind is Select + Y."
+group = "Controllers"
+type = "choice"
+default = "modern"
+
+[[option.choice]]
+value = "modern"
+label = "Modern (Recommended)"
+
+[[option.choice]]
+value = "classic"
+label = "Classic"
+
+[[plugin]]
+feature = "modern-controls"
+id = "r4.modern-controls"

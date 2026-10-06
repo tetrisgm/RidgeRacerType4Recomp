@@ -23,4 +23,7 @@ Rules (same as MegaManX6Recomp):
   `README.txt`); right-stick look-around in single-player races.
 - `r4_max_detail_plugin.c`: `r4.enhancement.max-detail` (`docs/MAX_DETAIL.md`).
 - `r4_pvs.h`: the course visibility list helpers both plugins share.
+- `r4_modern_controls.c` / `.h`: `r4.modern-controls` (package `README.txt`),
+  the Modern race scheme on psxrecomp's title pad transform; Classic
+  registers nothing.
 - See `psxrecomp/docs/MOD_PACKAGES.md`.
