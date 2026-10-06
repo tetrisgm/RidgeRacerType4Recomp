@@ -78,7 +78,7 @@ choice you make always wins over the default.
   resolution down (not below 720p) after sustained missed frame budgets, and
   with `dynamic_resolution_priority = "frame_rate"` also when in-between
   frames keep being dropped; it steps back up when there is room. It does
-  nothing at Native. See `ISSUES.md` #7 for what still costs speed.
+  nothing at Native.
 - **Netplay** is always vanilla: every mod, on by default or not, is cleared
   for a netplay session on both peers. Internal resolution is your own view
   and stays.
