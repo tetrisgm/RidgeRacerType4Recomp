@@ -6,8 +6,9 @@
 [game]
 name = "R4: Ridge Racer Type 4"
 id = "SLUS-00797"
-# VS Battle is a 2-player horizontal split screen on pads 1 + 2; netplay seats
-# map session slot N to controller port N+1.
+# VS Battle is the 2-player horizontal split screen on pads 1 + 2. players = 4
+# is the netplay seat ceiling for the online Link Battle (2-4 players, one car
+# per session slot; docs/ONLINE_BATTLE.md).
 players = 4
 exe = "disc/SLUS_007.97"
 # Local, gitignored. disc/ holds the cue/bin (or symlinks to them) plus the
@@ -68,13 +69,16 @@ mod_function_entry_funcs = [
   # r4.enhancement.frame-rate (src/mods/r4_interp.c): VSync, the render-pass
   # point (main loop VSync(0), ra 0x8001E7E4)
   "0x8008B330",
-  # Three/four-seat netplay serial-free setup filters (src/mods/r4_link_netplay.c).
+  # Online Link Battle (2-4 netplay seats) serial-free setup filters
+  # (src/mods/r4_link_netplay.c).
   "0x8003535C", "0x80035EA0", "0x8009B088", "0x80114AB8", "0x80114C28", "0x801155C4",
+  # Two-seat Link Battle: HUD setup at race init and the call after it.
+  "0x8002094C", "0x8007807C",
   # Link teardown's zero SIO1 handles must not close the game's CD EvCB.
   "0x800970A0", "0x80097060",
   # Link overlay packet, view and HUD sites the same filters guard. Native
   # overlay shards call entry hooks only for addresses listed here.
-  "0x80115520", "0x80115198", "0x80115310", "0x80115770", "0x80115D90", "0x80115F84", "0x80115FA8", "0x80116024",
+  "0x80115520", "0x80115198", "0x80115310", "0x80115770", "0x801157EC", "0x80115D90", "0x80115F84", "0x80115FA8", "0x80116024",
 ]
 
 [runtime]
@@ -335,7 +339,7 @@ branch_keep_sites = [
 # (0xE3) pads; the framework models digital and DualShock. Digital is the
 # faithful default; DualShock analog steering is selectable in the launcher.
 default_mode = "digital"
-# players = 4 sets the netplay seat count for experimental Link Battle; R4
+# players = 4 is the netplay seat ceiling for the online Link Battle; R4
 # itself has no multitap support, so offline play keeps two standalone pads.
 multitap = false
 
