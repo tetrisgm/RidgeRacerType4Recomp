@@ -7,14 +7,14 @@ Frame Rate (#3), internal resolution (#4) and near-wall docs (#5).
 
 Open R4 PRs (2026-10-06), dependencies in each PR body:
 - #6 hide rear-view mirror; #7 camera look-around (on by default); #8 JogCon + analog default;
-- #10 online battle, 2-4 players, each on their own view (experimental switch until per-session memory reservation exists) — psxrecomp#512, #535, #511, recomp-net#26;
+- #10 online battle, 2-4 players, each drawing its own car's full-screen view in a sandbox, quadrant fallback without OpenGL (experimental switch until per-session memory reservation exists) — psxrecomp#512, #535, #542, #511, recomp-net#26;
 - #11 Max Detail; #12 VS split screen; #13 PGXP default — psxrecomp#513;
 - #15 Controls (Modern default, Classic toggle; Rewind off in split screen and online) — psxrecomp#519-#522, #533, recomp-net#27;
 - #17 display defaults on the render-thread pipeline (includes #9) — psxrecomp#536-#540 (#537 merges #508 and #532).
 Closed/superseded: R4 #9 (in #17), #14, #16; psxrecomp #514-#518, #530, #531 parked as drafts.
 
 Merge order: recomp-net #25, #26, #27; psxrecomp #506, #507, #511, #512, #513,
-#519-#522, #533, #534, #535, #508, #532, #536, #537, #538, #539, #540;
+#519-#522, #533, #534, #535, #542, #508, #532, #536, #537, #538, #539, #540;
 recomp-ui #79 (#77, #80, #81 merged); then R4 #6, #7, #8, #11, #12, #13, #15,
 #17, #10, re-pinning each to the merged framework.
 
