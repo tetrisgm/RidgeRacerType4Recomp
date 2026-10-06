@@ -82,8 +82,16 @@ class Peers:
         return self.logs[i].read_text(errors="replace")
 
     def digests(self, i):
+        """Live core digests by tick, without ticks this peer later rolled
+        back over: a digest logged on a predicted input (rollback mode) is
+        speculative until the rollback replays that tick."""
+        text = self.log_text(i)
+        replayed = [(int(m), int(t)) for m, t in re.findall(
+            r"rb (?:begin|follow) epoch=\d+ mismatch=(\d+) load=\d+ "
+            r"target=(\d+)", text)]
         return {int(t): c for t, c in re.findall(
-            r"rb live dig local sim=(\d+) core=([0-9a-f]+)", self.log_text(i))}
+            r"rb live dig local sim=(\d+) core=([0-9a-f]+)", text)
+                if not any(m <= int(t) <= e for m, e in replayed)}
 
     def alive(self):
         for i, p in enumerate(self.procs):
