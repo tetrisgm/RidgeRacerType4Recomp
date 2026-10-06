@@ -14,10 +14,10 @@ game_id = "SLUS-00797"
 [[feature]]
 id = "camera-lookaround"
 name = "Camera Look-Around"
-description = "Disabled by default. In single-player races, the right stick looks left/right, down looks behind, and up adds a small upward tilt. Cockpit views stay anchored at the driver; chase views orbit around the car. Steering, the rear-view mirror, menus, replays, cutscenes, split-screen, and netplay keep their normal behavior."
+description = "On by default. In single-player races, the right stick looks left/right, down looks behind, and up adds a small upward tilt. Cockpit views stay anchored at the driver; chase views orbit around the car. Steering, the rear-view mirror, menus, replays, cutscenes, split-screen, and netplay keep their normal behavior."
 group = "Controls"
 channel = "experimental"
-default_enabled = false
+default_enabled = true
 
 [[option]]
 feature = "camera-lookaround"

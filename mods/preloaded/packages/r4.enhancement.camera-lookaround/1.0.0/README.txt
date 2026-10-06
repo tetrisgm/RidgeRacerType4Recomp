@@ -1,7 +1,8 @@
 R4 Camera Look-Around
 
 Enable Camera Look-Around in the mod catalog to look around during a
-single-player race with the right stick. It is off by default.
+single-player race with the right stick. It is on by default; untick it
+in the mod catalog to keep the game's fixed camera.
 
 Controls
   Right stick left/right: turn the view toward either side.
