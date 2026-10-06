@@ -165,7 +165,8 @@ class Peers:
                 ["./r4peer", "--game", "./game.toml", "--bios",
                  "./bios/openbios.bin", "--disc", str(a.disc),
                  "--memcard-dir", "./memcards", "--debug-port",
-                 str(self.port(i)), "--no-launcher", "--headless"],
+                 str(self.port(i)), "--no-launcher",
+                 "--hidden-window" if a.frontend == "hidden" else "--headless"],
                 cwd=d, env=env, stdout=self.handles[-1],
                 stderr=subprocess.STDOUT))
             if a.join_gap:
@@ -340,6 +341,22 @@ def quadrant_distance(full, thumb, qx, qy):
     return total / ((th // 2) * (tw // 2) * 3)
 
 
+def view_distance(full, thumb, qx, qy):
+    """Own full-screen view (hidden-window peers) against one quadrant of the
+    canonical frame: the same camera at half size, but a different HUD and a
+    rear-view mirror, so only the scene's middle band is compared."""
+    fw, _, frgb = full
+    tw, _, trgb = thumb
+    total = n = 0
+    for y in range(40, 100, 2):
+        for x in range(30, 130, 2):
+            a = 3 * ((qy + y) * fw + qx + x)
+            b = 3 * (y * tw + x)
+            total += sum(abs(frgb[a + k] - trgb[b + k]) for k in range(3))
+            n += 3
+    return total / n
+
+
 def scaled_distance(full, thumb):
     """Mean absolute RGB difference between a 160x120 thumbnail and the
     whole 320x240 frame sampled at half resolution."""
@@ -354,9 +371,28 @@ def scaled_distance(full, thumb):
     return total / ((th // 2) * (tw // 2) * 3)
 
 
+def presented_window(peers, i, path, full_path=None):
+    """Hidden-window peers: the window's presented image (present_shot),
+    scaled to 160x120 at `path`, and the canonical display frame (the
+    authoritative VRAM, `screenshot`) at `full_path`."""
+    raw = path.with_suffix(".window.png")
+    seq = peers.ask(i, "present_shot_seq")["seq"]
+    peers.ask(i, "present_shot", path=str(raw))
+    peers.wait(lambda: peers.ask(i, "present_shot_seq")["seq"] != seq, 10,
+               f"present_shot on peer {i}")
+    if full_path is not None:
+        peers.ask(i, "screenshot", path=str(full_path))
+    subprocess.check_call(["ffmpeg", "-v", "error", "-y", "-i", str(raw),
+                           "-vf", "scale=160:120:flags=area", str(path)])
+    w, h, _ = png_rgb(raw)
+    return dict(ok=True, width=w, height=h, window=str(raw))
+
+
 def presented(peers, i, path, full_path=None):
     """This peer's newest presented image (headless present ring) as PNG,
     plus, when asked, the full display frame of the same guest frame."""
+    if peers.args.frontend == "hidden":
+        return presented_window(peers, i, path, full_path)
     stats = peers.ask(i, "present_image_ring_stats")
     for frame in range(stats["newest"], stats["newest"] - 8, -1):
         response = peers.ask(i, "present_image_ring_get", frame=frame,
@@ -380,15 +416,30 @@ def local_views(peers, shots, label):
     for i in range(peers.n):
         full_path = shots / f"{label}-full.peer{i}.png"
         thumb_path = shots / f"{label}-presented.peer{i}.png"
-        info = presented(peers, i, thumb_path, full_path)
-        full, thumb = png_rgb(full_path), png_rgb(thumb_path)
-        dist = [round(quadrant_distance(full, thumb, (q & 1) * 160,
-                                        (q >> 1) * 120), 1) for q in range(4)]
-        rows.append(dict(peer=i, presented=[info["width"], info["height"]],
-                         quadrant_distance=dist,
-                         best=dist.index(min(dist)),
-                         thumb=str(thumb_path)))
-    ok = all(r["best"] == r["peer"] for r in rows)
+        # The window image and the canonical screenshot are taken a moment
+        # apart; a moving car can cross into a tunnel in between, so a
+        # hidden-window peer gets a few tries.
+        for attempt in range(4 if peers.args.frontend == "hidden" else 1):
+            info = presented(peers, i, thumb_path, full_path)
+            full, thumb = png_rgb(full_path), png_rgb(thumb_path)
+            metric = view_distance if peers.args.frontend == "hidden" \
+                else quadrant_distance
+            dist = [round(metric(full, thumb, (q & 1) * 160, (q >> 1) * 120), 1)
+                    for q in range(peers.n)]
+            if dist.index(min(dist)) == i:
+                break
+        row = dict(peer=i, presented=[info["width"], info["height"]],
+                   quadrant_distance=dist,
+                   best=dist.index(min(dist)),
+                   thumb=str(thumb_path))
+        if peers.args.frontend == "hidden":
+            st = peers.ask(i, "render_pass_stats")
+            row.update(window=info["window"], local_views=st["local_views"],
+                       local_attempts=st["local_attempts"],
+                       local_status=st["local_status"])
+        rows.append(row)
+    ok = all(r["best"] == r["peer"] for r in rows) and \
+        all(r.get("local_views", 1) > 0 for r in rows)
     if not ok:
         raise AssertionError(f"local views: {rows}")
     return dict(ok=ok, peers=rows)
@@ -548,6 +599,10 @@ def main():
     p.add_argument("--report", type=Path, required=True)
     p.add_argument("--disc", type=Path, default=DISC)
     p.add_argument("--mode", choices=("delay", "rollback"), default="delay")
+    p.add_argument("--frontend", choices=("headless", "hidden"),
+                   default="headless",
+                   help="hidden: OpenGL peers in never-shown windows; each "
+                        "draws its own full-screen view (present_shot)")
     p.add_argument("--debug-port-base", type=int, default=5895)
     p.add_argument("--udp-port-base", type=int, default=48841)
     p.add_argument("--session-id", type=int, default=98435)
@@ -642,6 +697,12 @@ def main():
             cars=[peers.u16(i, CAR_COUNT) for i in range(peers.n)])
         result["steps"]["race_shot"] = shot("race")
         if args.stop_after == "race":
+            peers.wait_frames(300, 60)
+            result["steps"]["local_views"] = local_views(peers, shots, "race")
+            _, pts = find_course(peers)
+            drive(peers, pts, args, shot, "race1", seconds=args.explore_seconds)
+            result["steps"]["local_views_driving"] = local_views(
+                peers, shots, "driving")
             return
         if args.stop_after in ("finish", "restart", "exit"):
             base, pts = find_course(peers)
@@ -725,6 +786,18 @@ def main():
                                             for st in stats]
         except Exception as exc:  # noqa: BLE001
             result["dispatch_error"] = str(exc)
+        try:
+            if args.frontend == "hidden" and peers.procs and \
+                    all(p.poll() is None for p in peers.procs):
+                result["local_view_stats"] = [
+                    {k: v for k, v in peers.ask(i, "render_pass_stats").items()
+                     if k in ("local_views", "local_attempts", "local_status",
+                              "aborted", "watchdog", "vram_leaks",
+                              "verify_mismatch", "avg_pass_ms",
+                              "avg_guest_ms", "last_failure")}
+                    for i in range(peers.n)]
+        except Exception as exc:  # noqa: BLE001
+            result["local_view_error"] = str(exc)
         peers.stop()
         rows = [peers.digests(i) for i in range(peers.n)] if peers.logs[0].exists() else []
         if rows:
