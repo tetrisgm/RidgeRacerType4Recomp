@@ -12,6 +12,7 @@ int main(void) {
         {"display", 0}, {"60", 60}, {"100", 100}, {"120", 120}, {"200", 200},
         {"240", 240}, {"300", 300}, {"", 0}, {"144", 0}, {"060", 0},
         {"-60", 0}, {"60fps", 0}, {"999999999999", 0}, {"uncapped", 0},
+        {"unlimited", R4_FRAME_RATE_UNLIMITED}, {"Unlimited", 0}, {"1000", 0},
     };
     for (size_t i = 0; i < sizeof rates / sizeof rates[0]; i++) {
         char msg[96];
@@ -36,6 +37,19 @@ int main(void) {
         CHECK(c.fps == 0 && c.method == R4_FRAME_RATE_INTERPOLATE &&
               c.blend == R4_FRAME_RATE_SMOOTH,
               "defaults match the manifest defaults");
+        CHECK(r4_frame_rate_present_rate(&c, 1000u) == 0,
+              "default: the display refresh");
+        c.fps = 120;
+        CHECK(r4_frame_rate_present_rate(&c, 1000u) == 120, "a fixed rate as chosen");
+        c.fps = R4_FRAME_RATE_UNLIMITED;
+        CHECK(r4_frame_rate_present_rate(&c, 1000u) == 1000,
+              "Unlimited + Interpolated: the runtime's unlimited rate");
+        CHECK(r4_frame_rate_present_rate(&c, 0u) == 0,
+              "Unlimited on a runtime without it: the display refresh");
+        c.method = R4_FRAME_RATE_BLEND;
+        CHECK(r4_frame_rate_present_rate(&c, 1000u) == 0,
+              "Unlimited + Frame blend: the display refresh (a crossfade at "
+              "every output would be 1000 presents a second)");
     }
     printf(failures ? "FAILED (%d)\n" : "ALL PASS\n", failures);
     return failures ? 1 : 0;

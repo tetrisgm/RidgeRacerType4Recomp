@@ -16,4 +16,6 @@ Rules (same as MegaManX6Recomp):
   (the release zip has no `tests/` or `tools/`, and the setup-host
   packager's CMakeLists gate only accepts that exact guard form).
 - `r4_widescreen_plugin.c`: `r4.enhancement.widescreen` (`docs/WIDESCREEN.md`).
+- `r4_frame_rate_plugin.c`, `r4_interp.c`: `r4.enhancement.frame-rate`
+  (README "Frame rate").
 - See `psxrecomp/docs/MOD_PACKAGES.md`.

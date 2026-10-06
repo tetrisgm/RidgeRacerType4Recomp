@@ -15,6 +15,11 @@
  *                         Sharp = motion-adaptive), only by the player's
  *                         choice.
  *
+ * Rate "unlimited" asks the presenter for as many in-between frames as fit,
+ * each shown at its own time (PSX_MOD_FRAME_INTERPOLATION_UNLIMITED; vsync is
+ * off). On a runtime without it, and for Frame blend, it follows the display
+ * refresh.
+ *
  * Never calls psx_mod_set_native_vblank_rate: that speeds up the machine. */
 #include "mod_plugins.h"
 #include "r4_frame_rate_options.h"
@@ -26,9 +31,15 @@
 #define R4_FR_FEATURE "frame-rate"
 #define R4_FR_PLUGIN  "r4.framerate"
 
+#ifdef PSX_MOD_FRAME_INTERPOLATION_UNLIMITED
+#define R4_FR_UNLIMITED_RATE PSX_MOD_FRAME_INTERPOLATION_UNLIMITED
+#else
+#define R4_FR_UNLIMITED_RATE 0u   /* older runtime: follow the display */
+#endif
+
 static void r4_frame_rate_activate(void) {
     char value[32];
-    uint32_t blend;
+    uint32_t blend, rate;
     R4FrameRateConfig cfg;
     r4_frame_rate_config_defaults(&cfg);
     if (psx_mod_option_value(R4_FR_PACKAGE, R4_FR_FEATURE, "rate",
@@ -44,18 +55,19 @@ static void r4_frame_rate_activate(void) {
     blend = cfg.blend == R4_FRAME_RATE_SHARP
                 ? PSX_MOD_FRAME_INTERPOLATION_MOTION_ADAPTIVE
                 : PSX_MOD_FRAME_INTERPOLATION_LINEAR;
+    rate = r4_frame_rate_present_rate(&cfg, R4_FR_UNLIMITED_RATE);
     psx_mod_set_frame_interpolation_source(PSX_MOD_FRAME_SOURCE_FLIP);
     /* Interpolated: hold the newest game frame wherever no pass image
      * applies; never a crossfade. Frame blend: the player's blend style. */
     psx_mod_set_frame_interpolation_blend(
         cfg.method == R4_FRAME_RATE_INTERPOLATE
             ? (uint32_t)PSX_MOD_FRAME_INTERPOLATION_HOLD : blend);
-    psx_mod_set_frame_interpolation(cfg.fps);
+    psx_mod_set_frame_interpolation(rate);
     if (cfg.method == R4_FRAME_RATE_INTERPOLATE) {
         /* Both reset at every session start, so set them on each activation.
          * CHANGED: present only new pictures (a game frame or a pass image),
-         * so a held frame costs no host time and the rate is a ceiling, not
-         * a workload. LEFTOVER: passes only in host time the game leaves
+         * so a held frame costs no host time and "unlimited" is a ceiling,
+         * not a workload. LEFTOVER: passes only in host time the game leaves
          * free before its frame is due, stopped at that deadline. Frame
          * blend changes the picture at every output and runs no passes, so
          * it keeps the defaults. The #ifdefs keep an older runtime building
@@ -72,10 +84,16 @@ static void r4_frame_rate_activate(void) {
         const char *how = cfg.method == R4_FRAME_RATE_INTERPOLATE
             ? "interpolated in leftover time, the game's frames elsewhere"
             : "frame blend";
-        if (cfg.fps)
-            fprintf(stdout, "r4: frame rate %u FPS, %s\n", (unsigned)cfg.fps, how);
+        if (cfg.fps == R4_FRAME_RATE_UNLIMITED && rate)
+            fprintf(stdout, "r4: frame rate unlimited (up to %u FPS, vsync "
+                    "off), %s\n", (unsigned)rate, how);
+        else if (rate)
+            fprintf(stdout, "r4: frame rate %u FPS, %s\n", (unsigned)rate, how);
         else
-            fprintf(stdout, "r4: frame rate follows the display, %s\n", how);
+            fprintf(stdout, "r4: frame rate follows the display%s, %s\n",
+                    cfg.fps == R4_FRAME_RATE_UNLIMITED
+                        ? " (Unlimited needs Interpolated and a newer runtime)"
+                        : "", how);
     }
 }
 

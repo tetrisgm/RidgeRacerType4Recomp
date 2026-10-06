@@ -105,31 +105,41 @@ executable. Defaults live in `game.toml`:
 
 ## Frame rate (optional mod)
 
-Mods -> Frame Rate -> **R4 Frame Rate** (experimental, off by default) shows
-races at the display's refresh rate or at 60 / 100 / 120 / 200 / 240 / 300 FPS.
-The game itself still runs at its original 30 Hz: lap times, AI, input and
-music are unchanged.
+Mods -> Frame Rate -> **R4 Frame Rate** (experimental, off by default) adds
+frames between the game's own in races, as many as the computer has time
+for, at up to the display's refresh rate, a fixed 60 / 100 / 120 / 200 / 240
+/ 300 FPS, or Unlimited. The game itself still runs at its original 30 Hz: lap times, AI,
+input and music are unchanged.
 
+- **The game's frames come first.** In-between frames are drawn only in the
+  time the game leaves free before its next frame is due on screen
+  (psxrecomp plans its render passes into that leftover time only, stops
+  one that would run late, and waits for the GPU to finish the game's own
+  frame first). Where none fits, the game's own frame is shown unchanged.
+  Nothing is forced into a frame to find out what it costs.
 - **Interpolated** (default): the race is redrawn between game frames with
   the cars and camera part of the way to the next frame, by the game's own
   draw code inside a psxrecomp render pass (frozen guest time, everything
   restored afterwards). No added latency. Grand Prix and Time Attack races,
   the attract demo and the replay after a Time Attack are interpolated; VS
   split screen (not yet tested), menus, pause, results and movies are shown
-  as on a PS1. Where the renderer cannot draw in-between frames at all, or
-  more than a quarter of the last second's frames get none in time (e.g. at
-  a high internal resolution), the package falls back to Frame blend and
-  says so in the log; it returns once at most a tenth of them would miss out.
-- **Frame blend**: crossfades finished frames (cheaper, ghosts, one frame
-  late).
+  as on a PS1. It never falls back to a crossfade.
+- **Frame blend** (only as your choice): crossfades finished frames at every
+  frame (cheap, but ghosts and shows each frame one game frame late).
+- **Unlimited**: as many in-between frames as fit, each shown at its own
+  time, beyond the display's refresh rate if the computer is fast enough
+  (vsync off). A monitor still shows at most its refresh rate: under a
+  desktop compositor (macOS, a window or borderless fullscreen on Windows)
+  it shows the newest frame at each refresh; in exclusive fullscreen on
+  Windows the extra frames can tear. With Frame blend, Unlimited means the
+  display refresh.
 
-It needs the OpenGL renderer and turns vsync off. A monitor shows at most its
-own refresh rate, so rates above it cost more without showing more motion
-(with vsync off they can show as tearing instead).
-If the machine cannot draw every in-between frame, fewer are drawn and the
-gaps between them crossfaded; in-between frames are planned into the time
-the presenter would otherwise wait. Netplay sessions run without mods.
-Details and credits:
+It needs the OpenGL renderer and turns vsync off. A picture that has not
+changed is not sent to the screen again, so the rate is a ceiling, not a
+workload. Built against a psxrecomp without leftover-only render passes
+(`PSX_MOD_RENDER_PASS_LEFTOVER`), the package draws no in-between frames,
+and `tools/check_pin_keys.py` (ctest `r4_pin_keys`) flags that state. Netplay
+sessions run without mods. Details and credits:
 `mods/preloaded/packages/r4.enhancement.frame-rate/1.0.0/README.txt`,
 `src/mods/r4_interp.c`, `psxrecomp/docs/RENDER_PASSES.md`.
 
