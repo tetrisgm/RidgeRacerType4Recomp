@@ -100,19 +100,10 @@ static inline int r4_modern_controls_map(const PSXModPadFrame *frame,
     if (r4_mc_pressed(in, R4_MC_PAD_CIRCLE)) mapped &= ~ng->upshift;
     if (r4_mc_pressed(in, R4_MC_PAD_R1)) mapped &= ~ng->view;
 
-    /* Twist is the left stick; a digital-mode pad (stick folded onto the
-     * D-pad) steers at full lock. */
-    if (frame->type == PSX_MOD_PAD_DUALSHOCK) {
-        twist = r4_mc_twist(frame->lx, ng);
-    } else if (r4_mc_pressed(in, R4_MC_PAD_LEFT) &&
-               !r4_mc_pressed(in, R4_MC_PAD_RIGHT)) {
-        twist = 0x00u;
-    } else if (r4_mc_pressed(in, R4_MC_PAD_RIGHT) &&
-               !r4_mc_pressed(in, R4_MC_PAD_LEFT)) {
-        twist = 0xFFu;
-    } else {
-        twist = 0x80u;
-    }
+    /* Twist is the left stick. A digital-presented pad's frame is its host
+     * pad (psxrecomp gives the transform the real sticks), so it steers
+     * proportionally too. */
+    twist = r4_mc_twist(frame->lx, ng);
 
     out->buttons = mapped & 0xFFFFu;
     out->type = PSX_MOD_PAD_NEGCON;

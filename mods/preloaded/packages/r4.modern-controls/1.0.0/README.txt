@@ -21,8 +21,7 @@ the buttons R4's own NeGcon settings use for shift down, shift up and camera
 view, so a remap in R4's options is followed. No car physics change. Cross,
 L1, L2, R2 and the D-pad do nothing in a race. Menus, the pause menu,
 keyboards, pads without both triggers and steering wheels keep the stock
-controls. A digital-mode pad steers at full lock from the D-pad; use the
-analog mode for stick steering.
+controls. The stick steers in either pad mode (digital or analog).
 
 Y is R4's default Rewind button. In Modern it acts alone (and never reaches the
 game); in Classic it means Select + Y. A Rewind button saved in Settings wins.

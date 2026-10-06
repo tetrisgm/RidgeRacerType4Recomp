@@ -220,14 +220,13 @@ static void test_mapping(void) {
     CHECK(o.buttons == press(R4_MC_PAD_DOWN), "empty config falls back to default");
     set_default_negcon_config();
 
-    /* Digital-mode pad: full lock from the D-pad. */
-    f = frame(press(R4_MC_PAD_LEFT), PSX_MOD_PAD_DIGITAL, 0x80, all, 0, 255);
+    /* Digital-presented pad: the frame carries the host's real stick, so it
+     * steers proportionally; the D-pad reaches nothing. */
+    f = frame(press(R4_MC_PAD_LEFT), PSX_MOD_PAD_DIGITAL, 0xC0, all, 0, 255);
     run(&f, &o);
-    CHECK(o.type == PSX_MOD_PAD_NEGCON && o.lx == 0x00 && o.negcon_i == 106 &&
-          o.buttons == 0xFFFFu, "digital left = full left twist");
-    f = frame(press(R4_MC_PAD_RIGHT), PSX_MOD_PAD_DIGITAL, 0x80, all, 0, 0);
-    run(&f, &o);
-    CHECK(o.lx == 0xFF, "digital right = full right twist");
+    CHECK(o.type == PSX_MOD_PAD_NEGCON && o.lx == 0x80 + 6 + 20 &&
+          o.negcon_i == 106 && o.buttons == 0xFFFFu,
+          "digital pad steers from the real stick");
     f = frame(0xFFFFu, PSX_MOD_PAD_DIGITAL, 0x80, all, 0, 0);
     run(&f, &o);
     CHECK(o.lx == 0x80, "digital neutral = centred twist");

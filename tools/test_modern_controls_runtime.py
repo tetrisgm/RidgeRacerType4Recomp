@@ -406,8 +406,7 @@ def sio_polls(entries):
             continue
         if cur is not None:
             cur["rx"].append(rx)
-    if cur:
-        polls.append(cur)
+    # The trace can end mid-poll: the last poll is left out.
     return [tuple(p["rx"]) for p in polls]
 
 
