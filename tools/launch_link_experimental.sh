@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
-# Opt-in three/four-seat Link Battle through the runtime's existing launcher.
+# Online Link Battle (2-4 players, docs/ONLINE_BATTLE.md) through the
+# runtime's launcher. Every peer starts the game this way.
 # Usage: tools/launch_link_experimental.sh [build-dir] [runtime args...]
-# The launcher NETPLAY page already offers Max Players 2, 3, or 4.
+# The launcher NETPLAY page offers Max Players 2, 3 or 4.
 set -euo pipefail
 
 R4_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
@@ -15,7 +16,6 @@ else
 fi
 
 export PSX_R4_LINK_EXPERIMENTAL=1
-export PSX_R4_VIEW_COUNT_PROBE=1
 R4_FORCE_LAUNCHER=1
 for arg in "$@"; do
   case "$arg" in

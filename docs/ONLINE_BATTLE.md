@@ -1,116 +1,149 @@
-# Experimental Link Battle integration
+# Online Link Battle (2-4 players)
 
-The opt-in link path runs one R4 runtime per human seat. It uses R4's native
-mode-4 four-car update loop and consumes synchronized netplay pad words in the
-game's command buffers. It does not emulate the serial cable. The game-specific
-hooks are statically linked in `src/mods/r4_link_netplay.c` and declared in
-`game.toml`; regular mod entry hooks are cleared when netplay starts.
+Online play uses R4's own Link Battle: the race the original game ran between
+two consoles joined by a link cable. Here every player runs one copy of the
+game on their own machine and sees their own car full screen. The host is
+Player 1; each player who joins takes the next free seat (P2, P3, P4). A
+session of 2, 3 or 4 players races 2, 3 or 4 cars.
 
-## Dependencies
+Local split screen stays two players: the stock VS Battle on pads 1 and 2.
 
-The serial-free bridge needs framework APIs that are under review upstream:
+## Playing
 
-- RetroPortingToolKit/psxrecomp#512 (`feat/link-seat-input`): game-owned
-  netplay function hooks and filters (independent of the mod plan a match
-  clears), the published seat pads and seat count, and the unconfirmed
-  load barrier in both netplay modes;
-- RetroPortingToolKit/psxrecomp#511: no duplicate restore in a mixed-hash
-  LOAD (needed when peers hold different checkpoints);
-- RetroPortingToolKit/recomp-net#26: matching seats wait for the host's
-  release of a SAVE hash probe (three or more seats);
-- RetroPortingToolKit/recomp-ui#80: the LAN page lists
-  local rooms without connecting to the online lobby.
+Every peer needs the same build, the same disc and the experimental switch:
+start the launcher with `tools/launch_link_experimental.sh build` (it sets
+`PSX_R4_LINK_EXPERIMENTAL=1`). On the NETPLAY page the host creates a room
+(LAN or online) and the others join; the host presses Play. In the game,
+choose **Link Battle** on the main menu. Car Select and Course Select work as
+in the original; every player can confirm. In the race each player steers
+their own car and sees only their own view.
 
-This branch pins psxrecomp and recomp-ui to the first and last of those. `[controller] multitap = false` (from #512) keeps offline play at two standalone pads; `players = 4` only sets the netplay seat count.
-Regenerate the game after changing the framework pin; never edit
-`generated/` directly. Run `tools/launch_link_experimental.sh BUILD_DIR` to
-open the normal graphical launcher with R4's two experimental environment
-flags enabled. Each peer selects the same player count. For a three-seat
-session, R4 runs three active cars; the fourth slot is inactive.
+Pause with Start from any seat. The shared pause menu then shows on every
+screen over the two upper views; Up/Down and Start from any seat move and
+confirm it (Cancel, Restart, Retire). After the race, Results offers
+**Car & Course Change** for another race or **Exit** to the title.
 
-## Evidence and limits
+Rewind is never available in a netplay session: `psxrecomp`'s rewind skips
+capture and refuses the toggle while netplay is active
+(`runtime/src/psx_rewind.c`: the capture tick, the capture and
+`psx_rewind_toggle()` all check `psx_netplay_active()`), in delay and rollback
+mode and for any seat count.
 
-`tools/r4_link_manifest.py` authenticates the US disc's EXE and R4.BIN hook
-sites. `tools/r4_link_state_probe.py` proves four independent command words
-reach four native car updates in one runtime. The native test
-`tests/test_r4_link_netplay.c` guards the game hooks, including zero-handle
-serial event teardown. The loopback driver
-`tools/r4_link_netplay_regression.py` loads separate peers and compares common
-guest-state digests. Its disposable result files are under `/tmp`; they are
-not part of the repository. The private graphical launcher regression
-`tools/r4_link_lan_launcher_regression.py` exercises LAN discovery, Join,
-host Play, and optional loading of a compatible race checkpoint.
+## Design
 
-Three-peer headless play completed a native two-lap Helter Skelter race, showed
-Results, then used native Car & Course Change to select cars and enter a new
-two-lap race with matching peer digests. Four-peer headless play completed both
-laps with four active cars and four rendered views, then reached native Results.
-Ordinary result-menu inputs selected Car & Course Change and restarted all four
-peers in a new mode-4 race; 144 common guest-state digest checkpoints matched.
-The graphical LAN page now lists local rooms without connecting to the online
-lobby server. A second instance on this Mac could discover the host room but
-could not reach the host's advertised NIC address by self-directed UDP; it
-could reach the same host on loopback. Join verifies a matching local room
-registry before using loopback, then uses UDP membership so every guest gets
-the host's START, BIOS, timing, and rollback contract. The file-only local
-seating path was removed because it could not deliver that contract.
-The graphical regression passed with three peers seated 3/3 and all three
-game runtimes armed. A checkpoint-free run then entered native Link Battle
-through the normal R4 menus and reached mode 4, race phase 2 with three active
-cars on every peer. A synchronized slot 06 checkpoint from that race reloaded
-successfully in a separate graphical LAN session. Four peers also seated 4/4,
-armed all four runtimes, and loaded a compatible synchronized checkpoint into
-mode 4, race phase 2 with four active cars on each peer.
+**Seats.** The framework assigns them; R4 only reads them. In a LAN or online
+room the host holds seat 0 and each guest takes the lowest free lobby seat,
+which is the join order unless a player left and a later one took the gap.
+At Play the host stays session slot 0 and the others follow in lobby-seat
+order; the session has one slot per seated player, so a 4-seat room started
+with three players is a three-player session. With the direct CLI path each
+peer is given its slot (`PSX_NET_SLOT`). R4 gives car *k* to session slot *k*
+(`psx_netplay_seat_count()`, `psx_netplay_local_slot()`). The host must sit in
+a seat; a host watching from the gallery is not supported.
 
-For fresh three-seat entry, `tools/r4_link_lan_launcher_regression.py`
-supports `--peers 3 --fresh-race`. After game frame 1200, it pulses Start
-(`0xFFF7` for eight frames, then neutral `0xFFFF` for at least 72) on all
-active peers until mode at `0x800F4EF4` is 4, the link FSM halfword at
-`0x800FF838` is 2, and accepted-seat bytes at `0x800AC074..77` are
-`01 01 01 00` on every peer. In the observed run, five pulses sufficed.
-After the Link Battle title settles into Preset Player 1 Car Select, four
-Circle pulses (`0xDFFF`, eight frames plus at least 80 neutral frames) on
-all active peers advance the two preset-car selections; the next screen is
-native Course Select with Start highlighted. One more Circle pulse starts
-the race. The success condition is mode 4, active-car count 3 at
-`0x800AC754`, and race phase 2 at `0x800FF860` on every peer. The regression
-captures Car Select, Course Select, and race screenshots. Its optional
-`--checkpoint-slot` saves a new synchronized race state only to an unused
-slot in the runtime's supported 0..11 range.
+**One race, every peer.** Each peer runs R4's native mode-4 link race with
+the same inputs, so guest state is identical everywhere (the netplay digests
+check it). Game-owned hooks in `src/mods/r4_link_netplay.c`, listed in
+`game.toml`, replace the serial cable: the link setup and handshake are
+satisfied without SIO1, the accepted-entrant flags mark the first N slots,
+and each frame the published pad of every seat (`psx_netplay_sim_pad`) is
+turned into R4's own command word for that seat's car. Pause and menu flags
+come from any seat. These hooks need RetroPortingToolKit/psxrecomp#512.
 
-The authenticated retail link overlay reads Start from `0x800F3BF0`, sends a
-pause flag in serial packet byte 3, and ORs the received/sent flags in its pause
-handler at `0x80115B58`-`0x80115B88`. The serial-free hook now supplies one
-flag pulse for each newly pressed synchronized Start seat. The held-seat mask
-lives in authenticated unused guest byte `0x801190BE`, preserving the existing
-enhancement-memory layout and rollback behavior. A four-peer headless test
-pressed Start from seat 4: all pause bytes became 1 and R4's native pause menu
-rendered. Car positions stayed fixed for 64 host frames; a second Start resumed
-all peers, car positions changed, and post-resume digests matched.
+**Views.** The original link console draws one view (two entrants) or the two
+local players' views (four entrants). Online every peer must draw the same
+frame, so every peer draws all seats' views: four 160x120 quadrants, seat 0
+top-left, 1 top-right, 2 bottom-left, 3 bottom-right, with each view's HUD
+inside its quadrant. Each peer then presents only its own seat's quadrant,
+scaled to the window at 4:3, through `psx_netplay_present_local_view`
+(RetroPortingToolKit/psxrecomp#535). That request is presentation only: it
+never reaches guest memory, savestates or digests. It lapses a few ticks after
+the race handler stops renewing it, so menus, Results and loading screens show
+the whole frame. While paused every peer shows the whole frame: the two upper
+views, the pause menu and a black lower half (the lower views' private OTs
+would cover the menu, so they are not drawn while paused).
 
-In the three-peer Results menu, selecting Exit returned all peers to the R4
-title screen with matching digests. The launcher's scripted Quit also exited
-cleanly. A visible host Escape and a visible seat-4 Escape each sent a netplay
-BYE: all four processes exited normally within one second, with the leaving
-peer reporting `netplay_escape` and the others `netplay_peer_disconnect`.
-An abrupt debug quit still provides a bounded fallback: the remaining peers
-waited for confirmation, then exited after the runtime's 18-second stall
-timeout. The direct CLI tests do not verify the launcher's post-disconnect UI.
+With two seats R4's entrant count is 2, which selects the one-view layout.
+The hooks keep the count at 2 for the race, rank and results, take the
+two-view branch of the link handler (0x801157EC) and let only the two-view
+HUD setup (race init 0x8002094C) and HUD pass (0x80021134 from 0x80115F7C)
+see the two-view count. The unused lower half is cleared black.
 
-## What is and is not claimed
+**Mode-4 frames without the race.** Results, Car Select and loading frames
+are still mode 4. The OT and HUD edits only run in a frame whose views the
+link race handler built (they once linked stale HUD copies into the Results
+-> Car Select frame, which halted the GPU on an unknown GP0 command).
 
-Verified (headless loopback peers, earlier framework pins; per-peer digests
-matched throughout): three peers through a native two-lap race, Results,
-Car & Course Change restart and title Exit; four peers with four accepted
-seats and rendered views, synchronized pause/resume from any seat, native
-Retire to Results, restart, and BYE on host or guest Escape; synchronized
-save/load, including a mixed-hash LOAD with psxrecomp#511.
+## The experimental switch stays
 
-Not claimed: a natural four-player race from the start line to the finish.
-Four-peer finishes so far ran from a late-race checkpoint or ended through
-Retire; two capped runs with the minimap driver did not reach the finish in
-900 s. Physical controllers and remote (non-loopback) networks are untested.
+`PSX_R4_LINK_EXPERIMENTAL=1` is still required on every peer. The bridge
+allocates its enhancement memory (Expansion 1 for brake ramps and two extra
+cameras, the GPU DMA aperture for the lower views' ordering tables) when the
+game starts, before anyone knows whether a link session will follow, and an
+allocation makes that hardware region RAM instead of open bus. The default
+path must stay hardware-faithful, so the allocation, and with it the bridge,
+stays opt-in until the framework can reserve that memory for a netplay
+session only (for example at session start, which already cold-boots the
+game). The switch changes nothing for offline play or the stock VS Battle.
 
-The runtime requires matching binaries and disc identity on every peer. The
-serial-free hooks are gated by `PSX_R4_LINK_EXPERIMENTAL=1` and a live 3/4-seat
-netplay session. Regular two-player VS Battle remains the stock path.
+## Limits
+
+- Each seat's view is 160x120 guest pixels, presented at 2x. Internal
+  resolution 2x or higher gives a native-sharp picture; Native looks soft.
+- The HUD of seats 3 and 4 lacks the mph/rpm labels and its timer sits at the
+  top edge of the quadrant.
+- Results name Player 1 and Player 2 only (the original link's two
+  consoles); the cars of seats 3 and 4 appear without a name.
+- In a two-player netplay session the main menu still offers VS Battle, which
+  is the stock split screen on both peers (each sees both halves). Choose
+  Link Battle.
+- Physical controllers, remote networks and the GL window present (as
+  opposed to the headless present-image ring) were not exercised by the
+  harness below.
+
+## Evidence
+
+`tools/r4_online_battle_regression.py` boots N headless peers of one debug
+build (`-DPSX_NETPLAY=ON`) on loopback LAN netplay, host = seat 0, guests
+started in order, and drives every seat through the native menus with its own
+pad. A test-only autopilot per seat holds accelerate and steers toward the
+course centreline a speed-dependent distance ahead (it finds the course
+segment table from the car's segment index, `car+0xF0`) and brakes into sharp
+bends. It checks: entry with N accepted entrants; each seat in turn
+accelerates alone from the grid and only its car moves; every peer presents
+exactly its own quadrant (its presented image against the four quadrants of
+the same guest frame); a race to the natural finish; Results; Car & Course
+Change into a second race; pause from the last seat (every peer paused and
+showing the whole frame), Retire from seat 0; Results; Exit to the title;
+matching digests on every common tick; dispatch and segment misses.
+
+Results at `d60f822` (psxrecomp `c4215396`), macOS arm64, one debug build,
+rollback mode (the launcher's default), 3-lap Helter Skelter, on a shared
+machine at load average 17-55:
+
+| Peers | Seats (slot per peer) | Own view presented (quadrant distance: own / others) | Natural finish | Car & Course Change | Pause (whole frame) / Retire / Exit | Digests | Dispatch / segment misses |
+|---|---|---|---|---|---|---|---|
+| 2 | 0, 1 | 0.0 / 43-69 on both | 519 s, 24015 frames; Results: Player 2 won | new race, 2 cars | both paused and whole frame; Retire; Exit to title | 985 common ticks, 0 mismatch | 0 / 0 |
+| 3 | 0, 1, 2 | 0.0-3.0 / 34-96 on all | 851 s, 25190 frames; Results: Player 1 won | new race, 3 cars | all three; Retire; Exit to title | 1032 common ticks, 0 mismatch | 0 / 0 |
+| 4 | 0, 1, 2, 3 | 0.0-0.6 / 33-52 on all | 1525 s, 31391 frames; Results: Player 1 won | new race, 4 cars | all four; Retire; Exit to title | 1225 common ticks, 0 mismatch | 0 / 0 |
+
+Three earlier four-peer runs (two rollback, one delay) were in sync (557-715
+common ticks, 0 mismatch) until each ended at sim 18016-23121, late in the
+race, with every peer reporting that the other player stopped responding: an
+input stall longer than the framework's 1.5 s running liveness timeout while
+the machine ran at load 20-55 from other work. The run in the table passed
+under the same conditions; a busy host can still end a four-player match.
+
+In every run each seat, accelerating alone from the grid, moved only its own
+car (seats not yet pressed stayed put), and a race began with N accepted
+entrants and N cars on every peer. The harness gives each headless peer its
+slot (`PSX_NET_SLOT`, in launch order); the room's join-order seating
+described above is the launcher's (`ae_np_lan_find_free_slot` and
+`ae_np_plan_session_slots` in `psxrecomp/runtime/src/main.cpp`) and was not
+re-run here, because that path opens (hidden) game windows.
+
+`tools/r4_link_netplay_regression.py` (savestate loads and the earlier
+three/four-seat probes) and `tools/r4_link_lan_launcher_regression.py`
+(hidden-window LAN discovery, Join and seating through the launcher) remain
+for those paths. `tools/r4_link_manifest.py` authenticates the US disc's EXE
+and R4.BIN hook sites; `tests/test_r4_link_netplay.c` guards the hooks.
