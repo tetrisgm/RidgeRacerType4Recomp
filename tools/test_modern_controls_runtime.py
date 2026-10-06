@@ -18,6 +18,13 @@ it is not a physical-controller test. Settings the run needs, in
                                 (shifting needs a --manual grid slot)
   classic [--slot 9]            Classic / feature off: stock pad in races,
                                 Y alone is Triangle, Select + Y opens Rewind
+  splitscreen --vs-slot 9 --grid-slot 7 [--classic]
+                                no Rewind in 2P VS Battle (r4.split-screen-rewind):
+                                in a VS race Rewind is blocked, captures nothing
+                                and Y / Select + Y do not open it; back on a 1P
+                                grid it captures and Y (--classic: Select + Y,
+                                for Classic or Controls off) opens it. Needs a
+                                2P VS race slot and a 1P grid slot
   sio OUT.json [--slot 9]       replay a fixed host script from the slot and
                                 record every P1 SIO poll (Classic / mods-off A/B)
   compare A.json B.json         identical poll sequences?
@@ -382,6 +389,96 @@ def cmd_classic(args):
     return 0 if all(x["ok"] for x in report["checks"]) else 1
 
 
+# ---- splitscreen ----------------------------------------------------------
+
+def rewind_status():
+    r = c({"cmd": "rewind_status"})
+    if not r.get("ok"):
+        raise RuntimeError(f"rewind_status failed (needs psxrecomp with it): {r}")
+    return r
+
+
+def press_and_watch(buttons):
+    """Hold `buttons` for half a second; (frames advanced, Rewind open)."""
+    host(buttons, rt=255)
+    time.sleep(0.25)
+    f1 = frame()
+    time.sleep(0.5)
+    f2 = frame()
+    opened = rewind_status()["open"]
+    host(rt=255)
+    return f2 - f1, opened
+
+
+def cmd_splitscreen(args):
+    """No Rewind in a 2P VS (split-screen) race; Rewind still works in 1P."""
+    vs_slot = int(opt(args, "--vs-slot", 9))
+    grid_slot = int(opt(args, "--grid-slot", 7))
+    rewind_keys = ["select", "triangle"] if "--classic" in args else ["triangle"]
+    report = {"checks": []}
+    wait_up()
+    c({"cmd": "turbo", "enabled": 0})
+
+    restore(grid_slot)
+    host(rt=255)
+    wait_frames(30)
+    a = rewind_status()
+    wait_frames(120)
+    b = rewind_status()
+    check(report, "1P race: Rewind enabled, not blocked, capturing",
+          a["enabled"] and not b["title_blocked"] and b["snaps"] > a["snaps"],
+          before=a, after=b)
+
+    restore(vs_slot)
+    host(rt=255)
+    wait_frames(30)
+    a = rewind_status()
+    wait_frames(300)
+    b = rewind_status()
+    check(report, "2P VS race: Rewind blocked, no history captured in 300 frames",
+          a["title_blocked"] and b["title_blocked"] and b["snaps"] == a["snaps"],
+          before=a, after=b)
+    advanced, opened = press_and_watch(["triangle"])
+    check(report, "2P VS race: Y does not open Rewind (guest keeps running)",
+          advanced > 0 and not opened, frames_advanced=advanced, opened=opened)
+    wait_frames(30)
+    advanced, opened = press_and_watch(["select", "triangle"])
+    check(report, "2P VS race: Select + Y does not open Rewind either",
+          advanced > 0 and not opened, frames_advanced=advanced, opened=opened)
+    wait_frames(30)
+    b2 = rewind_status()
+    check(report, "2P VS race: still no history after the presses",
+          b2["snaps"] == a["snaps"] and not b2["open"], status=b2)
+
+    restore(grid_slot)
+    host(rt=255)
+    wait_frames(30)
+    a = rewind_status()
+    wait_frames(120)
+    b = rewind_status()
+    check(report, "back in 1P: unblocked and capturing again",
+          not a["title_blocked"] and b["snaps"] > a["snaps"], before=a, after=b)
+    advanced, opened = press_and_watch(rewind_keys)
+    host()
+    time.sleep(0.2)
+    host(["circle"])
+    time.sleep(0.2)
+    host()
+    time.sleep(0.3)
+    f3 = frame()
+    time.sleep(0.5)
+    closed = not rewind_status()["open"]
+    check(report, "back in 1P: " + " + ".join(rewind_keys) +
+          " opens Rewind (guest frozen), Circle cancels",
+          opened and advanced == 0 and closed and frame() > f3,
+          frames_advanced_while_open=advanced, opened=opened, closed=closed)
+    c({"cmd": "clear_input"})
+    m = misses()
+    check(report, "0 dispatch and 0 segment misses",
+          m["dispatch"] == 0 and m["segment"] == 0, **m)
+    return 0 if all(x["ok"] for x in report["checks"]) else 1
+
+
 # ---- sio ------------------------------------------------------------------
 
 # Host script (frames, buttons, lx, lt, rt): every Modern-relevant input.
@@ -474,7 +571,7 @@ def main():
         return 2
     sub, rest = args[0], args[1:]
     return {"grid": cmd_grid, "modern": cmd_modern, "classic": cmd_classic,
-            "sio": cmd_sio,
+            "splitscreen": cmd_splitscreen, "sio": cmd_sio,
             "compare": cmd_compare}[sub](rest)
 
 

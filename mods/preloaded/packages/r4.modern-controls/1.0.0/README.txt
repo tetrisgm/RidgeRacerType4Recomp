@@ -26,3 +26,8 @@ controls. The stick steers in either pad mode (digital or analog).
 Y is R4's default Rewind button. In Modern it acts alone (and never reaches the
 game); in Classic it means Select + Y. A Rewind button saved in Settings wins.
 Netplay always runs with mods cleared, so it uses the stock controls.
+
+Rewind is off in split screen and online. Online, psxrecomp refuses it; in
+2-player VS Battle a hidden rule in this package (on by default, applied with
+any scheme or with Controls off) blocks it: Rewind does not open, keeps no
+history, and Y reaches the game as if Rewind were off.

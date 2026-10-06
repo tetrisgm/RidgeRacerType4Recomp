@@ -231,6 +231,27 @@ static void test_scene(void)
     CHECK(r4_frame_handler(rd, rdh) == 0, "a null row is not followed");
 }
 
+static void test_vs_session(void)
+{
+    setup_scene(2, 1, 53, 0);
+    wr(0x8011729Cu, 0x3C04800Fu); wr(0x801172A0u, 0x3C038010u);
+    CHECK(!r4_vs_session(rd, rdh), "1P race (overlay 660) is not VS");
+    wrh(R4_GAME_MODE_ADDR, R4_GAME_MODE_VS);
+    CHECK(r4_vs_session(rd, rdh), "mode 2 (VS Battle) is VS");
+    setup_scene(0, 2, 5, 0);
+    wrh(R4_GAME_MODE_ADDR, R4_GAME_MODE_VS);
+    CHECK(r4_vs_session(rd, rdh), "VS menus (mode 2, no race) are VS");
+    wrh(R4_GAME_MODE_ADDR, 1);
+    CHECK(!r4_vs_session(rd, rdh), "another mode at a menu is not VS");
+    wrh(R4_GAME_MODE_ADDR, 0);
+    wr(0x800A0200u + 4u * 38u, R4_VS_RACE_HANDLER);   /* row2[38] */
+    wrh(R4_STATE_MINOR_ADDR, 38);
+    wr(R4_VS_RACE_HANDLER, 0x3C04800Fu); wr(R4_VS_RACE_HANDLER + 4u, 0x3C038010u);
+    CHECK(r4_vs_session(rd, rdh), "VS race handler with overlay 661 resident is VS");
+    wr(R4_VS_RACE_HANDLER + 4u, 0u);
+    CHECK(!r4_vs_session(rd, rdh), "VS race address without overlay 661 is not VS");
+}
+
 static void test_pvs(void)
 {
     uint32_t list[8] = { 10, 20, 30 };
@@ -255,6 +276,7 @@ int main(void)
     test_gp0_words();
     test_walker();
     test_scene();
+    test_vs_session();
     test_pvs();
     if (failures) {
         fprintf(stderr, "test_r4_widescreen: %d failure(s)\n", failures);

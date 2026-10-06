@@ -26,4 +26,8 @@ Rules (same as MegaManX6Recomp):
 - `r4_modern_controls.c` / `.h`: `r4.modern-controls` (package `README.txt`),
   the Modern race scheme on psxrecomp's title pad transform; Classic
   registers nothing.
+- `r4_split_screen_rewind.c`: the hidden, default-on `split-screen-rewind`
+  feature of `r4.modern-controls` (plugin `r4.split-screen-rewind`): no
+  Rewind in 2P VS Battle (`psx_mod_set_rewind_blocked`), whatever Controls
+  is set to.
 - See `psxrecomp/docs/MOD_PACKAGES.md`.

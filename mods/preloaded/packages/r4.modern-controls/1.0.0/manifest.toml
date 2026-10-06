@@ -39,3 +39,19 @@ label = "Classic"
 [[plugin]]
 feature = "modern-controls"
 id = "r4.modern-controls"
+
+# Owner rule: no Rewind in split screen (netplay refuses it in psxrecomp).
+# Hidden and default-on, so it holds whatever the Controls feature is set to;
+# game.toml hide_hidden_mod_features keeps it out of the launcher.
+[[feature]]
+id = "split-screen-rewind"
+name = "No Rewind in split screen"
+description = "Rewind is off during 2-player VS Battle (split screen)."
+group = "Controllers"
+channel = "stable"
+default_enabled = true
+hidden = true
+
+[[plugin]]
+feature = "split-screen-rewind"
+id = "r4.split-screen-rewind"

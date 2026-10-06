@@ -343,6 +343,9 @@ Mods -> Controllers -> **Controls** (on by default) picks the race scheme:
 - **Classic**, or the feature off: R4's stock controls, unchanged (Cross
   accelerates, Square brakes); Rewind is Select + Y.
 
+Rewind is off in split screen and online (2-player VS Battle, netplay), with
+any scheme.
+
 Netplay always runs with mods cleared. Details:
 `mods/preloaded/packages/r4.modern-controls/1.0.0/README.txt`; headless check:
 `tools/test_modern_controls_runtime.py`.
