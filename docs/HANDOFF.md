@@ -11,26 +11,29 @@ PR body:
 - #7 camera look-around (default off) — needs RetroPortingToolKit/psxrecomp#506;
 - #8 JogCon input and native analog default — needs RetroPortingToolKit/recomp-net#25, psxrecomp#507;
 - #9 dynamic resolution on, 720p floor — needs psxrecomp#508, RetroPortingToolKit/recomp-ui#77;
-- #10 (draft) experimental three/four-seat Link Battle — needs psxrecomp#512, #511, recomp-net#26, recomp-ui#80.
+- #10 (draft) experimental three/four-seat Link Battle — needs psxrecomp#512, #511, recomp-net#26, recomp-ui#80;
+- #11 Max Detail (default on) — framework merged (#468);
+- #12 VS split screen interpolation and texture-window batching — framework merged (#467);
+- #13 PGXP on by default — needs psxrecomp#513;
+- #14 Frame Rate leftover-time passes and Unlimited — needs psxrecomp#514→#518 (stacked);
+- #15 Controls: Modern scheme on by default, Classic toggle — needs psxrecomp#519→#522 (stacked on #507), recomp-net#27 (on #25), recomp-ui#81.
 
-Suggested merge order: recomp-net #25, #26; psxrecomp #506, #507, #508,
-#511, #512; recomp-ui #77, #79, #80; then R4 #6, #7, #8, #9, #10, re-pinning
-each R4 branch to the merged framework.
+Suggested merge order: recomp-net #25, #26, #27; psxrecomp #506, #507, #508,
+#511, #512, #513, #514–#518, #519–#522; recomp-ui #77, #79, #80, #81; then R4
+#6–#15, re-pinning each R4 branch to the merged framework.
 
 Local only (dev Mac; details in `analysis/HANDOFF-LOCAL.md`, gitignored):
-the held `feat/bundled-releases` branch, the Max Detail and VS-split lanes
-stacked on it, and a release-candidate integration of all of the above.
+the held `feat/bundled-releases` branch (generated/ stays unpublished; the
+lanes that were stacked on it are now #11–#13 on master).
 
 ## Blockers
 
-- Owner: push `generated/` (it embeds the EXE's code words) for the bundled
-  release model, or keep holding `feat/bundled-releases` and v0.2.0.
-- Owner: modern controls need a framework design choice (extend the unified
-  external-input layer with button remap, NeGcon pressure and a host-trigger
-  read, or drop the feature).
-- Owner: the opportunistic render-pass / frame-pacing lane conflicts with
-  upstream's rebuilt render passes; port it as new work or drop it. The
-  Unlimited-rate and pass-cost measurements wait on that.
+- Frame Rate gain (#14) is unmeasured: on this shared host the pace guard
+  admitted no in-between frames (host load 35–60). Needs a quiet-host run;
+  forced passes verify with 0 mismatches.
+- In progress: one budget for dynamic resolution and render passes (after
+  #508 and #514–#518), then an R4 change turning the display defaults on.
+- Owner: pushing `generated/` for bundled releases stays on hold.
 
 ## References
 
