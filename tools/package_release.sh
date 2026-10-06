@@ -52,6 +52,10 @@ V="$(tr -d '[:space:]' < VERSION)"; V="${V#v}"
 export RELEASE_VERSION="$V"
 export EXCLUDE_DEV_MODS=1
 echo "== r4 $V ($PLATFORM) from $SHA"
+# Every game.toml [video] key is read by the pinned psxrecomp and its mod API
+# has what R4's plugins rely on: a key set ahead of the pin would be inert in
+# the zip, and R4's on-by-default display settings would not match its docs.
+python3 tools/check_pin_keys.py
 bash psxrecomp/tools/ci/record_pins.sh
 bash psxrecomp/tools/ci/clear_generated.sh
 

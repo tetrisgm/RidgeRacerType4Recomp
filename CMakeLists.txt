@@ -145,6 +145,15 @@ if(R4_BUILD_TESTS AND BUILD_TESTING)
                 endif()
             endif()
         endif()
+        # R4's on-by-default enhancements (manifests, game.toml) and the
+        # tools/mod_state.py switches scripted runs use to turn them off.
+        if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_r4_defaults.py")
+            add_test(NAME r4_defaults
+                COMMAND "${Python3_EXECUTABLE}"
+                    "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_r4_defaults.py"
+                WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}")
+            set_tests_properties(r4_defaults PROPERTIES SKIP_RETURN_CODE 77)
+        endif()
         # The pinned psxrecomp reads every game.toml [video] key and has the
         # mod API R4's plugins rely on. Skipped (with the list) while R4 is
         # ahead of its pin; the strict form refuses that state for a release.

@@ -95,14 +95,19 @@ overlay_backend = "auto"
 # tools/run_r4.cmd).
 
 [video]
-# Faithful 4:3 by default. Widescreen is the r4.enhancement.widescreen mod
-# (Mods > Display > R4 Custom Renderer), which selects the aspect itself.
+# The stock 4:3 frame. Widescreen is the r4.enhancement.widescreen mod
+# (Mods > Display > R4 Custom Renderer, on by default with Fit to Window),
+# which selects the aspect itself; with it off, races are this 4:3.
 renderer = "opengl"
 aspect_ratio = "4:3"
-# Internal resolution presets (Settings -> Display) divide their target height
-# by this: R4's races are 320x240 progressive, so 4K is 9x and 8K is 18x. Its
-# 480i menus render at twice the target and are resolved down. The shipped
-# default stays Native (no internal_resolution key).
+# R4 ships Match display (the monitor's full pixel height, no cap) as its
+# default internal resolution; the framework default is Native. A player's
+# pick in Settings -> Display is saved to settings.toml and outranks this, as
+# does a saved legacy supersampling factor (psxrecomp docs/config_schema.md).
+internal_resolution = "display"
+# Internal resolution presets divide their target height by this: R4's races
+# are 320x240 progressive, so 4K is 9x and 8K is 18x. Its 480i menus render at
+# twice the target and are resolved down.
 resolution_reference_lines = 240
 # Dynamic resolution (opt-in framework controller): keep the selected internal
 # resolution while the game has room; step down only after sustained missed
@@ -110,6 +115,12 @@ resolution_reference_lines = 240
 # nothing at Native. Players turn it off in Settings -> Display.
 dynamic_resolution = true
 dynamic_resolution_min = "720p"
+# Frame rate first (psxrecomp docs/RENDER_PASSES.md): the controller also
+# counts the time R4 Frame Rate's in-between frames need, stepping down a
+# level (never below the 720p floor) after 2 s of shed passes and up only when
+# the game and its passes both fit. The game's own frames always come first;
+# passes only ever use leftover time.
+dynamic_resolution_priority = "frame_rate"
 
 # Native-wide rendering for r4.enhancement.widescreen (docs/WIDESCREEN.md).
 # Inert at 4:3: every cull site below is the identity while the margin is 0.

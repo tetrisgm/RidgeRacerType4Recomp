@@ -20,6 +20,10 @@ no in-between frames at all (r4_interp.c), so the package would ship inert.
                                              so a branch that sets a key ahead of
                                              its pin still tests clean
 
+REQUIRED_VIDEO_KEYS names the keys R4's on-by-default display settings rely
+on; game.toml must set each one (checked in both forms) and the pin must read
+it.
+
 A key counts as known when psxrecomp/recompiler/src/config_loader.cpp names it
 in quotes; a mod API feature when psxrecomp/runtime/include/mod_plugins.h
 defines its macro. Run the strict form before building a release.
@@ -41,7 +45,27 @@ def unknown_video_keys(root):
                           'config_loader.cpp')
     with open(loader, encoding='utf-8') as fh:
         src = fh.read()
-    return [k for k in video if f'"{k}"' not in src]
+    return [k for k in set(video) | set(REQUIRED_VIDEO_KEYS)
+            if f'"{k}"' not in src]
+
+
+# [video] keys R4's on-by-default display settings rely on (README "On by
+# default"): Match display, dynamic resolution with its 720p floor, and the
+# frame-rate priority that lets it trade resolution for in-between frames.
+# Checked against the pin even if game.toml stops setting one, and
+# game.toml must set each (a dropped key silently changes the default).
+REQUIRED_VIDEO_KEYS = (
+    'internal_resolution',           # "display" (Match display)
+    'dynamic_resolution',            # psxrecomp #508
+    'dynamic_resolution_min',        # "720p" floor (#508)
+    'dynamic_resolution_priority',   # "frame_rate" (#530)
+)
+
+
+def unset_required_keys(root):
+    with open(os.path.join(root, 'game.toml'), 'rb') as fh:
+        video = tomllib.load(fh).get('video', {})
+    return [k for k in REQUIRED_VIDEO_KEYS if k not in video]
 
 
 # Feature macros of psxrecomp's mod API that R4's plugins rely on.
@@ -69,8 +93,14 @@ def main():
         print('SKIP: needs Python 3.11+ (tomllib)' if args.ctest
               else 'error: needs Python 3.11+ (tomllib)')
         return 77 if args.ctest else 2
-    missing = unknown_video_keys(args.root)
+    missing = sorted(unknown_video_keys(args.root))
     api = missing_mod_api(args.root)
+    unset = unset_required_keys(args.root)
+    if unset:
+        # A game.toml mistake, not a pin lag: fail under --ctest as well.
+        print('error: game.toml [video] does not set ' + ', '.join(unset) +
+              ', which R4\'s on-by-default display settings rely on')
+        return 1
     if not missing and not api:
         print('ok: the pinned psxrecomp reads every game.toml [video] key and '
               'has the mod API R4\'s plugins rely on')

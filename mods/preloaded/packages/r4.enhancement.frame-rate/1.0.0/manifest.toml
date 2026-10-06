@@ -8,19 +8,23 @@ license = "MIT"
 resolver = "declarative"
 save_compatibility = "shared"
 
-# The interpolation plugin calls US EXE functions by address, so the package
-# is pinned to the exact boot EXE (DISC.md).
+# The interpolation plugin calls US EXE functions by address. SLUS-00797 has
+# one release (DISC.md), this runtime is compiled from that exact boot EXE and
+# its text-image guard checks the loaded image, so game_id is the pin. No
+# exe_sha256: a release install carries no loose EXE for psxrecomp to hash,
+# and the target would never match there, refusing to launch while the
+# package is on (it is on by default).
 [[target]]
 game_id = "SLUS-00797"
-exe_sha256 = "078e3a95185cfa0cc79936dce37cc2c1a90e17aa209b42eef342c970a97f3323"
 
 [[feature]]
 id = "frame-rate"
 name = "R4 Frame Rate"
-description = "Races get extra frames between the game's own, drawn only in time the game leaves free, so it never runs slower: where none fits, the game's own 30 FPS frame is shown as is. Game logic, lap times, AI, input and music stay at the stock 30 Hz. Requires OpenGL; vsync is off while it runs."
+description = "On by default. Races get extra frames between the game's own, drawn only in time the game leaves free, so it never runs slower: where none fits, the game's own 30 FPS frame is shown as is. Game logic, lap times, AI, input and music stay at the stock 30 Hz. Turn it off for the stock 30 FPS picture. Requires OpenGL; vsync is off while it runs."
 group = "Frame Rate"
-channel = "experimental"
-default_enabled = false
+# On by default for R4 (owner decision, 2026-10-01). A player's own choice
+# in the launcher is saved to mods/state.toml and always wins.
+default_enabled = true
 
 [[option]]
 feature = "frame-rate"
