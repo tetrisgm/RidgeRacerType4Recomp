@@ -9,7 +9,9 @@ ends short of the right edge: see [Limitations](#limitations)), **16:9**,
 Races render wider than 4:3 with real extra pixels: the game submits the
 geometry beyond the 4:3 edges and the HUD sits at the window edges. Menus, the
 garage, results, replays after the finish and movies stay 4:3 with side bars.
-Netplay always plays stock 4:3.
+Online, it applies to your own view only (Link Battle draws each player's own
+view; see `docs/ONLINE_BATTLE.md`): the shared race stays stock 4:3 on every
+peer and each player keeps their own View.
 
 ## How it works
 
@@ -44,7 +46,10 @@ of their R4 (JP) "60 FPS + 16:9" patch, re-mapped to the US executable.
   them once with `psx_mod_register_function_entry_plugin("r4.widescreen", …)`,
   the manifest's `[[plugin]]` id, so psxrecomp runs them only while the
   resolved mod plan activates that plugin: never while the package is
-  disabled, never in netplay.
+  disabled. In netplay the manifest's `netplay = "local_view"` keeps them
+  for this player, but psxrecomp runs them only inside the sandboxed own-view
+  draw, where the cull margin is also this player's; the shared game never
+  sees them.
 - `[widescreen] native_wide = true` (the framework default).
 - `[widescreen.cull]`: generated. After changing the scanner or the seeds:
 
