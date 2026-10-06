@@ -31,6 +31,20 @@ void psx_netplay_present_local_view(uint32_t x, uint32_t y,
     local_view[3] = h;
     ++local_views;
 }
+static uint32_t local_status;
+static int local_render_result, local_renders;
+static PSXModRenderPass local_rect;
+uint32_t psx_mod_render_local_view_status(void) { return local_status; }
+int psx_mod_render_local_view(struct CPUState *cpu, const PSXModRenderPass *rect,
+                              PSXModRenderPassFn fn, void *user) {
+    assert(cpu && rect && fn && user);
+    local_rect = *rect;
+    ++local_renders;
+    return local_render_result;
+}
+void psx_dispatch_call(CPUState *cpu, uint32_t target, uint32_t ra) {
+    (void)cpu; (void)target; (void)ra;
+}
 int psx_netplay_sim_pad(int seat, PsxNetPad *out) {
     if (!out || seat < 0 || seat >= 4 || !sample_pad_valid[seat]) return 0;
     *out = sample_pads[seat];
@@ -96,7 +110,7 @@ int psx_game_register_netplay_function_filter(
 
 int main(void)
 {
-    assert(registrations == 27);
+    assert(registrations == 28);
     assert(setenv("PSX_R4_LINK_EXPERIMENTAL", "1", 1) == 0);
     r4_link_brake_ramps = psx_mod_alloc_guest_memory(4, 4);
     r4_link_extra_view_cameras = psx_mod_alloc_guest_memory(64, 4);
@@ -381,8 +395,10 @@ int main(void)
                (0x04000000u | (retail & 0x00FFFFFFu)));
         assert(psx_mod_read_word(retail) == 0x04FFFFFFu);
     }
-    /* Two seats: one car each, both views drawn, each peer presents its own
-     * quadrant (not while the shared pause menu is up). */
+    /* Two seats: one car each, both views drawn. At the main loop's VSync(0)
+     * each peer draws its own full-screen view (psx_mod_render_local_view)
+     * or, when that is unavailable, presents its own quadrant; nothing while
+     * the shared pause menu is up or while resimulating. */
     seat_count = 2;
     psx_mod_write_half(0x800FF838u, 3);
     psx_mod_write_word(0x800AC074u, 0x5A5A5A5Au);
@@ -392,21 +408,52 @@ int main(void)
     psx_mod_write_byte(R4_LINK_PAUSED, 0);
     local_slot = 1;
     local_views = 0;
+    local_renders = 0;
+    psx_mod_write_word(R4_LINK_PHASE, 2);
+    psx_mod_write_word(R4_LINK_FRAME_COUNTER, 7); /* drawing buffer 1 */
     assert(!r4_link_serial_filter(&cpu, 0x80115770u));
     assert(psx_mod_read_half(0x800AC754u) == 2);
-    assert(local_views == 1);
+    assert(local_views == 0 && local_renders == 0);
+    cpu.gpr[31] = R4_LINK_RA_PASS_POINT;
+    local_status = PSX_MOD_RENDER_PASS_BACKEND;     /* e.g. software present */
+    assert(!r4_link_serial_filter(&cpu, R4_LINK_VSYNC));
+    assert(local_views == 1 && local_renders == 0);
     assert(local_view[0] == 160u && local_view[1] == 0u &&
            local_view[2] == 160u && local_view[3] == 120u);
+    local_status = PSX_MOD_RENDER_PASS_READY;
+    local_render_result = 1;
+    assert(!r4_link_serial_filter(&cpu, R4_LINK_VSYNC));
+    assert(local_views == 1 && local_renders == 1);
+    assert(local_rect.x == 0 && local_rect.y == 0 &&   /* buffer 0 shows next */
+           local_rect.w == 320 && local_rect.h == 240 &&
+           local_rect.alpha_q16 == 0);
+    local_render_result = 0;                         /* rolled back */
+    assert(!r4_link_serial_filter(&cpu, R4_LINK_VSYNC));
+    assert(local_views == 2 && local_renders == 2);
+    local_status = PSX_MOD_RENDER_PASS_SESSION;      /* resimulating */
+    assert(!r4_link_serial_filter(&cpu, R4_LINK_VSYNC));
+    assert(local_views == 2 && local_renders == 2);
+    local_status = PSX_MOD_RENDER_PASS_READY;
+    local_render_result = 1;
+    cpu.gpr[31] = 0x80010000u;                       /* another VSync caller */
+    assert(!r4_link_serial_filter(&cpu, R4_LINK_VSYNC));
+    assert(local_renders == 2);
+    cpu.gpr[31] = R4_LINK_RA_PASS_POINT;
     psx_mod_write_byte(R4_LINK_PAUSED, 1);
-    assert(!r4_link_serial_filter(&cpu, 0x80115770u));
-    assert(local_views == 1);
+    assert(!r4_link_serial_filter(&cpu, R4_LINK_VSYNC));
+    assert(local_views == 2 && local_renders == 2);
     psx_mod_write_byte(R4_LINK_PAUSED, 0);
-    local_slot = 0;
     seat_count = 4;
     local_slot = 3;
-    assert(!r4_link_serial_filter(&cpu, 0x80115770u));
-    assert(local_views == 2);
+    local_status = PSX_MOD_RENDER_PASS_NO_PRESENTER;
+    assert(!r4_link_serial_filter(&cpu, R4_LINK_VSYNC));
+    assert(local_views == 3);
     assert(local_view[0] == 160u && local_view[1] == 120u);
+    local_status = PSX_MOD_RENDER_PASS_READY;
+    psx_mod_write_word(R4_LINK_FRAME_COUNTER, 8);    /* drawing buffer 0 */
+    assert(!r4_link_serial_filter(&cpu, R4_LINK_VSYNC));
+    assert(local_renders == 3 && local_rect.y == 240);
+    cpu.gpr[31] = 0;
     local_slot = 0;
     seat_count = 2;
     {

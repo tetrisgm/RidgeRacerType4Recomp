@@ -18,6 +18,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 
 #define R4_LINK_MODE 0x800F4EF4u
 #define R4_LINK_OVERLAY_BASE 0x801149A8u
@@ -785,7 +786,7 @@ static void r4_link_clear_serial_state(void)
     r4_link_zero_words(0x800ACD98u, 2);
 }
 
-/* Present only this peer's quadrant while the race views are up. The pause
+/* Fallback: present only this peer's quadrant of the shared frame. The pause
  * menu spans the whole frame, so a paused race shows every view. */
 static void r4_link_present_local_view(unsigned seats)
 {
@@ -797,8 +798,274 @@ static void r4_link_present_local_view(unsigned seats)
     psx_netplay_present_local_view(x, y, R4_LINK_VIEW_W, R4_LINK_VIEW_H);
 }
 
+/* ---- Own full-screen view (psx_mod_render_local_view) -------------------
+ *
+ * Every peer simulates and draws the same multi-view frame (the canonical
+ * frame: guest RAM, VRAM, digests). On top of that each peer redraws its own
+ * seat's view as one full-screen 320x240 view inside a framework sandbox and
+ * shows that instead; the sandbox restores the whole machine, so this never
+ * changes guest state.
+ *
+ * Where: the main loop's VSync(0) entry (0x8008B330, ra 0x8001E7E4), as R4's
+ * frame-rate plugin does. The link handler has built tick n (cars, cameras,
+ * OT), the previous OT has drawn the other buffer (DrawSync returned), and
+ * the display is about to flip to that buffer, whose RAM and VRAM are free
+ * to redraw.
+ *
+ * What: the link handler's own one-view path (two entrants, retail: one
+ * console, one full-screen car; 0x80115D80..0x80116254 with view flag 0 and
+ * one view), draw calls only. The seat's car takes the P1 object's place
+ * (that path draws P1, 0x800AC0B0), its lap time takes slot 0, and its
+ * camera (already advanced by tick n's handler) is the view's camera. Logic
+ * in that path (the camera step, the countdown fade counter, engine audio,
+ * the packet send) is left out. */
+#define R4_LINK_P1_CAR 0x800AC0B0u
+#define R4_LINK_CAR_BYTES 0x320u
+#define R4_LINK_LAP_TIMES 0x800F4E20u
+#define R4_LINK_PHASE 0x800FF860u
+#define R4_LINK_TICK 0x800F2F94u
+#define R4_LINK_VSYNC 0x8008B330u
+#define R4_LINK_RA_PASS_POINT 0x8001E7E4u
+#define R4_LINK_RA_NESTED 0x8001E7E8u
+#define R4_LINK_BUF_BASE 0x800ADCA0u
+#define R4_LINK_FRAME_COUNTER 0x800AC064u
+#define R4_LINK_CUR_BUF 0x800ACDCCu
+#define R4_LINK_BUF_INDEX 0x800F4DA0u
+#define R4_LINK_OT2_ENABLED 0x800ACDB0u
+
+static int r4_link_in_local_view;
+#define R4_LINK_MIRROR_SLIDE 0x800F4E90u
+static int32_t r4_link_mirror_slide, r4_link_mirror_next;
+static uint32_t r4_link_mirror_tick = UINT32_MAX;
+static uint64_t r4_link_local_ok, r4_link_local_failed;
+
+typedef struct R4LinkCall {
+    struct CPUState *cpu;
+    uint32_t sp;
+    int broken;
+} R4LinkCall;
+
+static uint32_t r4_link_call(R4LinkCall *c, uint32_t fn, uint32_t a0,
+                             uint32_t a1)
+{
+    struct CPUState *cpu = c->cpu;
+    if (c->broken) return 0;
+    cpu->gpr[4] = a0;
+    cpu->gpr[5] = a1;
+    cpu->gpr[6] = cpu->gpr[7] = 0;
+    cpu->gpr[29] = c->sp;
+    cpu->gpr[31] = R4_LINK_RA_NESTED;
+    psx_dispatch_call(cpu, fn, R4_LINK_RA_NESTED);
+    if (cpu->gpr[29] != c->sp) c->broken = 1; /* left its frame: discard */
+    return cpu->gpr[2];
+}
+
+/* The handler's km/h conversion for the speed HUD (0x80115EE0..F14). */
+static uint32_t r4_link_kmh(uint32_t car)
+{
+    const int32_t a0 = (int32_t)(int16_t)psx_mod_read_half(car + 0x1D8u) * 160;
+    const int32_t hi = (int32_t)(((int64_t)a0 * (int32_t)0xE070381Du) >> 32);
+    return (uint32_t)(((hi + a0) >> 10) - (a0 >> 31));
+}
+
+static void r4_link_swap_bytes(uint32_t a, uint32_t b, uint32_t bytes)
+{
+    for (uint32_t i = 0; i < bytes; i += 4u) {
+        const uint32_t x = psx_mod_read_word(a + i);
+        psx_mod_write_word(a + i, psx_mod_read_word(b + i));
+        psx_mod_write_word(b + i, x);
+    }
+}
+
+/* Seat k's car and its camera blocks (angle s6, position s7 in the view
+ * loop): seats 0/1 use the retail P1/P2 objects and camera pairs, seats 2/3
+ * their roster entries and the bridge's extra cameras. */
+static int r4_link_seat_view(unsigned seat, uint32_t *car, uint32_t *angle,
+                             uint32_t *position)
+{
+    if (seat < 2u) {
+        *car = R4_LINK_P1_CAR + R4_LINK_CAR_BYTES * seat;
+        *angle = 0x80118FB8u + 16u * seat;
+        *position = 0x80118FD8u + 16u * seat;
+        return 1;
+    }
+    if (!r4_link_extra_view_cameras || seat > 3u) return 0;
+    *car = psx_mod_read_word(0x800FFDD0u + 4u * seat);
+    *angle = r4_link_extra_view_cameras + 32u * (seat - 2u);
+    *position = *angle + 16u;
+    return (*car & 0xFFE00003u) == 0x80000000u;
+}
+
+typedef struct R4LinkLocalView {
+    unsigned seat;
+    uint32_t buffer, buffer_index;
+} R4LinkLocalView;
+
+static int r4_link_draw_local_view(struct CPUState *cpu, void *user,
+                                   uint32_t alpha_q16)
+{
+    const R4LinkLocalView *v = (const R4LinkLocalView *)user;
+    const uint32_t buf = v->buffer, ot = buf + 0x70u;
+    const uint32_t phase = psx_mod_read_word(R4_LINK_PHASE);
+    const uint32_t tick = psx_mod_read_word(R4_LINK_TICK);
+    uint32_t car_k, angle, position;
+    R4LinkCall call = {cpu, (cpu->gpr[29] - 0x100u) & ~7u, 0};
+    (void)alpha_q16;
+    if (!r4_link_seat_view(v->seat, &car_k, &angle, &position)) return 0;
+
+    /* The other buffer is the draw target everywhere the code looks. */
+    psx_mod_write_word(R4_LINK_CUR_BUF, buf);
+    psx_mod_write_word(R4_LINK_BUF_INDEX, v->buffer_index);
+    psx_mod_write_word(0x1F800004u, ot);
+    psx_mod_write_word(0x1F800000u, buf + 0x1670u);
+    r4_link_call(&call, 0x80093418u, ot, 0x2C0u);          /* ClearOTagR */
+    r4_link_call(&call, 0x80093418u, buf + 0xB70u, 0x2C0u);
+    /* One view (two entrants): view flag 0, the one-view OT, no LOD flag,
+     * and the one-view HUD the race init would have set up for two
+     * entrants: its rank sprites (0x8002094C) and the speed/gear/needle
+     * layout (0x80021014), both called as 0x8003D328..34 does. */
+    const uint16_t entrants = psx_mod_read_half(R4_LINK_ENTRANTS);
+    r4_link_call(&call, 0x8002094Cu, 4u, 0);
+    psx_mod_write_half(R4_LINK_ENTRANTS, 2u);
+    psx_mod_write_half(0x1F80005Eu, 0u);
+    r4_link_call(&call, 0x80021014u, 4u, 0);
+    /* The seat's car in the P1 object, its lap time in slot 0. The roster
+     * still lists every car, so every car is drawn where it is. */
+    if (v->seat) {
+        r4_link_swap_bytes(R4_LINK_P1_CAR, car_k, R4_LINK_CAR_BYTES);
+        const uint16_t lap0 = psx_mod_read_half(R4_LINK_LAP_TIMES);
+        psx_mod_write_half(R4_LINK_LAP_TIMES,
+                           psx_mod_read_half(R4_LINK_LAP_TIMES + 2u * v->seat));
+        psx_mod_write_half(R4_LINK_LAP_TIMES + 2u * v->seat, lap0);
+    }
+    const uint32_t car = R4_LINK_P1_CAR;
+
+    if (phase < 4u)
+        r4_link_call(&call, 0x80034444u, ot, tick);
+    if (phase - 1u < 3u) {
+        /* HUD for one view (0x80115E84..F44, s4 = 1, s1 = 0, s2 = 1). */
+        r4_link_call(&call, 0x800212E0u,
+                     (uint32_t)(int32_t)(int16_t)psx_mod_read_half(R4_LINK_LAP_TIMES), 0);
+        r4_link_call(&call, 0x80021DDCu, 0, 0);
+        r4_link_call(&call, 0x80021C38u, 0,
+                     (uint32_t)(int32_t)(int16_t)psx_mod_read_half(car + 0x2AAu));
+        r4_link_call(&call, 0x80022048u, ot, 0);
+        r4_link_call(&call, 0x80021614u, r4_link_kmh(car), 0);
+        r4_link_call(&call, 0x80021960u,
+                     (uint32_t)(int32_t)(int16_t)psx_mod_read_half(car + 0x27Au), 0);
+        /* Rank "n | N": N is the entrant count (0x80021A90). */
+        psx_mod_write_half(R4_LINK_ENTRANTS, entrants);
+        r4_link_call(&call, 0x80021A20u,
+                     (uint32_t)(int32_t)(int16_t)psx_mod_read_half(car + 0x1EEu), 0);
+        psx_mod_write_half(R4_LINK_ENTRANTS, 2u);
+        r4_link_call(&call, 0x8002C194u, psx_mod_read_word(0x800AC75Cu), 0);
+        r4_link_call(&call, 0x80021BA4u, 1, 0);
+        r4_link_call(&call, 0x80021134u, 0, 0);
+        r4_link_call(&call, 0x80020A98u, 3, 0);
+    }
+    if ((int16_t)psx_mod_read_half(car + 0x1E8u) != -1) {
+        /* The view (0x80115FB8..0x80116150, s1 = 0): its camera blocks into
+         * scratch, full-screen viewport 0, camera, cars, course, mirror. */
+        for (unsigned i = 0; i < 4u; ++i) {
+            psx_mod_write_word(0x1F800018u + 4u * i,
+                               psx_mod_read_word(angle + 4u * i));
+            psx_mod_write_word(0x1F800008u + 4u * i,
+                               psx_mod_read_word(position + 4u * i));
+        }
+        r4_link_call(&call, 0x8006F2B0u, 0, 0);
+        /* The camera step (0x80116024..5C) derives this view's matrices and
+         * course position from its blocks. The shared frame already took
+         * this tick's step for the seat, so the image leads by at most one
+         * smoothing step; the sandbox discards the advanced blocks. */
+        if (phase == 0u && tick < 90u)
+            r4_link_call(&call, 0x80033974u, car, 0);
+        else
+            r4_link_call(&call, 0x800340ECu, car, 0);
+        r4_link_call(&call, 0x8006E4D0u, 0, 0);
+        const uint32_t side = psx_mod_read_half(0x800AD6C0u) ^ 1u;
+        r4_link_call(&call, 0x8002E554u, 2u * side + 2u, 0); /* 0x801160C4 */
+        if ((int16_t)psx_mod_read_half(car + 0x1EAu) != 0 &&
+            psx_mod_read_byte(R4_LINK_PAUSED) == 0)
+            r4_link_call(&call, 0x8002258Cu, 0, 0);
+        /* The course renderer keeps state per view index; this seat's view
+         * used index seat & 1 in the shared frame. */
+        r4_link_call(&call, 0x8006F00Cu, v->seat & 1u, 0);
+        r4_link_call(&call, 0x800738C4u, 0, 0);
+        r4_link_call(&call, 0x80074AD8u, 0, 0);
+        r4_link_call(&call, 0x800374F8u, 1, 0);
+        /* The rear-view mirror (one view only) slides in by one step per
+         * call (0x800F4E90). The shared frame never draws it, so the slide
+         * is this peer's presentation state, kept on the host. */
+        psx_mod_write_word(R4_LINK_MIRROR_SLIDE, (uint32_t)r4_link_mirror_slide);
+        r4_link_call(&call, 0x80070A58u, psx_mod_read_word(0x800AC068u), 0);
+        r4_link_mirror_next = (int32_t)psx_mod_read_word(R4_LINK_MIRROR_SLIDE);
+    }
+    r4_link_call(&call, 0x80093590u, buf, 0);               /* PutDrawEnv */
+    r4_link_call(&call, 0x80093520u, buf + 0xB6Cu, 0);      /* DrawOTag */
+    if (psx_mod_read_word(R4_LINK_OT2_ENABLED))
+        r4_link_call(&call, 0x80093520u, buf + 0x166Cu, 0);
+    return !call.broken;
+}
+
+/* At the pass point of a race frame: draw this peer's own view, or fall back
+ * to its quadrant of the shared frame. */
+static void r4_link_local_view(struct CPUState *cpu)
+{
+    const int seats = psx_netplay_seat_count();
+    const int slot = psx_netplay_local_slot();
+    const uint32_t phase = psx_mod_read_word(R4_LINK_PHASE);
+    R4LinkLocalView view;
+    PSXModRenderPass rect;
+    if (!r4_link_seats_ok(seats) || slot < 0 || slot >= seats ||
+        psx_mod_read_byte(R4_LINK_PAUSED) != 0)
+        return; /* paused: the whole frame with the shared menu */
+    view.seat = (unsigned)slot;
+    view.buffer_index = (psx_mod_read_word(R4_LINK_FRAME_COUNTER) & 1u) ^ 1u;
+    view.buffer = R4_LINK_BUF_BASE + view.buffer_index * R4_LINK_BUFFER_BYTES;
+    const uint32_t status = psx_mod_render_local_view_status();
+    if (phase < 4u && status == PSX_MOD_RENDER_PASS_READY &&
+        !getenv("PSX_R4_LINK_QUADRANT_VIEW")) {
+        memset(&rect, 0, sizeof rect);
+        rect.struct_size = sizeof rect;
+        rect.y = (uint16_t)(view.buffer_index ? 240u : 0u);
+        rect.w = 320;
+        rect.h = 240;
+        const uint32_t tick = psx_mod_read_word(R4_LINK_TICK);
+        if (r4_link_mirror_tick == UINT32_MAX || tick < r4_link_mirror_tick)
+            r4_link_mirror_slide =
+                (int32_t)psx_mod_read_word(R4_LINK_MIRROR_SLIDE); /* new race */
+        r4_link_mirror_tick = tick;
+        r4_link_mirror_next = r4_link_mirror_slide;
+        r4_link_in_local_view = 1;
+        const int ok = psx_mod_render_local_view(cpu, &rect,
+                                                 r4_link_draw_local_view, &view);
+        r4_link_in_local_view = 0;
+        if (ok) {
+            r4_link_mirror_slide = r4_link_mirror_next;
+            ++r4_link_local_ok;
+            return;
+        }
+        if (++r4_link_local_failed <= 4)
+            fprintf(stderr, "r4 link: own view refused or rolled back "
+                    "(status %u); showing this seat's quadrant\n",
+                    psx_mod_render_local_view_status());
+    } else if (status == PSX_MOD_RENDER_PASS_SESSION) {
+        return; /* resimulation: nothing is presented */
+    }
+    r4_link_present_local_view((unsigned)seats);
+}
+
 static int r4_link_serial_filter(struct CPUState *cpu, uint32_t address)
 {
+    /* Guest calls made by the own-view draw run in a sandbox; none of the
+     * bridge's frame edits apply to them. */
+    if (r4_link_in_local_view) return 0;
+    if (address == R4_LINK_VSYNC) {
+        if (cpu->gpr[31] == R4_LINK_RA_PASS_POINT && r4_link_ready() &&
+            r4_link_views_frame)
+            r4_link_local_view(cpu);
+        return 0;
+    }
     if (((address == 0x80021614u && cpu->gpr[31] == 0x80115F18u) ||
          (address == 0x80021960u && cpu->gpr[31] == 0x80115F24u)) &&
         r4_link_ready() && cpu->gpr[5] >= 2u && cpu->gpr[5] < 4u)
@@ -883,7 +1150,6 @@ static int r4_link_serial_filter(struct CPUState *cpu, uint32_t address)
     if (address == 0x80115770u && r4_link_ready()) {
         const int seats = psx_netplay_seat_count();
         if (r4_link_seats_ok(seats)) {
-            r4_link_present_local_view((unsigned)seats);
             r4_link_views_frame = 1;
             r4_link_draw_view = 0;
             for (unsigned i = 0; i < 4u; ++i)
@@ -1115,4 +1381,6 @@ PSX_MOD_CONSTRUCTOR(r4_link_netplay_register)
         0x80021614u, r4_link_serial_filter);
     (void)psx_game_register_netplay_function_filter(
         0x80021960u, r4_link_serial_filter);
+    (void)psx_game_register_netplay_function_filter(
+        R4_LINK_VSYNC, r4_link_serial_filter);
 }
