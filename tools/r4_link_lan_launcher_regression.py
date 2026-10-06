@@ -10,6 +10,7 @@ present in the host openbios/ and each guest netplay/ memcard directory.
 import argparse
 import json
 import os
+import re
 import subprocess
 import time
 from pathlib import Path
@@ -22,7 +23,7 @@ def main():
     parser.add_argument("--build", required=True, type=Path)
     parser.add_argument("--peer-prefix", required=True, type=Path)
     parser.add_argument("--disc", required=True, type=Path)
-    parser.add_argument("--peers", required=True, type=int, choices=(3, 4))
+    parser.add_argument("--peers", required=True, type=int, choices=(2, 3, 4))
     race = parser.add_mutually_exclusive_group()
     race.add_argument("--race-slot", type=int,
                       help="load a matching synchronized race checkpoint")
@@ -31,6 +32,9 @@ def main():
     parser.add_argument("--checkpoint-slot", type=int,
                         help="save a new synchronized checkpoint after fresh race entry (0..11)")
     parser.add_argument("--debug-base", type=int, default=6895)
+    parser.add_argument("--exe-name", default="r4-runtime",
+                        help="runtime file in --build (a hard link under another "
+                             "name keeps a machine-wide `pkill r4-runtime` away)")
     parser.add_argument("--report", required=True, type=Path)
     args = parser.parse_args()
     if args.checkpoint_slot is not None and not args.fresh_race:
@@ -38,7 +42,7 @@ def main():
     if args.checkpoint_slot is not None and not 0 <= args.checkpoint_slot <= 11:
         parser.error("--checkpoint-slot must be 0..11")
     build = args.build.resolve()
-    runtime = build / "r4-runtime"
+    runtime = build / args.exe_name
     room = build / "netplay_lan_lobby.txt"
     if not runtime.is_file() or not args.disc.is_file():
         parser.error("runtime or disc is missing")
@@ -76,8 +80,8 @@ def main():
 
     def launch(i, script):
         env = os.environ.copy()
-        env.update(LNG_TEST_HIDDEN="1", LNG_SCRIPT=script,
-                   PSX_R4_LINK_EXPERIMENTAL="1", PSX_R4_VIEW_COUNT_PROBE="1")
+        env.update(LNG_TEST_HIDDEN="1", LNG_SCRIPT=script, SDL_AUDIODRIVER="dummy",
+                   PSX_R4_LINK_EXPERIMENTAL="1")
         handle = log_path(i).open("w")
         handles.append(handle)
         processes.append(subprocess.Popen(
@@ -88,13 +92,16 @@ def main():
             cwd=directories[i], env=env, stdout=handle,
             stderr=subprocess.STDOUT))
 
-    def seats():
+    def seat_ids():
         if not room.is_file():
-            return 0, 0
+            return 0, []
         rows = room.read_text().splitlines()
         capacity = int(rows[9])
-        seated = sum(bool(row) for row in rows[10 + capacity:10 + 2 * capacity])
-        return capacity, seated
+        return capacity, rows[10 + capacity:10 + 2 * capacity]
+
+    def seats():
+        capacity, ids = seat_ids()
+        return capacity, sum(bool(row) for row in ids)
 
     def ask(i, name, **fields):
         return cmd(dict(cmd=name, **fields), port=args.debug_base + i, timeout=3)
@@ -127,23 +134,39 @@ def main():
         host_script = ("view:netplay_mode;wait:5;click:100,275;wait:10;"
                        "click:120,812;wait:15;" + select_three +
                        "click:540,608;wait:750;click:965,815;wait:1000")
+        # Two players: keep the default 4-seat room and start it with two
+        # seated (a room starts with any 2+ seated players).
+        capacity_expected = 4 if args.peers == 2 else args.peers
         launch(0, host_script)
         wait(lambda: room.is_file(), 12, "host lobby")
         capacity, seated = seats()
-        if (capacity, seated) != (args.peers, 1):
+        if (capacity, seated) != (capacity_expected, 1):
             raise AssertionError(f"host lobby seating {(capacity, seated)}")
+        join_order = [[k for k, row in enumerate(seat_ids()[1]) if row]]
         for i in range(1, args.peers):
             launch(i, "view:netplay_mode;wait:5;click:100,275;wait:20;"
                       "click:1035,198;wait:2000")
-            wait(lambda: seats() == (args.peers, i + 1), 10,
+            wait(lambda: seats() == (capacity_expected, i + 1), 10,
                  f"guest {i} discovery and Join")
+            join_order.append([k for k, row in enumerate(seat_ids()[1]) if row])
         wait(lambda: all("netplay lockstep armed" in
                          log_path(i).read_text(errors="replace")
                          for i in range(args.peers)), 60, "host Play and guest START")
         for i in range(args.peers):
             if "login_required" in log_path(i).read_text(errors="replace"):
                 raise AssertionError(f"LAN launcher {i} attempted lobby login")
-        result = dict(peers=args.peers, seated=seats()[1],
+        # Lobby seat each newcomer took, and the session slot each game
+        # runtime then reports.
+        lobby_seat = [sorted(set(after) - set(before))
+                      for before, after in zip([[]] + join_order, join_order)]
+        game_slot = []
+        for i in range(args.peers):
+            match = re.search(r"psx_netplay: started transport=\S+ slot=(\d+)",
+                              log_path(i).read_text(errors="replace"))
+            game_slot.append(int(match.group(1)) if match else None)
+        result = dict(peers=args.peers, capacity=capacity_expected,
+                      seated=seats()[1], lobby_seat_by_join_order=lobby_seat,
+                      session_slot_by_join_order=game_slot,
                       all_game_runtimes_armed=True,
                       logs=[str(log_path(i)) for i in range(args.peers)])
         if args.fresh_race:

@@ -21,11 +21,9 @@ from dbg import cmd
 
 
 def view_draw_counts(frames, seats):
-    """Count GP0 draw primitives under each expected split-screen draw area."""
-    expected = ([(0, 0, 319, 119), (0, 120, 159, 239),
-                 (160, 120, 319, 239)] if seats == 3 else
-                [(0, 0, 159, 119), (160, 0, 319, 119),
-                 (0, 120, 159, 239), (160, 120, 319, 239)])
+    """Count GP0 draw primitives under each seat's quadrant draw area."""
+    expected = [(0, 0, 159, 119), (160, 0, 319, 119),
+                (0, 120, 159, 239), (160, 120, 319, 239)][:seats]
     best = [0] * len(expected)
     for frame in frames:
         counts = [0] * len(expected)
@@ -48,14 +46,13 @@ def view_draw_counts(frames, seats):
                 if clip in expected:
                     counts[expected.index(clip)] += 1
         best = [max(a, b) for a, b in zip(best, counts)]
-    return dict(zip(("top", "lower_left", "lower_right") if seats == 3 else
-                    ("top_left", "top_right", "lower_left", "lower_right"), best))
+    return dict(zip(("top_left", "top_right", "lower_left", "lower_right"),
+                    best))
 
 
 def view_speed_digits(frame, seats):
     """Decode R4's native 12-pixel speed glyphs from each split viewport."""
-    anchors = ([(252, 80), (92, 200), (252, 200)] if seats == 3 else
-               [(92, 80), (252, 80), (92, 200), (252, 200)])
+    anchors = [(92, 80), (252, 80), (92, 200), (252, 200)][:seats]
     glyphs = {}
     for entry in frame.get("entries", []):
         if entry.get("op") != "0x65" or len(entry.get("w", [])) < 4:
@@ -76,8 +73,7 @@ def view_speed_digits(frame, seats):
 
 def view_gear_digits(frame, seats):
     """Decode R4's native single-glyph gear display in each viewport."""
-    anchors = ([(296, 66), (130, 186), (296, 186)] if seats == 3 else
-               [(136, 66), (290, 66), (136, 186), (290, 186)])
+    anchors = [(136, 66), (290, 66), (136, 186), (290, 186)][:seats]
     glyphs = {}
     for entry in frame.get("entries", []):
         if entry.get("op") != "0x65" or len(entry.get("w", [])) < 4:
@@ -274,8 +270,6 @@ def main():
     p.add_argument("--race-timeout", type=int, default=50,
                    help="seconds allowed for fresh Link Battle entry")
     args = p.parse_args()
-    if args.fresh_link and args.peers not in (3, 4):
-        p.error("--fresh-link requires three or four peers")
     if args.resume_race and not args.fresh_link:
         p.error("--resume-race requires --fresh-link")
     if args.visible_peer is not None and not 0 <= args.visible_peer < args.peers:
@@ -667,8 +661,7 @@ def main():
             if args.fresh_link:
                 result["gpu_laps"] = [top_view_lap_digits(frame) for frame in frames
                                       if frame.get("count", 0) > 0][-2:]
-            if (args.fresh_link and phase_change_sim is None and
-                    os.environ.get("PSX_R4_VIEW_COUNT_PROBE") == "1"):
+            if args.fresh_link and phase_change_sim is None:
                 result["gpu_view_draws"] = view_draw_counts(frames, args.peers)
                 recent = [frame for frame in frames if frame.get("count", 0) > 0][-2:]
                 result["gpu_view_frames"] = [dict(
