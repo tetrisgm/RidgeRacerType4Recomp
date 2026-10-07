@@ -701,6 +701,20 @@ static uint32_t r4_link_digital_command(unsigned seat, const PsxNetPad *pad)
         ramp = 0;
     }
     psx_mod_write_byte(r4_link_brake_ramps + seat, ramp);
+    if (pad->analog == 3u) {
+        /* NeGcon (e.g. a player's Modern controls, an input transform kept
+         * online): analog I is the gas, II the brake, twist the wheel. R4
+         * reads the pressures calibrated on 0..106 and steers at full lock
+         * 44 counts off centre (dead zone 6 + range 38). */
+        const uint32_t gas = pad->rx > 106u ? 255u : (pad->rx * 255u) / 106u;
+        const uint32_t brk = pad->ry > 106u ? 0x73u : (pad->ry * 0x73u) / 106u;
+        int d = (int)pad->lx - 128;
+        int stick = 128 + (d * 127) / 44;
+        word = 0x80000000u | (gas << 8);
+        if (brk > 4u) word |= (0x8Cu + brk) << 16;
+        stick = stick < 0 ? 0 : (stick > 255 ? 255 : stick);
+        return word | r4_link_analog_steering[stick];
+    }
     if (!(pad->buttons & 0x0080u)) word |= 0x01000000u; /* left */
     if (!(pad->buttons & 0x0020u)) word |= 0x02000000u; /* right */
     if (pad->analog) {
