@@ -21,3 +21,7 @@ default_enabled = true
 [[plugin]]
 feature = "hide-mirror"
 id = "r4.hide-rear-view-mirror"
+# Online: this player's own view only (psxrecomp #545). The hook suppresses
+# the mirror draw (0x80070A58), which only the sandboxed own-view render calls
+# in Link Battle; its gate write is discarded with the sandbox.
+netplay = "local_view"
