@@ -109,6 +109,16 @@ overlay_backend = "auto"
 # set here would override that. Dev runs pass the dev command through
 # PSX_OVERLAY_AUTOCOMPILE_CMD (tools/run_r4.sh, tools/run_r4.cmd).
 
+# Title timing constant, enabled once psxrecomp #561 merges and is pinned
+# (docs/MAX_DETAIL.md, Limitations). No CPU is emulated: recompiled code
+# charges the guest clock a fixed cost per instruction; guest_cycle_scale = N
+# charges 1/N of it (VBlank/timers/CD/SPU/DMA unchanged), so R4's race code
+# never runs out of its two-VBlank tick. Gated: only while Max Detail opens
+# the gate on the race loop; menus, loading and FMV stay faithful.
+# [timing]
+# guest_cycle_scale = 64
+# guest_cycle_scale_gated = true
+
 [video]
 # Faithful 4:3 by default. Widescreen is the r4.enhancement.widescreen mod
 # (Mods > Display > R4 Custom Renderer), which selects the aspect itself.

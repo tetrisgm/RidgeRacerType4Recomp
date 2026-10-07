@@ -83,11 +83,19 @@ pops under 12000 units fell from 78 to 10 per 40 s; most now land at
 
 ## Limitations
 
-- Not yet here: the owner test build also opens psxrecomp's gated CPU
-  overclock (`[cpu] overclock`) on the race loop and holds the race tick at
-  two VBlanks. That needs the overclock API, which is not on psxrecomp
-  master yet; it lands as a follow-up once it is. Without it the level is
-  bounded by the stock CPU budget, as measured below.
+- Not yet here: the guest cycle scale. No CPU is emulated: recompiled code
+  charges the guest clock a fixed cost per instruction, and psxrecomp's
+  `[timing] guest_cycle_scale = N` (psxrecomp #561) charges 1/N of it while
+  VBlank, timers, CD, SPU and DMA keep hardware time, so the race code never
+  runs out of its two-VBlank tick. For R4 it is a title constant in
+  `game.toml`, not a player setting: `guest_cycle_scale = 64` with
+  `guest_cycle_scale_gated = true`, Max Detail opening the gate
+  (`psx_guest_cycle_scale_gate_open`) on the 30 Hz race loop and holding the
+  tick at two VBlanks; menus, loading and FMV keep faithful timing. The
+  `[timing]` block in `game.toml` is commented out until #561 merges and
+  psxrecomp is re-pinned; the gate and tick pacing land with that pin.
+  Without it the level is bounded by the stock instruction budget, as
+  measured below.
 
 - The car draw distance (T2 = 8704) is not raised. Past it R4's car transform
   overflows: a car about 15000 units away drew huge and misplaced above the
