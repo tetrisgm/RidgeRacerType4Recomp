@@ -273,6 +273,124 @@ def md_layout():
     ]
 
 
+def far_layout():
+    """r4_max_detail.h's far-object, far-car and frame-budget constants, and
+    r4_pvs.h's centreline pointer, as the instruction words the game holds."""
+    xf = c_define(MD_H, 'R4_MD_XF_FN')
+    st_fn = c_define(MD_H, 'R4_MD_XF_SETTRANS_FN')
+    st_ra = c_define(MD_H, 'R4_MD_XF_SETTRANS_RA')
+    vec = c_define(MD_H, 'R4_MD_XF_VECTOR_OFF')
+    mat = c_define(MD_H, 'R4_MD_XF_MATRIX_OFF')
+    cam = c_define(MD_H, 'R4_MD_CAMERA_POS_ADDR')
+    cmat = c_define(MD_H, 'R4_MD_CAMERA_MATRIX_ADDR')
+    car_fn = c_define(MD_H, 'R4_MD_CAR_DRAW_FN')
+    after = c_define(MD_H, 'R4_MD_CAR_AFTER_LOD_FN')
+    far = c_define(MD_H, 'R4_MD_CAR_FAR')
+    fs_fn = c_define(MD_H, 'R4_MD_FRAME_START_FN')
+    fs_ra = c_define(MD_H, 'R4_MD_FRAME_START_RA')
+    vs_fn = c_define(MD_H, 'R4_MD_VSYNC_FN')
+    vs_ra = c_define(MD_H, 'R4_MD_VSYNC_WAIT_RA')
+    segtab = c_define(PVS_H, 'R4_TRACK_SEGMENT_TABLE_ADDR')
+    ras = [int(v, 0) for v in re.findall(
+        r'(0x[0-9A-Fa-f]+)u', re.search(r'r4_md_car_after_lod_ra\[4\]\s*=\s*\{(.*?)\};',
+                                         open(MD_H).read(), re.S).group(1))]
+    if cam != 0x1F800008 or cmat != 0x1F800028:
+        raise SystemExit(f'{MD_H}: the camera is at 0x1F800008, its matrix at 0x1F800028')
+    th, tl = lui_lo(CAR_TABLE)
+    sh, sl = lui_lo(segtab)
+    want = [
+        # 0x8006F160: pos - camera stored as 16 bits, rotated (MAC, 32 bits), SetTransMatrix
+        (xf + 0x14, 0x3C061F80, 'lui a2,0x1f80 (the camera)'),
+        (xf + 0x1C, 0x94A20000, 'lhu v0,0(a1) (pos.x, low 16 bits)'),
+        (xf + 0x20, 0x94C30000 | (cam & 0xFFFF), 'lhu v1,8(a2) (camera x)'),
+        (xf + 0x2C, 0xA6020000, 'sh v0,0(s0) (the 16-bit delta)'),
+        (xf + 0x38, 0x34840000 | (cmat & 0xFFFF), 'ori a0,a0,0x28 (the camera matrix)'),
+        (xf + 0x58, jal(0x800910A0), 'jal 0x800910A0 (rotate: MVMVA)'),
+        (xf + 0x60, 0x8E020000 | vec, 'lw v0,8(s0) (R4_MD_XF_VECTOR_OFF)'),
+        (xf + 0x70, 0xAE020000 | (mat + 0x14), 'sw v0,0x2C(s0) (the MATRIX t[] at R4_MD_XF_MATRIX_OFF)'),
+        (st_ra - 0x08, jal(st_fn), f'jal 0x{st_fn:08X} (R4_MD_XF_SETTRANS_RA - 8)'),
+        (st_ra - 0x04, 0x26040000 | mat, 'addiu a0,s0,0x18 (R4_MD_XF_MATRIX_OFF)'),
+        (0x800910D4, 0x4A486012, 'MVMVA sf=1, rotation x V0, no translation'),
+        (0x800910D8, 0xE8D90000, 'swc2 MAC1 (a 32-bit result)'),
+        (st_fn + 0x00, 0x8C880014, 'lw t0,0x14(a0) (SetTransMatrix reads t[])'),
+        # 0x8002DC00(car, row): the three row reads, then 0x80015F60 on every path
+        (car_fn + 0x21C, 0x3C030000 | th, f'lui v1,%hi(0x{CAR_TABLE:08X})'),
+        (car_fn + 0x220, 0x24630000 | tl, f'addiu v1,v1,%lo(0x{CAR_TABLE:08X})'),
+        (0x8002DE34, 0x84620000, 'lh v0,0(v1) (T0)'),
+        (0x8002E29C, 0x84620002, 'lh v0,2(v1) (T1)'),
+        (0x8002E44C, 0x84620004, 'lh v0,4(v1) (T2)'),
+        # the car renderer's ordering-table guard bounds the far cull distance
+        (0x8005F6BC, 0x2C4201BF, 'sltiu v0,v0,447 (car OT guard)'),
+        # the main loop: DrawSync, the VSync(1) floor wait, VSync(0), frame start
+        (vs_ra - 0x18, jal(0x80092F2C), 'jal DrawSync (0x80092F2C)'),
+        (vs_ra - 0x08, jal(vs_fn), f'jal 0x{vs_fn:08X} (R4_MD_VSYNC_WAIT_RA - 8)'),
+        (vs_ra - 0x04, 0x24040001, 'addiu a0,zero,1 (VSync(1))'),
+        (fs_ra - 0x08, jal(fs_fn), f'jal 0x{fs_fn:08X} (R4_MD_FRAME_START_RA - 8)'),
+        # the segment lookup reads the centreline table pointer
+        (0x800269E4, 0x3C070000 | sh, f'lui a3,%hi(0x{segtab:08X}) (R4_TRACK_SEGMENT_TABLE_ADDR)'),
+        (0x800269F8, 0x8CE30000 | sl, f'lw v1,%lo(0x{segtab:08X})(a3)'),
+    ]
+    want += [(ra - 0x08, jal(after), f'jal 0x{after:08X} (r4_md_car_after_lod_ra)') for ra in ras]
+    if not (far * 4 < 0x10000 and far < 447 * 32):
+        raise SystemExit(f'{MD_H}: R4_MD_CAR_FAR {far} is past SZ or the car OT guard')
+    return want
+
+
+def poly_kinds():
+    """r4_max_detail.h's r4_md_poly_kinds as (field, stride, table)."""
+    m = re.search(r'r4_md_poly_kinds\[\]\s*=\s*\{(.*?)\};', open(MD_H).read(), re.S)
+    return {tuple(int(v.strip().rstrip('u'), 0) for v in row.split(','))
+            for row in re.findall(r'\{([^{}]*)\}', m.group(1))}
+
+
+def check_poly_kinds(seg, seg_bytes):
+    """Each renderer of the 1P course chain (0x800A2370) loads its block field,
+    record size and table pointer: lw t1,F(t2); addiu t2,zero,S; ... lui t2 /
+    ori t2 (the table)."""
+    found = set()
+    for i in range(11):
+        r = int.from_bytes(seg_bytes(0x800A2370 + 4 * i, 4), 'little')
+        words = [seg.word(r + 4 * k) for k in range(40)]
+        for k, w in enumerate(words[:-6]):
+            if (w >> 16) != 0x8D49 or (words[k + 1] >> 16) != 0x240A:
+                continue
+            hi = next((x for x in words[k:] if (x >> 16) == 0x3C0A), None)
+            lo = next((x for x in words[k:] if (x >> 16) == 0x354A), None)
+            if hi is not None and lo is not None:
+                found.add((w & 0xFFFF, words[k + 1] & 0xFFFF, ((hi & 0xFFFF) << 16) | (lo & 0xFFFF)))
+            break
+    have = poly_kinds()
+    errors = []
+    if found != have:
+        errors.append(f'{MD_H}: r4_md_poly_kinds {sorted(have)} differs from the course '
+                      f'renderers {sorted(found)}')
+    return errors
+
+
+def check_hook_list(game_toml):
+    """Every address the plugin registers is a mod entry hook in game.toml."""
+    funcs = {int(a, 16) for a in tomllib.load(open(game_toml, 'rb'))['recompiler']
+             .get('mod_function_entry_funcs', [])}
+    src = open(os.path.join(MODS, 'r4_max_detail_plugin.c')).read()
+    names = re.findall(r'R4_MD_REGISTER_ENTRY\((R4_\w+),', src)
+    errors = []
+    for n in names:
+        try:
+            a = c_define(MD_H, n)
+        except SystemExit:
+            try:
+                a = c_define(PVS_H, n)
+            except SystemExit:
+                a = c_define(os.path.join(MODS, 'r4_max_detail_plugin.c'), n)
+        if a not in funcs:
+            errors.append(f'{game_toml}: mod_function_entry_funcs lacks 0x{a:08X} ({n}), '
+                          'which the Max Detail plugin hooks')
+    count = c_define(os.path.join(MODS, 'r4_max_detail_plugin.c'), 'R4_MD_HOOK_COUNT')
+    if count != len(names):
+        errors.append(f'R4_MD_HOOK_COUNT {count} != {len(names)} registrations')
+    return errors
+
+
 def check_guest_layout(seg):
     """The course visibility lookup at 0x8006F5AC and the hooks' return-address
     gates, as the plugin and r4_pvs.h encode them."""
@@ -306,6 +424,7 @@ def check_guest_layout(seg):
     want += [(ra - 0x08, jal(merge_fn), f'jal 0x{merge_fn:08X} (R4_PVS_MERGE_RA - 8)')
              for ra in merge_ras]
     want += md_layout()
+    want += far_layout()
     for a, w, what in want:
         got = seg.word(a)
         if got != w:
@@ -422,7 +541,8 @@ def main():
         return image[off:off + n]
 
     errors = (check_game_toml(sites, args.check) + check_manifest(seg_bytes, args.manifest)
-              + check_manifest_policy(args.manifest) + check_guest_layout(seg))
+              + check_manifest_policy(args.manifest) + check_guest_layout(seg)
+              + check_poly_kinds(seg, seg_bytes) + check_hook_list(args.check))
     _want, stock = expected_patches()
     exe_rows = seg_bytes(CAR_TABLE, 6 * CAR_ROWS)
     if b''.join(row_bytes(r) for r in stock) != exe_rows:
@@ -433,7 +553,8 @@ def main():
     if errors:
         return 1
     print(f'r4_detail_scan: {len(sites)} clamp sites, the car-table patches, the '
-          'course-list lookup and the reflection and mirror hooks match the EXE')
+          'course-list lookup, the reflection and mirror hooks, the far object and car '
+          'hooks, the frame-budget anchors and the course poly kinds match the EXE')
     return 0
 
 

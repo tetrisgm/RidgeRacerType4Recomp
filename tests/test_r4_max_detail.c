@@ -55,7 +55,7 @@ static void put_car_table(const int16_t rows[R4_MD_CAR_LOD_ROWS][3]);
 static int car_table_is(const int16_t rows[R4_MD_CAR_LOD_ROWS][3]);
 
 /* ---- the mod API the plugin uses ---------------------------------------- */
-#define MAX_HOOKS 8
+#define MAX_HOOKS 16
 static struct { char id[32]; uint32_t addr; PSXModFunctionEntryCallback cb; } s_hooks[MAX_HOOKS];
 static int s_nhooks;
 int psx_mod_register_function_entry_plugin(const char *id, uint32_t address,
@@ -77,6 +77,13 @@ int psx_mod_register_activation_plugin(const char *id, PSXModActivationCallback 
     s_activate = cb;
     return 1;
 }
+static PSXModActivationCallback s_savestate;
+int psx_mod_register_savestate_plugin(const char *id, PSXModActivationCallback cb) {
+    (void)id;
+    s_savestate = cb;
+    return 1;
+}
+uint64_t psx_cycle_count;   /* the guest clock the frame budget reads */
 static PSXModVBlankCallback s_vblank;
 static char s_vblank_id[32];
 int psx_mod_register_vblank_plugin(const char *id, PSXModVBlankCallback cb) {
@@ -203,23 +210,27 @@ static void test_options(void) {
     CHECK(o.draw == R4_MD_DRAW_STOCK && !o.course_full && !o.cars_full && !o.split_same &&
               !o.reflections && !o.mirror_full,
           "all stock");
-    CHECK(!r4_md_clamp_on(o) && r4_md_section_reach(o) == 0 && !r4_md_course_hook_active(o),
+    CHECK(!r4_md_clamp_on(o) && !r4_md_far_xform_on(o) && !r4_md_course_hook_active(o),
           "stock does nothing");
     o = r4_md_options(NULL, NULL, NULL, NULL, "on", "full");
     CHECK(o.reflections && o.mirror_full, "reflections on, mirror full");
     o = r4_md_options("extended", "full", "full", "same", NULL, NULL);
-    CHECK(o.draw == R4_MD_DRAW_EXTENDED && r4_md_clamp_on(o) && r4_md_section_reach(o) == 0,
-          "extended: clamp only");
+    CHECK(o.draw == R4_MD_DRAW_EXTENDED && r4_md_clamp_on(o) && r4_md_far_xform_on(o),
+          "extended: clamp and the far transform");
     o = r4_md_options("maximum", "stock", "stock", "same", NULL, NULL);
-    CHECK(r4_md_clamp_on(o) && r4_md_section_reach(o) == 2 && r4_md_course_hook_active(o),
-          "maximum: clamp and two sections; split alone runs the course hook");
-    CHECK(r4_md_section_reach_for(o, 0) == 2 && r4_md_section_reach_for(o, 1) == 2,
-          "two sections from 4:3 to just under 30:9");
-    CHECK(r4_md_section_reach_for(o, 2) == 0 && r4_md_section_reach_for(o, 3) == 0,
-          "no sections from about 30:9, in 1P and 2P (PS1 frame budget)");
-    o = r4_md_options("extended", "full", "full", "same", NULL, NULL);
-    CHECK(r4_md_section_reach_for(o, 0) == 0 && r4_md_section_reach_for(o, 1) == 0,
-          "extended never adds sections");
+    CHECK(r4_md_clamp_on(o) && r4_md_far_xform_on(o) && r4_md_course_hook_active(o),
+          "maximum: clamp and far transform; split alone runs the course hook");
+    /* Maximum's levels: two sections ahead and one behind at the start, none
+     * at the floor, up to twelve ahead; far cars from level 1. */
+    CHECK(r4_md_level_ahead(0) == 2 && r4_md_level_behind(0) == 1 && !r4_md_level_far_cars(0),
+          "level 0: two ahead, one behind, stock car distance");
+    CHECK(r4_md_level_ahead(R4_MD_LEVEL_MIN) == 0 && r4_md_level_behind(R4_MD_LEVEL_MIN) == 0,
+          "the floor adds no sections (what Extended draws)");
+    CHECK(r4_md_level_ahead(R4_MD_LEVEL_MAX) == 12 && r4_md_level_far_cars(1),
+          "the ceiling: twelve sections ahead; far cars from level 1");
+    CHECK(r4_md_gov_start_level(0) == 0 && r4_md_gov_start_level(1) == 0 &&
+              r4_md_gov_start_level(2) == R4_MD_LEVEL_MIN,
+          "views from about 30:9 start with no sections");
 
     /* Car reflections: only over the game's "off" page, only in a live race,
      * only without a widescreen margin; a wide view takes back our own write. */
@@ -413,13 +424,17 @@ static void mirror_draw(uint32_t limit) {
 
 static void test_plugin(void) {
     CHECK(strcmp(s_activation_id, "r4.maxdetail") == 0 && s_activate, "activation registered");
-    CHECK(s_nhooks == 7, "seven entry hooks");
+    CHECK(s_nhooks == 13, "thirteen entry hooks");
+    CHECK(s_savestate != NULL, "a save-state callback (the frame budget restarts)");
     for (int i = 0; i < s_nhooks; i++)
         CHECK(strcmp(s_hooks[i].id, "r4.maxdetail") == 0, "hooks belong to r4.maxdetail");
     CHECK(hook(0x80060F94u) && hook(0x8006F584u) && hook(0x8007166Cu) && hook(0x80093520u),
           "hooks: course renderer, octant, course list, DrawOTag");
     CHECK(hook(0x80014A90u) && hook(0x80071704u) && hook(0x8006EDECu),
           "hooks: env-map car draw, mirror limit, mirror list consumer");
+    CHECK(hook(0x8006F160u) && hook(0x80091320u) && hook(0x8002DC00u) && hook(0x80015F60u) &&
+              hook(0x8009375Cu) && hook(0x8008B330u),
+          "hooks: object transform, SetTransMatrix, car draw, post-LOD, frame start, VSync");
 
     /* Before activation every hook is inert. */
     build_course(2);
@@ -458,7 +473,7 @@ static void test_plugin(void) {
     course_draw(5, 0, 0x8006F02Cu);
     CHECK(rd32(R4_PVS_LIST_ADDR) == 10u && list_has(block_ptr(3, 0, 1)) &&
               list_has(block_ptr(7, 0, 0)),
-          "default: two sections each way");
+          "default, no centreline: two sections each way");
     load_list(5, 0, 2);
     course_draw(5, 0, 0x8006F090u);
     CHECK(rd32(R4_PVS_LIST_ADDR) == 10u, "the alternate course draw path merges too");
@@ -787,6 +802,296 @@ static void test_car_restore(void) {
     put_car_table(r4_md_car_lod_stock);
 }
 
+/* ---- Maximum: direction, view cone, far objects, far cars, frame budget ----- */
+
+/* A straight mock centreline: segment k at (1000, (nseg - k) * 300), so
+ * racing (toward lower segments) runs toward +z. */
+#define SEGTAB 0x80180000u
+static void put_centreline(uint32_t nseg) {
+    psx_mod_write_word(R4_TRACK_SEGMENT_TABLE_ADDR, SEGTAB);
+    psx_mod_write_word(R4_TRACK_SEGMENT_COUNT_ADDR, nseg);
+    for (uint32_t k = 0; k < nseg; k++) {
+        psx_mod_write_word(SEGTAB + R4_TRACK_SEGMENT_STRIDE * k + R4_TRACK_SEGMENT_X, 1000u);
+        psx_mod_write_word(SEGTAB + R4_TRACK_SEGMENT_STRIDE * k + R4_TRACK_SEGMENT_Z,
+                           (nseg - k) * 300u);
+    }
+}
+static int keep_even(void *ctx, uint32_t b) {
+    (void)ctx;
+    return (((b - BLOCKS) / R4_PVS_BLOCK_STRIDE) & 1u) == 0u;
+}
+
+static void test_pvs_dir(void) {
+    build_course(2);
+    /* Three ahead toward lower sections, one behind: own, -1, +1, -2, -3. */
+    load_list(5, 0, 2);
+    R4PvsMerge m = r4_pvs_merge_dir(rd32, rd16, psx_mod_write_word, 5, 0, NSEC, -1, 3, 1, 0,
+                                    NULL, NULL);
+    CHECK(m.ok && m.after == 10u, "three ahead, one behind: four sections");
+    CHECK(list_at(2) == block_ptr(4, 0, 0) && list_at(4) == block_ptr(6, 0, 0) &&
+              list_at(6) == block_ptr(3, 0, 0) && list_at(8) == block_ptr(2, 0, 0),
+          "nearest first: ahead 1, behind 1, ahead 2, ahead 3");
+    load_list(5, 0, 2);
+    m = r4_pvs_merge_dir(rd32, rd16, psx_mod_write_word, 5, 0, NSEC, 1, 3, 0, 0, NULL, NULL);
+    CHECK(m.after == 8u && list_at(2) == block_ptr(6, 0, 0) && list_at(6) == block_ptr(8, 0, 0) &&
+              !list_has(block_ptr(4, 0, 0)),
+          "facing the other way: ahead is toward higher sections");
+    /* More reach than the circuit has: every section once. */
+    load_list(5, 0, 2);
+    m = r4_pvs_merge_dir(rd32, rd16, psx_mod_write_word, 5, 0, NSEC, -1, 12, 1, 0, NULL, NULL);
+    CHECK(m.after == 2u * NSEC, "a short circuit: each section once");
+    /* The keep filter applies to other entries only. */
+    load_list(5, 0, 2);
+    m = r4_pvs_merge_dir(rd32, rd16, psx_mod_write_word, 5, 0, NSEC, -1, 2, 0, 1, keep_even,
+                         NULL);
+    CHECK(m.after == 2u + 3u * 3u - 1u && list_has(block_ptr(5, 0, 1)) &&
+              !list_has(block_ptr(4, 0, 1)) && list_has(block_ptr(4, 0, 0)) &&
+              !list_has(block_ptr(5, 1, 1)),
+          "the filter drops added blocks, never the game's own");
+    /* The symmetric form is unchanged: -1, +1, -2, +2. */
+    load_list(0, 3, 2);
+    m = r4_pvs_merge(rd32, rd16, psx_mod_write_word, 0, 3, NSEC, 2, 0);
+    CHECK(m.after == 10u && list_at(2) == block_ptr(9, 3, 0) && list_at(8) == block_ptr(2, 3, 0),
+          "symmetric merge order");
+
+    /* Direction from the centreline and the camera yaw. */
+    put_centreline(NSEC * 5u);
+    CHECK(r4_pvs_ahead_dir(rd32, 2, NSEC, 0x000u) == -1, "facing +z (the racing way): -1");
+    CHECK(r4_pvs_ahead_dir(rd32, 2, NSEC, 0xF00u) == -1, "a little left of it: -1");
+    CHECK(r4_pvs_ahead_dir(rd32, 2, NSEC, 0x800u) == 1, "facing back: +1");
+    CHECK(r4_pvs_ahead_dir(rd32, 2, NSEC, 0x500u) == 1 && r4_pvs_ahead_dir(rd32, 2, NSEC, 0x300u) == -1,
+          "the half-planes split at 90 degrees");
+    psx_mod_write_word(R4_TRACK_SEGMENT_TABLE_ADDR, 0x1F800000u);
+    CHECK(r4_pvs_ahead_dir(rd32, 2, NSEC, 0u) == 0, "no centreline: unknown");
+    psx_mod_write_word(R4_TRACK_SEGMENT_TABLE_ADDR, SEGTAB);
+    CHECK(r4_pvs_ahead_dir(rd32, 99, NSEC, 0u) == 0 && r4_pvs_ahead_dir(rd32, 2, 0, 0u) == 0,
+          "a section past the course: unknown");
+}
+
+/* One course block with two polys of the first kind around world (40000,
+ * 50000) (x, z; world = v + 0x8000), +/-100 in x and z. */
+#define BLK 0x801C0000u
+#define POLYS 0x801D0000u
+static void put_block(void) {
+    for (unsigned k = 0; k < R4_MD_POLY_KINDS; k++) psx_mod_write_word(r4_md_poly_kinds[k].table, 0u);
+    memset(at(BLK), 0, 0x50);
+    psx_mod_write_word(r4_md_poly_kinds[0].table, POLYS);
+    psx_mod_write_word(BLK + r4_md_poly_kinds[0].field, (0u << 16) | 2u);
+    for (uint32_t p = 0; p < 2u; p++) {
+        int32_t x = 40000 - 32768, z = 50000 - 32768, d = p ? 100 : -100;
+        uint32_t a = POLYS + 0x40u * p;
+        uint32_t xy = (uint16_t)(x + d), zz = (uint16_t)(z + d) | ((uint32_t)(uint16_t)(z - d) << 16);
+        psx_mod_write_word(a, xy);
+        psx_mod_write_word(a + 4u, zz);
+        psx_mod_write_word(a + 8u, (uint16_t)(x - d));
+        psx_mod_write_word(a + 12u, (uint16_t)(x + d));
+        psx_mod_write_word(a + 16u, zz);
+        psx_mod_write_word(a + 20u, (uint16_t)(x - d));
+    }
+}
+
+static void test_block_cone(void) {
+    put_block();
+    R4MdBounds b;
+    CHECK(r4_md_block_bounds(rd32, BLK, &b) && b.cx == 40000 && b.cz == 50000 &&
+              b.r >= 141 && b.r <= 145,
+          "bounds: centre and half-diagonal on the ground plane");
+    CHECK(b.sig == r4_md_block_sig(rd32, BLK), "the signature matches its block");
+    double sl = r4_md_view_slope(0);
+    CHECK(r4_md_block_visible(&b, 40000.0, 40000.0, 0.0, 1.0, sl), "10000 ahead: kept");
+    CHECK(!r4_md_block_visible(&b, 40000.0, 40000.0, 0.0, -1.0, sl), "behind the camera: dropped");
+    CHECK(!r4_md_block_visible(&b, 20000.0, 50000.0, 0.0, 1.0, sl), "beside the camera: dropped");
+    CHECK(r4_md_block_visible(&b, 32000.0, 44000.0, 0.0, 1.0, sl), "inside the cone edge: kept");
+    CHECK(!r4_md_block_visible(&b, 40000.0, 50000.0 - 30000.0, 0.0, 1.0, sl),
+          "past the GTE-safe range: dropped");
+    CHECK(r4_md_view_slope(240) > r4_md_view_slope(0) + 1.5, "a wide view widens the cone");
+    psx_mod_write_word(BLK + r4_md_poly_kinds[0].field, 0u);
+    CHECK(!r4_md_block_bounds(rd32, BLK, &b), "a block with no polygons has no bounds");
+}
+
+static void test_far_xform_math(void) {
+    int32_t a[3] = { 32767, -32768, 0 }, c[3] = { 32768, 0, 0 };
+    CHECK(r4_md_delta_fits(a) && !r4_md_delta_fits(c), "the 16-bit SVECTOR range");
+    int16_t id[9] = { 4096, 0, 0, 0, 4096, 0, 0, 0, 4096 };
+    int32_t d[3] = { 50000, -7, 40000 }, t[3];
+    r4_md_apply_matrix(id, d, t);
+    CHECK(t[0] == 50000 && t[1] == -7 && t[2] == 40000, "identity keeps the delta");
+    int16_t rot[9] = { 0, 0, 4096, 0, 4096, 0, -4096, 0, 0 };   /* 90 degrees about y */
+    r4_md_apply_matrix(rot, d, t);
+    CHECK(t[0] == 40000 && t[1] == -7 && t[2] == -50000, "a rotation, exactly");
+    int16_t half[9] = { 2048, 0, 0, 0, 2048, 0, 0, 0, 2048 };
+    int32_t odd[3] = { -3, 3, 1 };
+    r4_md_apply_matrix(half, odd, t);
+    CHECK(t[0] == -2 && t[1] == 1 && t[2] == 0, "MVMVA's arithmetic shift (rounds down)");
+    int32_t ok[3] = { 30000, -30000, 60000 }, wide[3] = { 30001, 0, 0 }, deep[3] = { 0, 0, 60001 };
+    CHECK(r4_md_xf_safe(ok) && !r4_md_xf_safe(wide) && !r4_md_xf_safe(deep),
+          "the GTE-safe translation range");
+}
+
+static void test_far_cars_pure(void) {
+    R4MdOptions o = r4_md_options("extended", NULL, NULL, NULL, NULL, NULL);
+    int16_t out[3];
+    CHECK(r4_md_car_row_far(o, 0, r4_md_car_lod_full[0], out) && out[0] == 8704 &&
+              out[1] == 8704 && out[2] == R4_MD_CAR_FAR,
+          "full 1P row: only the cull distance moves (simplest model past 8704)");
+    CHECK(r4_md_car_row_far(o, 3, r4_md_car_lod_stock[3], out) && out[0] == 320 &&
+              out[1] == 3200 && out[2] == R4_MD_CAR_FAR,
+          "stock 2P row: the same");
+    CHECK(!r4_md_car_row_far(o, 1, r4_md_car_lod_full[1], out), "the mirror row is left alone");
+    const int16_t odd[3] = { 600, 3000, 8000 };
+    CHECK(!r4_md_car_row_far(o, 0, odd, out), "a row this package does not know is left alone");
+    o = r4_md_options("stock", NULL, NULL, NULL, NULL, NULL);
+    CHECK(!r4_md_car_row_far(o, 0, r4_md_car_lod_full[0], out), "stock draw distance: never");
+    CHECK(R4_MD_CAR_FAR * 4 < 65535 && R4_MD_CAR_FAR < 447 * 32,
+          "far cars stay inside SZ and the car renderer's ordering table");
+}
+
+static void test_governor_pure(void) {
+    R4MdGovernor g;
+    r4_md_gov_reset(&g, 0);
+    const uint64_t B = R4_MD_FRAME_BUDGET;
+    for (int i = 0; i < 19; i++) (void)r4_md_gov_update(&g, B / 2u);
+    CHECK(g.level == 0, "19 calm frames: no change");
+    CHECK(r4_md_gov_update(&g, B / 2u) == 1 && g.level == 1, "the 20th calm frame: up one");
+    CHECK(r4_md_gov_update(&g, B * 95u / 100u) == -1 && g.level == 0 && g.hold == 30,
+          "over 93 %: down one, hold");
+    for (int i = 0; i < 29; i++) (void)r4_md_gov_update(&g, B / 2u);
+    CHECK(g.level == 0, "held while the hold runs");
+    (void)r4_md_gov_update(&g, B / 2u);
+    CHECK(g.level == 1, "then up again");
+    CHECK(r4_md_gov_update(&g, B) == -2 && g.level == -1 && g.hold == 60, "over 96 %: down two");
+    (void)r4_md_gov_update(&g, B * 2u);
+    (void)r4_md_gov_update(&g, B * 2u);
+    CHECK(g.level == R4_MD_LEVEL_MIN, "never below the floor");
+    r4_md_gov_reset(&g, 99);
+    CHECK(g.level == R4_MD_LEVEL_MAX, "never above the ceiling");
+    (void)r4_md_gov_update(&g, B / 2u);
+    CHECK(g.level == R4_MD_LEVEL_MAX, "calm at the ceiling stays there");
+    r4_md_gov_reset(&g, 0);
+    for (int i = 0; i < 40; i++) (void)r4_md_gov_update(&g, B * 90u / 100u);
+    CHECK(g.level == 0, "between the thresholds: steady");
+}
+
+/* One main-loop frame of the plugin: frame start, a course draw (section
+ * 5, octant 0), then the VSync(1) floor wait after `busy` guest cycles. */
+static void plugin_frame(uint64_t busy) {
+    s_cpu.gpr[31] = R4_MD_FRAME_START_RA;
+    hook(R4_MD_FRAME_START_FN)(&s_cpu, R4_MD_FRAME_START_FN);
+    load_list(5, 0, 2);
+    course_draw(5, 0, 0x8006F02Cu);
+    psx_cycle_count += busy;
+    s_cpu.gpr[31] = R4_MD_VSYNC_WAIT_RA;
+    hook(R4_MD_VSYNC_FN)(&s_cpu, R4_MD_VSYNC_FN);
+}
+
+static void car_lookup(uint32_t row, uint32_t after_ra) {
+    s_cpu.gpr[5] = row;
+    hook(R4_MD_CAR_DRAW_FN)(&s_cpu, R4_MD_CAR_DRAW_FN);
+    s_cpu.gpr[31] = after_ra;
+    hook(R4_MD_CAR_AFTER_LOD_FN)(&s_cpu, R4_MD_CAR_AFTER_LOD_FN);
+}
+
+static void test_plugin_far(void) {
+    /* ---- the far object transform ---- */
+    set_options(NULL, NULL, NULL, NULL);
+    s_activate();
+    const uint32_t cam = R4_MD_CAMERA_POS_ADDR, out = 0x1F80007Cu, pos = 0x80190000u;
+    const int16_t id[9] = { 4096, 0, 0, 0, 4096, 0, 0, 0, 4096 };
+    for (unsigned i = 0; i < 9u; i++) psx_mod_write_half(R4_MD_CAMERA_MATRIX_ADDR + 2u * i, (uint16_t)id[i]);
+    psx_mod_write_word(cam, 100000u); psx_mod_write_word(cam + 4u, 0u); psx_mod_write_word(cam + 8u, 200000u);
+#define PLACE(dx, dy, dz, ra) do { \
+        psx_mod_write_word(pos, 100000u + (uint32_t)(dx)); psx_mod_write_word(pos + 4u, (uint32_t)(dy)); \
+        psx_mod_write_word(pos + 8u, 200000u + (uint32_t)(dz)); \
+        for (unsigned i_ = 0; i_ < 3u; i_++) { psx_mod_write_word(out + 8u + 4u * i_, 0xAAAAAAAAu); \
+            psx_mod_write_word(out + 0x2Cu + 4u * i_, 0xAAAAAAAAu); } \
+        s_cpu.gpr[4] = out; s_cpu.gpr[5] = pos; hook(R4_MD_XF_FN)(&s_cpu, R4_MD_XF_FN); \
+        s_cpu.gpr[4] = out + R4_MD_XF_MATRIX_OFF; s_cpu.gpr[31] = (ra); \
+        hook(R4_MD_XF_SETTRANS_FN)(&s_cpu, R4_MD_XF_SETTRANS_FN); } while (0)
+    PLACE(100, 0, 200, R4_MD_XF_SETTRANS_RA);
+    CHECK(rd32(out + 0x2Cu) == 0xAAAAAAAAu && rd32(out + 8u) == 0xAAAAAAAAu,
+          "a delta that fits: the game's own translation stands");
+    PLACE(20000, 0, 40000, R4_MD_XF_SETTRANS_RA);
+    CHECK(rd32(out + 0x2Cu) == 20000u && rd32(out + 0x34u) == 40000u && rd32(out + 8u) == 20000u &&
+              rd32(out + 0x10u) == 40000u,
+          "past 32767: the exact 32-bit translation");
+    PLACE(20000, 0, 40000, 0x80012345u);
+    CHECK(rd32(out + 0x2Cu) == 0xAAAAAAAAu, "SetTransMatrix from another caller: untouched");
+    PLACE(0, 0, 70000, R4_MD_XF_SETTRANS_RA);
+    CHECK((int32_t)rd32(out + 0x34u) == R4_MD_XF_BEHIND && rd32(out + 0x2Cu) == 0u,
+          "past the GTE's range: moved behind the camera");
+    set_options("stock", NULL, NULL, NULL);
+    s_activate();
+    PLACE(20000, 0, 40000, R4_MD_XF_SETTRANS_RA);
+    CHECK(rd32(out + 0x2Cu) == 0xAAAAAAAAu, "draw distance stock: never");
+#undef PLACE
+
+    /* ---- far cars: raised for one lookup, put back after it ---- */
+    set_options("extended", NULL, NULL, NULL);
+    s_activate();
+    put_car_table(r4_md_car_lod_full);
+    s_cpu.gpr[5] = 0;
+    hook(R4_MD_CAR_DRAW_FN)(&s_cpu, R4_MD_CAR_DRAW_FN);
+    CHECK((int16_t)rd16(R4_MD_CAR_LOD_TABLE + 4u) == R4_MD_CAR_FAR &&
+              (int16_t)rd16(R4_MD_CAR_LOD_TABLE) == 8704,
+          "extended: the 1P cull distance is raised during the lookup");
+    for (unsigned i = 0; i < 4u; i++) {
+        car_lookup(i == 1u ? 1u : 0u, r4_md_car_after_lod_ra[i]);
+        CHECK(car_table_is(r4_md_car_lod_full), "each of the four paths puts the row back");
+    }
+    s_cpu.gpr[5] = 3;
+    hook(R4_MD_CAR_DRAW_FN)(&s_cpu, R4_MD_CAR_DRAW_FN);
+    s_cpu.gpr[31] = 0x80012345u;
+    hook(R4_MD_CAR_AFTER_LOD_FN)(&s_cpu, R4_MD_CAR_AFTER_LOD_FN);
+    CHECK((int16_t)rd16(R4_MD_CAR_LOD_TABLE + 18u + 4u) == R4_MD_CAR_FAR,
+          "0x80015F60 from elsewhere does not end the lookup");
+    car_lookup(0, r4_md_car_after_lod_ra[3]);
+    CHECK(car_table_is(r4_md_car_lod_full), "the next car's lookup restores the previous row first");
+    s_cpu.gpr[5] = 1;
+    hook(R4_MD_CAR_DRAW_FN)(&s_cpu, R4_MD_CAR_DRAW_FN);
+    CHECK(car_table_is(r4_md_car_lod_full), "the mirror row is never raised");
+    s_savestate();
+    put_car_table(r4_md_car_lod_stock);
+
+    /* ---- Maximum: the frame budget steers the reach ---- */
+    set_options(NULL, NULL, NULL, NULL);
+    s_activate();
+    build_course(2);
+    put_centreline(NSEC * 5u);
+    psx_cycle_count = 1000000u;
+    plugin_frame(R4_MD_FRAME_BUDGET / 2u);
+    CHECK(rd32(R4_PVS_LIST_ADDR) == 8u && list_has(block_ptr(3, 0, 0)) &&
+              list_has(block_ptr(6, 0, 0)) && !list_has(block_ptr(7, 0, 0)),
+          "level 0: two sections ahead (toward lower sections), one behind");
+    for (int i = 0; i < 20; i++) plugin_frame(R4_MD_FRAME_BUDGET / 2u);
+    load_list(5, 0, 2);
+    course_draw(5, 0, 0x8006F02Cu);
+    CHECK(rd32(R4_PVS_LIST_ADDR) == 10u && list_has(block_ptr(2, 0, 0)),
+          "20 calm frames: three ahead");
+    put_car_table(r4_md_car_lod_full);
+    s_cpu.gpr[5] = 0;
+    hook(R4_MD_CAR_DRAW_FN)(&s_cpu, R4_MD_CAR_DRAW_FN);
+    CHECK((int16_t)rd16(R4_MD_CAR_LOD_TABLE + 4u) == R4_MD_CAR_FAR, "level 1: far cars");
+    car_lookup(0, r4_md_car_after_lod_ra[0]);
+    for (int i = 0; i < 3; i++) plugin_frame(R4_MD_FRAME_BUDGET);
+    load_list(5, 0, 2);
+    course_draw(5, 0, 0x8006F02Cu);
+    CHECK(rd32(R4_PVS_LIST_ADDR) == 2u, "overloaded frames: down to the floor (no sections)");
+    car_lookup(0, r4_md_car_after_lod_ra[0]);
+    CHECK(car_table_is(r4_md_car_lod_full), "below level 1: the stock cull distance");
+    /* Frames that never reach the VSync(1) wait, or VSync from elsewhere,
+     * measure nothing. */
+    s_cpu.gpr[31] = R4_MD_FRAME_START_RA;
+    hook(R4_MD_FRAME_START_FN)(&s_cpu, R4_MD_FRAME_START_FN);
+    psx_cycle_count += R4_MD_FRAME_BUDGET * 3u;
+    s_cpu.gpr[31] = 0x8001E7E4u;
+    hook(R4_MD_VSYNC_FN)(&s_cpu, R4_MD_VSYNC_FN);
+    s_savestate();
+    load_list(5, 0, 2);
+    course_draw(5, 0, 0x8006F02Cu);
+    CHECK(rd32(R4_PVS_LIST_ADDR) == 8u, "a save state starts again from level 0");
+    put_car_table(r4_md_car_lod_stock);
+}
+
 int main(void) {
     test_options();
     test_car_tables();
@@ -795,6 +1100,12 @@ int main(void) {
     test_reflections();
     test_mirror();
     test_car_restore();
+    test_pvs_dir();
+    test_block_cone();
+    test_far_xform_math();
+    test_far_cars_pure();
+    test_governor_pure();
+    test_plugin_far();
     if (failures) {
         fprintf(stderr, "test_r4_max_detail: %d failure(s)\n", failures);
         return 1;

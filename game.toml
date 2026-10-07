@@ -78,8 +78,12 @@ mod_function_entry_funcs = [
   # renderer dispatcher (course detail, split screen); it also uses the two
   # course-list hooks and DrawOTag above; the env-map car part draw (car
   # reflections); the rear-view mirror's block limit and its course list's
-  # first consumer (mirror scenery)
+  # first consumer (mirror scenery); the object transform 0x8006F160 and
+  # SetTransMatrix (far cars and objects past the 16-bit delta); the
+  # opponent car draw and its post-LOD call (the far car cull distance); the
+  # main loop's frame start after VSync(0) (the frame budget; VSync is above)
   "0x80060F94", "0x80014A90", "0x80071704", "0x8006EDEC",
+  "0x8006F160", "0x80091320", "0x8002DC00", "0x80015F60", "0x8009375C",
 ]
 
 [runtime]

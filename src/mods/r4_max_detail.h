@@ -47,6 +47,7 @@
 #ifndef R4_MAX_DETAIL_H
 #define R4_MAX_DETAIL_H
 
+#include <math.h>
 #include <stdint.h>
 #include <string.h>
 
@@ -84,6 +85,185 @@
 #define R4_MD_MIRROR_LIST_RA     0x8006F128u   /* after jal 0x8006EDEC at 0x8006F120 */
 #define R4_MD_LIST_ADDR          0x8010E3C0u   /* count, then block pointers */
 #define R4_MD_LIST_MAX           255u          /* 0x8006EB58 caps the list here */
+
+/* Far object transform. 0x8006F160(out, pos, matrix) is called by every car,
+ * trackside object and effect draw (34 call sites): it writes pos - camera
+ * (camera at 0x1F800008, world >> 6, s32 x/y/z) to out+0 as an SVECTOR
+ * (`sh`, so it wraps past 32767), rotates it by the camera matrix
+ * (0x1F800028) with 0x800910A0 (MVMVA, sf = 1, MAC1-3 to out+8 as a
+ * VECTOR), copies that to out+0x2C (the t[] of the MATRIX at out+0x18) and
+ * calls SetRotMatrix(matrix), then SetTransMatrix(out+0x18) from
+ * 0x8006F1E0. */
+#define R4_MD_XF_FN              0x8006F160u
+#define R4_MD_XF_SETTRANS_FN     0x80091320u   /* SetTransMatrix */
+#define R4_MD_XF_SETTRANS_RA     0x8006F1E8u   /* after jal 0x80091320 at 0x8006F1E0 */
+#define R4_MD_XF_VECTOR_OFF      0x08u
+#define R4_MD_XF_MATRIX_OFF      0x18u
+#define R4_MD_CAMERA_POS_ADDR    0x1F800008u
+#define R4_MD_CAMERA_MATRIX_ADDR 0x1F800028u
+
+/* The camera-space translation the fix writes is fed to RTPS/RTPT with the
+ * model's vertices; the GTE's IR1/IR2 saturate at +/-32767 and SZ at 65535
+ * (world >> 6). An object whose translation leaves that range (it is then
+ * off screen, or past the depth any renderer keeps) is moved behind the
+ * camera instead, so every renderer rejects it (SZ 0, OT index 0). */
+#define R4_MD_XF_SAFE_XY     30000
+#define R4_MD_XF_SAFE_Z      60000
+#define R4_MD_XF_BEHIND      (-0x100000)
+static inline int r4_md_xf_safe(const int32_t t[3])
+{
+    return t[0] >= -R4_MD_XF_SAFE_XY && t[0] <= R4_MD_XF_SAFE_XY &&
+           t[1] >= -R4_MD_XF_SAFE_XY && t[1] <= R4_MD_XF_SAFE_XY && t[2] <= R4_MD_XF_SAFE_Z;
+}
+
+/* Does the delta fit the game's 16-bit SVECTOR unchanged? */
+static inline int r4_md_delta_fits(const int32_t d[3])
+{
+    for (unsigned i = 0; i < 3u; i++)
+        if (d[i] < -32768 || d[i] > 32767) return 0;
+    return 1;
+}
+
+/* MVMVA with sf = 1, no translation: t = (m * d) >> 12 per row, on the
+ * GTE's 44-bit accumulator (here 64-bit; the inputs cannot overflow it). */
+static inline void r4_md_apply_matrix(const int16_t m[9], const int32_t d[3], int32_t t[3])
+{
+    for (unsigned r = 0; r < 3u; r++) {
+        int64_t acc = (int64_t)m[3u * r] * d[0] + (int64_t)m[3u * r + 1u] * d[1] +
+                      (int64_t)m[3u * r + 2u] * d[2];
+        t[r] = (int32_t)(acc >> 12);
+    }
+}
+
+/* ---- course blocks ------------------------------------------------------------
+ * A course block (0x50 bytes, r4_pvs.h) holds, per kind of course polygon,
+ * a word (count | first << 16) at `field`; that kind's polys live in the
+ * table *`table`, `stride` bytes each (the 1P renderer chain 0x800A2370:
+ * 0x80061078, 0x80061C34, ... each loads its own field, table pointer and
+ * record size; the kind at +0x30, 0x80066D58, is drawn differently and is
+ * left out). Every kind starts with the same packed vertices: x0|y0,
+ * z0|z1, x1|y1, x2|y2, z2|z3, x3|y3 (s16), with world (>> 8) = v + 0x8000
+ * for x and z (the course draw translates by 0x8000 - camera >> 2,
+ * 0x8006EDEC). */
+typedef struct { uint8_t field, stride; uint32_t table; } R4MdPolyKind;
+static const R4MdPolyKind r4_md_poly_kinds[] = {
+    { 0x10, 0x40, 0x800F2B90u }, { 0x14, 0x44, 0x800F4EE4u }, { 0x18, 0x30, 0x800ADC98u },
+    { 0x1C, 0x34, 0x800F4ED8u }, { 0x20, 0x40, 0x800F4E10u }, { 0x24, 0x44, 0x800AC060u },
+    { 0x28, 0x30, 0x800F4DD0u }, { 0x2C, 0x34, 0x800AC054u }, { 0x34, 0x34, 0x800F4DE0u },
+    { 0x38, 0x38, 0x800AC058u },
+};
+#define R4_MD_POLY_KINDS (sizeof r4_md_poly_kinds / sizeof r4_md_poly_kinds[0])
+#define R4_MD_BLOCK_POLYS_MAX 4096u
+
+typedef uint32_t (*R4MdRead32)(uint32_t address);
+
+/* A block's bounding circle on the ground plane (world >> 8): centre of the
+ * x/z box and the half-diagonal. `sig` folds the block's kind words, so a
+ * cached circle can be checked against the block it was made from. Returns
+ * 0 for a block with no polygons or an implausible table. */
+typedef struct { int32_t cx, cz, r; uint32_t sig; } R4MdBounds;
+
+static inline uint32_t r4_md_block_sig(R4MdRead32 rd32, uint32_t block)
+{
+    uint32_t sig = 0x9E3779B9u;
+    for (unsigned k = 0; k < R4_MD_POLY_KINDS; k++)
+        sig = (sig ^ rd32(block + r4_md_poly_kinds[k].field)) * 0x01000193u;
+    return sig;
+}
+
+static inline int r4_md_block_bounds(R4MdRead32 rd32, uint32_t block, R4MdBounds *b)
+{
+    int32_t x0 = INT32_MAX, x1 = INT32_MIN, z0 = INT32_MAX, z1 = INT32_MIN;
+    for (unsigned k = 0; k < R4_MD_POLY_KINDS; k++) {
+        uint32_t w = rd32(block + r4_md_poly_kinds[k].field);
+        uint32_t polys = rd32(r4_md_poly_kinds[k].table);
+        uint32_t n = w & 0xFFFFu, first = w >> 16;
+        if (n == 0u || (polys & 0xFFE00000u) != 0x80000000u || n > R4_MD_BLOCK_POLYS_MAX)
+            continue;
+        for (uint32_t i = 0; i < n; i++) {
+            uint32_t p = polys + r4_md_poly_kinds[k].stride * (first + i);
+            uint32_t v[6];
+            for (unsigned j = 0; j < 6u; j++) v[j] = rd32(p + 4u * j);
+            int32_t xs[4] = { (int16_t)v[0], (int16_t)v[2], (int16_t)v[3], (int16_t)v[5] };
+            int32_t zs[4] = { (int16_t)v[1], (int16_t)(v[1] >> 16), (int16_t)v[4],
+                              (int16_t)(v[4] >> 16) };
+            for (unsigned j = 0; j < 4u; j++) {
+                if (xs[j] < x0) x0 = xs[j];
+                if (xs[j] > x1) x1 = xs[j];
+                if (zs[j] < z0) z0 = zs[j];
+                if (zs[j] > z1) z1 = zs[j];
+            }
+        }
+    }
+    if (x0 > x1) return 0;
+    b->cx = (x0 + x1) / 2 + 0x8000;
+    b->cz = (z0 + z1) / 2 + 0x8000;
+    int64_t hx = ((int64_t)x1 - x0 + 1) / 2 + 1, hz = ((int64_t)z1 - z0 + 1) / 2 + 1;
+    b->r = (int32_t)sqrt((double)(hx * hx + hz * hz)) + 1;
+    b->sig = r4_md_block_sig(rd32, block);
+    return 1;
+}
+
+/* Far blocks appended at Maximum are kept only where they can be seen and
+ * drawn correctly:
+ *   - in view: the circle meets the horizontal view cone (|lateral| <=
+ *     forward * slope, slope = tan of the half view angle plus a margin for
+ *     roll and pitch), so the PS1 never transforms the polygons of a block
+ *     behind or beside the camera;
+ *   - in range: every point of the circle within R4_MD_BLOCK_RANGE of the
+ *     camera. The course draw feeds camera-space vertices through the GTE's
+ *     16-bit IR registers (RTPT, sf = 1): past 32767 they saturate and the
+ *     polygon would be drawn bent. */
+#define R4_MD_BLOCK_RANGE 30000
+static inline int r4_md_block_visible(const R4MdBounds *b, double camx, double camz,
+                                      double fx, double fz, double slope)
+{
+    double x = (double)b->cx - camx, z = (double)b->cz - camz, r = (double)b->r;
+    double d2 = x * x + z * z;
+    double lim = (double)R4_MD_BLOCK_RANGE - r;
+    if (lim <= 0.0 || d2 > lim * lim) return 0;
+    double fwd = x * fx + z * fz, lat = x * fz - z * fx;
+    if (lat < 0) lat = -lat;
+    /* The circle meets the cone when its centre is within r of it: the
+     * distance from the centre to the cone's edge line is
+     * (lat - fwd * slope) / sqrt(1 + slope^2). */
+    if (fwd < -r) return 0;
+    return (lat - fwd * slope) <= r * sqrt(1.0 + slope * slope);
+}
+
+/* The view cone's half-angle slope for a view `margin` pixels wider than
+ * 320 on each side: the 4:3 view spans about +/-51 degrees (slope 1.25);
+ * a wider view scales the half-width. Plus 0.35 for roll, pitch and the
+ * camera moving within a frame. */
+static inline double r4_md_view_slope(int margin)
+{
+    if (margin < 0) margin = 0;
+    return 1.25 * (160.0 + (double)margin) / 160.0 + 0.35;
+}
+
+/* Far cars. 0x8002DC00(car, row) reads the row's three distances (T0 at
+ * 0x8002DE34, T1 0x8002E29C, T2 0x8002E44C) against the car's L1 distance
+ * ((car - camera) >> 2 on x and z, world >> 8) and draws the full model
+ * below T0, a simpler one below T1, the simplest below T2, nothing past
+ * it. Every path then calls 0x80015F60 (from the four return addresses
+ * below), after the last read. The stock cull distance 8704 is the range
+ * of 0x8006F160's 16-bit delta (8192 per axis) rounded up; with the far
+ * transform fix the limit is the car renderer's own: its ordering-table
+ * guard (0x8005F6BC: OTZ >> 5 below 447, about 14300 deep) and the GTE's
+ * SZ (65535 >> 2, about 16380 deep). So at Extended and Maximum the plugin
+ * raises the 1P, TV and 2P rows' cull distance to 14000 for the duration
+ * of each car's lookup only: written at 0x8002DC00's entry and put back at
+ * 0x80015F60's, so the table in RAM, and in any save state, stays what the
+ * manifest wrote. The mirror row is left alone. */
+#define R4_MD_CAR_DRAW_FN        0x8002DC00u
+#define R4_MD_CAR_AFTER_LOD_FN   0x80015F60u
+static const uint32_t r4_md_car_after_lod_ra[4] = {
+    0x8002E1B8u,   /* full model (0x8002E1B0) */
+    0x8002E3CCu,   /* simpler model (0x8002E3C4) */
+    0x8002E4B4u,   /* simplest model (0x8002E4AC) */
+    0x8002E524u,   /* past the cull distance (0x8002E51C) */
+};
+#define R4_MD_CAR_FAR            14000
 
 /* Stock car rows: 1P, rear-view mirror, TV/replay, 2P, 2P (alternate). */
 static const int16_t r4_md_car_lod_stock[R4_MD_CAR_LOD_ROWS][3] = {
@@ -155,25 +335,114 @@ static inline R4MdOptions r4_md_options(const char *draw, const char *course,
 /* psxrecomp's draw-distance clamp: on from Extended. */
 static inline int r4_md_clamp_on(R4MdOptions o) { return o.draw != R4_MD_DRAW_STOCK; }
 
-/* Neighbouring track sections added on each side of the camera's section at
- * Maximum (r4_pvs.h), given the widescreen octant reach (0 at 4:3, 1 from
- * 16:9, 2 from about 30:9). Two up to about 30:9; none from there on, so the
- * widest views draw what Extended draws. At 32:9, with full car models and
- * the Grand Prix start grid ahead (seven cars), the extra sections pushed the
- * PS1 frame past its two-VBlank budget: over 40 s two sections lost 46 game
- * frames (windows down to 21.6 game frames/s), one section 14, one section
- * with only the heading's neighbouring octants 1, none 0 like stock. Up to
- * 29:9 two sections lost none, in 1P (the grid) and 2P (the VS start).
- * Measured on Helter Skelter, docs/MAX_DETAIL.md. */
-static inline int r4_md_section_reach_for(R4MdOptions o, int oct_reach)
+/* The far object transform fix runs with any draw distance above Stock (the
+ * only settings that raise the car cull distance). */
+static inline int r4_md_far_xform_on(R4MdOptions o) { return o.draw != R4_MD_DRAW_STOCK; }
+
+/* The row values to use for one car lookup: `cur` as the table holds it,
+ * `out` what the lookup should see. Returns 0 when nothing changes. */
+static inline int r4_md_car_row_far(R4MdOptions o, unsigned row, const int16_t cur[3],
+                                    int16_t out[3])
 {
-    if (o.draw != R4_MD_DRAW_MAXIMUM || oct_reach >= 2) return 0;
-    return 2;
+    out[0] = cur[0]; out[1] = cur[1]; out[2] = cur[2];
+    if (o.draw == R4_MD_DRAW_STOCK || row >= R4_MD_CAR_LOD_ROWS || row == 1u) return 0;
+    if (cur[2] != R4_MD_CAR_CULL) return 0;   /* not a row this package knows */
+    /* Only the cull distance moves: past the old one (where stock draws no
+     * car at all) a car takes the game's simplest model, a few pixels tall
+     * there; the full model's eight parts would cost the PS1 frame time
+     * the course needs. */
+    out[2] = R4_MD_CAR_FAR;
+    return 1;
 }
-static inline int r4_md_section_reach(R4MdOptions o)
+
+/* ---- Maximum: reach within the PS1's frame budget ---------------------------
+ * Every block and car Maximum adds costs the emulated PS1 time, and R4 has
+ * two VBlanks per game frame: past them the game drops a frame (it runs
+ * its logic once per frame, so the race slows). The cost depends on the
+ * course, the cars in view and the view's width, so a fixed reach is either
+ * short everywhere or too long on a crowded grid. Maximum therefore
+ * measures each frame's busy time, in guest cycles from the main loop's
+ * frame start (0x8009375C, called at 0x8001E7E8) to its first VSync(1)
+ * (0x8008B330 from 0x8001E7C8: the handler, DrawSync and the course and car
+ * draws all come before it), and steers a level:
+ *   level -2..10: sections ahead = 2 + level, one section behind (none at
+ *   -2), far cars (cull distance 14000) from level 1.
+ * Over 96 % of the budget the level drops by 2 and holds for 60 frames; over
+ * 93 % by 1 (hold 30); after 20 frames in a row under 86 % it rises by 1.
+ * Each level changes the busy time by a few percent, so the level settles
+ * where the frame uses 86-93 % of its budget.
+ * Guest cycles are deterministic, so from a save state (which resets the
+ * level) the same input gives the same frames. */
+#define R4_MD_FRAME_START_FN   0x8009375Cu   /* called at 0x8001E7E8 after VSync(0) */
+#define R4_MD_FRAME_START_RA   0x8001E7F0u
+#define R4_MD_VSYNC_FN         0x8008B330u
+#define R4_MD_VSYNC_WAIT_RA    0x8001E7D0u   /* the VSync(1) floor loop at 0x8001E7C8 */
+#define R4_MD_FRAME_BUDGET     1130090u      /* two NTSC VBlanks: 2 * 33868800 / 59.94 */
+#define R4_MD_LEVEL_MIN        (-2)
+#define R4_MD_LEVEL_MAX        10
+#define R4_MD_BEHIND           1
+
+typedef struct {
+    int level;
+    int calm;   /* frames in a row under the rise threshold */
+    int hold;   /* frames before the level may rise again */
+} R4MdGovernor;
+
+static inline void r4_md_gov_reset(R4MdGovernor *g, int level)
 {
-    return r4_md_section_reach_for(o, 0);
+    g->level = level < R4_MD_LEVEL_MIN ? R4_MD_LEVEL_MIN
+             : level > R4_MD_LEVEL_MAX ? R4_MD_LEVEL_MAX : level;
+    g->calm = 0;
+    g->hold = 0;
 }
+
+/* One measured frame: `busy` guest cycles against R4_MD_FRAME_BUDGET.
+ * Returns the level change (-2..+1). */
+static inline int r4_md_gov_update(R4MdGovernor *g, uint64_t busy)
+{
+    uint64_t permille = busy * 1000u / R4_MD_FRAME_BUDGET;
+    int before = g->level;
+    if (permille > 960u) {
+        g->level -= 2;
+        g->hold = 60;
+        g->calm = 0;
+    } else if (permille > 930u) {
+        g->level -= 1;
+        if (g->hold < 30) g->hold = 30;
+        g->calm = 0;
+    } else if (permille < 860u) {
+        if (g->hold > 0) g->hold--;
+        if (++g->calm >= 20 && g->hold == 0) {
+            g->level++;
+            g->calm = 0;
+        }
+    } else {
+        if (g->hold > 0) g->hold--;
+        g->calm = 0;
+    }
+    if (g->level < R4_MD_LEVEL_MIN) g->level = R4_MD_LEVEL_MIN;
+    if (g->level > R4_MD_LEVEL_MAX) g->level = R4_MD_LEVEL_MAX;
+    return g->level - before;
+}
+
+/* The starting level for a view `oct_reach` octants wide (r4_pvs.h): the
+ * widest views (about 30:9 on) start with no sections added, as before the
+ * governor (their wide octants made two sections overrun the grid). */
+static inline int r4_md_gov_start_level(int oct_reach)
+{
+    return oct_reach >= 2 ? R4_MD_LEVEL_MIN : 0;
+}
+
+static inline int r4_md_level_ahead(int level)
+{
+    int a = 2 + level;
+    return a < 0 ? 0 : a;
+}
+static inline int r4_md_level_behind(int level)
+{
+    return r4_md_level_ahead(level) > 0 ? R4_MD_BEHIND : 0;
+}
+static inline int r4_md_level_far_cars(int level) { return level >= 1; }
 
 /* Does the course renderer's entry hook have anything to write? */
 static inline int r4_md_course_hook_active(R4MdOptions o)
