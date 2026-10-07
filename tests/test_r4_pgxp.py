@@ -59,7 +59,8 @@ def check_manifest():
     check(r4.get("version") == fw.get("version"),
           "same version (an override, not a second package)")
     check(r4.get("format_version") == fw.get("format_version"), "same format_version")
-    check(r4.get("target") == fw.get("target"), "same [[target]]")
+    check(r4.get("target") == [{"game_id": "SLUS-00797"}],
+          "R4's copy targets R4 only ([[target]] game_id SLUS-00797)")
     feats = r4.get("feature", [])
     check(len(feats) == 1 and feats[0].get("id") == "pgxp", "one feature, id pgxp")
     if feats:

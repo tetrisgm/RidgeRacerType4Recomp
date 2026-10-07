@@ -15,7 +15,7 @@ resolver = "declarative"
 save_compatibility = "shared"
 
 [[target]]
-game_id = "*"
+game_id = "SLUS-00797"
 
 [[feature]]
 id = "pgxp"
