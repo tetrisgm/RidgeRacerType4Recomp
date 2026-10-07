@@ -125,7 +125,8 @@ static void test_activation(void) {
     CHECK(s_direct == (1u << PSX_MOD_SHORTCUT_REWIND), "default allows direct Rewind only");
 
     reset_mocks(); s_scheme = "modern"; s_activate();
-    CHECK(s_xf_set[0] && s_xf_set[1] && !s_xf_set[2], "modern registers two players");
+    CHECK(s_xf_set[0] && s_xf_set[1] && s_xf_set[2] && s_xf_set[3],
+          "modern registers all four players (Link Battle seats)");
     CHECK(s_xf[0].struct_size == sizeof(PSXModPadTransform), "struct_size");
     CHECK(s_xf[0].allowed_types & PSX_MOD_PAD_TYPE_BIT(PSX_MOD_PAD_NEGCON), "NeGcon allowed");
     CHECK(s_xf[0].allowed_types & PSX_MOD_PAD_TYPE_BIT(s_xf[0].initial_type),
@@ -253,7 +254,10 @@ static void test_mapping(void) {
         CHECK(run(&f, &o) == 1, "race again after attract");
     }
     f.player = 2;
-    CHECK(run(&f, &o) == 0, "players past P2 pass through");
+    CHECK(run(&f, &o) == 1 && o.type == PSX_MOD_PAD_NEGCON,
+          "seat 3 maps too (port 1's NeGcon config)");
+    f.player = 4;
+    CHECK(run(&f, &o) == 0, "players past P4 pass through");
 
     CHECK(r4_modern_controls_scheme_is_classic("classic") &&
           !r4_modern_controls_scheme_is_classic("modern") &&

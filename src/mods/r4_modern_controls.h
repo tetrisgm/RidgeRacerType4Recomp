@@ -23,7 +23,11 @@
 #define R4_MC_PAD_FACE_SHOULDERS 0xFF00u
 #define R4_MC_PAD_DPAD     0x00F0u
 
-#define R4_MC_PLAYERS 2u
+/* Every pad the runtime can present: two offline ports, four Link Battle
+ * seats online. R4 keeps NeGcon config and calibration for its two ports
+ * only; seats 3-4 use port 1's (R4_MC_CONFIG_PORT). */
+#define R4_MC_PLAYERS 4u
+#define R4_MC_CONFIG_PORT(player) ((player) < 2u ? (player) : 0u)
 #define R4_MC_HOST_TRIGGERS \
     (PSX_MOD_PAD_HOST_GAMEPAD | PSX_MOD_PAD_HOST_LT | PSX_MOD_PAD_HOST_RT)
 #define R4_MC_ALLOWED_TYPES \

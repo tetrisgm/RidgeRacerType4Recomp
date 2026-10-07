@@ -66,8 +66,9 @@ static int r4_mc_driving(void) {
 }
 
 static void r4_mc_negcon_config(uint32_t player, R4ModernNegcon *ng) {
-    const uint32_t cfg = R4_MC_BUTTON_CFG_ADDR + player * 48u + 16u;
-    const uint32_t cal = R4_MC_PAD_CAL_ADDR + player * 16u;
+    const uint32_t port = R4_MC_CONFIG_PORT(player);
+    const uint32_t cfg = R4_MC_BUTTON_CFG_ADDR + port * 48u + 16u;
+    const uint32_t cal = R4_MC_PAD_CAL_ADDR + port * 16u;
     uint32_t rest, idx;
     ng->upshift = r4_mc_cfg_to_sio(psx_mod_read_half(cfg + 8u), R4_MC_PAD_DOWN);
     ng->downshift = r4_mc_cfg_to_sio(psx_mod_read_half(cfg + 10u), R4_MC_PAD_UP);
