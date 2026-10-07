@@ -556,8 +556,11 @@ def local_views(peers, shots, label):
         rows.append(row)
     # A peer behind the match sheds its own view (status 5, FAST_FORWARD)
     # and presents its quadrant of the shared frame instead: still its seat.
+    # Under a load that only the own view adds, it alternates between the
+    # two, so a sample may catch the quadrant just after the view returned.
     def shed(r):
-        return r.get("local_status") == 5
+        return r.get("local_status") == 5 or \
+            "netplay own view SHED" in peers.log_text(r["peer"])
     ok = all(r["best"] == r["peer"] for r in rows) and \
         all(r.get("local_views", 1) > 0 or shed(r) for r in rows)
     if peers.args.frontend == "hidden":
