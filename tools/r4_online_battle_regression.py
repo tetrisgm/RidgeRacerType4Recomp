@@ -61,6 +61,7 @@ class Peers:
         self.remote = args.remote_seat
         self.remote_files = {}
         self.remote_log_at = 0.0
+        self.modern_race = False   # --modern: triggers/stick in a race
 
     def view(self, i):
         """This seat's own widescreen View ('' = off)."""
@@ -75,9 +76,18 @@ class Peers:
 
     def ask(self, i, name, timeout=5, **fields):
         if name == "set_input" and self.args.modern and "buttons" in fields \
-                and not int(fields["buttons"], 16) & CROSS_BIT:
-            # Modern controls: the gas is the right trigger (R4 NeGcon I).
-            fields["rt"] = 255
+                and self.modern_race:
+            # Modern controls, as a player's gamepad drives them: gas = right
+            # trigger, brake = left trigger, steering = left stick (the
+            # transform makes it NeGcon twist). Cross / Square / D-pad
+            # left-right become those; menus keep the plain buttons.
+            b = int(fields["buttons"], 16)
+            fields["rt"] = 255 if not b & CROSS_BIT else 0
+            fields["lt"] = 255 if not b & SQUARE else 0
+            fields.setdefault("lx", 0 if not b & LEFT else
+                              255 if not b & RIGHT else 0x80)
+            fields["buttons"] = hex(b | CROSS_BIT | SQUARE | LEFT | RIGHT)
+            fields["pad_type"] = 1   # a DualShock-shaped gamepad: the stick passes
         if not self.local(i) and "path" in fields:
             local = Path(fields["path"])
             remote = f"{self.args.remote_dir}/shots/{local.name}"
@@ -562,6 +572,27 @@ def seat_control(peers):
         rows.append(dict(seat=seat, moved=[round(m) for m in moved]))
         if moved[seat] < 20 or any(moved[j] > 1 for j in range(seat + 1, peers.n)):
             raise AssertionError(f"seat {seat} control: {rows}")
+        if peers.args.modern:
+            # Brake (left trigger) and steering (left stick) of this seat.
+            peers.ask(seat, "set_input", buttons=hex(CROSS))
+            peers.wait_frames(60)
+            fast = car_state(peers, 0, seat)
+            peers.ask(seat, "set_input", buttons=hex(NEUTRAL & ~SQUARE))
+            peers.wait_frames(20)
+            fast = max(fast, car_state(peers, 0, seat), key=lambda c: c["speed"])
+            peers.wait_frames(60)   # input delay grows with seats
+            slow = car_state(peers, 0, seat)
+            peers.ask(seat, "set_input", buttons=hex(CROSS), lx=0)
+            peers.wait_frames(40)
+            turned = car_state(peers, 0, seat)
+            peers.ask(seat, "set_input", buttons=hex(NEUTRAL & ~SQUARE))
+            peers.wait_frames(60)
+            hd = lambda c: c["yaw"]
+            turn = (hd(turned) - hd(slow) + 2048) % 4096 - 2048
+            rows[-1].update(speed_gas=fast["speed"], speed_braked=slow["speed"],
+                            heading_turn=turn)
+            if slow["speed"] >= fast["speed"] or abs(turn) < 16:
+                raise AssertionError(f"seat {seat} brake/steer: {rows}")
     for seat in range(peers.n):
         peers.ask(seat, "set_input", buttons=hex(NEUTRAL))
     return dict(ok=True, steps=rows,
@@ -829,6 +860,7 @@ def main():
             entrants=[peers.u16(i, ENTRANTS) for i in range(peers.n)],
             cars=[peers.u16(i, CAR_COUNT) for i in range(peers.n)])
         result["steps"]["race_shot"] = shot("race")
+        peers.modern_race = bool(args.modern)
         if args.stop_after == "race":
             peers.wait_frames(300, 60)
             result["steps"]["local_views"] = local_views(peers, shots, "race")
