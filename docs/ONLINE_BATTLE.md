@@ -110,6 +110,14 @@ same match, with nothing negotiated. The Link race handler (0x80115770, link
 overlay) is in the race predicate (`src/mods/r4_widescreen_scene.h`). Paused,
 Results and menus show the canonical 4:3 frame.
 
+Per-player widescreen runs (R4 `feat/link-battle`, psxrecomp #545), macOS
+arm64, rollback, hidden OpenGL peers, seat 0 Fit in a 1280x720 window, other
+seats 21:9: 2 peers to the title (natural finish 801 s, Car & Course Change,
+Retire, Exit): 983 common digest ticks, 0 mismatch, 0 / 0 misses, 12796 own
+views per peer, no sandbox faults; 4 peers through the natural finish and
+Results (stopped at Car & Course Change): 1204 common ticks, 0 mismatch. Every
+own view was wide (scenery in the side columns), the canonical frame 4:3.
+
 **Mode-4 frames without the race.** Results, Car Select and loading frames
 are still mode 4. The OT and HUD edits only run in a frame whose views the
 link race handler built (they once linked stale HUD copies into the Results
