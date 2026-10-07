@@ -192,9 +192,9 @@ class Peers:
             # A hard link under its own name: a concurrent `pkill r4-runtime`
             # elsewhere on a shared machine must not stop these peers.
             try:
-                os.link(build / "r4-runtime", d / "r4peer")
+                os.link(build / "r4-runtime", d / self.args.peer_name)
             except OSError:
-                shutil.copy2(build / "r4-runtime", d / "r4peer")
+                shutil.copy2(build / "r4-runtime", d / self.args.peer_name)
             (d / "memcards").mkdir()
             # Widescreen is each player's own choice (own view only).
             view = self.view(i)
@@ -231,6 +231,14 @@ class Peers:
                 env.pop("PSX_R4_LINK_EXPERIMENTAL", None)
             env.pop("PSX_R4_VIEW_COUNT_PROBE", None)
             env.pop("PSX_OVERLAY_AUTOCOMPILE_CMD", None)
+            for k in ("PSX_R4_LINK_TEST_VIEW_COST_MS",
+                      "PSX_R4_LINK_TEST_FRAME_COST_MS"):
+                env.pop(k, None)
+            if i in a.load_seat:
+                if a.view_cost_ms:
+                    env["PSX_R4_LINK_TEST_VIEW_COST_MS"] = str(a.view_cost_ms)
+                if a.frame_cost_ms:
+                    env["PSX_R4_LINK_TEST_FRAME_COST_MS"] = str(a.frame_cost_ms)
             if i:
                 env["PSX_NET_PEER"] = f"127.0.0.1:{a.udp_port_base}"
             else:
@@ -238,7 +246,7 @@ class Peers:
             d = a.work / f"peer{i}"
             self.handles.append(self.logs[i].open("w"))
             self.procs.append(subprocess.Popen(
-                ["./r4peer", "--game", "./game.toml", "--bios",
+                ["./" + a.peer_name, "--game", "./game.toml", "--bios",
                  "./bios/openbios.bin", "--disc", str(a.disc),
                  "--memcard-dir", "./memcards", "--debug-port",
                  str(self.port(i)), "--no-launcher",
@@ -546,11 +554,16 @@ def local_views(peers, shots, label):
                        local_attempts=st["local_attempts"],
                        local_status=st["local_status"])
         rows.append(row)
+    # A peer behind the match sheds its own view (status 5, FAST_FORWARD)
+    # and presents its quadrant of the shared frame instead: still its seat.
+    def shed(r):
+        return r.get("local_status") == 5
     ok = all(r["best"] == r["peer"] for r in rows) and \
-        all(r.get("local_views", 1) > 0 for r in rows)
+        all(r.get("local_views", 1) > 0 or shed(r) for r in rows)
     if peers.args.frontend == "hidden":
         # A widescreen player's own view has scenery in the side columns.
-        ok = ok and all(r["side_lit"] > 0.5 for r in rows if peers.view(r["peer"]))
+        ok = ok and all(r["side_lit"] > 0.5 for r in rows
+                        if peers.view(r["peer"]) and not shed(r))
     if not ok:
         raise AssertionError(f"local views: {rows}")
     return dict(ok=ok, peers=rows)
@@ -763,6 +776,16 @@ def main():
     p.add_argument("--session-id", type=int, default=98435)
     p.add_argument("--join-gap", type=float, default=0.5,
                    help="seconds between guest launches (join order)")
+    p.add_argument("--load-seat", type=int, action="append", default=[],
+                   help="test load on this seat (repeatable): the costs below "
+                        "are spent in its host time each frame / own view")
+    p.add_argument("--view-cost-ms", type=int, default=0,
+                   help="extra host ms per own-view draw on --load-seat")
+    p.add_argument("--frame-cost-ms", type=int, default=0,
+                   help="extra host ms per race frame on --load-seat")
+    p.add_argument("--peer-name", default="r4peer",
+                   help="process name of every peer (distinct per run so "
+                        "stray peers can be found and stopped by name)")
     p.add_argument("--experimental-env", action="store_true",
                    help="set PSX_R4_LINK_EXPERIMENTAL=1 on every peer")
     p.add_argument("--stop-after", default="exit",
