@@ -19,6 +19,11 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#ifdef _WIN32
+#include <windows.h>
+#else
+#include <time.h>
+#endif
 
 #define R4_LINK_MODE 0x800F4EF4u
 #define R4_LINK_OVERLAY_BASE 0x801149A8u
@@ -1021,6 +1026,35 @@ static int r4_link_draw_local_view(struct CPUState *cpu, void *user,
     return !call.broken;
 }
 
+/* Test-only host load for the online harness (tools/r4_online_battle_
+ * regression.py --load-seat): PSX_R4_LINK_TEST_VIEW_COST_MS is added to every
+ * own-view draw, PSX_R4_LINK_TEST_FRAME_COST_MS to every race frame. Host
+ * time only: the guest never sees it, so a loaded peer simulates exactly what
+ * an unloaded one does, just later. Unset (the default) costs nothing. */
+static unsigned r4_link_test_cost_ms(const char *name, int *cache)
+{
+    if (*cache < 0) {
+        const char *v = getenv(name);
+        long ms = v ? strtol(v, NULL, 10) : 0;
+        *cache = (ms > 0 && ms <= 1000) ? (int)ms : 0;
+    }
+    return (unsigned)*cache;
+}
+
+static void r4_link_test_spend(unsigned ms)
+{
+    if (!ms)
+        return;
+#ifdef _WIN32
+    Sleep(ms);
+#else
+    struct timespec ts;
+    ts.tv_sec = (time_t)(ms / 1000u);
+    ts.tv_nsec = (long)(ms % 1000u) * 1000000L;
+    nanosleep(&ts, NULL);
+#endif
+}
+
 /* At the pass point of a race frame: draw this peer's own view, or fall back
  * to its quadrant of the shared frame. */
 static void r4_link_local_view(struct CPUState *cpu)
@@ -1030,6 +1064,9 @@ static void r4_link_local_view(struct CPUState *cpu)
     const uint32_t phase = psx_mod_read_word(R4_LINK_PHASE);
     R4LinkLocalView view;
     PSXModRenderPass rect;
+    static int frame_cost = -1, view_cost = -1;
+    r4_link_test_spend(r4_link_test_cost_ms("PSX_R4_LINK_TEST_FRAME_COST_MS",
+                                            &frame_cost));
     if (!r4_link_seats_ok(seats) || slot < 0 || slot >= seats ||
         psx_mod_read_byte(R4_LINK_PAUSED) != 0)
         return; /* paused: the whole frame with the shared menu */
@@ -1051,6 +1088,8 @@ static void r4_link_local_view(struct CPUState *cpu)
         r4_link_mirror_tick = tick;
         r4_link_mirror_next = r4_link_mirror_slide;
         r4_link_in_local_view = 1;
+        r4_link_test_spend(r4_link_test_cost_ms("PSX_R4_LINK_TEST_VIEW_COST_MS",
+                                                &view_cost));
         const int ok = psx_mod_render_local_view(cpu, &rect,
                                                  r4_link_draw_local_view, &view);
         r4_link_in_local_view = 0;
