@@ -46,6 +46,7 @@ NEUTRAL = 0xFFFF
 START = 0xFFF7
 CIRCLE = 0xDFFF
 CROSS = 0xBFFF            # accelerate
+CROSS_BIT = 0x4000
 LEFT, RIGHT, UP, DOWN, SQUARE = 0x0080, 0x0020, 0x0010, 0x0040, 0x8000
 
 
@@ -73,6 +74,10 @@ class Peers:
             else self.args.debug_port_base + i
 
     def ask(self, i, name, timeout=5, **fields):
+        if name == "set_input" and self.args.modern and "buttons" in fields \
+                and not int(fields["buttons"], 16) & CROSS_BIT:
+            # Modern controls: the gas is the right trigger (R4 NeGcon I).
+            fields["rt"] = 255
         if not self.local(i) and "path" in fields:
             local = Path(fields["path"])
             remote = f"{self.args.remote_dir}/shots/{local.name}"
@@ -183,13 +188,19 @@ class Peers:
             (d / "memcards").mkdir()
             # Widescreen is each player's own choice (own view only).
             view = self.view(i)
+            state = ""
             if view:
+                state += ("\n[[feature]]\n"
+                          "package_id = \"r4.enhancement.widescreen\"\n"
+                          "id = \"widescreen\"\nenabled = true\n"
+                          f"[feature.values]\naspect = \"{view}\"\n")
+            if self.args.modern:
+                state += ("\n[[feature]]\npackage_id = \"r4.modern-controls\"\n"
+                          "id = \"modern-controls\"\nenabled = true\n"
+                          "[feature.values]\nscheme = \"modern\"\n")
+            if state:
                 (d / "mods").mkdir(exist_ok=True)
-                (d / "mods" / "state.toml").write_text(
-                    "format_version = 2\n\n[[feature]]\n"
-                    "package_id = \"r4.enhancement.widescreen\"\n"
-                    "id = \"widescreen\"\nenabled = true\n"
-                    f"[feature.values]\naspect = \"{view}\"\n")
+                (d / "mods" / "state.toml").write_text("format_version = 2\n" + state)
 
     def launch(self):
         a = self.args
@@ -698,6 +709,10 @@ def main():
                         "View (Fit, 16:9, 21:9, 32:9) for its own view")
     p.add_argument("--guest-widescreen", default="",
                    help="the other seats' own widescreen View (default off)")
+    p.add_argument("--modern", action="store_true",
+                   help="every seat runs R4 Modern controls (an input "
+                        "transform kept online): accelerate is the right "
+                        "trigger (rt=255), not Cross")
     p.add_argument("--remote-seat", type=int, default=-1,
                    help="this seat (the last) runs on another machine, started "
                         "there with the same session env; its debug port is "
