@@ -451,7 +451,15 @@ def presented_window(peers, i, path, full_path=None):
     peers.fetch(raw)
     if full_path is not None:
         peers.fetch(full_path)
-    vf = ("crop=ih*4/3:ih," if wide else "") + "scale=160:120:flags=area"
+    vf = "scale=160:120:flags=area"
+    if wide:
+        # The picture's height: a fixed View narrower than the window is
+        # letterboxed in it; then its middle 4:3.
+        w0, h0, _ = png_rgb(raw)
+        num, den = (int(v) for v in peers.view(i).split(":")) \
+            if ":" in peers.view(i) else (w0, h0)
+        ch = min(h0, w0 * den // num)
+        vf = f"crop={ch * 4 // 3}:{ch}," + vf
     subprocess.check_call(["ffmpeg", "-v", "error", "-y", "-i", str(raw),
                            "-vf", vf, str(path)])
     w, h, rgb = png_rgb(raw)
