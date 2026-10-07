@@ -268,7 +268,13 @@ for A in "${ARTS[@]}"; do
   if grep -iE '\.bin$' <<< "$L" | grep -vxF bios/openbios.bin; then
     echo "unexpected .bin above in $Z" >&2; exit 1
   fi
-  # 4. No developer-channel mods.
+  # 4. The only bundled artwork is the HD HUD pack (Kuid0us/T4HDHUD, re-keyed
+  #    by tools/r4_hd_hud_pack.py): images under mods/ live in its pack folder.
+  if grep -iE '^mods/.*\.(png|jpe?g|bmp|tga|dds|webp)$' <<< "$L" \
+       | grep -vE '^mods/bundled/r4\.enhancement\.ui-fonts/[^/]+/pack/[0-9a-f]{7,8}-[0-9a-f]{7,8}\.png$'; then
+    echo "unexpected images above in $Z (only the HD HUD pack may ship)" >&2; exit 1
+  fi
+  # 5. No developer-channel mods.
   if "$PYTHON" - "$Z" <<'PY'
 import re, sys, zipfile
 z = zipfile.ZipFile(sys.argv[1])
