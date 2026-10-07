@@ -8,7 +8,7 @@ choice, and with the package off the game runs the stock path unchanged
 
 | Option | Choices (default first) | What it changes |
 |---|---|---|
-| Draw distance | Maximum, Extended, Stock | Extended keeps the far course polygons the game drops at the end of its ordering table and draws cars to 14000 instead of 8704; Maximum also adds the visibility lists of up to twelve track sections ahead (one behind), as many as fit the PS1 frame budget (Far draw distance) |
+| Draw distance | Maximum, Extended, Stock | Extended keeps the far course polygons the game drops at the end of its ordering table and draws cars to 14000 instead of 8704; Maximum also adds the visibility lists of up to 32 track sections ahead (one behind), as many as fit the PS1 frame budget and the primitive heap (Far draw distance) |
 | Course detail | Always full, Stock | No distance LOD on the course: full-resolution textures and smooth shading at every distance, mirror included |
 | Car detail | Always full, Stock | Full car models (3D wheels, full-resolution texture) out to the car draw distance; mirror cars as far as ahead |
 | Split screen | Same as 1P, Stock | VS halves use the 1P course subdivision and car models |
@@ -62,7 +62,8 @@ census), cars vanishing at the 8704 cull, and trackside animated objects
 |---|---|---|
 | Direction | `r4_pvs.h` `r4_pvs_ahead_dir`, `r4_pvs_merge_dir` | The centreline (`*0x800AC05C`, 0x3C per segment, x/z at +8/+0xC) and the camera yaw give which way is ahead; sections are added ahead (up to 12) and one behind, nearest first |
 | View cone | `r4_md_block_bounds` / `r4_md_block_visible` | Added blocks are kept only if their bounding circle meets the view cone and lies within 30000 of the camera (GTE IR range); host-side, so free for the PS1. The game's own list is never filtered |
-| Frame budget | hooks `0x8009375C` (ra `0x8001E7F0`) and VSync (ra `0x8001E7D0`) | Busy guest cycles per frame steer a level -2..10 (ahead = 2 + level, far cars from 1): down 2 above 96 %, down 1 above 93 %, up 1 after 20 frames under 86 %. Deterministic; reset by save-state loads |
+| Frame budget | hooks `0x8009375C` (ra `0x8001E7F0`) and VSync (ra `0x8001E7D0`) | Busy guest cycles per frame steer a level -2..30 (ahead = 2 + level, far cars from 1): down 2 above 96 %, down 1 above 93 %, up 1 after 20 frames under 86 % (after 5 under 60 %). Primitive-heap use counts as load, scaled so 70 % of the heap reads as the 93 % line (R4 never checks its heap). Deterministic; reset by save-state loads |
+| Expanded heap (8 MB RAM) | hook ClearOTagR `0x80093418` (ra `0x8001E764`) | When psxrecomp's 8 MB main RAM is live (`psx_ram_8mb_active()`), the heap pointer the main loop just reset moves to a 1 MiB region per draw buffer at `0x80200000`/`0x80300000`, above the retail 2 MB; with 2 MB RAM nothing changes. `R4_MD_BIG_HEAP=0` turns it off for A/B |
 | Far objects | hooks `0x8006F160`, SetTransMatrix `0x80091320` (ra `0x8006F1E8`) | `0x8006F160` stores object - camera as a 16-bit SVECTOR, the real limit behind the 8704 car cull. When the delta does not fit, the exact MVMVA translation is recomputed from the 32-bit delta; out of the GTE-safe range the object is moved behind the camera. In range nothing changes |
 | Far cars | hooks `0x8002DC00` / `0x80015F60` | The 1P/TV/2P rows' T2 becomes 14000 only for each car's lookup (written at entry, put back after the last row read on all four paths), so the table in RAM and in save states stays as the manifest wrote it. Past 8704 the game's simplest model; the bound is the car OT guard (`0x8005F6BC`, 447 << 5) and SZ |
 
@@ -81,6 +82,12 @@ pops under 12000 units fell from 78 to 10 per 40 s; most now land at
 12k-30k. 2P was not re-measured (no VS save state in this build).
 
 ## Limitations
+
+- Not yet here: the owner test build also opens psxrecomp's gated CPU
+  overclock (`[cpu] overclock`) on the race loop and holds the race tick at
+  two VBlanks. That needs the overclock API, which is not on psxrecomp
+  master yet; it lands as a follow-up once it is. Without it the level is
+  bounded by the stock CPU budget, as measured below.
 
 - The car draw distance (T2 = 8704) is not raised. Past it R4's car transform
   overflows: a car about 15000 units away drew huge and misplaced above the

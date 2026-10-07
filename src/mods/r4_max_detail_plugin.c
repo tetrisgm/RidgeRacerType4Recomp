@@ -30,6 +30,7 @@
 #include "mod_plugins.h"
 #include "cpu_state.h"
 #include "psx_cycles.h"
+#include "psx_memory.h"
 #include "r4_max_detail.h"
 #include "r4_pvs.h"
 #include "r4_widescreen_scene.h"
@@ -49,7 +50,7 @@ static int s_hooks_registered;
 #define R4_MD_REGISTER_ENTRY(address, callback) \
     (s_hooks_registered += \
          psx_mod_register_function_entry_plugin(PLUGIN_ID, (address), (callback)))
-#define R4_MD_HOOK_COUNT 13
+#define R4_MD_HOOK_COUNT 14
 
 /* ---- guest layout (US) ------------------------------------------------- */
 #define R4_DRAW_OTAG_FN     0x80093520u   /* trace only */
@@ -80,6 +81,7 @@ static R4MdGovernor s_gov;
 static struct {
     int started, measured, last_oct;
     uint64_t start;
+    uint32_t heap_pm;   /* highest primitive-heap use this frame, permille */
 } s_frame;
 static struct {
     int valid;
@@ -105,6 +107,7 @@ static struct {
     uint32_t env_calls, env_writes, env_offs, mirror_lists, mirror_now_max, mirror_after_max;
     uint32_t xf_calls, xf_fixed, xf_culled, dir_fwd, dir_back, car_far;
     uint32_t gov_frames, busy_max_pm, level_min, level_max;
+    uint32_t per_min, per_max;   /* frame-start to frame-start, guest cycles */
     int32_t level_sum;
 } s_stat;
 
@@ -422,6 +425,11 @@ static void r4_md_frame_start(CPUState *cpu, uint32_t address)
 {
     (void)address;
     if (!s_enabled || cpu->gpr[31] != R4_MD_FRAME_START_RA) return;
+    if (s_trace && s_frame.started) {
+        uint64_t per = psx_cycle_count - s_frame.start;
+        if (!s_stat.per_min || per < s_stat.per_min) s_stat.per_min = (uint32_t)per;
+        if (per > s_stat.per_max) s_stat.per_max = (uint32_t)per;
+    }
     s_frame.start = psx_cycle_count;
     s_frame.started = 1;
     s_frame.measured = 0;
@@ -439,7 +447,8 @@ static void r4_md_vsync(CPUState *cpu, uint32_t address)
     if (s_opt.draw != R4_MD_DRAW_MAXIMUM || !s_frame_has_course) return;
     s_frame_has_course = 0;
     uint64_t busy = psx_cycle_count - s_frame.start;
-    (void)r4_md_gov_update(&s_gov, busy);
+    (void)r4_md_gov_update_heap(&s_gov, busy, s_frame.heap_pm);
+    s_frame.heap_pm = 0;
     if (s_trace) {
         uint32_t pm = (uint32_t)(busy * 1000u / R4_MD_FRAME_BUDGET);
         if (pm > s_stat.busy_max_pm) s_stat.busy_max_pm = pm;
@@ -552,6 +561,52 @@ static void r4_md_vblank(void)
 
 /* ---- diagnostics (R4_MD_TRACE=1) ----------------------------------------- */
 
+/* Expanded primitive heap (8 MB main RAM): R4 points the heap at its draw
+ * buffer + 0x1670 at 0x8001E760 (135 KB, never checked, and past its end lies
+ * the other buffer). With psxrecomp's 8 MB RAM active, the ClearOTagR call
+ * that follows (ra 0x8001E764) moves the pointer to a 1 MiB region per
+ * buffer above the retail 2 MB, which no stock code addresses. Packets keep
+ * 24-bit links (the GPU DMA walks them in the 8 MB map), the OTs stay put. */
+#define R4_MD_CLEAR_OTAG_FN      0x80093418u
+#define R4_MD_CLEAR_OTAG_HEAP_RA 0x8001E764u
+#define R4_MD_BIG_HEAP_BASE      0x80200000u
+#define R4_MD_BIG_HEAP_SIZE      0x00100000u
+static int s_big_heap;          /* expanded heap in use (8 MB RAM live) */
+static int s_big_heap_allowed;  /* R4_MD_BIG_HEAP=0 turns it off for A/B */
+
+static uint32_t r4_md_heap_cap(void)
+{
+    return s_big_heap ? R4_MD_BIG_HEAP_SIZE : (R4_BUF_HEAP_END - R4_BUF_HEAP);
+}
+
+/* Bytes of heap the frame on buffer `buf` has used, or ~0u if the pointer is
+ * in neither the stock nor the expanded heap. */
+static uint32_t r4_md_heap_used(uint32_t buf, uint32_t heap)
+{
+    uint32_t base = buf + R4_BUF_HEAP;
+    if (s_big_heap) base = R4_MD_BIG_HEAP_BASE + (buf == R4_BUF0 ? 0u : R4_MD_BIG_HEAP_SIZE);
+    uint32_t used = heap - base;
+    return (heap >= base && used <= r4_md_heap_cap()) ? used : ~0u;
+}
+
+static uint32_t r4_md_heap_permille(uint32_t used)
+{
+    return (uint32_t)((uint64_t)used * 1000u / r4_md_heap_cap());
+}
+
+static void r4_md_clear_otag(CPUState *cpu, uint32_t address)
+{
+    (void)address;
+    if (!s_enabled || cpu->gpr[31] != R4_MD_CLEAR_OTAG_HEAP_RA) return;
+    s_big_heap = s_big_heap_allowed && psx_ram_8mb_active();
+    if (!s_big_heap) return;
+    uint32_t heap = rd32(R4_HEAP_PTR_ADDR);
+    uint32_t buf = heap - R4_BUF_HEAP;
+    if (buf != R4_BUF0 && buf != R4_BUF0 + R4_BUF_STRIDE) return;
+    psx_mod_write_word(R4_HEAP_PTR_ADDR,
+                       R4_MD_BIG_HEAP_BASE + (buf == R4_BUF0 ? 0u : R4_MD_BIG_HEAP_SIZE));
+}
+
 /* Highest occupied slot of a ClearOTagR table ending at `head`, below the
  * backdrop slots (701/702) and the viewport's DR_AREA (703). An empty slot
  * links to the one before it. */
@@ -568,8 +623,21 @@ static uint32_t r4_md_ot_high(uint32_t head)
 static void r4_md_draw_otag(CPUState *cpu, uint32_t address)
 {
     (void)address;
-    if (!s_enabled || !s_trace) return;
+    if (!s_enabled) return;
     uint32_t a0 = cpu->gpr[4];
+    if (!s_trace) {
+        /* The governor's heap input: OT1 is drawn once the frame's packets
+         * are all built, so the heap pointer is the frame's use. */
+        uint32_t buf = a0 - R4_BUF_OT1_HEAD;
+        if (buf != R4_BUF0 && buf != R4_BUF0 + R4_BUF_STRIDE) return;
+        uint32_t heap = rd32(R4_HEAP_PTR_ADDR);
+        uint32_t used = r4_md_heap_used(buf, heap);
+        if (used != ~0u) {
+            uint32_t pm = r4_md_heap_permille(used);
+            if (pm > s_frame.heap_pm) s_frame.heap_pm = pm;
+        }
+        return;
+    }
     int ot1 = 1;
     uint32_t buf = a0 - R4_BUF_OT1_HEAD;
     if (buf != R4_BUF0 && buf != R4_BUF0 + R4_BUF_STRIDE) {
@@ -585,19 +653,25 @@ static void r4_md_draw_otag(CPUState *cpu, uint32_t address)
     }
     if (!ot1) return;
     uint32_t heap = rd32(R4_HEAP_PTR_ADDR);
-    uint32_t used = heap - (buf + R4_BUF_HEAP);
-    if (heap >= buf + R4_BUF_HEAP && used <= R4_BUF_STRIDE) {
+    uint32_t used = r4_md_heap_used(buf, heap);
+    if (used != ~0u) {
         if (used > s_stat.heap_max) s_stat.heap_max = used;
-        if (used >= R4_BUF_HEAP_END - R4_BUF_HEAP) s_stat.heap_limit_hits++;
+        {
+            uint32_t pm = r4_md_heap_permille(used);
+            if (pm > s_frame.heap_pm) s_frame.heap_pm = pm;
+        }
+        if (used >= r4_md_heap_cap()) s_stat.heap_limit_hits++;
     }
     if (++s_stat.frames % 60u == 0u) {
         fprintf(stdout,
-                "[r4-md] heap_max=0x%X/0x%X (%u%%) limit_hits=%u ot1_max=%u ot2_max=%u "
+                "[r4-md] gf=%u cyc=%llu per=%u..%u heap_max=0x%X/0x%X (%u%%) limit_hits=%u ot1_max=%u ot2_max=%u "
                 "course_calls=%u pvs sections=%u before_max=%u after_max=%u added=%u/%u frames "
                 "clamp=%d env=%u/%u mirror=%u->%u (%u lists) env_off=%u "
                 "xf=%u/%u/%u carfar=%u level=%d..%d avg=%d busy_max=%u dir=%u/%u cone=%u/%u pops=%u min=%u h=%u/%u/%u/%u/%u/%u\n",
-                (unsigned)s_stat.heap_max, (unsigned)(R4_BUF_HEAP_END - R4_BUF_HEAP),
-                (unsigned)(100u * s_stat.heap_max / (R4_BUF_HEAP_END - R4_BUF_HEAP)),
+                (unsigned)s_stat.frames, (unsigned long long)psx_cycle_count,
+                (unsigned)s_stat.per_min, (unsigned)s_stat.per_max,
+                (unsigned)s_stat.heap_max, (unsigned)r4_md_heap_cap(),
+                (unsigned)(100u * s_stat.heap_max / r4_md_heap_cap()),
                 (unsigned)s_stat.heap_limit_hits, (unsigned)s_stat.ot1_max,
                 (unsigned)s_stat.ot2_max, (unsigned)s_stat.course_calls,
                 (unsigned)s_stat.nsec, (unsigned)s_stat.pvs_before_max,
@@ -625,6 +699,7 @@ static void r4_md_draw_otag(CPUState *cpu, uint32_t address)
         s_stat.xf_calls = s_stat.xf_fixed = s_stat.dir_fwd = s_stat.dir_back = 0;
         s_stat.xf_culled = s_stat.car_far = 0;
         s_stat.gov_frames = s_stat.busy_max_pm = s_stat.level_min = s_stat.level_max = 0;
+        s_stat.per_min = s_stat.per_max = 0;
         s_stat.level_sum = 0;
         s_pop.pops = s_pop.pop_min = 0;
         s_cone.kept = s_cone.dropped = 0;
@@ -655,6 +730,9 @@ static void r4_max_detail_activate(void)
     memset(&s_frame, 0, sizeof s_frame);
     s_frame.last_oct = -1;
     s_frame_has_course = 0;
+    env = getenv("R4_MD_BIG_HEAP");
+    s_big_heap_allowed = !(env && env[0] == '0');
+    s_big_heap = 0;
     r4_md_gov_reset(&s_gov, 0);
     env = getenv("R4_MD_FAR_CARS");
     s_far_cars_override = env ? atoi(env) : -1;
@@ -685,9 +763,10 @@ static void r4_max_detail_activate(void)
         fprintf(stderr, "[r4-md] only %d of %d entry hooks registered\n",
                 s_hooks_registered, R4_MD_HOOK_COUNT);
     fprintf(stdout, "[r4-md] active: draw=%d course=%d cars=%d split=%d reflections=%d "
-                    "mirror=%d clamp=%d\n",
+                    "mirror=%d clamp=%d big_heap=%d\n",
             (int)s_opt.draw, s_opt.course_full, s_opt.cars_full, s_opt.split_same,
-            s_opt.reflections, s_opt.mirror_full, psx_mod_draw_distance_clamp_enabled());
+            s_opt.reflections, s_opt.mirror_full, psx_mod_draw_distance_clamp_enabled(),
+            s_big_heap_allowed && psx_ram_8mb_active());
     fflush(stdout);
 }
 
@@ -697,6 +776,7 @@ PSX_MOD_CONSTRUCTOR(r4_register_max_detail)
     R4_MD_REGISTER_ENTRY(R4_PVS_OCTANT_FN, r4_md_pvs_octant);
     R4_MD_REGISTER_ENTRY(R4_PVS_MERGE_FN, r4_md_pvs_merge);
     R4_MD_REGISTER_ENTRY(R4_DRAW_OTAG_FN, r4_md_draw_otag);
+    R4_MD_REGISTER_ENTRY(R4_MD_CLEAR_OTAG_FN, r4_md_clear_otag);
     R4_MD_REGISTER_ENTRY(R4_MD_ENV_RENDER_FN, r4_md_env);
     R4_MD_REGISTER_ENTRY(R4_MD_MIRROR_LIMIT_FN, r4_md_mirror_limit);
     R4_MD_REGISTER_ENTRY(R4_MD_MIRROR_LIST_FN, r4_md_mirror_list);

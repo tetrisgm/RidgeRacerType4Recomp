@@ -365,10 +365,11 @@ static inline int r4_md_car_row_far(R4MdOptions o, unsigned row, const int16_t c
  * frame start (0x8009375C, called at 0x8001E7E8) to its first VSync(1)
  * (0x8008B330 from 0x8001E7C8: the handler, DrawSync and the course and car
  * draws all come before it), and steers a level:
- *   level -2..10: sections ahead = 2 + level, one section behind (none at
+ *   level -2..30: sections ahead = 2 + level, one section behind (none at
  *   -2), far cars (cull distance 14000) from level 1.
  * Over 96 % of the budget the level drops by 2 and holds for 60 frames; over
- * 93 % by 1 (hold 30); after 20 frames in a row under 86 % it rises by 1.
+ * 93 % by 1 (hold 30); after 20 frames in a row under 86 % it rises by 1
+ * (after 5 under 60 %).
  * Each level changes the busy time by a few percent, so the level settles
  * where the frame uses 86-93 % of its budget.
  * Guest cycles are deterministic, so from a save state (which resets the
@@ -379,7 +380,7 @@ static inline int r4_md_car_row_far(R4MdOptions o, unsigned row, const int16_t c
 #define R4_MD_VSYNC_WAIT_RA    0x8001E7D0u   /* the VSync(1) floor loop at 0x8001E7C8 */
 #define R4_MD_FRAME_BUDGET     1130090u      /* two NTSC VBlanks: 2 * 33868800 / 59.94 */
 #define R4_MD_LEVEL_MIN        (-2)
-#define R4_MD_LEVEL_MAX        10
+#define R4_MD_LEVEL_MAX        30
 #define R4_MD_BEHIND           1
 
 typedef struct {
@@ -412,7 +413,9 @@ static inline int r4_md_gov_update(R4MdGovernor *g, uint64_t busy)
         g->calm = 0;
     } else if (permille < 860u) {
         if (g->hold > 0) g->hold--;
-        if (++g->calm >= 20 && g->hold == 0) {
+        /* Far under budget (a light view) climbs four
+         * times as fast: there is no frame to lose on the way up. */
+        if (++g->calm >= (permille < 600u ? 5 : 20) && g->hold == 0) {
             g->level++;
             g->calm = 0;
         }
@@ -423,6 +426,24 @@ static inline int r4_md_gov_update(R4MdGovernor *g, uint64_t busy)
     if (g->level < R4_MD_LEVEL_MIN) g->level = R4_MD_LEVEL_MIN;
     if (g->level > R4_MD_LEVEL_MAX) g->level = R4_MD_LEVEL_MAX;
     return g->level - before;
+}
+
+/* The primitive heap is the other limit: R4 never checks it, so Maximum
+ * may not fill it. Heap use (permille of the heap) counts as frame load
+ * scaled so that R4_MD_HEAP_TARGET permille of heap reads as the governor's
+ * 930 permille "drop one level" line: the heap settles under about 65-70 %,
+ * a level over 72 % is dropped at once (heap overflow corrupts the other
+ * draw buffer, and a frame can add more than a level adds on average). On a light view the heap, not
+ * the CPU, becomes the limit. */
+#define R4_MD_HEAP_TARGET 700u
+static inline uint64_t r4_md_heap_load(uint32_t heap_pm)
+{
+    return (uint64_t)heap_pm * 930u / R4_MD_HEAP_TARGET;
+}
+static inline int r4_md_gov_update_heap(R4MdGovernor *g, uint64_t busy, uint32_t heap_pm)
+{
+    uint64_t h = r4_md_heap_load(heap_pm) * R4_MD_FRAME_BUDGET / 1000u;
+    return r4_md_gov_update(g, busy > h ? busy : h);
 }
 
 /* The starting level for a view `oct_reach` octants wide (r4_pvs.h): the

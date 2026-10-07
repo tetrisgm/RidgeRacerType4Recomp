@@ -84,6 +84,8 @@ int psx_mod_register_savestate_plugin(const char *id, PSXModActivationCallback c
     return 1;
 }
 uint64_t psx_cycle_count;   /* the guest clock the frame budget reads */
+static int s_ram8 = 0;
+int psx_ram_8mb_active(void) { return s_ram8; }
 static PSXModVBlankCallback s_vblank;
 static char s_vblank_id[32];
 int psx_mod_register_vblank_plugin(const char *id, PSXModVBlankCallback cb) {
@@ -226,8 +228,8 @@ static void test_options(void) {
           "level 0: two ahead, one behind, stock car distance");
     CHECK(r4_md_level_ahead(R4_MD_LEVEL_MIN) == 0 && r4_md_level_behind(R4_MD_LEVEL_MIN) == 0,
           "the floor adds no sections (what Extended draws)");
-    CHECK(r4_md_level_ahead(R4_MD_LEVEL_MAX) == 12 && r4_md_level_far_cars(1),
-          "the ceiling: twelve sections ahead; far cars from level 1");
+    CHECK(r4_md_level_ahead(R4_MD_LEVEL_MAX) == 32 && r4_md_level_far_cars(1),
+          "the ceiling: 32 sections ahead; far cars from level 1");
     CHECK(r4_md_gov_start_level(0) == 0 && r4_md_gov_start_level(1) == 0 &&
               r4_md_gov_start_level(2) == R4_MD_LEVEL_MIN,
           "views from about 30:9 start with no sections");
@@ -424,7 +426,7 @@ static void mirror_draw(uint32_t limit) {
 
 static void test_plugin(void) {
     CHECK(strcmp(s_activation_id, "r4.maxdetail") == 0 && s_activate, "activation registered");
-    CHECK(s_nhooks == 13, "thirteen entry hooks");
+    CHECK(s_nhooks == 14, "fourteen entry hooks");
     CHECK(s_savestate != NULL, "a save-state callback (the frame budget restarts)");
     for (int i = 0; i < s_nhooks; i++)
         CHECK(strcmp(s_hooks[i].id, "r4.maxdetail") == 0, "hooks belong to r4.maxdetail");
@@ -950,14 +952,14 @@ static void test_governor_pure(void) {
     R4MdGovernor g;
     r4_md_gov_reset(&g, 0);
     const uint64_t B = R4_MD_FRAME_BUDGET;
-    for (int i = 0; i < 19; i++) (void)r4_md_gov_update(&g, B / 2u);
+    for (int i = 0; i < 19; i++) (void)r4_md_gov_update(&g, B * 7u / 10u);
     CHECK(g.level == 0, "19 calm frames: no change");
-    CHECK(r4_md_gov_update(&g, B / 2u) == 1 && g.level == 1, "the 20th calm frame: up one");
+    CHECK(r4_md_gov_update(&g, B * 7u / 10u) == 1 && g.level == 1, "the 20th calm frame: up one");
     CHECK(r4_md_gov_update(&g, B * 95u / 100u) == -1 && g.level == 0 && g.hold == 30,
           "over 93 %: down one, hold");
-    for (int i = 0; i < 29; i++) (void)r4_md_gov_update(&g, B / 2u);
+    for (int i = 0; i < 29; i++) (void)r4_md_gov_update(&g, B * 7u / 10u);
     CHECK(g.level == 0, "held while the hold runs");
-    (void)r4_md_gov_update(&g, B / 2u);
+    (void)r4_md_gov_update(&g, B * 7u / 10u);
     CHECK(g.level == 1, "then up again");
     CHECK(r4_md_gov_update(&g, B) == -2 && g.level == -1 && g.hold == 60, "over 96 %: down two");
     (void)r4_md_gov_update(&g, B * 2u);
@@ -965,11 +967,24 @@ static void test_governor_pure(void) {
     CHECK(g.level == R4_MD_LEVEL_MIN, "never below the floor");
     r4_md_gov_reset(&g, 99);
     CHECK(g.level == R4_MD_LEVEL_MAX, "never above the ceiling");
-    (void)r4_md_gov_update(&g, B / 2u);
+    (void)r4_md_gov_update(&g, B * 7u / 10u);
     CHECK(g.level == R4_MD_LEVEL_MAX, "calm at the ceiling stays there");
     r4_md_gov_reset(&g, 0);
     for (int i = 0; i < 40; i++) (void)r4_md_gov_update(&g, B * 90u / 100u);
     CHECK(g.level == 0, "between the thresholds: steady");
+    r4_md_gov_reset(&g, 0);
+    for (int i = 0; i < 4; i++) (void)r4_md_gov_update(&g, B / 10u);
+    CHECK(g.level == 0, "far under budget: 4 calm frames, no change");
+    CHECK(r4_md_gov_update(&g, B / 10u) == 1, "far under budget: the 5th frame climbs");
+    r4_md_gov_reset(&g, 10);
+    CHECK(r4_md_gov_update_heap(&g, B / 10u, 850u) == -2,
+          "heap 85 % drops two levels however idle the CPU");
+    r4_md_gov_reset(&g, 10);
+    for (int i = 0; i < 40; i++) (void)r4_md_gov_update_heap(&g, B / 10u, 550u);
+    CHECK(g.level > 10, "heap 55 %: still climbs");
+    r4_md_gov_reset(&g, 10);
+    for (int i = 0; i < 40; i++) (void)r4_md_gov_update_heap(&g, B / 10u, 670u);
+    CHECK(g.level == 10, "heap 67 %: steady");
 }
 
 /* One main-loop frame of the plugin: frame start, a course draw (section
@@ -1062,7 +1077,7 @@ static void test_plugin_far(void) {
     CHECK(rd32(R4_PVS_LIST_ADDR) == 8u && list_has(block_ptr(3, 0, 0)) &&
               list_has(block_ptr(6, 0, 0)) && !list_has(block_ptr(7, 0, 0)),
           "level 0: two sections ahead (toward lower sections), one behind");
-    for (int i = 0; i < 20; i++) plugin_frame(R4_MD_FRAME_BUDGET / 2u);
+    for (int i = 0; i < 20; i++) plugin_frame(R4_MD_FRAME_BUDGET * 7u / 10u);
     load_list(5, 0, 2);
     course_draw(5, 0, 0x8006F02Cu);
     CHECK(rd32(R4_PVS_LIST_ADDR) == 10u && list_has(block_ptr(2, 0, 0)),
@@ -1092,6 +1107,28 @@ static void test_plugin_far(void) {
     put_car_table(r4_md_car_lod_stock);
 }
 
+/* 8 MB RAM: the primitive heap moves. */
+static void wr32(uint32_t a, uint32_t v) { psx_mod_write_word(a, v); }
+static void test_big_heap(void) {
+    set_options(NULL, NULL, NULL, NULL);
+    s_activate();
+    wr32(0x1F800000u, 0x800ADCA0u + 0x1670u);
+    s_cpu.gpr[31] = 0x8001E764u;
+    hook(0x80093418u)(&s_cpu, 0x80093418u);
+    CHECK(rd32(0x1F800000u) == 0x800ADCA0u + 0x1670u, "2 MB RAM: the stock heap");
+    s_ram8 = 1;
+    hook(0x80093418u)(&s_cpu, 0x80093418u);
+    CHECK(rd32(0x1F800000u) == 0x80200000u, "8 MB RAM: buffer 0's heap moves to 0x80200000");
+    wr32(0x1F800000u, 0x800ADCA0u + 0x22778u + 0x1670u);
+    hook(0x80093418u)(&s_cpu, 0x80093418u);
+    CHECK(rd32(0x1F800000u) == 0x80300000u, "buffer 1's to 0x80300000");
+    wr32(0x1F800000u, 0x800ADCA0u + 0x1670u);
+    s_cpu.gpr[31] = 0x8001E774u;
+    hook(0x80093418u)(&s_cpu, 0x80093418u);
+    CHECK(rd32(0x1F800000u) == 0x800ADCA0u + 0x1670u, "other ClearOTagR calls: untouched");
+    s_ram8 = 0;
+}
+
 int main(void) {
     test_options();
     test_car_tables();
@@ -1106,6 +1143,7 @@ int main(void) {
     test_far_cars_pure();
     test_governor_pure();
     test_plugin_far();
+    test_big_heap();
     if (failures) {
         fprintf(stderr, "test_r4_max_detail: %d failure(s)\n", failures);
         return 1;
