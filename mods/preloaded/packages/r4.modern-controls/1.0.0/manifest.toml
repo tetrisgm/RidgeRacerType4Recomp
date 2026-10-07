@@ -39,6 +39,10 @@ label = "Classic"
 [[plugin]]
 feature = "modern-controls"
 id = "r4.modern-controls"
+# Online it stays on per player: the transform runs on this player's own pad
+# before netplay staging, so the NeGcon frame it makes is what every peer
+# simulates (psxrecomp: [[plugin]] netplay = "input").
+netplay = "input"
 
 # Owner rule: no Rewind in split screen (netplay refuses it in psxrecomp).
 # Hidden and default-on, so it holds whatever the Controls feature is set to;
