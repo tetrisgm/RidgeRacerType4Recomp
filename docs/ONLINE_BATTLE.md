@@ -10,10 +10,8 @@ Local split screen stays two players: the stock VS Battle on pads 1 and 2.
 
 ## Playing
 
-Every peer needs the same build, the same disc and the experimental switch:
-start the launcher with `tools/launch_link_experimental.sh build` (it sets
-`PSX_R4_LINK_EXPERIMENTAL=1`). On the NETPLAY page the host creates a room
-(LAN or online) and the others join; the host presses Play. In the game,
+Every peer needs the same build and the same disc. On the launcher's
+NETPLAY page the host creates a room (LAN or online) and the others join; the host presses Play. In the game,
 choose **Link Battle** on the main menu. Car Select and Course Select work as
 in the original; every player can confirm. In the race each player steers
 their own car and sees only their own view.
@@ -123,17 +121,15 @@ are still mode 4. The OT and HUD edits only run in a frame whose views the
 link race handler built (they once linked stale HUD copies into the Results
 -> Car Select frame, which halted the GPU on an unknown GP0 command).
 
-## The experimental switch stays
+## No switch
 
-`PSX_R4_LINK_EXPERIMENTAL=1` is still required on every peer. The bridge
+Online battle is on for every netplay session of 2-4 players (owner
+decision, 2026-10-07); `PSX_R4_LINK_EXPERIMENTAL` is gone. The bridge
 allocates its enhancement memory (Expansion 1 for brake ramps and two extra
 cameras, the GPU DMA aperture for the lower views' ordering tables) when the
-game starts, before anyone knows whether a link session will follow, and an
-allocation makes that hardware region RAM instead of open bus. The default
-path must stay hardware-faithful, so the allocation, and with it the bridge,
-stays opt-in until the framework can reserve that memory for a netplay
-session only (for example at session start, which already cold-boots the
-game). The switch changes nothing for offline play or the stock VS Battle.
+game starts, before anyone knows whether a link session will follow, so on
+every run those two regions are RAM instead of open bus. R4 never addresses
+them, so offline play and the stock VS Battle are unchanged.
 
 ## Limits
 

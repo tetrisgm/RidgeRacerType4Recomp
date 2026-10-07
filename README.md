@@ -369,9 +369,8 @@ PSX_NET_MODE=rollback build/r4-runtime --no-launcher --netplay --net-slot 1 \
 
 Details: `psxrecomp/docs/NETPLAY.md`.
 
-Online Link Battle for 2-4 players (experimental): every player starts the
-launcher with `tools/launch_link_experimental.sh build`, the host opens a room
-on the NETPLAY page and the others join; in the game choose Link Battle. The
+Online Link Battle for 2-4 players: the host opens a room on the launcher's
+NETPLAY page and the others join; in the game choose Link Battle. The
 host is Player 1, each joining player takes the next seat, and everyone sees
 their own car full screen. Local split screen stays two players (VS Battle).
 See `docs/ONLINE_BATTLE.md` for the design, limits and the framework PRs it

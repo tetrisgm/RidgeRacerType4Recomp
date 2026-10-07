@@ -640,10 +640,7 @@ static void r4_link_patch_view_loop(unsigned seats)
 static int r4_link_session(void)
 {
     const char *probe = getenv("PSX_GAME_FILTER_OFFLINE_PROBE");
-    const char *experimental = getenv("PSX_R4_LINK_EXPERIMENTAL");
-    const int seats = psx_netplay_seat_count();
-    return (r4_link_seats_ok(seats) && experimental &&
-            experimental[0] == '1' && !experimental[1]) ||
+    return r4_link_seats_ok(psx_netplay_seat_count()) ||
            (probe && probe[0] == '1' && !probe[1]);
 }
 
@@ -1373,13 +1370,15 @@ static int r4_link_serial_filter(struct CPUState *cpu, uint32_t address)
 
 PSX_MOD_CONSTRUCTOR(r4_link_netplay_register)
 {
-    const char *experimental = getenv("PSX_R4_LINK_EXPERIMENTAL");
-    if (experimental && experimental[0] == '1' && !experimental[1])
-        r4_link_brake_ramps = psx_mod_alloc_guest_memory(4, 4);
-    if (experimental && experimental[0] == '1' && !experimental[1])
-        r4_link_extra_view_cameras = psx_mod_alloc_guest_memory(64, 4);
-    if (experimental && experimental[0] == '1' && !experimental[1])
-        r4_link_extra_ot = psx_mod_alloc_gpu_dma_memory(R4_LINK_OT_ALLOC_BYTES, 4);
+    /* Online battle is on for every 2-4 seat netplay session (owner,
+     * 2026-10-07: no experimental switch). Its memory is allocated at
+     * startup, before anyone knows whether a link session follows: Expansion
+     * 1 (brake ramps, two extra cameras) and the GPU DMA aperture (the lower
+     * views' ordering tables). R4 never addresses either region, so offline
+     * play is unchanged; the regions are just RAM instead of open bus. */
+    r4_link_brake_ramps = psx_mod_alloc_guest_memory(4, 4);
+    r4_link_extra_view_cameras = psx_mod_alloc_guest_memory(64, 4);
+    r4_link_extra_ot = psx_mod_alloc_gpu_dma_memory(R4_LINK_OT_ALLOC_BYTES, 4);
     (void)psx_game_register_netplay_function_filter(
         0x8003535Cu, r4_link_serial_filter);
     (void)psx_game_register_netplay_function_filter(

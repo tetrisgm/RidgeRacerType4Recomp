@@ -111,7 +111,6 @@ int psx_game_register_netplay_function_filter(
 int main(void)
 {
     assert(registrations == 28);
-    assert(setenv("PSX_R4_LINK_EXPERIMENTAL", "1", 1) == 0);
     r4_link_brake_ramps = psx_mod_alloc_guest_memory(4, 4);
     r4_link_extra_view_cameras = psx_mod_alloc_guest_memory(64, 4);
     r4_link_extra_ot = psx_mod_alloc_gpu_dma_memory(R4_LINK_OT_ALLOC_BYTES, 4);

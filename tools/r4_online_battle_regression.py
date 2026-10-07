@@ -790,7 +790,8 @@ def main():
                    help="process name of every peer (distinct per run so "
                         "stray peers can be found and stopped by name)")
     p.add_argument("--experimental-env", action="store_true",
-                   help="set PSX_R4_LINK_EXPERIMENTAL=1 on every peer")
+                   help="set PSX_R4_LINK_EXPERIMENTAL=1 on every peer "
+                        "(older builds only; online battle no longer needs it)")
     p.add_argument("--stop-after", default="exit",
                    choices=("entry", "race", "explore", "finish", "restart", "exit"))
     p.add_argument("--explore-seconds", type=float, default=20)
