@@ -6,29 +6,24 @@ Released: v0.1.0 (2026-09-26, setup-host zips). Master has widescreen (#2),
 Frame Rate (#3), internal resolution (#4) and near-wall docs (#5).
 
 Open R4 PRs (2026-10-06), dependencies in each PR body:
-- #6 hide rear-view mirror; #7 camera look-around (on by default); #8 JogCon + analog default;
-- #10 online battle, 2-4 players, each drawing its own car's full-screen view in a sandbox, quadrant fallback without OpenGL (experimental switch until per-session memory reservation exists) — psxrecomp#512, #535, #542, #511, recomp-net#26;
-- #11 Max Detail; #12 VS split screen; #13 PGXP default — psxrecomp#513;
-- #15 Controls (Modern default, Classic toggle; Rewind off in split screen and online) — psxrecomp#519-#522, #533, recomp-net#27;
-- #17 display defaults on the render-thread pipeline (includes #9) — psxrecomp#536-#540 (#537 merges #508 and #532).
-Closed/superseded: R4 #9 (in #17), #14, #16; psxrecomp #514-#518, #530, #531 parked as drafts.
+- #6 hide rear-view mirror (per player online); #7 camera look-around (on by default; off online); #8 JogCon + analog default (off online);
+- #10 online battle, 2-4 players, each sees their own car full screen in their own widescreen aspect; Modern controls online (experimental switch remains) — psxrecomp #512, #535, #542, #545, #549, #511; recomp-net #26, #28;
+- #11 Max Detail; #12 VS split screen; #13 PGXP default (#513) — Max Detail and PGXP stay off online;
+- #15 Controls (Modern default on all 4 players, Classic toggle; Rewind off in split screen and online) — psxrecomp #519-#522, #533, #549; recomp-net #27, #28;
+- #17 display defaults on the render-thread pipeline (includes #9; frame generation off until camera interpolation is accepted) — psxrecomp #536-#540, #547, #548; recomp-ui #82;
+- #18 bundled compiled releases (owner decision 2026-10-06): after it lands every R4 PR regenerates `generated/` at its re-pin.
+Closed/superseded: R4 #9, #14, #16; psxrecomp #514-#518, #530, #531 parked drafts; #539's triangle matching superseded by #547.
 
-Merge order: recomp-net #25, #26, #27; psxrecomp #506, #507, #511, #512, #513,
-#519-#522, #533, #534, #535, #542, #508, #532, #536, #537, #538, #539, #540;
-recomp-ui #79 (#77, #80, #81 merged); then R4 #6, #7, #8, #11, #12, #13, #15,
-#17, #10, re-pinning each to the merged framework.
-
-Plan: `analysis/ROADMAP-2026-10-05.md` (local).
+Merge order: recomp-net #25, #26, #27, #28; psxrecomp #506, #507, #511,
+#512, #513, #519-#522, #533, #534, #535, #542, #545, #549, #508, #532, #536,
+#537, #538, #539, #540, #547, #548; recomp-ui #79, #82; then R4 #18, #6, #7,
+#8, #11, #12, #13, #15, #17, #10 (re-pin + regen each).
 
 ## Blockers
 
-- Frame generation is wired but rarely admitted on this loaded host (breaker
-  trips on late guest frames); needs a quiet-host measurement and tuning.
-- Render/present thread and frame generation have no launcher toggle yet (env
-  switches only); needs a psxrecomp/recomp-ui setting.
-- Online battle keeps its experimental switch until psxrecomp can reserve the
-  link memory per netplay session.
-- Owner: release model (bundled `generated/` vs setup-host) before v0.2.0.
+- Owner: enable frame generation (camera interpolation, #547) by default? 2P tunnels not yet driven.
+- Online battle keeps its experimental switch until psxrecomp reserves the link memory per netplay session.
+- Mac<->PC LAN online test pending (`ssh pc` unreachable from the current network).
 
 ## References
 
