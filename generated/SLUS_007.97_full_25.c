@@ -20526,7 +20526,8 @@ block_8005AE0C:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_gte_read(cpu, 12);
 #endif
-    cpu->gpr[12] = gte_read_ctrl(cpu, 31);  /* cfc2 */  /* 0x8005AE3C: 0x484CF800 */
+    cpu->gpr[12] = gte_read_ctrl(cpu, 31);  /* cfc2 */
+    PGXP_COP2(0x484CF800u, cpu->gpr[12], 0u);  /* 0x8005AE3C: 0x484CF800 */
 #ifdef PSX_COSIM
     cosim_instr(0x8005AE3Cu);
 #endif
