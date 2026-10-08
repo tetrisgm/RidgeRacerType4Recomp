@@ -76,9 +76,9 @@ Notes
   package on and Car detail = Stock, the stock models come back at once.
   Loaded with the package off, a state made with Car detail = Always full
   keeps full car models until the game is restarted.
-- Composes with R4 Custom Renderer (widescreen) and R4 Frame Rate: wide
+- Composes with R4 Custom Renderer (widescreen) and Smooth motion: wide
   views also load the wide octants of the extra track sections, and
-  interpolated frames are drawn at the same detail.
+  in-between frames show the same detail.
 - Needs a build whose game.toml lists R4's [[draw_distance.clamp]] sites
   (every build of this version does); without them Draw distance stays
   stock and the rest still applies.

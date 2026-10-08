@@ -141,11 +141,11 @@ if(R4_BUILD_TESTS AND BUILD_TESTING)
             "${CMAKE_CURRENT_SOURCE_DIR}/src/mods")
         add_test(NAME r4_widescreen_helpers COMMAND r4-widescreen-tests)
     endif()
-    # R4 Frame Rate, pure C (no runtime or disc needed). The executables are
+    # R4 mod plugin tests, pure C (no runtime or disc needed). The executables are
     # built on demand by the *_build tests, so a plain
     #   ctest --test-dir build -R r4_ --output-on-failure
     # builds and runs them.
-    function(r4_frame_rate_test name)
+    function(r4_plugin_test name)
         add_executable(test_${name} EXCLUDE_FROM_ALL ${ARGN})
         target_include_directories(test_${name} PRIVATE
             "${CMAKE_CURRENT_SOURCE_DIR}/src/mods" "${PSXRECOMP_ROOT}/runtime/include")
@@ -155,25 +155,8 @@ if(R4_BUILD_TESTS AND BUILD_TESTING)
         add_test(NAME ${name} COMMAND test_${name})
         set_tests_properties(${name} PROPERTIES DEPENDS ${name}_build)
     endfunction()
-    # Option parsing.
-    if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_r4_frame_rate.c")
-        r4_frame_rate_test(r4_frame_rate
-            "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_r4_frame_rate.c")
-    endif()
-    # Interpolation math and the field table.
-    if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_r4_interp.c")
-        r4_frame_rate_test(r4_interp
-            "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_r4_interp.c")
-    endif()
-    # The interpolation plugin itself against a mock mod API (rolled-back
-    # passes, fallback to frame blend).
-    if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_r4_interp_plugin.c")
-        r4_frame_rate_test(r4_interp_plugin
-            "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_r4_interp_plugin.c"
-            "${CMAKE_CURRENT_SOURCE_DIR}/src/mods/r4_interp.c")
-    endif()
     if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_r4_jogcon_compat.c")
-        r4_frame_rate_test(r4_jogcon_compat
+        r4_plugin_test(r4_jogcon_compat
             "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_r4_jogcon_compat.c"
             "${CMAKE_CURRENT_SOURCE_DIR}/src/mods/r4_jogcon_compat.c")
     endif()
@@ -181,13 +164,13 @@ if(R4_BUILD_TESTS AND BUILD_TESTING)
     # (r4_pvs.h, also the widescreen plugin's) and the plugin against a mock
     # mod API.
     if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_r4_max_detail.c")
-        r4_frame_rate_test(r4_max_detail
+        r4_plugin_test(r4_max_detail
             "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_r4_max_detail.c"
             "${CMAKE_CURRENT_SOURCE_DIR}/src/mods/r4_max_detail_plugin.c")
     endif()
     # R4 Controls (Modern scheme) pad transform against a mock mod API.
     if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_r4_modern_controls.c")
-        r4_frame_rate_test(r4_modern_controls
+        r4_plugin_test(r4_modern_controls
             "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_r4_modern_controls.c"
             "${CMAKE_CURRENT_SOURCE_DIR}/src/mods/r4_modern_controls.c")
     endif()
@@ -267,12 +250,24 @@ if(R4_BUILD_TESTS AND BUILD_TESTING)
                     "(game.toml [[draw_distance.clamp]] vs the disc) is not registered")
             endif()
         endif()
-        # src/mods/r4_interp_fields.h must match tools/data/r4_interp_fields.json.
-        if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/tools/gen_r4_interp_fields.py")
-            add_test(NAME r4_interp_fields_current
+        # R4's on-by-default display settings (manifests, game.toml) and the
+        # tools/mod_state.py switches scripted runs use to turn them off.
+        if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_r4_defaults.py")
+            add_test(NAME r4_defaults
                 COMMAND "${Python3_EXECUTABLE}"
-                    "${CMAKE_CURRENT_SOURCE_DIR}/tools/gen_r4_interp_fields.py" --check
+                    "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_r4_defaults.py"
                 WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}")
+            set_tests_properties(r4_defaults PROPERTIES SKIP_RETURN_CODE 77)
+        endif()
+        # The pinned psxrecomp reads every game.toml [video] key. Skipped
+        # (with the list) while R4 is ahead of its pin; the strict form
+        # refuses that state for a release (tools/package_release.sh).
+        if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/tools/check_pin_keys.py")
+            add_test(NAME r4_pin_keys
+                COMMAND "${Python3_EXECUTABLE}"
+                    "${CMAKE_CURRENT_SOURCE_DIR}/tools/check_pin_keys.py" --ctest
+                WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}")
+            set_tests_properties(r4_pin_keys PROPERTIES SKIP_RETURN_CODE 77)
         endif()
     endif()
 endif()

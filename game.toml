@@ -63,14 +63,13 @@ mod_function_entry_funcs = [
   # r4.enhancement.camera-lookaround: restore the previous eye before the
   # next guest camera update writes fresh scratch inputs (not at car-draw entry).
   "0x800738C4",
-  # ClearOTagR (clear a buffer's HUD tags; also R4 Frame Rate's loop head,
-  # ra 0x8001E764, before the race handler runs) and DrawOTag (tag the
-  # frame's HUD)
+  # ClearOTagR (clear a buffer's HUD tags) and DrawOTag (tag the frame's
+  # HUD)
   "0x80093418", "0x80093520",
   # course visibility list: heading octant, first list consumer
   "0x8006F584", "0x8007166C",
-  # r4.enhancement.frame-rate (src/mods/r4_interp.c): VSync, the render-pass
-  # point (main loop VSync(0), ra 0x8001E7E4)
+  # VSync, main loop VSync(0) (ra 0x8001E7E4): r4.enhancement.max-detail
+  # (R4_MD_VSYNC_FN) and Link Battle netplay (R4_LINK_VSYNC)
   "0x8008B330",
   # r4.compat.jogcon-input: normalize R4's internal JogCon mode before its
   # per-frame race-input translator, leaving SIO ID and wheel data unchanged.
@@ -144,15 +143,50 @@ guest_cycle_scale_gate = { addr = 0x800AC794, value = 0x180 }
 guest_cycle_scale_gated = true
 
 [video]
-# Faithful 4:3 by default. Widescreen is the r4.enhancement.widescreen mod
-# (Mods > Display > R4 Custom Renderer), which selects the aspect itself.
+# The stock 4:3 frame. Widescreen is the r4.enhancement.widescreen mod
+# (Mods > Display > R4 Custom Renderer, on by default with Fit to Window),
+# which selects the aspect itself; with it off, races are this 4:3.
 renderer = "opengl"
 aspect_ratio = "4:3"
-# Internal resolution presets (Settings -> Display) divide their target height
-# by this: R4's races are 320x240 progressive, so 4K is 9x and 8K is 18x. Its
-# 480i menus render at twice the target and are resolved down. The shipped
-# default stays Native (no internal_resolution key).
+# R4 ships Match display (the monitor's full pixel height, no cap) as its
+# default internal resolution; the framework default is Native. A player's
+# pick in Settings -> Display is saved to settings.toml and outranks this, as
+# does a saved legacy supersampling factor (psxrecomp docs/config_schema.md).
+internal_resolution = "display"
+# Internal resolution presets divide their target height by this: R4's races
+# are 320x240 progressive, so 4K is 9x and 8K is 18x. Its 480i menus render at
+# twice the target and are resolved down.
 resolution_reference_lines = 240
+# Supersampling (Settings -> Display -> Supersampling): render 1.5x the
+# Match display target and resolve down to the window. No post-process
+# anti-aliasing filter on top (antialiasing_mode = "off").
+supersample = 1.5
+antialiasing_mode = "off"
+# Dynamic resolution (framework controller): keep the selected internal
+# resolution while the game has room; step down only after missed frame
+# budgets, never below the display's own lines ("display": the monitor's
+# height, i.e. the supersample factor is what gives way first), and back up
+# after sustained headroom. It does nothing at Native. Off: Settings ->
+# Display -> Dynamic resolution.
+dynamic_resolution = true
+dynamic_resolution_min = "display"
+# Render thread (psxrecomp docs/RENDER_THREAD.md): the OpenGL backend runs on
+# its own thread, so a frame costs max(game, GL) instead of game + GL. Nothing
+# the guest reads back changes. Off for one run: PSX_RENDER_THREAD=0. Smooth
+# motion and the present thread need it.
+render_thread = true
+# Present thread (docs/RENDER_THREAD.md "Present thread"): the window swap
+# leaves the render thread. Off for one run: PSX_PRESENT_THREAD=0.
+present_thread = true
+# Smooth motion (psxrecomp docs/FRAME_GENERATION.md; Settings -> Display ->
+# Smooth motion): in-between frames up to the display's refresh (any rate,
+# VRR too), only when there is measured time to spare; real frames always
+# come first and no guest code runs again. R4 opts in to reprojection: each
+# in-between frame warps the newer real frame (its object rules were tuned on
+# R4); cars are redrawn at their own in-between position. PSX_FRAME_GEN=0 or
+# PSX_FRAME_GEN_METHOD=redraw for one run.
+frame_generation = true
+frame_generation_method = "reprojection"
 # VS split screen draws its far road through per-primitive texture windows
 # (about 515 GP0(E2h) changes a game frame). Let the OpenGL renderer batch
 # across them: the same image in about a tenth of the draws, so 2P with
@@ -172,6 +206,13 @@ pgxp_mod_only = true             # the Mods page is the one PGXP switch
 pgxp_tolerance = -1.0            # no clamp: at 0.5 it keeps ~25% of vertices and draws seams
 pgxp_position_fallback = false   # dataflow only: the position cache only mislabels HUD vertices
 pgxp_preserve_projection = true  # exact projection: no residual wobble on near geometry
+# PGXP extras (also inert while PGXP is off): a per-pixel depth buffer from
+# PGXP depth (no painter's-order sorting errors where polygons cross), Gouraud
+# colour correction across PGXP-moved vertices, and "fine" seam closing
+# between neighbouring polygons.
+pgxp_depth_buffer = true
+pgxp_color_correction = true
+pgxp_seam = "fine"
 
 # Native-wide rendering for r4.enhancement.widescreen (docs/WIDESCREEN.md).
 # Inert at 4:3: every cull site below is the identity while the margin is 0.

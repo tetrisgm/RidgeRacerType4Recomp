@@ -10,7 +10,7 @@ Rules (same as MegaManX6Recomp):
   and `*.cpp`.
 - Features are enabled only from the launcher's Mods page and callbacks do
   nothing until their package's activation runs. Default state is a per-feature
-  product choice (R4 Max Detail, for one, is on by default); the package off is
+  product choice (R4 Max Detail and widescreen, for two, are on by default); the package off is
   the stock game.
 - Keep game logic in pure headers (`r4_*_*.h`) so `tests/` can check it
   without a game build; register every test with ctest in `CMakeLists.txt`,

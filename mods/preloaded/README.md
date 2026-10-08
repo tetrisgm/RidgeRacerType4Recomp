@@ -1,7 +1,8 @@
 # Preloaded mods
 
 Ship reviewed packages here. They are default-disabled unless the owner chose
-otherwise (`r4.enhancement.max-detail` is on by default):
+otherwise (`r4.enhancement.max-detail` and `r4.enhancement.widescreen` are on by
+default):
 
 ```text
 packages/<package-id>/<version>/
