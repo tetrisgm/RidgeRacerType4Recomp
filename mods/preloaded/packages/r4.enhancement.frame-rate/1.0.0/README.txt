@@ -17,10 +17,11 @@ Interpolated (default)
   are put back exactly as they were, so the game never sees it. Motion is
   really smooth and no latency is added compared with the original.
 
-  Grand Prix and Time Attack races, the attract demo and the replay after a
-  Time Attack are interpolated while the race is running. VS split screen is
-  not interpolated yet (it has not been tested) and, like menus, the intro
-  fly-by, pause, results and movies, is shown exactly as the original does.
+  Grand Prix, Time Attack and VS split-screen races, the attract demo and
+  the replay after a Time Attack are interpolated while the race is running
+  (in split screen, each player's half follows that player's camera). Menus,
+  the intro fly-by, pause, results and movies are shown exactly as the
+  original does.
   The HUD (speed, rev meter, timers) still updates 30 times a second, as it
   does on a PlayStation.
 

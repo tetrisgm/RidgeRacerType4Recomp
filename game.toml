@@ -109,6 +109,12 @@ aspect_ratio = "4:3"
 # 480i menus render at twice the target and are resolved down. The shipped
 # default stays Native (no internal_resolution key).
 resolution_reference_lines = 240
+# VS split screen draws its far road through per-primitive texture windows
+# (about 515 GP0(E2h) changes a game frame). Let the OpenGL renderer batch
+# across them: the same image in about a tenth of the draws, so 2P with
+# widescreen at high internal resolutions costs about what 1P does (see
+# docs/WIDESCREEN.md). PSX_GL_TEXWIN_BATCH=0 turns it off for one run.
+texture_window_batching = true
 
 # Native-wide rendering for r4.enhancement.widescreen (docs/WIDESCREEN.md).
 # Inert at 4:3: every cull site below is the identity while the margin is 0.

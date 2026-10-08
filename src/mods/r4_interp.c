@@ -33,9 +33,9 @@
  * the same handler before and after this tick, consecutive ticks, and the
  * framework's plan (OpenGL, flip-aware interpolation, budget). Anything else
  * shows the stock frame for that tick. Verified in runs: Grand Prix races
- * (mode 2), Time Attack (mode 1), the attract demo (mode 4) and the replay
- * after a Time Attack (mode 5); VS split screen (mode 3) is gated off until
- * a run reaches it (R4_INTERP_SPLIT_ENABLED).
+ * (mode 2), Time Attack (mode 1), the attract demo (mode 4), the replay
+ * after a Time Attack (mode 5) and VS split screen (mode 3, both players
+ * driving; PSX_RENDER_PASS_VERIFY found no mismatch).
  *
  * Fallback: when the framework cannot run passes at all (no interpolating
  * OpenGL presenter, a renderer mode that declines them, or passes disabled
@@ -108,13 +108,6 @@
 #define R4_SPAD_OT          0x1F800004u
 
 #define R4_MAX_PASSES 16u
-
-/* VS split screen (mode 3, overlay 661) has its draw sequence (seq_split)
- * from the static analysis, but no run has reached it yet: the VS battle menu
- * stays disabled without a second connected pad. Until a run verifies it
- * (render_pass_stats: no aborts, PSX_RENDER_PASS_VERIFY: 0 mismatches, pass
- * dumps), split screen shows the stock frames like menus do. */
-#define R4_INTERP_SPLIT_ENABLED 0
 
 /* Fallback to frame blend (see the header comment). Ticks are main-loop
  * VSync(0) calls, 30 per second in a race. */
@@ -692,7 +685,6 @@ static void r4_loop_head(CPUState *cpu, uint32_t address) {
 static int r4_gates(int mode) {
     uint32_t phase;
     if (mode == R4_MODE_NONE) return 0;
-    if (mode == R4_MODE_SPLIT && !R4_INTERP_SPLIT_ENABLED) return 0;
     if (rd32(R4_PACING) != 0x180u) return 0;
     if (R.pre_paused != 0 || (int8_t)psx_mod_read_byte(R4_PAUSED) != 0) return 0;
     phase = rd32(R4_PHASE);

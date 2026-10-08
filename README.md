@@ -186,10 +186,10 @@ music are unchanged.
 - **Interpolated** (default): the race is redrawn between game frames with
   the cars and camera part of the way to the next frame, by the game's own
   draw code inside a psxrecomp render pass (frozen guest time, everything
-  restored afterwards). No added latency. Grand Prix and Time Attack races,
-  the attract demo and the replay after a Time Attack are interpolated; VS
-  split screen (not yet tested), menus, pause, results and movies are shown
-  as on a PS1. Where the renderer cannot draw in-between frames at all, or
+  restored afterwards). No added latency. Grand Prix, Time Attack and VS
+  split-screen races, the attract demo and the replay after a Time Attack
+  are interpolated; menus, pause, results and movies are shown as on a PS1.
+  Where the renderer cannot draw in-between frames at all, or
   more than a quarter of the last second's frames get none in time (e.g. at
   a high internal resolution), the package falls back to Frame blend and
   says so in the log; it returns once at most a tenth of them would miss out.
