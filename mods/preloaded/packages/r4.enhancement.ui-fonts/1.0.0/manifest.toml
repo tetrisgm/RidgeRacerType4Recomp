@@ -1,0 +1,39 @@
+format_version = 5
+id = "r4.enhancement.ui-fonts"
+version = "1.0.0"
+name = "R4 HD HUD"
+author = "Kuid0us (artwork), Shokunin (package)"
+description = "High-resolution race HUD and font artwork (HD HUD by Kuid0us, github.com/Kuid0us/T4HDHUD), drawn with OpenGL at the game's internal resolution."
+resolver = "declarative"
+save_compatibility = "shared"
+
+[[target]]
+game_id = "SLUS-00797"
+
+[[feature]]
+id = "ui-glyphs"
+name = "HD HUD"
+description = "Replaces the race HUD and its text (rank, record, lap and time digits, speedometer, RPM gauge labels, course maps) with high-resolution artwork. Presentation only: the game's video memory, timing and saves are unchanged. Requires OpenGL; other renderers keep the original HUD. Change folder selects another pack."
+group = "Visual"
+default_enabled = true
+
+[[resource]]
+feature = "ui-glyphs"
+id = "pack"
+label = "HUD pack folder"
+description = "Uses the bundled HD HUD pack. Change folder selects another folder of upload-CRC/CLUT-CRC (TTTTTTTT-PPPPPPPP.png) or DuckStation replacement PNGs."
+format = "directory"
+default = "pack"
+required = true
+
+[[option]]
+feature = "ui-glyphs"
+id = "replacements"
+label = "Load replacements"
+description = "Display the pack's artwork. Off shows the original HUD."
+type = "boolean"
+default = "true"
+
+[[plugin]]
+feature = "ui-glyphs"
+id = "psx.hd-textures"

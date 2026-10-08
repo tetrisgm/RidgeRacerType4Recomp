@@ -231,7 +231,8 @@ for A in "${ARTS[@]}"; do
   if grep -iE '(^|/)(libgcc_s_[^/]*|libstdc\+\+-[^/]*|libwinpthread-[^/]*)\.dll$' <<< "$L"; then
     echo "unused GCC runtime DLLs above in $Z" >&2; exit 1
   fi
-  for p in assets/fonts/ licenses/ mods/bundled/r4.enhancement.widescreen/; do
+  for p in assets/fonts/ licenses/ mods/bundled/r4.enhancement.widescreen/ \
+           mods/bundled/r4.enhancement.ui-fonts/; do
     grep -q "^$p" <<< "$L" || { echo "missing $p in $Z" >&2; exit 1; }
   done
   # TinyCC (LGPL-2.1, Windows overlay compiler) must ship with its license
@@ -277,6 +278,11 @@ for A in "${ARTS[@]}"; do
        | grep -vE '^mods/bundled/r4\.enhancement\.ui-fonts/[^/]+/pack/[0-9a-f]{7,8}-[0-9a-f]{7,8}\.png$'; then
     echo "unexpected images above in $Z (only the HD HUD pack may ship)" >&2; exit 1
   fi
+  # ...and all of it: the zip's pack is exactly the tracked one.
+  want=$(cd mods/preloaded/packages/r4.enhancement.ui-fonts && ls */pack/*.png | sort)
+  have=$(grep -E '^mods/bundled/r4\.enhancement\.ui-fonts/' <<< "$L" | grep -E '\.png$' \
+         | sed 's#^mods/bundled/r4\.enhancement\.ui-fonts/##' | sort)
+  [[ "$want" == "$have" ]] || { echo "HD HUD pack in $Z differs from mods/preloaded" >&2; exit 1; }
   # 5. No developer-channel mods.
   if "$PYTHON" - "$Z" <<'PY'
 import re, sys, zipfile
