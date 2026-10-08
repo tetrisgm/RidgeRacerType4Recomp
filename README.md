@@ -142,7 +142,8 @@ Requirements: Xcode command-line tools, `brew install cmake ninja python`,
 and R4: Ridge Racer Type 4 (USA, SLUS-00797) as the Redump bin/cue (verify
 against `DISC.md`). Do not convert it to a 2048-byte `.iso`: that drops the
 Mode-2 Form-2 XA sectors the music and movies stream from. Linux and Windows
-follow `psxrecomp/docs/BUILDING.md`.
+follow `psxrecomp/docs/BUILDING.md`; the Steam Deck and the Linux release zip
+are in `docs/STEAM_DECK.md`.
 
 ```sh
 git clone --recurse-submodules <this repo> && cd ridgeracertype4
