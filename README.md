@@ -53,10 +53,13 @@ netplay and online Link Battle for 2-4 players. Not yet verified end to end (see
 | VS Battle (2P split screen) | Works over netplay (delay-sync and rollback, digests match) |
 | Link Battle | Online for 2-4 players, each on their own screen (`docs/ONLINE_BATTLE.md`); no physical link cable |
 | Renderer | Stock psxrecomp OpenGL at 4:3; software selectable |
-| Internal resolution | Native to 8K presets (Settings → Display), OpenGL |
+| Internal resolution | Match display by default, 1.5× supersampled; Native to 8K presets (Settings → Display), OpenGL |
+| Dynamic resolution | On by default; never below the display's own lines |
+| Render pipeline | OpenGL render thread and present thread, on by default |
+| Smooth motion | In-between frames up to the display's refresh (reprojection), on by default |
 | Camera look-around | Right stick turns the view in single-player races (Mods > Camera Look-Around), on by default |
 | PGXP (steady geometry, straight textures) | Mods > Visual > PGXP Precision, on by default |
-| Widescreen | Mods > Display > R4 Custom Renderer (experimental, off by default): native-wide races, Fit to Window / 16:9 / 21:9 / 32:9 |
+| Widescreen | Mods > Display > R4 Custom Renderer, on by default with Fit to Window: native-wide races, also 16:9 / 21:9 / 32:9 |
 | JogCon input | R4 JogCon Input compatibility is enabled by default; wheels retain guest JogCon ID and analog steering from the start grid |
 
 ## What's new / on by default
@@ -74,7 +77,12 @@ Switching a feature off gives you the stock game for that part.
 | **PGXP**: steady geometry and straight (perspective-correct) textures, with precise culling so the far road has no gaps | Yes | Mods → Visual → **PGXP Precision** off, or turn only its **Precise culling** option off |
 | **Max Detail**: longer draw distance (far bridges, buildings and road no longer pop in), full course and car detail at every distance, 1P detail in split screen, car reflections in the race | Yes | Mods → Detail → **R4 Max Detail** off, or set any one option (Draw distance, Course detail, Car detail, Split screen, Car reflections) back to **Stock**. Mirror scenery stays Stock unless you choose Full |
 | **VS split screen**: the OpenGL renderer draws 2P split screen in about a tenth of the draws (same picture) | Yes | Set `PSX_GL_TEXWIN_BATCH=0` for one run |
-| **VS split screen interpolation**: with R4 Frame Rate on, 2P split-screen races are drawn at the higher rate too | Comes with Frame Rate, which is off by default | Mods → Frame Rate → **R4 Frame Rate** off |
+| **Widescreen**: races fill the window at whatever shape you give it (Fit to Window), with real extra scenery at the sides and the HUD at the edges | Yes, Fit to Window | Mods → Display → **R4 Custom Renderer** off (stock 4:3), or pick 16:9 / 21:9 / 32:9 |
+| **Match display + supersampling**: the game renders at your monitor's full pixel height times 1.5 and is resolved down, for clean edges (no blur filter on top) | Yes | Settings → Display → **Internal resolution** (Native for the stock picture) and **Supersampling** (1×) |
+| **Dynamic resolution**: when a frame runs late, the supersampling gives way first; it never drops below your display's own lines, and climbs back when there is room | Yes | Settings → Display → **Dynamic resolution** off |
+| **Smooth motion**: in-between frames up to your display's refresh rate (VRR too); the game still runs at 30 Hz | Yes (reprojection) | Settings → Display → **Smooth motion** off |
+| **Render thread + present thread**: OpenGL work and the window swap run off the game's thread | Yes | `PSX_RENDER_THREAD=0` / `PSX_PRESENT_THREAD=0` for one run |
+| **PGXP extras**: a depth buffer (no sorting errors where polygons cross), smooth shading across corrected vertices, and closed seams between polygons | Yes, with PGXP | They follow **PGXP Precision**; `PSX_PGXP_DEPTH=0` for one run |
 | **Online battle, 2-4 players**: R4's Link Battle over the internet or LAN, each player on their own machine with their own full-screen view | Available from the launcher's NETPLAY page | Just play offline; local split screen stays 2-player VS Battle |
 | **No Rewind in split screen or online**: Rewind is off in 2-player VS Battle and in every netplay session, so a rewind can't put one player out of step | Yes, always | Not a setting. Rewind still works in single-player races (enable it in Settings; Y in Modern, Select + Y in Classic) |
 
@@ -82,10 +90,10 @@ In netplay every peer runs without the game-changing mods. The ones that only
 change your own screen or your own pad (hide mirror, widescreen in your own
 Link Battle view, Modern controls) follow each player's own choice.
 
-Coming once the framework changes they need are merged: display defaults
-(dynamic resolution and window settings tuned for R4), **Smooth motion**
-(frame-rate interpolation on by default), the **HD HUD** pack, and
-**anti-aliasing**.
+A choice you make in Settings (saved to `settings.toml`) or on the Mods page
+(saved to `mods/state.toml`) always wins over these defaults.
+
+Coming next: the **HD HUD** pack.
 
 ## Playing a release
 
@@ -207,42 +215,29 @@ executable. Defaults live in `game.toml`:
   channel), `overlay_cache` (native overlay shards; see Building From Source).
 - `[netplay]` — disc gates: `require_cue`, `required_tracks = 1`, `required_disc_fp`.
 
-## Frame rate (optional mod)
+## Smooth motion
 
-Mods -> Frame Rate -> **R4 Frame Rate** (experimental, off by default) shows
-races at the display's refresh rate or at 60 / 100 / 120 / 200 / 240 / 300 FPS.
-The game itself still runs at its original 30 Hz: lap times, AI, input and
-music are unchanged.
-
-- **Interpolated** (default): the race is redrawn between game frames with
-  the cars and camera part of the way to the next frame, by the game's own
-  draw code inside a psxrecomp render pass (frozen guest time, everything
-  restored afterwards). No added latency. Grand Prix, Time Attack and VS
-  split-screen races, the attract demo and the replay after a Time Attack
-  are interpolated; menus, pause, results and movies are shown as on a PS1.
-  Where the renderer cannot draw in-between frames at all, or
-  more than a quarter of the last second's frames get none in time (e.g. at
-  a high internal resolution), the package falls back to Frame blend and
-  says so in the log; it returns once at most a tenth of them would miss out.
-- **Frame blend**: crossfades finished frames (cheaper, ghosts, one frame
-  late).
-
-It needs the OpenGL renderer and turns vsync off. A monitor shows at most its
-own refresh rate, so rates above it cost more without showing more motion
-(with vsync off they can show as tearing instead).
-If the machine cannot draw every in-between frame, fewer are drawn and the
-gaps between them crossfaded; in-between frames are planned into the time
-the presenter would otherwise wait. Netplay sessions run without mods, except
-widescreen in your own Link Battle view (per player).
-Details and credits:
-`mods/preloaded/packages/r4.enhancement.frame-rate/1.0.0/README.txt`,
-`src/mods/r4_interp.c`, `psxrecomp/docs/RENDER_PASSES.md`.
+**Settings → Display → Smooth motion** (psxrecomp frame generation,
+`[video] frame_generation`) is on by default. It adds in-between frames up to
+the display's refresh rate (any rate; variable-refresh displays too), and only
+when there is measured time to spare: a real frame is never delayed for one.
+R4 uses reprojection (`frame_generation_method = "reprojection"`): each
+in-between frame warps the newest real frame to an in-between camera and
+redraws the cars at their own in-between position; the HUD and the mirror
+stay as drawn. The game itself still runs at its original 30 Hz: lap times,
+AI, input and music are unchanged. It needs the OpenGL render thread. It
+replaces the old R4 Frame Rate mod. `PSX_FRAME_GEN=0` turns it off for one run,
+`PSX_FRAME_GEN_METHOD=redraw` picks the framework's other method. Details:
+`psxrecomp/docs/FRAME_GENERATION.md`.
 
 ## Internal resolution
 
 **Settings → Display → Internal resolution** renders the game at a higher
-resolution instead of stretching 320×240 (OpenGL). It is off (Native) by
-default and takes effect when the game starts.
+resolution instead of stretching 320×240 (OpenGL). R4 defaults to Match
+display with 1.5× supersampling (`[video] internal_resolution = "display"`,
+`supersample = 1.5`; the framework default is Native) and dynamic resolution
+floored at the display (`dynamic_resolution_min = "display"`); it takes
+effect when the game starts.
 
 | Preset | Scale | Race frame | Notes |
 |---|---|---|---|
@@ -270,8 +265,7 @@ default and takes effect when the game starts.
 - At 8K on a GPU with a 16384 texture limit (Apple GPUs), widescreen's Fit
   to Window goes up to about 34:9; a wider window is pillarboxed.
 - Netplay: your own view only. Other players are unaffected and may use a
-  different setting. Frame-rate options, when present, are mods and are turned
-  off for netplay; widescreen stays on for your own Link Battle view only;
+  different setting. Widescreen stays on for your own Link Battle view only;
   internal resolution is not affected.
 - `PSX_INTERNAL_RESOLUTION=4k` (or any preset id, or a number of lines)
   overrides the setting for one run. `tools/res_matrix.py` checks every preset

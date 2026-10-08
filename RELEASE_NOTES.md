@@ -31,20 +31,30 @@ cards and settings carry over; savestates from v0.1.0 are refused.
   distance, 1P detail in split screen and reflective cars in the race. Every
   part can be set back to Stock.
 - **Faster VS split screen.** 2P split screen takes about a tenth of the draws
-  on OpenGL, and with R4 Frame Rate on it is drawn at the higher rate too.
+  on OpenGL.
 - **Online battle for 2-4 players.** R4's Link Battle over LAN or the
   internet: the host opens a room on the NETPLAY page, the others join, and
   everyone races on their own screen with their own full-screen view.
+- **Widescreen.** Races fill the window at whatever shape you give it (Fit
+  to Window), with real extra scenery at the sides and the HUD at the edges.
+- **Sharper picture.** The game renders at your monitor's full resolution,
+  1.5× supersampled, and dynamic resolution keeps it at full speed (it never
+  drops below your display's own resolution).
+- **Smooth motion.** In-between frames up to your display's refresh rate,
+  variable-refresh displays included; the game itself still runs at 30 Hz.
+  It replaces the old R4 Frame Rate mod.
+- **PGXP extras.** A depth buffer (no sorting glitches where polygons cross),
+  smooth shading and closed seams between polygons.
 - **Rewind is off in split screen and online,** so it can't put one player out
   of step. It still works in single-player races.
 
-Every feature above has a switch on the Mods page; switching it off restores
+Every feature above has a switch on the Mods page or under Settings →
+Display; switching it off restores
 the stock game for that part.
 
 ## Coming next
 
-Waiting on framework changes: display defaults tuned for R4, Smooth motion
-(frame interpolation on by default), the HD HUD pack and anti-aliasing.
+The HD HUD pack.
 
 ## Credits
 

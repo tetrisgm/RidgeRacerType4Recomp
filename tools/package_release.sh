@@ -69,6 +69,10 @@ V="$(tr -d '[:space:]' < VERSION)"; V="${V#v}"
 export RELEASE_VERSION="$V"
 export EXCLUDE_DEV_MODS=1
 echo "== r4 $V ($PLATFORM) from $SHA, BIOS backends: $BIOS_STEMS"
+# Every game.toml [video] key is read by the pinned psxrecomp: a key set
+# ahead of the pin would be inert in the zip, and R4's on-by-default display
+# settings would not match its docs.
+python3 tools/check_pin_keys.py
 bash psxrecomp/tools/ci/record_pins.sh
 # The committed game C is present and tracked, and the framework's committed
 # BIOS backends match its emitter (the same gates psxrecomp's CI template runs).
@@ -227,8 +231,7 @@ for A in "${ARTS[@]}"; do
   if grep -iE '(^|/)(libgcc_s_[^/]*|libstdc\+\+-[^/]*|libwinpthread-[^/]*)\.dll$' <<< "$L"; then
     echo "unused GCC runtime DLLs above in $Z" >&2; exit 1
   fi
-  for p in assets/fonts/ licenses/ mods/bundled/r4.enhancement.widescreen/ \
-           mods/bundled/r4.enhancement.frame-rate/; do
+  for p in assets/fonts/ licenses/ mods/bundled/r4.enhancement.widescreen/; do
     grep -q "^$p" <<< "$L" || { echo "missing $p in $Z" >&2; exit 1; }
   done
   # TinyCC (LGPL-2.1, Windows overlay compiler) must ship with its license
