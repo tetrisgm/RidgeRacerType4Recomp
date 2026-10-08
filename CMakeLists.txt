@@ -91,6 +91,18 @@ endforeach()
 # Every path is behind its own if(EXISTS ...), so a checkout without tests/ or
 # tools/ still configures (none of them ship).
 if(R4_BUILD_TESTS AND BUILD_TESTING)
+    if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_r4_hide_rear_view_mirror.c")
+        add_executable(r4-hide-rear-view-mirror-tests EXCLUDE_FROM_ALL
+            "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_r4_hide_rear_view_mirror.c")
+        target_include_directories(r4-hide-rear-view-mirror-tests PRIVATE
+            "${CMAKE_CURRENT_SOURCE_DIR}/src/mods")
+        add_test(NAME r4_hide_rear_view_mirror_build
+                 COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}
+                         --target r4-hide-rear-view-mirror-tests)
+        add_test(NAME r4_hide_rear_view_mirror COMMAND r4-hide-rear-view-mirror-tests)
+        set_tests_properties(r4_hide_rear_view_mirror PROPERTIES
+                             DEPENDS r4_hide_rear_view_mirror_build)
+    endif()
     # Pure widescreen helpers, no game data needed.
     if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_r4_widescreen.c")
         add_executable(r4-widescreen-tests
