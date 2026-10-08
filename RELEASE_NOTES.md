@@ -45,6 +45,8 @@ cards and settings carry over; savestates from v0.1.0 are refused.
   It replaces the old R4 Frame Rate mod.
 - **PGXP extras.** A depth buffer (no sorting glitches where polygons cross),
   smooth shading and closed seams between polygons.
+- **HD HUD.** The race HUD drawn from high-resolution artwork: **HD HUD by
+  Kuid0us** (github.com/Kuid0us/T4HDHUD), re-keyed for the US disc.
 - **Rewind is off in split screen and online,** so it can't put one player out
   of step. It still works in single-player races.
 
@@ -52,14 +54,10 @@ Every feature above has a switch on the Mods page or under Settings →
 Display; switching it off restores
 the stock game for that part.
 
-## Coming next
-
-The HD HUD pack.
-
 ## Credits
 
 R4 recompilation by Shokunin, built on psxrecomp and recomp-ui
-(RetroPortingToolKit). Third-party notices are in `THIRD-PARTY-LICENSES/`.
+(RetroPortingToolKit). HD HUD artwork by Kuid0us. Third-party notices are in `THIRD-PARTY-LICENSES/`.
 
 ---
 

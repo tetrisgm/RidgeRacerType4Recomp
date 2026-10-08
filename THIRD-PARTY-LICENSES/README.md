@@ -82,3 +82,10 @@ Windows zip, and is also at
 `recomp/launcher/boxart.*` comes from
 [libretro-thumbnails](https://github.com/libretro-thumbnails/libretro-thumbnails)
 (`Named_Boxarts`); see `recomp/launcher/BOXART_SOURCE.txt`.
+
+## Kuid0us — HD HUD (T4HDHUD)
+
+The HD HUD pack bundled in
+`mods/preloaded/packages/r4.enhancement.ui-fonts/1.0.0/pack/` is HD HUD by
+Kuid0us, <https://github.com/Kuid0us/T4HDHUD>, re-keyed for the US disc by
+`tools/r4_hd_hud_pack.py` (`docs/HD_HUD.md`). Credit to Kuid0us.

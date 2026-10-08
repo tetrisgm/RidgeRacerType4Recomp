@@ -60,6 +60,7 @@ netplay and online Link Battle for 2-4 players. Not yet verified end to end (see
 | Camera look-around | Right stick turns the view in single-player races (Mods > Camera Look-Around), on by default |
 | PGXP (steady geometry, straight textures) | Mods > Visual > PGXP Precision, on by default |
 | Widescreen | Mods > Display > R4 Custom Renderer, on by default with Fit to Window: native-wide races, also 16:9 / 21:9 / 32:9 |
+| HD HUD | Mods > Visual > HD HUD (on, OpenGL): high-resolution race HUD, HD HUD by Kuid0us |
 | JogCon input | R4 JogCon Input compatibility is enabled by default; wheels retain guest JogCon ID and analog steering from the start grid |
 
 ## What's new / on by default
@@ -83,6 +84,7 @@ Switching a feature off gives you the stock game for that part.
 | **Smooth motion**: in-between frames up to your display's refresh rate (VRR too); the game still runs at 30 Hz | Yes (reprojection) | Settings → Display → **Smooth motion** off |
 | **Render thread + present thread**: OpenGL work and the window swap run off the game's thread | Yes | `PSX_RENDER_THREAD=0` / `PSX_PRESENT_THREAD=0` for one run |
 | **PGXP extras**: a depth buffer (no sorting errors where polygons cross), smooth shading across corrected vertices, and closed seams between polygons | Yes, with PGXP | They follow **PGXP Precision**; `PSX_PGXP_DEPTH=0` for one run |
+| **HD HUD**: the race HUD (rank, lap/time and speed digits, RPM gauge, course map) drawn from high-resolution artwork, **HD HUD by [Kuid0us](https://github.com/Kuid0us/T4HDHUD)** | Yes (OpenGL) | Mods → Visual → **HD HUD** off |
 | **Online battle, 2-4 players**: R4's Link Battle over the internet or LAN, each player on their own machine with their own full-screen view | Available from the launcher's NETPLAY page | Just play offline; local split screen stays 2-player VS Battle |
 | **No Rewind in split screen or online**: Rewind is off in 2-player VS Battle and in every netplay session, so a rewind can't put one player out of step | Yes, always | Not a setting. Rewind still works in single-player races (enable it in Settings; Y in Modern, Select + Y in Classic) |
 
@@ -92,8 +94,6 @@ Link Battle view, Modern controls) follow each player's own choice.
 
 A choice you make in Settings (saved to `settings.toml`) or on the Mods page
 (saved to `mods/state.toml`) always wins over these defaults.
-
-Coming next: the **HD HUD** pack.
 
 ## Playing a release
 
@@ -127,9 +127,10 @@ You need:
 The game runs on the bundled OpenBIOS. To use your own SCPH-1001 dump
 instead, pick it under Settings → System → BIOS: the game compiles a backend
 for it from your dump once (about a minute; on macOS this needs the Command
-Line Tools) and uses it from then on. Widescreen and frame rate are under
-**Mods** and internal resolution under **Settings → Display**, all off by
-default; the features on by default are listed under "What's new" above.
+Line Tools) and uses it from then on. Widescreen and the HD HUD are under
+**Mods**; internal resolution, dynamic resolution and Smooth motion under
+**Settings → Display**. The features on by default are listed under "What's
+new" above.
 
 To update, extract the new zip over the old folder. Memory cards and settings
 carry over. Savestates from an older version are refused, and code overlays
@@ -229,6 +230,15 @@ AI, input and music are unchanged. It needs the OpenGL render thread. It
 replaces the old R4 Frame Rate mod. `PSX_FRAME_GEN=0` turns it off for one run,
 `PSX_FRAME_GEN_METHOD=redraw` picks the framework's other method. Details:
 `psxrecomp/docs/FRAME_GENERATION.md`.
+
+## HD HUD
+
+Mods > Visual > **HD HUD** (on by default, OpenGL) draws the race HUD (rank,
+record, lap/time and speed digits, RPM gauge, course map) from
+high-resolution artwork instead of the 320x240 originals. **HD HUD by
+[Kuid0us](https://github.com/Kuid0us/T4HDHUD)**, re-keyed for the US disc and
+bundled in `mods/preloaded/packages/r4.enhancement.ui-fonts/`. Change folder
+in the mod selects your own pack. Details: `docs/HD_HUD.md`.
 
 ## Internal resolution
 
@@ -438,5 +448,8 @@ movies, the `R4.BIN` overlays). Two things in them do come from the game:
 - The launcher's box art (`recomp/launcher/boxart.*`, shipped as
   `assets/img/boxart.tga`) is the game's cover; see
   `THIRD-PARTY-LICENSES/README.md`.
+
+The bundled HD HUD pack is Kuid0us's artwork of the HUD (see
+`docs/HD_HUD.md`).
 
 The compiled game needs your own disc to run.
