@@ -56,6 +56,7 @@ netplay. Not yet verified end to end (see `ISSUES.md`).
 | Internal resolution | Native to 8K presets (Settings → Display), OpenGL |
 | Camera look-around | Right stick turns the view in single-player races (Mods > Camera Look-Around), on by default |
 | Widescreen | Mods > Display > R4 Custom Renderer (experimental, off by default): native-wide races, Fit to Window / 16:9 / 21:9 / 32:9 |
+| JogCon input | R4 JogCon Input compatibility is enabled by default; wheels retain guest JogCon ID and analog steering from the start grid |
 
 ## Playing a release
 
@@ -169,7 +170,8 @@ executable. Defaults live in `game.toml`:
 
 - `[video]` — `renderer` (`opengl` / `software`), `aspect_ratio = "4:3"`,
   `resolution_reference_lines = 240` (see Internal resolution).
-- `[controller]` — `default_mode` (`digital`; DualShock analog selectable).
+- `[controller]` — `default_mode` (`analog` by default for native R4
+  DualShock steering; recognized SDL steering wheels use emulated JogCon).
 - `[runtime]` — `disc_speed = "1x"` (authentic; R4 streams XA with a data
   channel), `overlay_cache` (native overlay shards; see Building From Source).
 - `[netplay]` — disc gates: `require_cue`, `required_tracks = 1`, `required_disc_fp`.
@@ -243,8 +245,14 @@ default and takes effect when the game starts.
 
 ## Controls
 
-Keyboard and SDL gamepads per recomp-ui's input settings. In R4's menus
-**Circle is OK** and **Cross is cancel**; in races Cross accelerates by default.
+Keyboard and SDL gamepads per recomp-ui's input settings. Gamepads use R4's
+native DualShock analog mode by default. SDL-mapped steering wheels with
+recognized names use JogCon steering on the mapped left-X axis; per-player
+deadzone calibration applies. The default R4 JogCon Input compatibility package
+routes R4's mode-2 JogCon state through its existing analog race-input path,
+while preserving the emulated JogCon ID and wheel fields. Wheel force feedback
+is not mapped. In R4's
+menus **Circle is OK** and **Cross is cancel**; in races Cross accelerates by default.
 
 ## Netplay
 

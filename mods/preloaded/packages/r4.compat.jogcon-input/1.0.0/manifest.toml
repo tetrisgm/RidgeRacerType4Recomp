@@ -1,0 +1,24 @@
+format_version = 7
+id = "r4.compat.jogcon-input"
+version = "1.0.0"
+name = "R4 JogCon Input"
+author = "Shokunin"
+description = "Keeps R4's JogCon steering and buttons active from the start grid."
+license = "MIT"
+resolver = "declarative"
+save_compatibility = "shared"
+
+[[target]]
+game_id = "SLUS-00797"
+
+[[feature]]
+id = "jogcon-input"
+name = "JogCon Input"
+description = "Uses R4's analog race-input path for a detected JogCon while preserving the guest's JogCon ID and wheel data."
+group = "Controllers"
+channel = "stable"
+default_enabled = true
+
+[[plugin]]
+feature = "jogcon-input"
+id = "r4.jogcon-input"

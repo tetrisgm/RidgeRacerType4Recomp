@@ -71,6 +71,9 @@ mod_function_entry_funcs = [
   # r4.enhancement.frame-rate (src/mods/r4_interp.c): VSync, the render-pass
   # point (main loop VSync(0), ra 0x8001E7E4)
   "0x8008B330",
+  # r4.compat.jogcon-input: normalize R4's internal JogCon mode before its
+  # per-frame race-input translator, leaving SIO ID and wheel data unchanged.
+  "0x8002961C",
 ]
 
 [runtime]
@@ -327,9 +330,10 @@ branch_keep_sites = [
 
 [controller]
 # R4 identifies digital (0x41), DualShock (0x73), NeGcon (0x23) and JogCon
-# (0xE3) pads; the framework models digital and DualShock. Digital is the
-# faithful default; DualShock analog steering is selectable in the launcher.
-default_mode = "digital"
+# (0xE3) pads. Use the game's native DualShock analog steering for ordinary
+# gamepads. A recognized SDL wheel is presented as JogCon regardless of this
+# gamepad default.
+default_mode = "analog"
 
 # Online mount gate: digests + track count + TOC fingerprint
 # (psxrecomp/docs/NETPLAY.md). required_tracks = 1 is correct for this disc.
