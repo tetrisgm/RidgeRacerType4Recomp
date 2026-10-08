@@ -31431,6 +31431,7 @@ void func_80014A90(CPUState* cpu)
         }
     }
     debug_server_log_call_entry(0x80014A90u);
+    if (psx_mod_function_entry(cpu, 0x80014A90u)) return;  /* trusted opt-in game-mod hook */
     /* Address: 0x80014A90, Size: 420 bytes, Blocks: 22 */
 
 block_80014A90:

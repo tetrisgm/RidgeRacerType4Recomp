@@ -49,6 +49,7 @@ extern int  psx_ws_mmx6_bg_undercap(int counter);/* ws 2D bg per-frame tile cap 
 extern int  psx_game_option_store(uint32_t addr, int val);  /* persisted OPTION restore-at-init (game_options.c) */
 extern uint32_t psx_ws_backdrop_value(uint32_t orig, int is_end, int window_cols);  /* ws backdrop preload (gpu.c) */
 extern void gte_ws_set_suppress(int on);  /* widescreen far-backdrop un-squash (gte.cpp) */
+extern uint32_t g_psx_draw_distance_clamp;  /* [[draw_distance.clamp]] switch (draw_distance.c) */
 extern uint32_t g_debug_last_store_pc;  /* exact PC of the executing SW/SH/SB — wtrace/readtrace producer attribution (debug_server.c) */
 
 /* --- Unaligned memory access helper implementations --- */

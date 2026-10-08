@@ -289,6 +289,36 @@ there, with perspective-correct textures.
   `pgxp_position_fallback = false`, `pgxp_preserve_projection = true`; see
   `psxrecomp/docs/ENHANCEMENTS.md` G1.11/G1.12).
 
+## Max Detail (on by default)
+
+Mods -> Detail -> **R4 Max Detail** removes the detail R4 drops with distance
+to fit the PlayStation:
+
+- **Draw distance** (Maximum / Extended / Stock): far bridges, buildings and
+  road no longer pop in late; Maximum also loads the scenery of the track
+  sections ahead and behind (in views narrower than about 30:9).
+- **Course detail** (Always full / Stock): full-resolution textures and smooth
+  shading at every distance and in the rear-view mirror, instead of the
+  blurred, flat-shaded far course.
+- **Car detail** (Always full / Stock): full car models (3D wheels, full
+  texture) out to the normal car draw distance.
+- **Split screen** (Same as 1P / Stock): VS races get 1P detail. Split screen
+  already renders at the chosen internal resolution.
+- **Car reflections** (On / Stock): reflective car bodies during the race, as
+  in the fly-by and replays (stock R4 turns them off from the start signal to
+  the finish). For now in 4:3 views only: the widescreen renderer draws them
+  many times slower, so widened views keep Stock.
+- **Mirror scenery** (Stock / Full, **off by default**): Full draws all the
+  scenery behind you in the rear-view mirror instead of the nearest few track
+  blocks. It costs the emulated PlayStation the most time of anything here.
+
+Game logic is unchanged. The extra drawing costs the emulated PlayStation
+time; in the races measured (Helter Skelter and the two attract-demo courses,
+4:3 to 32:9, 1P and 2P) the game kept its 30 FPS race rate. Other courses are
+untested. Any option can be set back to Stock; with the package off the game
+runs exactly as before. Netplay sessions run without mods. Details:
+`docs/MAX_DETAIL.md`.
+
 ## Controls
 
 Keyboard and SDL gamepads per recomp-ui's input settings. Gamepads use R4's

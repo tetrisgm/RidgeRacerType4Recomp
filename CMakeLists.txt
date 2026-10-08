@@ -170,6 +170,14 @@ if(R4_BUILD_TESTS AND BUILD_TESTING)
             "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_r4_jogcon_compat.c"
             "${CMAKE_CURRENT_SOURCE_DIR}/src/mods/r4_jogcon_compat.c")
     endif()
+    # R4 Max Detail: option parsing, car tables, the shared course-list merge
+    # (r4_pvs.h, also the widescreen plugin's) and the plugin against a mock
+    # mod API.
+    if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_r4_max_detail.c")
+        r4_frame_rate_test(r4_max_detail
+            "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_r4_max_detail.c"
+            "${CMAKE_CURRENT_SOURCE_DIR}/src/mods/r4_max_detail_plugin.c")
+    endif()
     find_package(Python3 QUIET COMPONENTS Interpreter)
     if(Python3_FOUND)
         # game.toml's [widescreen.cull] lists must match a fresh scan of the
@@ -219,6 +227,31 @@ if(R4_BUILD_TESTS AND BUILD_TESTING)
             else()
                 message(WARNING "R4_BUILD_TESTS: r4_pgxp_boot needs the disc "
                     "(disc/*.cue) and PSX_DEBUG_TOOLS, so it is not registered")
+            endif()
+        endif()
+        # R4 Max Detail's manifest: on by default at the most detail (owner
+        # decision), every option with a Stock choice, and car patches that are
+        # exactly r4_max_detail.h's tables. No disc needed.
+        if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/tools/r4_detail_scan.py")
+            add_test(NAME r4_max_detail_manifest
+                COMMAND "${Python3_EXECUTABLE}"
+                    "${CMAKE_CURRENT_SOURCE_DIR}/tools/r4_detail_scan.py" --check-manifest
+                WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}")
+        endif()
+        # game.toml's [[draw_distance.clamp]] sites, R4 Max Detail's car-table
+        # patches and the course-list lookup the plugins hook must match the
+        # boot EXE (read from the disc image, like the cull-site check).
+        if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/tools/r4_detail_scan.py")
+            file(GLOB _R4_DISC_BINS "${CMAKE_CURRENT_SOURCE_DIR}/disc/*.bin")
+            if(_R4_DISC_BINS)
+                add_test(NAME r4_max_detail_sites
+                    COMMAND "${Python3_EXECUTABLE}"
+                        "${CMAKE_CURRENT_SOURCE_DIR}/tools/r4_detail_scan.py"
+                        --check "${CMAKE_CURRENT_SOURCE_DIR}/game.toml"
+                    WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}")
+            else()
+                message(WARNING "R4_BUILD_TESTS: no disc/*.bin, so r4_max_detail_sites "
+                    "(game.toml [[draw_distance.clamp]] vs the disc) is not registered")
             endif()
         endif()
         # src/mods/r4_interp_fields.h must match tools/data/r4_interp_fields.json.

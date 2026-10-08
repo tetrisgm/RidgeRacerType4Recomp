@@ -1,6 +1,7 @@
 # Preloaded mods
 
-Ship reviewed, default-disabled packages here:
+Ship reviewed packages here. They are default-disabled unless the owner chose
+otherwise (`r4.enhancement.max-detail` is on by default):
 
 ```text
 packages/<package-id>/<version>/

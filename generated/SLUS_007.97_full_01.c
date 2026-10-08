@@ -5717,6 +5717,7 @@ void func_80015F60(CPUState* cpu)
         }
     }
     debug_server_log_call_entry(0x80015F60u);
+    if (psx_mod_function_entry(cpu, 0x80015F60u)) return;  /* trusted opt-in game-mod hook */
     /* Address: 0x80015F60, Size: 4980 bytes, Blocks: 193 */
 
 block_80015F60:

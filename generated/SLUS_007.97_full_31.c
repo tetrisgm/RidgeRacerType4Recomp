@@ -4112,6 +4112,7 @@ block_8006C108:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x404u);
 #endif
+    if (g_psx_draw_distance_clamp && (int32_t)cpu->gpr[2] > 447) cpu->gpr[2] = (uint32_t)(447);  /* draw-distance clamp: keep far geometry */
     { uint32_t _pgx1 = cpu->gpr[2]; cpu->gpr[10] = (cpu->gpr[2] < (uint32_t)448) ? 1 : 0;
     PGXP_ALU(0x2C4A01C0u, cpu->gpr[10], _pgx1, 0x01C0u); }  /* 0x8006C118: 0x2C4A01C0 */
 #ifdef PSX_COSIM
@@ -13492,6 +13493,7 @@ block_8006CD58:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x404u);
 #endif
+    if (g_psx_draw_distance_clamp && (int32_t)cpu->gpr[2] > 447) cpu->gpr[2] = (uint32_t)(447);  /* draw-distance clamp: keep far geometry */
     { uint32_t _pgx1 = cpu->gpr[2]; cpu->gpr[10] = (cpu->gpr[2] < (uint32_t)448) ? 1 : 0;
     PGXP_ALU(0x2C4A01C0u, cpu->gpr[10], _pgx1, 0x01C0u); }  /* 0x8006CD68: 0x2C4A01C0 */
 #ifdef PSX_COSIM
@@ -24289,6 +24291,7 @@ block_8006DBEC:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x6u);
 #endif
+    if (g_psx_draw_distance_clamp && (int32_t)cpu->gpr[2] > 447) cpu->gpr[2] = (uint32_t)(447);  /* draw-distance clamp: keep far geometry */
     { uint32_t _pgx1 = cpu->gpr[2]; cpu->gpr[1] = cpu->gpr[2] + -1;
     PGXP_ALU(0x2441FFFFu, cpu->gpr[1], _pgx1, 0xFFFFFFFFu); }  /* 0x8006DBEC: 0x2441FFFF */
 #ifdef PSX_COSIM
@@ -37842,6 +37845,7 @@ void func_8006EDEC(CPUState* cpu)
         }
     }
     debug_server_log_call_entry(0x8006EDECu);
+    if (psx_mod_function_entry(cpu, 0x8006EDECu)) return;  /* trusted opt-in game-mod hook */
     /* Address: 0x8006EDEC, Size: 412 bytes, Blocks: 6 */
 
 block_8006EDEC:
