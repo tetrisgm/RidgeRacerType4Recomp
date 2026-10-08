@@ -35,7 +35,7 @@ from DualShock mode, not NeGcon twist.
 R4.BIN entries 659–672 are code overlays linked at 0x801149A8 (garage,
 VS car select, course info, records, link battle, movie player). The runtime
 captures each on first execution and compiles a native shard in the background
-(release builds: the setup host's `overlay_toolchain/`; dev runs:
+(release builds: the zip's `overlay_toolchain/`; dev runs:
 `PSX_OVERLAY_AUTOCOMPILE_CMD` via `tools/run_r4.*`); until then that code runs in the
 dirty-RAM interpreter. Shards persist in `<build>/cache/`. Ahead-of-time
 shards need an R4.BIN extraction method (a cumulative start-sector table, which
@@ -104,8 +104,7 @@ limits:
 ### #5 — macOS build linked Homebrew SDL3/FreeType dylibs — ✅ FIXED
 A local build linked `/opt/homebrew/…/libSDL3.0.dylib` plus Homebrew
 freetype/harfbuzz and targeted the build machine's macOS, so it would not run
-on another Mac. `CMakeLists.txt` now defaults macOS builds (including the one a
-player's setup host makes) to psxrecomp's pinned static SDL3, no optional
+on another Mac. `CMakeLists.txt` now defaults macOS builds to psxrecomp's pinned static SDL3, no optional
 FreeType/HarfBuzz and a macOS 11.0 floor; `tools/package_release.sh` gates the
 release binaries on system-only libraries, universal arm64+x86_64 and minos
 11.0.

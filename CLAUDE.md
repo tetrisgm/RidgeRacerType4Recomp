@@ -24,10 +24,16 @@ This project inherits, in order:
   only** and must not be committed. See `.gitignore`.
 - Tracked: `game.toml`, `seeds/`, `annotations/`, `symbols.toml`,
   `ghidra/instructions.txt`, `ghidra/scripts/`, `CMakeLists.txt`,
-  `codegen_setup.*`, `src/mods/`, `tests/`, `tools/`, `mods/preloaded/`, docs.
+  `codegen_setup.*`, `src/mods/`, `tests/`, `tools/`, `scripts/`,
+  `mods/preloaded/`, docs, and `generated/` (the recompiled game C).
+- `generated/` is committed because releases are compiled from it
+  (bundled releases, psxrecomp `docs/ci/BUNDLED_RELEASES.md`). Regenerate it
+  with `tools/regen.sh` after any seed, annotation, `[recompiler]` or pin
+  change and commit the result in the same change. The BIOS backends live in
+  the `psxrecomp` submodule, never here.
 - Codegen/runtime fixes belong in the framework (`psxrecomp/`) or in per-game
-  `game.toml` config — never in `generated/*.c`. A fix only this game needs is
-  a smell; prefer a class fix the next title inherits.
+  `game.toml` config — never by hand in `generated/*.c`. A fix only this game
+  needs is a smell; prefer a class fix the next title inherits.
 - After every run, resolve all dispatch misses before any other debugging.
 - The framework and launcher versions are the `psxrecomp` and `recomp-ui`
   submodule gitlinks. Bump them deliberately; record why in

@@ -4,8 +4,15 @@
 /out/
 /.happypath/
 
-# Recompiler output (derivative of copyrighted game code — regenerate locally)
-/generated/
+# generated/ (the recompiled game C) is COMMITTED: releases are compiled from
+# it. Regenerate with tools/regen.sh after a seed, config or pin change and
+# commit the result. Retail-BIOS C never lands here: the BIOS backends live in
+# the psxrecomp submodule.
+# psxrecomp_cli.py work areas (overlay toolchain download, static overlay
+# shard evidence -- the latter holds bytes read from the disc).
+/.cache/
+.psxrecomp_last_generate
+.psxrecomp_write_probe
 
 # Release packaging artifacts
 /release-stage/
@@ -33,6 +40,7 @@
 *.chd
 *.car
 SCPH*.BIN
+*.cht
 
 # Local path/config stubs written beside the exe or repo root
 bios.cfg
@@ -81,4 +89,3 @@ __pycache__/
 # Local symlinks (disc/, build trees) in feature worktrees
 /disc
 /build-*
-/generated

@@ -5,8 +5,8 @@ Drives pad 1 over the debug server with frontend turbo on (unthrottled), so a
 boot-to-race run takes seconds of wall clock: skips the intro, opens Grand
 Prix, confirms through the pre-race screens, then holds accelerate. All timing
 is in guest frames. Writes a numbered PNG per step into OUT_DIR and prints
-frame + dispatch-miss counters, so a run can be judged from the images and the
-numbers alone.
+frame, dispatch-miss and segment-miss counters, so a run can be judged from
+the images and the numbers alone.
 
 Usage: python3 tools/smoke.py OUT_DIR [--port 4797]
 Start the game first, e.g.:  tools/run_r4.sh build
@@ -100,7 +100,8 @@ def main():
             frame = cmd({"cmd": "frame"}, port=port).get("frame")
             d = cmd({"cmd": "dispatch_stats"}, port=port)
             print(f"{i:02d} {label:<11} frame={frame} "
-                  f"miss_total={d.get('miss_total')} miss_unique={d.get('miss_unique')}")
+                  f"miss_total={d.get('miss_total')} miss_unique={d.get('miss_unique')} "
+                  f"seg_miss={d.get('segment_miss_total')}")
     finally:
         cmd({"cmd": "clear_input"}, port=port)
         cmd({"cmd": "turbo", "enabled": 0}, port=port)
