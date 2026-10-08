@@ -19741,6 +19741,7 @@ void func_80091320(CPUState* cpu)
     psx_cyc_bb_defer_begin();
 #endif
     debug_server_log_call_entry(0x80091320u);
+    if (psx_mod_function_entry(cpu, 0x80091320u)) return;  /* trusted opt-in game-mod hook */
     /* Address: 0x80091320, Size: 32 bytes, Blocks: 1 */
 
 block_80091320:
