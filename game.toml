@@ -81,9 +81,11 @@ mod_function_entry_funcs = [
   # first consumer (mirror scenery); the object transform 0x8006F160 and
   # SetTransMatrix (far cars and objects past the 16-bit delta); the
   # opponent car draw and its post-LOD call (the far car cull distance); the
-  # main loop's frame start after VSync(0) (the frame budget; VSync is above)
+  # main loop's frame start after VSync(0) (the frame budget; VSync is above);
+  # the BIOS rand() stub (far cars keep the stock random sequence)
   "0x80060F94", "0x80014A90", "0x80071704", "0x8006EDEC",
   "0x8006F160", "0x80091320", "0x8002DC00", "0x80015F60", "0x8009375C",
+  "0x80096640",
 ]
 
 [runtime]
@@ -109,15 +111,23 @@ overlay_backend = "auto"
 # set here would override that. Dev runs pass the dev command through
 # PSX_OVERLAY_AUTOCOMPILE_CMD (tools/run_r4.sh, tools/run_r4.cmd).
 
-# Title timing constant, enabled once psxrecomp #561 merges and is pinned
-# (docs/MAX_DETAIL.md, Limitations). No CPU is emulated: recompiled code
-# charges the guest clock a fixed cost per instruction; guest_cycle_scale = N
-# charges 1/N of it (VBlank/timers/CD/SPU/DMA unchanged), so R4's race code
-# never runs out of its two-VBlank tick. Gated: only while Max Detail opens
-# the gate on the race loop; menus, loading and FMV stay faithful.
-# [timing]
-# guest_cycle_scale = 64
-# guest_cycle_scale_gated = true
+[timing]
+# Title constant (not a player setting). No CPU is emulated: recompiled code
+# charges the guest clock a fixed cost per instruction, and guest_cycle_scale
+# = N charges 1/N of it; VBlank, timers, CD, SPU and DMA keep hardware time.
+# 2, the smallest scale at which Max Detail's governor holds its cap (level
+# 30) in 1P and 2P races (docs/MAX_DETAIL.md). Larger scales add no detail
+# but make every guest poll loop (VSync, pad SIO) spin longer on the host.
+# Online peers must match (it is part of the content fingerprint).
+guest_cycle_scale = 2
+# Only in races: the scale applies while R4's pacing word (VSync(1)
+# threshold) holds the race value 0x180, judged by psxrecomp at every VBlank;
+# menus, loading and FMV keep faithful timing.
+guest_cycle_scale_gate = { addr = 0x800AC794, value = 0x180 }
+# ...and only with Max Detail active: it holds a scaled race tick at two
+# VBlanks (opens the mod gate on activation). Online, mod plans are cleared,
+# so the scale stays off there.
+guest_cycle_scale_gated = true
 
 [video]
 # Faithful 4:3 by default. Widescreen is the r4.enhancement.widescreen mod

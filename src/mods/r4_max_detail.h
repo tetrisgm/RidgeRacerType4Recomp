@@ -265,6 +265,74 @@ static const uint32_t r4_md_car_after_lod_ra[4] = {
 };
 #define R4_MD_CAR_FAR            14000
 
+/* Far cars and the BIOS random seed. 0x80015F60(car, matrix, ..., flags)
+ * runs the car's light effects and draws from BIOS rand() (A(2Fh), stub
+ * 0x80096640) at 0x8001611C and 0x80016518, both only with flags bit 0. Past
+ * the stock cull distance the game calls it with no matrix and flags 0 (no
+ * rand); a far car drawn by Max Detail takes the simplest-model call with
+ * the car's flags, so it would draw extra random numbers. rand() has gameplay
+ * callers too: 0x80025B04 jitters a car's heading (car + 0x290, which sets
+ * its velocity) while a crash timer runs, so a shifted sequence changes the
+ * race. The plugin keeps the sequence the stock game sees: while such a far
+ * call runs, every rand() it makes is undone at the next rand() from anywhere
+ * else (or the next car lookup or frame), so the seed only advances as stock.
+ * OpenBIOS keeps the seed at 0x8548 (stock BIOS has its own; the same guard
+ * reads it from the A(2Fh) code: lui 1, lw -31416). */
+#define R4_MD_RAND_STUB          0x80096640u
+#define R4_MD_RAND_SEED_ADDR     0x80008548u
+static const uint32_t r4_md_fx_rand_ra[2] = { 0x80016124u, 0x80016520u };
+#define R4_MD_CAR_FAR_RA_INDEX   2u   /* r4_md_car_after_lod_ra: simplest model */
+
+/* The car's L1 distance as 0x8002DC00 computes it: (car - camera) >> 2 on x
+ * and z (car + 0x10/+0x18, camera 0x1F800008/0x1F800010, world >> 6). The
+ * game draws the simplest model while it is below the row's third value. */
+#define R4_MD_CAMERA_X_ADDR      0x1F800008u
+#define R4_MD_CAMERA_Z_ADDR      0x1F800010u
+static inline int32_t r4_md_car_l1(int32_t carx, int32_t carz, int32_t camx, int32_t camz)
+{
+    int32_t dx = (int32_t)((uint32_t)carx - (uint32_t)camx) >> 2;
+    int32_t dz = (int32_t)((uint32_t)carz - (uint32_t)camz) >> 2;
+    return (dx < 0 ? -dx : dx) + (dz < 0 ? -dz : dz);
+}
+
+/* The guard's state machine, kept pure for tests. */
+typedef struct {
+    int far_call;       /* inside a far car's 0x80015F60 call */
+    int pending;        /* `seed` must be written back */
+    uint32_t seed;
+} R4MdRandGuard;
+
+/* At a rand() entry with return address `ra` and the seed in RAM `cur`:
+ * returns 1 and sets *write to the seed to put back first. */
+static inline int r4_md_rand_guard_call(R4MdRandGuard *g, uint32_t ra, uint32_t cur, uint32_t *write)
+{
+    int fx = g->far_call && (ra == r4_md_fx_rand_ra[0] || ra == r4_md_fx_rand_ra[1]);
+    int wrote = 0;
+    if (g->pending) {
+        *write = g->seed;
+        cur = g->seed;
+        g->pending = 0;
+        wrote = 1;
+    }
+    if (fx) {
+        g->seed = cur;
+        g->pending = 1;
+    } else {
+        g->far_call = 0;
+    }
+    return wrote;
+}
+
+/* End of the far call's window (next car lookup, frame start). */
+static inline int r4_md_rand_guard_end(R4MdRandGuard *g, uint32_t *write)
+{
+    g->far_call = 0;
+    if (!g->pending) return 0;
+    g->pending = 0;
+    *write = g->seed;
+    return 1;
+}
+
 /* Stock car rows: 1P, rear-view mirror, TV/replay, 2P, 2P (alternate). */
 static const int16_t r4_md_car_lod_stock[R4_MD_CAR_LOD_ROWS][3] = {
     { 672, 3200, 8704 },
@@ -378,6 +446,9 @@ static inline int r4_md_car_row_far(R4MdOptions o, unsigned row, const int16_t c
 #define R4_MD_FRAME_START_RA   0x8001E7F0u
 #define R4_MD_VSYNC_FN         0x8008B330u
 #define R4_MD_VSYNC_WAIT_RA    0x8001E7D0u   /* the VSync(1) floor loop at 0x8001E7C8 */
+#define R4_MD_TICK_CYCLES      1128960u      /* two VBlanks of psxrecomp's NTSC clock */
+#define R4_MD_PACING_ADDR      0x800AC794u   /* VSync(1) threshold: 0x180 in races */
+#define R4_MD_PACING_RACE      0x180u
 #define R4_MD_FRAME_BUDGET     1130090u      /* two NTSC VBlanks: 2 * 33868800 / 59.94 */
 #define R4_MD_LEVEL_MIN        (-2)
 #define R4_MD_LEVEL_MAX        30
@@ -413,7 +484,7 @@ static inline int r4_md_gov_update(R4MdGovernor *g, uint64_t busy)
         g->calm = 0;
     } else if (permille < 860u) {
         if (g->hold > 0) g->hold--;
-        /* Far under budget (a light view) climbs four
+        /* Far under budget (a scaled guest clock, a light view) climbs four
          * times as fast: there is no frame to lose on the way up. */
         if (++g->calm >= (permille < 600u ? 5 : 20) && g->hold == 0) {
             g->level++;
@@ -433,8 +504,8 @@ static inline int r4_md_gov_update(R4MdGovernor *g, uint64_t busy)
  * scaled so that R4_MD_HEAP_TARGET permille of heap reads as the governor's
  * 930 permille "drop one level" line: the heap settles under about 65-70 %,
  * a level over 72 % is dropped at once (heap overflow corrupts the other
- * draw buffer, and a frame can add more than a level adds on average). On a light view the heap, not
- * the CPU, becomes the limit. */
+ * draw buffer, and a frame can add more than a level adds on average). With [timing] guest_cycle_scale the busy time
+ * shrinks and the heap (and R4_MD_LEVEL_MAX) become the limit. */
 #define R4_MD_HEAP_TARGET 700u
 static inline uint64_t r4_md_heap_load(uint32_t heap_pm)
 {

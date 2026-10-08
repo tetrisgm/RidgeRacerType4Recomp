@@ -50,7 +50,7 @@ static int s_hooks_registered;
 #define R4_MD_REGISTER_ENTRY(address, callback) \
     (s_hooks_registered += \
          psx_mod_register_function_entry_plugin(PLUGIN_ID, (address), (callback)))
-#define R4_MD_HOOK_COUNT 14
+#define R4_MD_HOOK_COUNT 15
 
 /* ---- guest layout (US) ------------------------------------------------- */
 #define R4_DRAW_OTAG_FN     0x80093520u   /* trace only */
@@ -187,6 +187,8 @@ static int r4_md_keep_block(void *ctx, uint32_t block)
 }
 
 static int s_frame_has_course;   /* a main course draw ran this frame */
+static int64_t s_pace_trim;      /* guest-cycle-scale pacing: cycles cut from the spin */
+static int s_pace_active;        /* the spin was held this frame */
 static void r4_md_pvs_merge_body(void);
 static void r4_md_pop_census(uint32_t yaw);
 static void r4_md_pvs_merge(CPUState *cpu, uint32_t address)
@@ -385,11 +387,33 @@ static int r4_md_far_cars_now(void)
     return s_opt.draw == R4_MD_DRAW_MAXIMUM && r4_md_level_far_cars(s_gov.level);
 }
 
+/* The BIOS random seed guard (r4_md_rand_guard_call). */
+static R4MdRandGuard s_rand;
+static int s_car_past_stock;   /* this lookup's car is past the stock cull distance */
+static int s_rand_guard_off;   /* R4_MD_RAND_GUARD=0: A/B */
+
+static void r4_md_rand_end(void)
+{
+    uint32_t seed;
+    if (r4_md_rand_guard_end(&s_rand, &seed)) psx_mod_write_word(R4_MD_RAND_SEED_ADDR, seed);
+}
+
+static void r4_md_rand(CPUState *cpu, uint32_t address)
+{
+    (void)address;
+    if (!s_enabled) return;
+    uint32_t seed;
+    if (r4_md_rand_guard_call(&s_rand, cpu->gpr[31], rd32(R4_MD_RAND_SEED_ADDR), &seed))
+        psx_mod_write_word(R4_MD_RAND_SEED_ADDR, seed);
+}
+
 /* 0x8002DC00(car, row): raise the row for this lookup (r4_md_car_row_far). */
 static void r4_md_car_draw(CPUState *cpu, uint32_t address)
 {
     (void)address;
     r4_md_car_restore();
+    r4_md_rand_end();
+    s_car_past_stock = 0;
     if (!s_enabled || s_far_xform_off) return;
     uint32_t row = cpu->gpr[5];
     if (row >= R4_MD_CAR_LOD_ROWS) return;
@@ -400,6 +424,10 @@ static void r4_md_car_draw(CPUState *cpu, uint32_t address)
     s_car.valid = 1;
     s_car.addr = a;
     memcpy(s_car.saved, cur, sizeof cur);
+    uint32_t car = cpu->gpr[4];
+    s_car_past_stock = r4_md_car_l1((int32_t)rd32(car + 0x10u), (int32_t)rd32(car + 0x18u),
+                                    (int32_t)rd32(R4_MD_CAMERA_X_ADDR),
+                                    (int32_t)rd32(R4_MD_CAMERA_Z_ADDR)) >= cur[2];
     for (unsigned i = 0; i < 3u; i++)
         if (out[i] != cur[i]) psx_mod_write_half(a + 2u * i, (uint16_t)out[i]);
 }
@@ -413,6 +441,10 @@ static void r4_md_car_after_lod(CPUState *cpu, uint32_t address)
     for (unsigned i = 0; i < 4u; i++) {
         if (ra != r4_md_car_after_lod_ra[i]) continue;
         if (s_trace && i == 2u) s_stat.car_far++;
+        /* A car stock would not draw: its light effects' rand() calls are
+         * Max Detail's own (r4_md_rand_guard_call). */
+        if (i == R4_MD_CAR_FAR_RA_INDEX && s_car_past_stock && !s_rand_guard_off)
+            s_rand.far_call = 1;
         r4_md_car_restore();
         return;
     }
@@ -425,6 +457,17 @@ static void r4_md_frame_start(CPUState *cpu, uint32_t address)
 {
     (void)address;
     if (!s_enabled || cpu->gpr[31] != R4_MD_FRAME_START_RA) return;
+    r4_md_rand_end();
+    if (s_frame.started && s_pace_active) {
+        /* Scaled pacing: the frame's tail after the spin (VSync(0), the
+         * swap) takes its own time; trim the spin by what the last tick
+         * overshot two VBlanks so ticks average exactly two VBlanks. */
+        int64_t err = (int64_t)(psx_cycle_count - s_frame.start) - (int64_t)R4_MD_TICK_CYCLES;
+        s_pace_trim += err;
+        if (s_pace_trim < 0) s_pace_trim = 0;
+        if (s_pace_trim > (int64_t)R4_MD_TICK_CYCLES / 2) s_pace_trim = (int64_t)R4_MD_TICK_CYCLES / 2;
+    }
+    s_pace_active = 0;
     if (s_trace && s_frame.started) {
         uint64_t per = psx_cycle_count - s_frame.start;
         if (!s_stat.per_min || per < s_stat.per_min) s_stat.per_min = (uint32_t)per;
@@ -440,6 +483,35 @@ static void r4_md_frame_start(CPUState *cpu, uint32_t address)
 static void r4_md_vsync(CPUState *cpu, uint32_t address)
 {
     (void)address;
+    /* [timing] guest_cycle_scale: R4's race pacing (pacing word 0x180) spins on
+     * VSync(1) until 384 hblanks have passed since the last VSync, then
+     * calls VSync(0), which returns at once when a VBlank went by meanwhile.
+     * On the PS1 the frame's work fills the two VBlanks, so a race tick is
+     * two VBlanks; with a scaled guest clock the work ends early and a tick
+     * would come every 384 lines (37.5 a second): the race, its timer and
+     * the AI would run 25 % fast. So while the frame is younger than two
+     * VBlanks the spin's threshold (s0, reloaded from the pacing word every
+     * frame) is held out of reach; an overrun exits at once, as stock. */
+    if (cpu->gpr[31] == R4_MD_VSYNC_WAIT_RA && s_frame.started &&
+        psx_mod_guest_cycle_scale() != 1u && cpu->gpr[16] != 0u &&
+        rd32(R4_MD_PACING_ADDR) == R4_MD_PACING_RACE)
+    {
+        const uint64_t target = (uint64_t)((int64_t)R4_MD_TICK_CYCLES - s_pace_trim);
+        const uint64_t age = psx_cycle_count - s_frame.start;
+        s_pace_active = 1;
+        cpu->gpr[16] = age < target ? 0x10000u : 0u;
+        if (age < target) {
+            /* The spin only polls the hblank counter: let the time it would
+             * burn pass in one step, never past the next event the guest
+             * could observe (a scaled guest clock would otherwise run the
+             * poll loop many times over on the host). */
+            uint64_t step = target - age;
+            uint32_t bound = psx_idle_cycles_to_next_observable_event();
+            if (step > bound) step = bound;
+            psx_cyc_batch_flush();
+            psx_advance_cycles((uint32_t)step);
+        }
+    }
     if (!s_enabled || !s_frame.started || s_frame.measured ||
         cpu->gpr[31] != R4_MD_VSYNC_WAIT_RA)
         return;
@@ -468,6 +540,10 @@ static void r4_md_savestate_loaded(void)
     s_frame.last_oct = -1;
     s_car.valid = 0;
     s_xf.valid = 0;
+    memset(&s_rand, 0, sizeof s_rand);
+    s_car_past_stock = 0;
+    s_pace_trim = 0;
+    s_pace_active = 0;
 }
 
 /* ---- car reflections --------------------------------------------------------- */
@@ -727,9 +803,15 @@ static void r4_max_detail_activate(void)
     env = getenv("R4_MD_BEHIND");
     s_behind_override = env ? atoi(env) : -1;
     memset(&s_car, 0, sizeof s_car);
+    memset(&s_rand, 0, sizeof s_rand);
+    s_car_past_stock = 0;
+    env = getenv("R4_MD_RAND_GUARD");
+    s_rand_guard_off = env && env[0] == '0';
     memset(&s_frame, 0, sizeof s_frame);
     s_frame.last_oct = -1;
     s_frame_has_course = 0;
+    s_pace_trim = 0;
+    s_pace_active = 0;
     env = getenv("R4_MD_BIG_HEAP");
     s_big_heap_allowed = !(env && env[0] == '0');
     s_big_heap = 0;
@@ -756,6 +838,12 @@ static void r4_max_detail_activate(void)
     s_opt = r4_md_options(draw, course, cars, split, reflections, mirror);
     s_clamp_available = psx_mod_set_draw_distance_clamp(r4_md_clamp_on(s_opt));
     s_enabled = 1;
+    /* [timing] guest_cycle_scale: game.toml's declarative gate opens it only
+     * in races (pacing word 0x180, judged at VBlank); the mod gate ties it to
+     * this plugin, whose race-tick hold (r4_md_vsync) keeps a scaled race at
+     * two VBlanks a tick. Without the plugin (or online, where mod plans are
+     * cleared) the runtime keeps the gate shut and timing is faithful. */
+    psx_mod_set_guest_cycle_scale_gate(1);
     if (r4_md_clamp_on(s_opt) && !s_clamp_available)
         fprintf(stderr, "[r4-md] game.toml lists no [[draw_distance.clamp]] sites; "
                         "draw distance stays stock\n");
@@ -784,6 +872,7 @@ PSX_MOD_CONSTRUCTOR(r4_register_max_detail)
     R4_MD_REGISTER_ENTRY(R4_MD_XF_SETTRANS_FN, r4_md_xf_set_trans);
     R4_MD_REGISTER_ENTRY(R4_MD_CAR_DRAW_FN, r4_md_car_draw);
     R4_MD_REGISTER_ENTRY(R4_MD_CAR_AFTER_LOD_FN, r4_md_car_after_lod);
+    R4_MD_REGISTER_ENTRY(R4_MD_RAND_STUB, r4_md_rand);
     R4_MD_REGISTER_ENTRY(R4_MD_FRAME_START_FN, r4_md_frame_start);
     R4_MD_REGISTER_ENTRY(R4_MD_VSYNC_FN, r4_md_vsync);
     (void)psx_mod_register_savestate_plugin(PLUGIN_ID, r4_md_savestate_loaded);

@@ -66,6 +66,8 @@ census), cars vanishing at the 8704 cull, and trackside animated objects
 | Expanded heap (8 MB RAM) | hook ClearOTagR `0x80093418` (ra `0x8001E764`) | When psxrecomp's 8 MB main RAM is live (`psx_ram_8mb_active()`), the heap pointer the main loop just reset moves to a 1 MiB region per draw buffer at `0x80200000`/`0x80300000`, above the retail 2 MB; with 2 MB RAM nothing changes. `R4_MD_BIG_HEAP=0` turns it off for A/B |
 | Far objects | hooks `0x8006F160`, SetTransMatrix `0x80091320` (ra `0x8006F1E8`) | `0x8006F160` stores object - camera as a 16-bit SVECTOR, the real limit behind the 8704 car cull. When the delta does not fit, the exact MVMVA translation is recomputed from the 32-bit delta; out of the GTE-safe range the object is moved behind the camera. In range nothing changes |
 | Far cars | hooks `0x8002DC00` / `0x80015F60` | The 1P/TV/2P rows' T2 becomes 14000 only for each car's lookup (written at entry, put back after the last row read on all four paths), so the table in RAM and in save states stays as the manifest wrote it. Past 8704 the game's simplest model; the bound is the car OT guard (`0x8005F6BC`, 447 << 5) and SZ |
+| Random sequence | hook BIOS `rand()` stub `0x80096640` | A far car's `0x80015F60` call (simplest model past the stock 8704, where stock passes no matrix and flags 0) runs its light effects, which call `rand()` at `0x8001611C`/`0x80016518` (return addresses `0x80016124`/`0x80016520`). `rand()` also steers gameplay (`0x80025B04`: a crashed car's heading jitter, which sets its velocity), so the plugin undoes those draws at the next `rand()` from anywhere else, the next car lookup or the next frame: the seed (OpenBIOS `0x8548`) advances exactly as stock. `R4_MD_RAND_GUARD=0` turns it off for A/B |
+| Guest cycle scale | `game.toml` `[timing]`; hooks `0x8009375C`, VSync (ra `0x8001E7D0`) | No CPU is emulated: recompiled code charges the guest clock a fixed cost per instruction, and psxrecomp's `guest_cycle_scale = 2` charges half of it while VBlank, timers, CD, SPU and DMA keep hardware time. A title constant, gated twice: the declarative `guest_cycle_scale_gate` (pacing word `0x800AC794` == `0x180`, R4's race value, judged by psxrecomp at every VBlank) and the mod gate (`guest_cycle_scale_gated = true`), which Max Detail opens on activation. Menus, loading and FMV keep faithful timing; online, mod plans are cleared, so the scale stays off. A scaled race ends its work early, and R4's pacing (VSync(1) until 384 lines since the last VSync) would then tick every 384 lines (37.5 Hz); while the frame is younger than two VBlanks the plugin holds the spin's threshold out of reach and lets the time pass in one step (never past the next observable event), trimming by the last tick's overshoot, so race ticks stay two VBlanks |
 
 Measured (Helter Skelter, autopilot, 40 s, 0 dispatch/segment misses; CPU =
 frame start to DrawSync, % of two VBlanks, mean/max):
@@ -81,21 +83,16 @@ OT1 high-water stays 645-650 (stock worst case 702). Pop census at 4:3:
 pops under 12000 units fell from 78 to 10 per 40 s; most now land at
 12k-30k. 2P was not re-measured (no VS save state in this build).
 
-## Limitations
+The table above is without the guest cycle scale. With `guest_cycle_scale =
+2` (2 is the smallest scale at which the governor holds its cap, level 30, in
+1P and 2P races; owner build 2026-10-07: busy 48 % in 1P and 63 % in 2P of the
+two-VBlank tick, while at 1 2P settles near level 8): Grand Prix race from a
+headless boot, 3600 VBlanks holding the accelerator, 1800 game ticks (30.0 a
+second), level 30 throughout, busy at most 42.5 %, 0 dispatch and 0 segment
+misses (2026-10-08, psxrecomp `cbfd24fd`). Larger scales add no detail but
+make every guest poll loop (VSync, pad SIO) spin longer on the host.
 
-- Not yet here: the guest cycle scale. No CPU is emulated: recompiled code
-  charges the guest clock a fixed cost per instruction, and psxrecomp's
-  `[timing] guest_cycle_scale = N` (psxrecomp #561) charges 1/N of it while
-  VBlank, timers, CD, SPU and DMA keep hardware time, so the race code never
-  runs out of its two-VBlank tick. For R4 it is a title constant in
-  `game.toml`, not a player setting: `guest_cycle_scale = 64` with
-  `guest_cycle_scale_gated = true`, Max Detail opening the gate
-  (`psx_guest_cycle_scale_gate_open`) on the 30 Hz race loop and holding the
-  tick at two VBlanks; menus, loading and FMV keep faithful timing. The
-  `[timing]` block in `game.toml` is commented out until #561 merges and
-  psxrecomp is re-pinned; the gate and tick pacing land with that pin.
-  Without it the level is bounded by the stock instruction budget, as
-  measured below.
+## Limitations
 
 - The car draw distance (T2 = 8704) is not raised. Past it R4's car transform
   overflows: a car about 15000 units away drew huge and misplaced above the
@@ -297,6 +294,16 @@ after one VBlank, and with Split screen = same the 2P rows hold the 1P row
 Stock all five rows are stock. Loaded with the package off, the full rows stay
 (Limitations).
 
+**Gameplay unchanged.** From one Grand Prix race savestate with the
+accelerator held, 3600+ VBlanks (1827 race ticks) recorded per tick: the first
+128 bytes of the P1 car and all eight opponents (position, velocity) and the
+BIOS rand seed, Max Detail off vs on (defaults: Maximum, car detail full).
+Before the random sequence guard the seed diverged for good at tick 2874,
+when an opponent beyond 8704 was drawn (66 extra `rand()` calls from
+`0x80016520` over the window); no car had diverged yet in this window (no
+crash), but `0x80025B04` would have read the shifted sequence. With the guard
+every car and the seed match stock byte for byte on every tick.
+
 **Tests.** `tools/r4_detail_scan.py --check game.toml` (ctest
 `r4_max_detail_sites`, needs the disc) re-derives the 18 clamp sites from the
 disc's EXE, checks the manifest's car-table guards, checks `r4_pvs.h`
@@ -316,7 +323,9 @@ both return-address gates included; car reflections (only over -1, only in a
 live race in phase 1-3, never in a wide view, our page taken back when the
 view turns wide, the game's pages never touched) and mirror scenery (the
 count put back only between the mirror draw's two return-address gates, once
-per limit call). `R4_MD_SECTIONS=n` overrides the section reach for A/B runs;
+per limit call), the guest-cycle-scale race tick hold and the random
+sequence guard (a far car's effect draws undone before any other caller, a
+car stock draws untouched). `R4_MD_SECTIONS=n` overrides the section reach for A/B runs;
 `R4_MD_TRACE=1` also logs reflection writes and mirror list counts.
 
 ## Netplay

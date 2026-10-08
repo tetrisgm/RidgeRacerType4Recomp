@@ -84,6 +84,20 @@ int psx_mod_register_savestate_plugin(const char *id, PSXModActivationCallback c
     return 1;
 }
 uint64_t psx_cycle_count;   /* the guest clock the frame budget reads */
+/* Guest-clock stubs for the guest-cycle-scale pacing (psx_cycles.h inlines). */
+uint64_t psx_next_service_cycle = 0;
+int psx_in_device_service = 0;
+int g_event_step_conservative = 0;
+int g_ls_replay_active = 0;
+uint32_t g_psx_cyc_batch = 0, g_psx_cyc_batch_limit = 0;
+uint32_t *g_psx_cyc_local_acc = 0;
+void psx_devices_service_to_now(void) { psx_next_service_cycle = psx_cycle_count + (1ull << 40); }
+void psx_advance_cycles_slow(uint32_t c) { psx_cycle_count += c; }
+static uint32_t s_gcs = 1u;
+uint32_t psx_mod_guest_cycle_scale(void) { return s_gcs; }
+static int s_gcs_open = -1;
+void psx_mod_set_guest_cycle_scale_gate(int open) { s_gcs_open = open; }
+uint32_t psx_idle_cycles_to_next_observable_event(void) { return 100000u; }
 static int s_ram8 = 0;
 int psx_ram_8mb_active(void) { return s_ram8; }
 static PSXModVBlankCallback s_vblank;
@@ -426,7 +440,7 @@ static void mirror_draw(uint32_t limit) {
 
 static void test_plugin(void) {
     CHECK(strcmp(s_activation_id, "r4.maxdetail") == 0 && s_activate, "activation registered");
-    CHECK(s_nhooks == 14, "fourteen entry hooks");
+    CHECK(s_nhooks == 15, "fifteen entry hooks");
     CHECK(s_savestate != NULL, "a save-state callback (the frame budget restarts)");
     for (int i = 0; i < s_nhooks; i++)
         CHECK(strcmp(s_hooks[i].id, "r4.maxdetail") == 0, "hooks belong to r4.maxdetail");
@@ -1107,11 +1121,37 @@ static void test_plugin_far(void) {
     put_car_table(r4_md_car_lod_stock);
 }
 
-/* 8 MB RAM: the primitive heap moves. */
+/* [timing] guest_cycle_scale: race ticks stay two VBlanks; 8 MB RAM: the heap moves. */
 static void wr32(uint32_t a, uint32_t v) { psx_mod_write_word(a, v); }
-static void test_big_heap(void) {
+static void test_pacing_and_heap(void) {
     set_options(NULL, NULL, NULL, NULL);
+    s_gcs_open = -1;
     s_activate();
+    CHECK(s_gcs_open == 1, "activation opens the guest cycle scale mod gate");
+    wr32(R4_MD_PACING_ADDR, R4_MD_PACING_RACE);
+    s_gcs = 1u;
+    psx_cycle_count = 5000000u;
+    s_cpu.gpr[31] = R4_MD_FRAME_START_RA;
+    hook(R4_MD_FRAME_START_FN)(&s_cpu, R4_MD_FRAME_START_FN);
+    s_cpu.gpr[31] = R4_MD_VSYNC_WAIT_RA; s_cpu.gpr[16] = 0x180u;
+    hook(R4_MD_VSYNC_FN)(&s_cpu, R4_MD_VSYNC_FN);
+    CHECK(s_cpu.gpr[16] == 0x180u && psx_cycle_count == 5000000u,
+          "faithful CPU: the spin is the game's own");
+    s_gcs = 16u;
+    s_cpu.gpr[16] = 0x180u;
+    hook(R4_MD_VSYNC_FN)(&s_cpu, R4_MD_VSYNC_FN);
+    CHECK(s_cpu.gpr[16] == 0x10000u && psx_cycle_count == 5100000u,
+          "guest cycle scale, young frame: spin held, time passes to the next event");
+    psx_cycle_count = 5000000u + R4_MD_TICK_CYCLES;
+    s_cpu.gpr[16] = 0x180u;
+    hook(R4_MD_VSYNC_FN)(&s_cpu, R4_MD_VSYNC_FN);
+    CHECK(s_cpu.gpr[16] == 0u, "guest cycle scale, two VBlanks old: the spin exits");
+    wr32(R4_MD_PACING_ADDR, 0x80u);
+    s_cpu.gpr[16] = 0x80u;
+    hook(R4_MD_VSYNC_FN)(&s_cpu, R4_MD_VSYNC_FN);
+    CHECK(s_cpu.gpr[16] == 0x80u, "menus (60 Hz pacing) untouched");
+    s_gcs = 1u;
+
     wr32(0x1F800000u, 0x800ADCA0u + 0x1670u);
     s_cpu.gpr[31] = 0x8001E764u;
     hook(0x80093418u)(&s_cpu, 0x80093418u);
@@ -1129,6 +1169,49 @@ static void test_big_heap(void) {
     s_ram8 = 0;
 }
 
+/* Far cars keep the BIOS random sequence the stock game sees. */
+static uint32_t lcg(uint32_t x) { return x * 0x41C64E6Du + 12345u; }
+static void rand_call(uint32_t ra) {   /* the stub's hook, then OpenBIOS rand() */
+    s_cpu.gpr[31] = ra;
+    hook(R4_MD_RAND_STUB)(&s_cpu, R4_MD_RAND_STUB);
+    wr32(R4_MD_RAND_SEED_ADDR, lcg(rd32(R4_MD_RAND_SEED_ADDR)));
+}
+static void test_rand_guard(void) {
+    CHECK(r4_md_car_l1(400, -400, 0, 0) == 200 && r4_md_car_l1(-5, 0, 0, 0) == 2,
+          "car L1 distance: arithmetic >> 2 per axis, as 0x8002DC00");
+    set_options("extended", NULL, NULL, NULL);
+    s_activate();
+    put_car_table(r4_md_car_lod_full);
+    const uint32_t car = 0x80107348u, other = 0x80025B08u, seed0 = 0x12345678u;
+    psx_mod_write_word(R4_MD_CAMERA_X_ADDR, 0u);
+    psx_mod_write_word(R4_MD_CAMERA_Z_ADDR, 0u);
+    s_cpu.gpr[4] = car;
+    /* Past the stock cull distance (8704 * 4 world >> 6), drawn as simplest. */
+    psx_mod_write_word(car + 0x10u, 4u * 9000u);
+    psx_mod_write_word(car + 0x18u, 0u);
+    wr32(R4_MD_RAND_SEED_ADDR, seed0);
+    car_lookup(0, r4_md_car_after_lod_ra[R4_MD_CAR_FAR_RA_INDEX]);
+    rand_call(r4_md_fx_rand_ra[0]);
+    rand_call(r4_md_fx_rand_ra[1]);
+    CHECK(rd32(R4_MD_RAND_SEED_ADDR) != seed0, "the far car's effects drew numbers");
+    rand_call(other);
+    CHECK(rd32(R4_MD_RAND_SEED_ADDR) == lcg(seed0),
+          "the next caller sees the stock sequence (the far draws undone)");
+    car_lookup(0, r4_md_car_after_lod_ra[R4_MD_CAR_FAR_RA_INDEX]);
+    rand_call(r4_md_fx_rand_ra[0]);
+    s_cpu.gpr[4] = car; s_cpu.gpr[5] = 0;
+    hook(R4_MD_CAR_DRAW_FN)(&s_cpu, R4_MD_CAR_DRAW_FN);
+    CHECK(rd32(R4_MD_RAND_SEED_ADDR) == lcg(seed0), "the next car lookup also puts it back");
+    /* Within the stock distance the game draws it too: rand() runs as stock. */
+    psx_mod_write_word(car + 0x10u, 4u * 8000u);
+    wr32(R4_MD_RAND_SEED_ADDR, seed0);
+    car_lookup(0, r4_md_car_after_lod_ra[R4_MD_CAR_FAR_RA_INDEX]);
+    rand_call(r4_md_fx_rand_ra[0]);
+    rand_call(other);
+    CHECK(rd32(R4_MD_RAND_SEED_ADDR) == lcg(lcg(seed0)), "a car stock draws: untouched");
+    set_options(NULL, NULL, NULL, NULL);
+}
+
 int main(void) {
     test_options();
     test_car_tables();
@@ -1143,7 +1226,8 @@ int main(void) {
     test_far_cars_pure();
     test_governor_pure();
     test_plugin_far();
-    test_big_heap();
+    test_pacing_and_heap();
+    test_rand_guard();
     if (failures) {
         fprintf(stderr, "test_r4_max_detail: %d failure(s)\n", failures);
         return 1;
