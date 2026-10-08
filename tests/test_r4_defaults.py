@@ -153,6 +153,11 @@ def test_quality_presets():
     check(low.get('frame_generation') is False and low.get('supersample') == 1.0 and
           low.get('dynamic_resolution_min') == 'native',
           'game.toml: Low drops Smooth motion and supersampling, floor Native')
+    check(low.get('pgxp_depth_buffer') is False and low.get('pgxp_color_correction') is False
+          and low.get('pgxp_seam') == 'off',
+          'game.toml: Low turns the PGXP extras off (PGXP itself stays on)')
+    check(all('pgxp' not in k for n in ('ultra', 'high', 'medium') for k in q[n]),
+          'game.toml: Medium and up keep the PGXP extras')
     check(all(p.get('dynamic_resolution', True) is True for p in q.values()),
           'game.toml: dynamic resolution stays on in every preset')
     check(all(isinstance(v, (bool, int, float, str)) for p in q.values() for v in p.values()),

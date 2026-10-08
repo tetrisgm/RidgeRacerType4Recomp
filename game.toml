@@ -223,7 +223,7 @@ pgxp_seam = "fine"
 # preset as the safety net. Measured on R4 races (analysis/lowend-perf):
 # Smooth motion is the largest render-thread cost (~60-70 % of it), the
 # supersample factor the largest GPU cost; PGXP's depth/colour/seam extras
-# cost ~0.7 ms of render-thread CPU and no measurable GPU time, so they stay.
+# cost ~0.7 ms of render-thread CPU and no measurable GPU time; Low drops them.
 [quality.ultra]
 # The [video] block as shipped: Match display x1.5, Smooth motion.
 
@@ -235,10 +235,17 @@ supersample = 1.0
 dynamic_resolution_min = "720p"
 
 [quality.low]
-# M1 (8 GB), Steam Deck, Intel UHD-class iGPUs and 4-thread CPUs.
+# M1 (8 GB), Steam Deck, Intel UHD-class iGPUs and 4-thread CPUs. PGXP
+# itself stays on (it closes the seams); its renderer extras go: depth
+# buffer, colour correction, seam expansion. In R4 they only move polygon
+# silhouette edges by one output pixel (0.02 % of a road frame, 0 pixels in
+# the tunnel at 10x; analysis/lowend-perf/seams), no cracks.
 supersample = 1.0
 dynamic_resolution_min = "native"
 frame_generation = false
+pgxp_depth_buffer = false
+pgxp_color_correction = false
+pgxp_seam = "off"
 
 # Native-wide rendering for r4.enhancement.widescreen (docs/WIDESCREEN.md).
 # Inert at 4:3: every cull site below is the identity while the margin is 0.
