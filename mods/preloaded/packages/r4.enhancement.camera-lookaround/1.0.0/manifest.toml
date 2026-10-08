@@ -1,0 +1,70 @@
+format_version = 7
+id = "r4.enhancement.camera-lookaround"
+version = "1.0.0"
+name = "R4 Camera Look-Around"
+author = "Shokunin"
+description = "Look around during single-player races with the right stick while leaving steering and the game's camera switch alone."
+license = "MIT"
+resolver = "declarative"
+save_compatibility = "shared"
+
+[[target]]
+game_id = "SLUS-00797"
+
+[[feature]]
+id = "camera-lookaround"
+name = "Camera Look-Around"
+description = "On by default. In single-player races, the right stick looks left/right, down looks behind, and up adds a small upward tilt. Cockpit views stay anchored at the driver; chase views orbit around the car. Steering, the rear-view mirror, menus, replays, cutscenes, split-screen, and netplay keep their normal behavior."
+group = "Controls"
+channel = "experimental"
+default_enabled = true
+
+[[option]]
+feature = "camera-lookaround"
+id = "deadzone"
+label = "Look deadzone"
+description = "Ignore small right-stick drift before camera movement starts."
+group = "Controls"
+type = "choice"
+default = "18"
+
+[[option.choice]]
+value = "12"
+label = "12%"
+
+[[option.choice]]
+value = "18"
+label = "18% (Recommended)"
+
+[[option.choice]]
+value = "25"
+label = "25%"
+
+[[option.choice]]
+value = "32"
+label = "32%"
+
+[[option]]
+feature = "camera-lookaround"
+id = "sensitivity"
+label = "Look sensitivity"
+description = "Scale the amount of camera rotation for a given stick movement."
+group = "Controls"
+type = "choice"
+default = "100"
+
+[[option.choice]]
+value = "70"
+label = "70%"
+
+[[option.choice]]
+value = "100"
+label = "100% (Recommended)"
+
+[[option.choice]]
+value = "130"
+label = "130%"
+
+[[plugin]]
+feature = "camera-lookaround"
+id = "r4.camera-lookaround"

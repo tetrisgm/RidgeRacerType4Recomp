@@ -103,6 +103,16 @@ if(R4_BUILD_TESTS AND BUILD_TESTING)
         set_tests_properties(r4_hide_rear_view_mirror PROPERTIES
                              DEPENDS r4_hide_rear_view_mirror_build)
     endif()
+    if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_r4_camera_look.c")
+        add_executable(r4-camera-look-tests
+            "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_r4_camera_look.c")
+        target_include_directories(r4-camera-look-tests PRIVATE
+            "${CMAKE_CURRENT_SOURCE_DIR}/src/mods")
+        if(NOT MSVC)
+            target_link_libraries(r4-camera-look-tests PRIVATE m)
+        endif()
+        add_test(NAME r4_camera_look_helpers COMMAND r4-camera-look-tests)
+    endif()
     # Pure widescreen helpers, no game data needed.
     if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_r4_widescreen.c")
         add_executable(r4-widescreen-tests

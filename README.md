@@ -54,6 +54,7 @@ netplay. Not yet verified end to end (see `ISSUES.md`).
 | Link battle (link cable) | Not supported (no SIO1 model) |
 | Renderer | Stock psxrecomp OpenGL at 4:3; software selectable |
 | Internal resolution | Native to 8K presets (Settings → Display), OpenGL |
+| Camera look-around | Right stick turns the view in single-player races (Mods > Camera Look-Around), on by default |
 | Widescreen | Mods > Display > R4 Custom Renderer (experimental, off by default): native-wide races, Fit to Window / 16:9 / 21:9 / 32:9 |
 
 ## Playing a release
