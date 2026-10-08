@@ -142,6 +142,27 @@ def test_game_toml():
           'game.toml: OpenGL renderer (render thread and native-wide need it)')
 
 
+def test_quality_presets():
+    with open(os.path.join(ROOT, 'game.toml'), 'rb') as fh:
+        cfg = tomllib.load(fh)
+    video, q = cfg.get('video', {}), cfg.get('quality', {})
+    check(sorted(q) == ['high', 'low', 'medium', 'ultra'],
+          'game.toml: Low, Medium, High and Ultra graphics presets')
+    check(q.get('ultra') == {}, 'game.toml: Ultra is the shipped [video] block')
+    low = q.get('low', {})
+    check(low.get('frame_generation') is False and low.get('supersample') == 1.0 and
+          low.get('dynamic_resolution_min') == 'native',
+          'game.toml: Low drops Smooth motion and supersampling, floor Native')
+    check(all(p.get('dynamic_resolution', True) is True for p in q.values()),
+          'game.toml: dynamic resolution stays on in every preset')
+    check(all(isinstance(v, (bool, int, float, str)) for p in q.values() for v in p.values()),
+          'game.toml: presets hold plain [video] values')
+    ss = [video.get('supersample'), q['high'].get('supersample', video.get('supersample')),
+          q['medium'].get('supersample'), low.get('supersample')]
+    check(ss == sorted(ss, reverse=True),
+          'game.toml: supersample never rises from Ultra down to Low')
+
+
 def test_mod_state():
     tool = os.path.join(ROOT, 'tools', 'mod_state.py')
     with tempfile.TemporaryDirectory() as build:
@@ -198,6 +219,7 @@ def test_mod_state():
 def main():
     test_manifests()
     test_game_toml()
+    test_quality_presets()
     test_mod_state()
     if FAILS:
         print(f'{len(FAILS)} failure(s)')

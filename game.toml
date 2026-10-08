@@ -214,6 +214,32 @@ pgxp_depth_buffer = true
 pgxp_color_correction = true
 pgxp_seam = "fine"
 
+# Graphics presets (psxrecomp docs/QUALITY_PRESETS.md). On first launch, and
+# when the machine changes, psxrecomp detects the CPU, GPU and memory and
+# picks one of these; Settings -> Display -> Graphics preset shows it, offers
+# Re-detect, and becomes Custom once the player changes a setting a preset
+# sets (Custom is never overridden). Each table is [video] keys laid over the
+# [video] block above, which is Ultra. Dynamic resolution stays on in every
+# preset as the safety net. Measured on R4 races (analysis/lowend-perf):
+# Smooth motion is the largest render-thread cost (~60-70 % of it), the
+# supersample factor the largest GPU cost; PGXP's depth/colour/seam extras
+# cost ~0.7 ms of render-thread CPU and no measurable GPU time, so they stay.
+[quality.ultra]
+# The [video] block as shipped: Match display x1.5, Smooth motion.
+
+[quality.high]
+supersample = 1.25
+
+[quality.medium]
+supersample = 1.0
+dynamic_resolution_min = "720p"
+
+[quality.low]
+# M1 (8 GB), Steam Deck, Intel UHD-class iGPUs and 4-thread CPUs.
+supersample = 1.0
+dynamic_resolution_min = "native"
+frame_generation = false
+
 # Native-wide rendering for r4.enhancement.widescreen (docs/WIDESCREEN.md).
 # Inert at 4:3: every cull site below is the identity while the margin is 0.
 [widescreen]
