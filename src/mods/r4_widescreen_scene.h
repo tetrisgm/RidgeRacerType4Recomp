@@ -76,4 +76,21 @@ static inline int r4_in_race(R4SceneReadWord rd, R4SceneReadHalf rh)
     return r4_is_race_handler(rd, r4_frame_handler(rd, rh));
 }
 
+/* 2P VS Battle (split screen). The main menu stores the mode it starts in
+ * the s16 at 0x800F4EDC (0x8002F7A0, copied from the menu cursor
+ * 0x800AC802 on confirm; zeroed once at boot, 0x8002EFC8): 2 is VS Battle. It
+ * holds from VS Battle's car select through the races until another mode is
+ * started. The VS race handler (overlay 661) also counts, with its code
+ * resident, in case a race is reached without that menu path. */
+#define R4_GAME_MODE_ADDR      0x800F4EDCu   /* s16 */
+#define R4_GAME_MODE_VS        2u
+#define R4_VS_RACE_HANDLER     0x80114C30u
+
+static inline int r4_vs_session(R4SceneReadWord rd, R4SceneReadHalf rh)
+{
+    if (rh(R4_GAME_MODE_ADDR) == R4_GAME_MODE_VS) return 1;
+    uint32_t handler = r4_frame_handler(rd, rh);
+    return handler == R4_VS_RACE_HANDLER && r4_is_race_handler(rd, handler);
+}
+
 #endif /* R4_WIDESCREEN_SCENE_H */

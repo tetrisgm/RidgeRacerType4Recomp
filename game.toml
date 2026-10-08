@@ -92,6 +92,9 @@ mod_function_entry_funcs = [
 debug_port = 4797
 window_title = "Ridge Racer Type 4 Recompiled"
 memcard_dir = "saves"
+# Hidden mod features are runtime rules, never launcher choices: the
+# r4.modern-controls split-screen-rewind rule (no Rewind in 2P VS Battle).
+hide_hidden_mod_features = true
 # Authentic guest CD timing. R4 streams XA music with a Form-1 data channel
 # (channel 7 carries the elapsed-time words the CPU reads while music plays)
 # and polls GetlocP, so the guest-visible CD must never be sped up. Fast loads,
@@ -495,6 +498,11 @@ max = 0x1BF
 # gamepads. A recognized SDL wheel is presented as JogCon regardless of this
 # gamepad default.
 default_mode = "analog"
+# Rewind's default controller button is Y alone (Triangle). It acts alone only
+# while the r4.modern-controls Modern scheme allows it
+# (psx_mod_allow_direct_shortcut); otherwise it means Select + Y.
+direct_shortcut = "rewind"
+direct_shortcut_button = "y"
 
 # Online mount gate: digests + track count + TOC fingerprint
 # (psxrecomp/docs/NETPLAY.md). required_tracks = 1 is correct for this disc.

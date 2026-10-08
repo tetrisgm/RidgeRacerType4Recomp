@@ -172,7 +172,9 @@ executable. Defaults live in `game.toml`:
 - `[video]` — `renderer` (`opengl` / `software`), `aspect_ratio = "4:3"`,
   `resolution_reference_lines = 240` (see Internal resolution).
 - `[controller]` — `default_mode` (`analog` by default for native R4
-  DualShock steering; recognized SDL steering wheels use emulated JogCon).
+  DualShock steering; recognized SDL steering wheels use emulated JogCon);
+  `direct_shortcut = "rewind"` with `direct_shortcut_button = "y"` (Rewind's
+  default pad button; alone in Modern controls, Select + Y otherwise).
 - `[runtime]` — `disc_speed = "1x"` (authentic; R4 streams XA with a data
   channel), `overlay_cache` (native overlay shards; see Building From Source).
 - `[netplay]` — disc gates: `require_cue`, `required_tracks = 1`, `required_disc_fp`.
@@ -329,6 +331,24 @@ routes R4's mode-2 JogCon state through its existing analog race-input path,
 while preserving the emulated JogCon ID and wheel fields. Wheel force feedback
 is not mapped. In R4's
 menus **Circle is OK** and **Cross is cancel**; in races Cross accelerates by default.
+
+Mods -> Controllers -> **Controls** (on by default) picks the race scheme:
+
+- **Modern** (default): on a gamepad with analog triggers, RT is gas and LT
+  is brake (analog), the left stick steers, Square / Circle shift down / up,
+  R1 changes the camera view and Y opens Rewind (enable Rewind in Settings).
+  The stick steers in either pad mode. R4 sees its native NeGcon while you
+  drive; menus, the pause menu, keyboards and pads without triggers keep the
+  stock controls.
+- **Classic**, or the feature off: R4's stock controls, unchanged (Cross
+  accelerates, Square brakes); Rewind is Select + Y.
+
+Rewind is off in split screen and online (2-player VS Battle, netplay), with
+any scheme.
+
+Netplay always runs with mods cleared. Details:
+`mods/preloaded/packages/r4.modern-controls/1.0.0/README.txt`; headless check:
+`tools/test_modern_controls_runtime.py`.
 
 ## Netplay
 
