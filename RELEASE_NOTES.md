@@ -1,3 +1,58 @@
+# Ridge Racer Type 4 Recompiled — vNEXT (draft)
+
+> Draft for the next release. The version number is the owner's call; this
+> section is not published yet.
+
+## The download is now the compiled game
+
+No more setup kit and no first-run build: unzip, run `r4-runtime`, pick your
+own Redump bin/cue. Nothing is downloaded or compiled before you can play. The
+zip holds no disc data and no BIOS dump; the game runs on the bundled
+OpenBIOS (or on your own SCPH-1001 dump, if you pick one in Settings).
+
+Updating from v0.1.0: extract into a new folder, or over the old one. Memory
+cards and settings carry over; savestates from v0.1.0 are refused.
+
+## New, and on by default
+
+- **Modern controls.** On a gamepad with analog triggers: RT gas, LT brake,
+  left stick steers, Square / Circle shift down / up, R1 changes the view,
+  Y opens Rewind. Menus and the pause menu keep the stock buttons. Want the
+  original? Mods → Controllers → Controls → **Classic**.
+- **Camera look-around.** The right stick turns the view in single-player
+  races.
+- **Rear-view mirror hidden.** The mirror inset is skipped for a clearer view;
+  switch **Hide Rear-view Mirror** off in Mods to bring it back.
+- **JogCon and analog steering.** Recognized steering wheels drive as R4's
+  own JogCon; gamepads use native DualShock analog steering.
+- **PGXP.** No more wobbling polygons or bent textures, and the far road is
+  drawn without gaps.
+- **Max Detail.** Longer draw distance, full-detail course and cars at every
+  distance, 1P detail in split screen and reflective cars in the race. Every
+  part can be set back to Stock.
+- **Faster VS split screen.** 2P split screen takes about a tenth of the draws
+  on OpenGL, and with R4 Frame Rate on it is drawn at the higher rate too.
+- **Online battle for 2-4 players.** R4's Link Battle over LAN or the
+  internet: the host opens a room on the NETPLAY page, the others join, and
+  everyone races on their own screen with their own full-screen view.
+- **Rewind is off in split screen and online,** so it can't put one player out
+  of step. It still works in single-player races.
+
+Every feature above has a switch on the Mods page; switching it off restores
+the stock game for that part.
+
+## Coming next
+
+Waiting on framework changes: display defaults tuned for R4, Smooth motion
+(frame interpolation on by default), the HD HUD pack and anti-aliasing.
+
+## Credits
+
+R4 recompilation by Shokunin, built on psxrecomp and recomp-ui
+(RetroPortingToolKit). Third-party notices are in `THIRD-PARTY-LICENSES/`.
+
+---
+
 # Ridge Racer Type 4 Recompiled — v0.1.0 (preview)
 
 R4: Ridge Racer Type 4 (USA) statically recompiled to native code with
