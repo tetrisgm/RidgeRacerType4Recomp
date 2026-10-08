@@ -34,13 +34,17 @@ typedef struct {
     uint32_t word0, word1;   /* first two instructions; 0,0 = EXE code */
 } R4RaceHandler;
 
-#define R4_RACE_HANDLER_COUNT 5
+#define R4_RACE_HANDLER_COUNT 6
 static const R4RaceHandler r4_race_handlers[R4_RACE_HANDLER_COUNT] = {
     { 0x8005E118u, 0u, 0u },                       /* attract demo (EXE) */
     { 0x8002A464u, 0u, 0u },                       /* after-goal run (EXE) */
     { 0x8011729Cu, 0x3C04800Fu, 0x3C038010u },     /* race, overlay 660 */
     { 0x80114A38u, 0x27BDFFC8u, 0x3C03800Fu },     /* race, overlay 659 */
     { 0x80114C30u, 0x3C04800Fu, 0x3C038010u },     /* 2P VS race, overlay 661 */
+    /* Link Battle race (link overlay, id 9 at 0x801149A8). Online, widescreen
+     * is an agreed netplay mod: the shared frame and each peer's own view
+     * render at the match's one aspect (docs/ONLINE_BATTLE.md). */
+    { 0x80115770u, 0x3C028010u, 0x84427328u },
 };
 
 typedef uint32_t (*R4SceneReadWord)(uint32_t address);
