@@ -55,6 +55,7 @@ netplay. Not yet verified end to end (see `ISSUES.md`).
 | Renderer | Stock psxrecomp OpenGL at 4:3; software selectable |
 | Internal resolution | Native to 8K presets (Settings → Display), OpenGL |
 | Camera look-around | Right stick turns the view in single-player races (Mods > Camera Look-Around), on by default |
+| PGXP (steady geometry, straight textures) | Mods > Visual > PGXP Precision, on by default |
 | Widescreen | Mods > Display > R4 Custom Renderer (experimental, off by default): native-wide races, Fit to Window / 16:9 / 21:9 / 32:9 |
 | JogCon input | R4 JogCon Input compatibility is enabled by default; wheels retain guest JogCon ID and analog steering from the start grid |
 
@@ -226,7 +227,8 @@ default and takes effect when the game starts.
 - The menus are 480-line screens, so they render at twice the target and are
   resolved down; movies are unchanged.
 - Textures stay the game's own; edges, geometry and the rear-view mirror get
-  sharper. Wobbling polygons are the PS1's integer vertex snap, magnified.
+  sharper. PGXP (below, on by default) keeps polygons from wobbling; with it
+  off, the wobble is the PS1's integer vertex snap, magnified.
 - On a Mac, any preset above Native gives the game window a Retina (full
   pixel density) drawable.
 - The GPU can lower a preset it cannot hold; the log line and the `video_info`
@@ -242,6 +244,50 @@ default and takes effect when the game starts.
 - `PSX_INTERNAL_RESOLUTION=4k` (or any preset id, or a number of lines)
   overrides the setting for one run. `tools/res_matrix.py` checks every preset
   against a savestate.
+
+## PGXP: steady geometry and straight textures
+
+Mods -> Visual -> **PGXP Precision** is on by default, and it is the only
+PGXP switch: Settings has no Perspective textures row for R4
+(`[video] pgxp_mod_only`). The PS1 snaps every projected vertex to a whole
+pixel and maps textures without perspective, so polygons wobble as the camera
+moves and road, wall and sign textures bend at polygon edges. PGXP follows
+each vertex's full-precision projection from the GTE to the GPU and draws it
+there, with perspective-correct textures.
+
+- **Precise culling**, an option of the same package, is on too. The game
+  drops a polygon it sees as zero-sized or facing away, and on the PS1 that
+  test uses the rounded positions. With PGXP drawing the exact ones, the far
+  road beyond the start gantry and over crests broke into thin strips with
+  sky between them. Precise culling makes the game decide from the positions
+  PGXP draws, so those rows are drawn. This one changes what the game computes:
+  with it the game emits up to about a quarter more polygons. Its packet
+  buffers peaked at 60% in a 2P race, and its timing (one frame every two
+  VBlanks) is unchanged.
+- Without precise culling PGXP is visual only: with PGXP off, or on with
+  culling off, the game runs exactly as on the stock build (checked over
+  12000 frames of boot, menus and the attract race). Switching PGXP off
+  restores the original picture.
+- Textures are corrected at every internal resolution; the steadier geometry
+  shows above Native (the picture is still drawn on whole pixels at Native).
+- Every vertex is checked against the exact packet word the game drew with,
+  and one that cannot be proven draws the original way (the tachometer needle,
+  2D screens, vertices clamped far off-screen). In a Grand Prix race 99.9% of
+  polygon vertices are corrected and every textured triangle gets
+  perspective-correct UVs.
+- Far, thin features now draw at their true size: distant lane dashes and the
+  start line show in the mirror, grid lines across the road at the start, and
+  the START!! board at the far end of the straight looks smaller than on a
+  PS1. The first frame after loading a savestate draws without PGXP.
+- Cost: on a 2P race with the other enhancements at their defaults, about
+  1.5 ms more per frame, mostly the extra polygons.
+- Netplay sessions run without it, like every mod.
+- The runtime is built with psxrecomp's PGXP hooks (`R4_PGXP`, on by default;
+  `-DR4_PGXP=OFF` builds without them, for A/B checks). Savestates from a
+  build with the other setting are refused. `game.toml` `[video]` sets the
+  PGXP tuning R4 needs (`pgxp_tolerance = -1.0`,
+  `pgxp_position_fallback = false`, `pgxp_preserve_projection = true`; see
+  `psxrecomp/docs/ENHANCEMENTS.md` G1.11/G1.12).
 
 ## Controls
 

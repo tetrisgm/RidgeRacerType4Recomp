@@ -1,0 +1,47 @@
+# R4's copy of the framework's builtin psx.enhancement.pgxp, at the same id and
+# version. The framework stages its builtin first and this file over it
+# (psxrecomp docs/MOD_PACKAGES.md), so R4 ships the same package and plugin
+# with two changes: the feature is on by default, and so is its precise
+# culling option. The player can switch either off on the Mods page; netplay
+# clears it like every mod. Keep the [[option]] and [[plugin]] entries in step
+# with the builtin (tests/test_r4_pgxp.py checks).
+format_version = 5
+id = "psx.enhancement.pgxp"
+version = "1.0.0"
+name = "PGXP Precision (geometry + textures)"
+author = "psxrecomp"
+description = "Sub-pixel vertex precision and perspective-correct texturing (the PGXP technique): the runtime follows the GTE's full-precision projections to the GPU, so 3D polygons stop wobbling between whole pixels and road, wall and sign textures stop bending at polygon edges. Visual-only apart from the precise culling option: the game's own math and timing see exactly what real hardware produces."
+resolver = "declarative"
+save_compatibility = "shared"
+
+[[target]]
+game_id = "SLUS-00797"
+
+[[feature]]
+id = "pgxp"
+name = "PGXP Precision"
+description = "On by default in R4. Every vertex is checked against the exact packet word the game drew with, and a vertex that cannot be proven draws the original way, so the HUD and 2D screens are untouched. Textures are corrected at every internal resolution; the steadier geometry shows above Native. Off restores the original wobble and texture bending."
+group = "Visual"
+default_enabled = true
+
+[[option]]
+feature = "pgxp"
+id = "cpu_mode"
+label = "CPU-mode propagation"
+description = "Also track precision through CPU arithmetic. R4 does not need it: its 3D vertices are tracked without it. Safe either way."
+group = "Visual"
+type = "boolean"
+default = "false"
+
+[[option]]
+feature = "pgxp"
+id = "culling"
+label = "Precise culling"
+description = "On by default in R4. Decides which faces the game drops from the same full-precision positions PGXP draws, so far stretches of road are no longer cut into thin strips with sky between them. Off goes back to the hardware's whole-pixel test. Netplay always runs without it."
+group = "Visual"
+type = "boolean"
+default = "true"
+
+[[plugin]]
+feature = "pgxp"
+id = "psx.pgxp"
