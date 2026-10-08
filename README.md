@@ -40,8 +40,8 @@ Important files:
 
 ## Status
 
-**Bring-up preview.** Boots, plays races, and runs 2-player VS Battle over
-netplay. Not yet verified end to end (see `ISSUES.md`).
+**Bring-up preview.** Boots, plays races, runs 2-player VS Battle over
+netplay and online Link Battle for 2-4 players. Not yet verified end to end (see `ISSUES.md`).
 
 | Area | State |
 |---|---|
@@ -51,13 +51,41 @@ netplay. Not yet verified end to end (see `ISSUES.md`).
 | Audio (SPU + XA music) | Works |
 | Code overlays (R4.BIN) | Captured and compiled to native shards in the background |
 | VS Battle (2P split screen) | Works over netplay (delay-sync and rollback, digests match) |
-| Link battle (link cable) | Not supported (no SIO1 model) |
+| Link Battle | Online for 2-4 players, each on their own screen (`docs/ONLINE_BATTLE.md`); no physical link cable |
 | Renderer | Stock psxrecomp OpenGL at 4:3; software selectable |
 | Internal resolution | Native to 8K presets (Settings → Display), OpenGL |
 | Camera look-around | Right stick turns the view in single-player races (Mods > Camera Look-Around), on by default |
 | PGXP (steady geometry, straight textures) | Mods > Visual > PGXP Precision, on by default |
 | Widescreen | Mods > Display > R4 Custom Renderer (experimental, off by default): native-wide races, Fit to Window / 16:9 / 21:9 / 32:9 |
 | JogCon input | R4 JogCon Input compatibility is enabled by default; wheels retain guest JogCon ID and analog steering from the start grid |
+
+## What's new / on by default
+
+These are on when you first start the game. Each one is a switch on the
+launcher's **Mods** page (or a choice inside it), and your choice is saved.
+Switching a feature off gives you the stock game for that part.
+
+| Feature | On by default | To turn it off |
+|---|---|---|
+| **Modern controls** (R4 Controls): RT gas, LT brake, left stick steers, Square / Circle shift, R1 camera, Y Rewind | Yes, Modern scheme | Mods → Controllers → **Controls**: pick **Classic** for R4's stock controls (Cross accelerates, Square brakes), or switch the feature off |
+| **Camera look-around**: the right stick turns the view in single-player races | Yes | Mods → **Camera Look-Around** off |
+| **Hide rear-view mirror**: skips the mirror inset at the top of the race screen | Yes | Mods → **Hide Rear-view Mirror** off brings the mirror back |
+| **JogCon input**: recognized steering wheels drive as R4's JogCon; ordinary gamepads use native DualShock analog steering | Yes | Mods → **JogCon Input** off; the pad mode is under Settings → Controller |
+| **PGXP**: steady geometry and straight (perspective-correct) textures, with precise culling so the far road has no gaps | Yes | Mods → Visual → **PGXP Precision** off, or turn only its **Precise culling** option off |
+| **Max Detail**: longer draw distance (far bridges, buildings and road no longer pop in), full course and car detail at every distance, 1P detail in split screen, car reflections in the race | Yes | Mods → Detail → **R4 Max Detail** off, or set any one option (Draw distance, Course detail, Car detail, Split screen, Car reflections) back to **Stock**. Mirror scenery stays Stock unless you choose Full |
+| **VS split screen**: the OpenGL renderer draws 2P split screen in about a tenth of the draws (same picture) | Yes | Set `PSX_GL_TEXWIN_BATCH=0` for one run |
+| **VS split screen interpolation**: with R4 Frame Rate on, 2P split-screen races are drawn at the higher rate too | Comes with Frame Rate, which is off by default | Mods → Frame Rate → **R4 Frame Rate** off |
+| **Online battle, 2-4 players**: R4's Link Battle over the internet or LAN, each player on their own machine with their own full-screen view | Available from the launcher's NETPLAY page | Just play offline; local split screen stays 2-player VS Battle |
+| **No Rewind in split screen or online**: Rewind is off in 2-player VS Battle and in every netplay session, so a rewind can't put one player out of step | Yes, always | Not a setting. Rewind still works in single-player races (enable it in Settings; Y in Modern, Select + Y in Classic) |
+
+In netplay every peer runs without the game-changing mods. The ones that only
+change your own screen or your own pad (hide mirror, widescreen in your own
+Link Battle view, Modern controls) follow each player's own choice.
+
+Coming once the framework changes they need are merged: display defaults
+(dynamic resolution and window settings tuned for R4), **Smooth motion**
+(frame-rate interpolation on by default), the **HD HUD** pack, and
+**anti-aliasing**.
 
 ## Playing a release
 
@@ -92,8 +120,8 @@ The game runs on the bundled OpenBIOS. To use your own SCPH-1001 dump
 instead, pick it under Settings → System → BIOS: the game compiles a backend
 for it from your dump once (about a minute; on macOS this needs the Command
 Line Tools) and uses it from then on. Widescreen and frame rate are under
-**Mods**, internal resolution under **Settings → Display**; all are off by
-default.
+**Mods** and internal resolution under **Settings → Display**, all off by
+default; the features on by default are listed under "What's new" above.
 
 To update, extract the new zip over the old folder. Memory cards and settings
 carry over. Savestates from an older version are refused, and code overlays
@@ -373,8 +401,7 @@ Online Link Battle for 2-4 players: the host opens a room on the launcher's
 NETPLAY page and the others join; in the game choose Link Battle. The
 host is Player 1, each joining player takes the next seat, and everyone sees
 their own car full screen. Local split screen stays two players (VS Battle).
-See `docs/ONLINE_BATTLE.md` for the design, limits and the framework PRs it
-needs.
+See `docs/ONLINE_BATTLE.md` for the design and limits.
 
 ## Memory Cards
 
