@@ -7,7 +7,9 @@
  * (psx_mod_set_host_rumble; r4_modern_rumble.h). Only for ports presenting
  * a NeGcon (ID 0x23) and not in DualShock mode, so Classic's real DualShock
  * rumble is untouched; R4's own vibration off setting is honoured. Host
- * output only: it never writes guest state. */
+ * output only: it never writes guest state, so online it stays on per player
+ * (netplay = "host_output"); it reports both ports and psxrecomp keeps only
+ * this peer's own port, outside rollback resims. */
 #include <stdint.h>
 
 #include "cpu_state.h"
