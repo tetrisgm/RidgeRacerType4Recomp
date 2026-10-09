@@ -11,6 +11,11 @@
 #                      (one universal arm64+x86_64 build, ad-hoc signed; each
 #                      zip carries its own overlay_toolchain/ Python)
 #   Windows (MSYS2 MINGW64 shell) -> dist/r4-<ver>-windows-x64.zip
+#   Linux x86_64    -> dist/r4-<ver>-linux-x64.zip (Steam Deck / SteamOS too).
+#                      Build it inside the Steam Runtime 3 "sniper" SDK image
+#                      (glibc 2.31; docs/LINUX.md) so the binary runs on any
+#                      distribution at or after it. Gated below on its glibc
+#                      symbol versions and shared-library imports.
 #
 # Local only: no CI. Always packages from a throwaway clone at <ref>, so a
 # dirty or untracked generated/ never reaches a zip, and the framework
@@ -46,7 +51,10 @@ JOBS="${JOBS:-$(nproc 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null || echo 4)}"
 case "$(uname -s)" in
   Darwin) PLATFORM=macos ;;
   MINGW*|MSYS*) PLATFORM=windows ;;
-  *) echo "error: run on macOS or in an MSYS2 MINGW64 shell" >&2; exit 2 ;;
+  Linux)
+    [[ "$(uname -m)" == x86_64 ]] || { echo "error: Linux releases are x86_64 (run in the sniper SDK image)" >&2; exit 2; }
+    PLATFORM=linux ;;
+  *) echo "error: run on macOS, Linux x86_64 or in an MSYS2 MINGW64 shell" >&2; exit 2 ;;
 esac
 
 # --- throwaway clone at <ref> -------------------------------------------------
@@ -120,6 +128,20 @@ if [[ $PLATFORM == macos ]]; then
   if command -v ccache >/dev/null 2>&1; then
     HOST_ARGS+=(-DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache)
   fi
+elif [[ $PLATFORM == linux ]]; then
+  # One binary for every distribution at or after the build image's glibc:
+  # libstdc++/libgcc linked in, SDL3 built in (CMakeLists.txt vendors it; it
+  # dlopens X11/Wayland/GL/audio at run time), and no system SDL3 picked up.
+  # zlib is fetched and linked in, and the optional FreeType/HarfBuzz colour
+  # emoji path is off (as on macOS), so the only system libraries left are
+  # glibc's and the GL driver's (libOpenGL/libGL via GLVND, as on SteamOS).
+  LNX=("-DCMAKE_EXE_LINKER_FLAGS=-static-libstdc++ -static-libgcc")
+  EMIT_ARGS+=("${LNX[@]}")
+  HOST_ARGS+=("${LNX[@]}"
+              -DCMAKE_DISABLE_FIND_PACKAGE_SDL3=ON
+              -DCMAKE_DISABLE_FIND_PACKAGE_Freetype=ON
+              -DCMAKE_DISABLE_FIND_PACKAGE_ZLIB=ON -DPSX_ZLIB_FETCH=ON)
+  EXE=r4-runtime; SFX=""
 else
   # Static emitters (they ship in overlay_toolchain/), so a player's PATH can
   # never hand them the wrong runtime DLLs.
@@ -164,6 +186,19 @@ for b in "${BINS[@]}"; do
     fi
     [[ "$(otool -l "$b" | awk '/LC_BUILD_VERSION/{f=1} f&&/minos/{print $2; f=0}' | sort -u)" == "11.0" ]] \
       || { echo "minos is not 11.0: $b" >&2; exit 1; }
+  elif [[ $PLATFORM == linux ]]; then
+    # Only glibc's own objects and the GL driver (GLVND's libOpenGL / libGL):
+    # everything else is linked in or dlopened by SDL. And no glibc symbol
+    # newer than the Steam Runtime's 2.31 (SteamOS and current distributions
+    # are newer).
+    NEEDED="$(readelf -d "$b" | awk '/NEEDED/{gsub(/[][]/,"",$5); print $5}')"
+    [[ -n "$NEEDED" ]] || { echo "no dynamic section read from $b" >&2; exit 1; }
+    if grep -vxE 'lib(c|m|dl|pthread|rt)\.so\.[0-9]+|ld-linux-x86-64\.so\.2|lib(OpenGL\.so\.0|GL\.so\.1)' <<< "$NEEDED"; then
+      echo "non-libc shared library imports above in $b" >&2; exit 1
+    fi
+    GLIBC_MAX="$(objdump -T "$b" | grep -oE 'GLIBC_[0-9]+\.[0-9]+(\.[0-9]+)?' | sed 's/GLIBC_//' | sort -V | tail -1)"
+    [[ "$(printf '%s\n2.31\n' "$GLIBC_MAX" | sort -V | tail -1)" == 2.31 ]] \
+      || { echo "$b needs glibc $GLIBC_MAX (> 2.31)" >&2; exit 1; }
   else
     # Static: no MinGW/SDL/zlib DLL imports, so none has to ship beside it.
     IMPORTS="$(objdump -p "$b" | awk '/DLL Name:/{print $3}')"
@@ -200,7 +235,9 @@ if [[ $PLATFORM == macos ]]; then
 fi
 
 # --- package -------------------------------------------------------------------
-if [[ $PLATFORM == macos ]]; then ARTS=(macos-arm64 macos-x64); else ARTS=(windows-x64); fi
+if [[ $PLATFORM == macos ]]; then ARTS=(macos-arm64 macos-x64)
+elif [[ $PLATFORM == linux ]]; then ARTS=(linux-x64)
+else ARTS=(windows-x64); fi
 for A in "${ARTS[@]}"; do
   scripts/package_release.sh "$HOST" "$A" "$EMIT" > "dist-$A.log" 2>&1 \
     || { tail -40 "dist-$A.log" >&2; exit 1; }
@@ -241,6 +278,24 @@ for A in "${ARTS[@]}"; do
     for f in overlay_toolchain/tcc/tcc.exe overlay_toolchain/tcc/COPYING; do
       grep -qxF -- "$f" <<< "$L" || { echo "missing $f in $Z" >&2; exit 1; }
     done
+  fi
+  # Linux: a Steam Deck has no compiler either. The framework builds tcc from
+  # its pinned source and bundles musl's libc headers (MIT, with their notice).
+  if [[ $PLATFORM == linux ]]; then
+    for f in overlay_toolchain/tcc/tcc overlay_toolchain/tcc/libtcc1.a overlay_toolchain/tcc/COPYING \
+             overlay_toolchain/tcc/libc-include/stdint.h overlay_toolchain/tcc/libc-include/COPYRIGHT \
+             overlay_toolchain/python/bin/python3; do
+      grep -qxF -- "$f" <<< "$L" || { echo "missing $f in $Z" >&2; exit 1; }
+    done
+    # Executables keep their mode bits in the zip (a player unzips and runs).
+    "$PYTHON" - "$Z" <<'PY' || { echo "executables without +x in $Z" >&2; exit 1; }
+import stat, sys, zipfile
+z = zipfile.ZipFile(sys.argv[1])
+need = ["r4-runtime", "overlay_toolchain/tcc/tcc", "overlay_toolchain/psxrecomp-game",
+        "overlay_toolchain/psxrecomp-bios"]
+bad = [n for n in need if not (z.getinfo(n).external_attr >> 16) & stat.S_IXUSR]
+print("\n".join(bad)); sys.exit(1 if bad else 0)
+PY
   fi
   if grep -q '^overlay_toolchain/tcc/' <<< "$L" &&
      ! grep -iqE '^overlay_toolchain/tcc/([^/]+/)*[^/]*(copying|licen[cs]e|lgpl)[^/]*$' <<< "$L"; then
