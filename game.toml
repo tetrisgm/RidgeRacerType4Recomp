@@ -141,6 +141,10 @@ guest_cycle_scale_gate = { addr = 0x800AC794, value = 0x180 }
 # VBlanks (opens the mod gate on activation). Online, mod plans are cleared,
 # so the scale stays off there.
 guest_cycle_scale_gated = true
+# Batch the scaled CPU charge like the unscaled path (psxrecomp
+# guest_cycle_scale_batch): the same guest timing, frame-fingerprint
+# identical in 1P and 2P races, with less host work per instruction.
+guest_cycle_scale_batch = true
 
 [video]
 # The stock 4:3 frame. Widescreen is the r4.enhancement.widescreen mod
