@@ -43,6 +43,11 @@ if(EXISTS "${PSXRECOMP_ROOT}/lib/recomp-net/CMakeLists.txt")
 endif()
 set(PSX_SETUP_WIZARD ON CACHE BOOL
     "First-run setup wizard in recomp-ui (the disc picker of a full build)" FORCE)
+# R4 owns its launcher title layer: what the menus show, hide or automate,
+# the credits, and the disc-sourced menu art (launcher/title_r4.cpp,
+# recomp-launcher docs/SUPPORTED.md).
+set(R4L_TITLE_SOURCE "${CMAKE_CURRENT_SOURCE_DIR}/launcher/title_r4.cpp" CACHE FILEPATH
+    "recomp-launcher title layer for R4")
 include("${PSXRECOMP_ROOT}/runtime/runtime.cmake")
 
 # This project's own mod catalog. The FRAMEWORK stages it -- together with its
