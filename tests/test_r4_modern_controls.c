@@ -232,8 +232,20 @@ static void test_curves(PSXModPadFrame *f, PSXModPadOutput *o) {
     CHECK(o->lx == 0x80 + 6 + 35, "full stick at speed 900 loses 10% of the lock");
     set_speed(450); run(f, o);
     CHECK(o->lx == 0x80 + 6 + 38, "no lock reduction up to speed 450");
-    f->player = 1; set_speed(900); run(f, o);
-    CHECK(o->lx == 0x80 + 6 + 38, "P2 (car not mapped): no speed reduction");
+    f->player = 1; set_speed(900); put16(0x800AC0B0u + 0x320u + 0x1D8u, 0); run(f, o);
+    CHECK(o->lx == 0x80 + 6 + 38, "P2 reads its own car (at rest), not P1's");
+    put16(0x800AC0B0u + 0x320u + 0x1D8u, 900); run(f, o);
+    CHECK(o->lx == 0x80 + 6 + 35, "P2's own car at speed 900: lock reduced");
+    f->lx = 0x80; f->host_rt = 13; run(f, o);
+    CHECK(o->negcon_i > 0 && o->negcon_i < 53, "P2 rolling: light RT feathers");
+    put16(0x800AC0B0u + 0x320u + 0x1D8u, 0); run(f, o);
+    CHECK(o->negcon_i >= 53, "P2 at rest: light RT launches");
+    f->player = 2; put32(0x800FFDD0u + 8u, 0x80123400u);
+    put16(0x80123400u + 0x1D8u, 900); run(f, o);
+    CHECK(o->negcon_i > 0 && o->negcon_i < 53, "seat 3 reads its roster car");
+    put32(0x800FFDD0u + 8u, 0x12345678u); run(f, o);
+    CHECK(o->negcon_i >= 53, "seat 3 bad roster pointer: treated as at rest");
+    f->host_rt = 0;
     f->player = 0; set_speed(0);
     f->lx = 0x80;
 }

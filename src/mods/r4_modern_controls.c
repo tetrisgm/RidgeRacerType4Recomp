@@ -49,10 +49,15 @@
 #define R4_MC_TWIST_DZ_TABLE  0x800A0324u   /* u16 stride 4: 0 6 10 14 */
 #define R4_MC_TWIST_MAX_TABLE 0x800A0170u   /* u16: 25 38 75 113 */
 #define R4_MC_ATTRACT_HANDLER 0x8005E118u
-/* P1's car speed (s16 at car + 0x1D8) and a VBlank counter; R4's race logic
- * runs every second VBlank, so counter >> 1 is its frame. Speed-sensitive
- * steering uses P1's car only (other seats' cars are not mapped yet). */
-#define R4_MC_P1_SPEED_ADDR   (0x800AC0B0u + 0x1D8u)
+/* Each player's car (speed s16 at car + 0x1D8) and a VBlank counter; R4's
+ * race logic runs every second VBlank, so counter >> 1 is its frame. Players
+ * 1 and 2 (offline ports, netplay seats 0 / 1) drive R4's P1 / P2 car objects
+ * 0x320 apart; Link Battle seats 3 and 4 drive the roster's cars
+ * (0x800FFDD0 + 4 * seat, as r4_link_netplay.c draws them). */
+#define R4_MC_P1_CAR          0x800AC0B0u
+#define R4_MC_CAR_BYTES       0x320u
+#define R4_MC_CAR_SPEED       0x1D8u
+#define R4_MC_CAR_ROSTER      0x800FFDD0u
 #define R4_MC_VBLANK_COUNTER  0x800A6548u
 #define R4_MC_TUNING_FEATURE  "controls-tuning"
 
@@ -75,6 +80,15 @@ static int r4_mc_driving(void) {
     return psx_mod_read_word(R4_MC_PAUSED_ADDR) == 0;
 }
 
+/* The car this player drives, 0 when none is mapped. */
+static uint32_t r4_mc_player_car(uint32_t player) {
+    uint32_t car;
+    if (player < 2u) return R4_MC_P1_CAR + R4_MC_CAR_BYTES * player;
+    if (player >= R4_MC_PLAYERS) return 0u;
+    car = psx_mod_read_word(R4_MC_CAR_ROSTER + 4u * player);
+    return (car & 0xFFE00003u) == 0x80000000u ? car : 0u;
+}
+
 static void r4_mc_negcon_config(uint32_t player, R4ModernNegcon *ng) {
     const uint32_t port = R4_MC_CONFIG_PORT(player);
     const uint32_t cfg = R4_MC_BUTTON_CFG_ADDR + port * 48u + 16u;
@@ -95,11 +109,11 @@ static void r4_mc_negcon_config(uint32_t player, R4ModernNegcon *ng) {
         ? psx_mod_read_half(R4_MC_TWIST_MAX_TABLE + idx * 2u) : 38u;
     if (ng->twist_deadzone > 32u) ng->twist_deadzone = 6u;
     if (!ng->twist_range || ng->twist_range > 127u) ng->twist_range = 38u;
-    if (player == 0u) {
-        const int16_t speed = (int16_t)psx_mod_read_half(R4_MC_P1_SPEED_ADDR);
+    {
+        const uint32_t car = r4_mc_player_car(player);
+        const int16_t speed = car
+            ? (int16_t)psx_mod_read_half(car + R4_MC_CAR_SPEED) : 0;
         ng->speed = speed > 0 ? (uint32_t)speed : 0u;
-    } else {
-        ng->speed = 0u;
     }
     ng->phase = psx_mod_read_word(R4_MC_VBLANK_COUNTER) >> 1;
     ng->tuning = s_r4_mc_tuning;

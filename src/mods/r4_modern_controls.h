@@ -85,7 +85,7 @@ typedef struct R4ModernTuning {
  * (R4 steers on |twist - 128| past the dead zone, at full lock at dead zone +
  * range). Defaults: D-pad Down shifts up, Up shifts down, B (the Triangle
  * bit) changes the camera view; dead zone 6, range 38. speed and phase are
- * guest RAM read at pad time (the car's speed, R4's 30 Hz frame parity), so
+ * guest RAM read at pad time (this player's own car's speed, R4's 30 Hz frame parity), so
  * the mapping stays a pure function of the pad and guest state. */
 typedef struct R4ModernNegcon {
     uint32_t upshift, downshift, view;   /* SIO masks */
