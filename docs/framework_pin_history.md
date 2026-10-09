@@ -36,3 +36,5 @@ deliberately and record each bump here with the reason and what was verified.
 
 Nested submodules stay at whatever `psxrecomp` pins; do not bump recomp-net on
 its own.
+
+- 2026-10-08: recomp-ui -> recomp-launcher 7253f05 (netplay host/join return codes, LAN Start gate, script sleep, PARITY verified column).
