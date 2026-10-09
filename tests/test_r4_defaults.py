@@ -136,6 +136,8 @@ def test_game_toml():
           timing.get('guest_cycle_scale_gated') is True and
           'guest_cycle_scale_gate' in timing,
           'game.toml: guest_cycle_scale 2, gated to races with Max Detail')
+    check(timing.get('guest_cycle_scale_batch') is True,
+          'game.toml: the scaled CPU charge is batched (guest_cycle_scale_batch)')
     check(video.get('aspect_ratio') == '4:3',
           'game.toml: the base aspect stays 4:3 (widescreen is the mod)')
     check(video.get('renderer') == 'opengl',
