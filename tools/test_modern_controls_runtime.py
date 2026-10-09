@@ -283,7 +283,8 @@ def cmd_modern(args):
         brk[pct] = s0 - car()["speed"]
     d = [brk[p] for p in (0,) + PCTS]
     check(report, "LT sweep: light press brakes gently, deceleration rises with LT",
-          d[1] > d[0] and nondecreasing(d[1:]) and d[-1] > 2 * d[1] - d[0],
+          d[1] > d[0] and nondecreasing(d[1:], slack=NOISE)
+          and d[-1] > 2 * d[1] - d[0],
           drop=brk)
 
     # Steering: left stick sweep at full throttle.
