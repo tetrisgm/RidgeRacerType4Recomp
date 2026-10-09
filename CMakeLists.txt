@@ -169,6 +169,11 @@ if(R4_BUILD_TESTS AND BUILD_TESTING)
             "${CMAKE_CURRENT_SOURCE_DIR}/src/mods/r4_max_detail_plugin.c")
     endif()
     # R4 Controls (Modern scheme) pad transform against a mock mod API.
+    if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_r4_modern_rumble.c")
+        r4_plugin_test(r4_modern_rumble
+            "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_r4_modern_rumble.c"
+            "${CMAKE_CURRENT_SOURCE_DIR}/src/mods/r4_modern_rumble.c")
+    endif()
     if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_r4_modern_controls.c")
         r4_plugin_test(r4_modern_controls
             "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_r4_modern_controls.c"
