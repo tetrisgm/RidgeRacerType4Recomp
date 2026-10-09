@@ -44,6 +44,172 @@ id = "r4.modern-controls"
 # simulates (psxrecomp: [[plugin]] netplay = "input").
 netplay = "input"
 
+# Response tuning for Modern (docs/MODERN_CONTROLS.md). Hidden: game.toml
+# hide_hidden_mod_features keeps it out of the launcher; edit the values in
+# mods/state.toml to experiment.
+[[feature]]
+id = "controls-tuning"
+name = "Modern controls tuning"
+description = "Trigger and stick response curves for the Modern scheme."
+group = "Controllers"
+channel = "stable"
+default_enabled = true
+hidden = true
+
+[[option]]
+feature = "controls-tuning"
+id = "trigger_deadzone"
+label = "Trigger inner dead zone (%)"
+description = "Trigger travel ignored as noise before gas or brake begins."
+group = "Controllers"
+type = "integer"
+min = 0
+max = 50
+default = 2
+
+[[option]]
+feature = "controls-tuning"
+id = "trigger_full"
+label = "Trigger full point (%)"
+description = "Trigger travel that already counts as fully pressed."
+group = "Controllers"
+type = "integer"
+min = 50
+max = 100
+default = 95
+
+[[option]]
+feature = "controls-tuning"
+id = "trigger_gamma"
+label = "Trigger ease-in (gamma x100)"
+description = "Response curve exponent: 100 is linear, higher makes light presses gentler."
+group = "Controllers"
+type = "integer"
+min = 50
+max = 300
+default = 130
+
+[[option]]
+feature = "controls-tuning"
+id = "throttle_low_share"
+label = "Throttle feather band (%)"
+description = "Share of the gas request fed through R4's graded feather band (pressure 0..52) while rolling."
+group = "Controllers"
+type = "integer"
+min = 1
+max = 99
+default = 40
+
+[[option]]
+feature = "controls-tuning"
+id = "throttle_step_share"
+label = "Throttle step point (%)"
+description = "Share of the gas request where R4's half-throttle step lands; requests between the two are dithered across the step."
+group = "Controllers"
+type = "integer"
+min = 1
+max = 99
+default = 70
+
+[[option]]
+feature = "controls-tuning"
+id = "launch_speed"
+label = "Launch speed (R4 speed units)"
+description = "Below this speed, plus the request times the launch span, any gas press holds at least R4's half-throttle step, so a light press moves the car from rest and settles at a gentle cruise."
+group = "Controllers"
+type = "integer"
+min = 0
+max = 1000
+default = 20
+
+[[option]]
+feature = "controls-tuning"
+id = "stick_deadzone"
+label = "Stick radial dead zone (%)"
+description = "Stick travel ignored around the centre (drift)."
+group = "Controllers"
+type = "integer"
+min = 0
+max = 50
+default = 6
+
+[[option]]
+feature = "controls-tuning"
+id = "stick_ease"
+label = "Stick centre ease (%)"
+description = "Quadratic blend near centre: 0 is linear."
+group = "Controllers"
+type = "integer"
+min = 0
+max = 100
+default = 20
+
+[[option]]
+feature = "controls-tuning"
+id = "steer_speed_cut"
+label = "Speed-sensitive lock reduction (%)"
+description = "Steering lock removed at high speed; 0 turns speed-sensitive steering off."
+group = "Controllers"
+type = "integer"
+min = 0
+max = 90
+default = 10
+
+[[option]]
+feature = "controls-tuning"
+id = "steer_speed_low"
+label = "Speed-sensitive start (R4 speed units)"
+description = "Speed where the lock reduction starts."
+group = "Controllers"
+type = "integer"
+min = 0
+max = 4000
+default = 450
+
+[[option]]
+feature = "controls-tuning"
+id = "steer_speed_high"
+label = "Speed-sensitive end (R4 speed units)"
+description = "Speed where the lock reduction is complete."
+group = "Controllers"
+type = "integer"
+min = 0
+max = 4000
+default = 900
+
+[[option]]
+feature = "controls-tuning"
+id = "launch_span"
+label = "Launch span (R4 speed units)"
+description = "How far the launch zone grows with the gas request."
+group = "Controllers"
+type = "integer"
+min = 0
+max = 2000
+default = 300
+
+[[option]]
+feature = "controls-tuning"
+id = "feather_min"
+label = "Feather floor (NeGcon pressure)"
+description = "Lowest rolling gas pressure for any press (R4 roughly holds speed near 32)."
+group = "Controllers"
+type = "integer"
+min = 0
+max = 52
+default = 32
+
+[[option]]
+feature = "controls-tuning"
+id = "brake_min"
+label = "Brake floor (NeGcon pressure)"
+description = "Lowest brake pressure for any press past the dead zone."
+group = "Controllers"
+type = "integer"
+min = 0
+max = 50
+default = 6
+
 # Owner rule: no Rewind in split screen (netplay refuses it in psxrecomp).
 # Hidden and default-on, so it holds whatever the Controls feature is set to;
 # game.toml hide_hidden_mod_features keeps it out of the launcher.

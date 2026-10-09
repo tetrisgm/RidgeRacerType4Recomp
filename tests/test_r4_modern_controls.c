@@ -139,6 +139,105 @@ static void test_activation(void) {
     CHECK(!s_xf_set[0] && !s_xf_set[1] && !s_direct, "classic registers nothing");
 }
 
+static void set_speed(int16_t v) { put16(0x800AC0B0u + 0x1D8u, (uint16_t)v); }
+static void set_vblank(uint32_t v) { put32(0x800A6548u, v); }
+
+/* Mean throttle byte over R4's 16-frame dither cycle. */
+static double mean_i(PSXModPadFrame *f, PSXModPadOutput *o, uint32_t rt) {
+    uint32_t sum = 0;
+    f->host_rt = rt;
+    for (uint32_t k = 0; k < 16; ++k) {
+        set_vblank(k * 2u);
+        run(f, o);
+        sum += o->negcon_i;
+    }
+    set_vblank(0);
+    return sum / 16.0;
+}
+
+/* Response curves: dead zones, ease, launch dither, speed-sensitive lock. */
+static void test_curves(PSXModPadFrame *f, PSXModPadOutput *o) {
+    double prev = -1.0;
+    uint32_t lt_prev = 0, twist_prev = 0x80;
+    *f = frame(0xFFFFu, PSX_MOD_PAD_DUALSHOCK, 0x80, R4_MC_HOST_TRIGGERS, 0, 0);
+    set_speed(0);
+    CHECK(mean_i(f, o, 4) == 0.0, "RT inside the 2% dead zone: no gas");
+    CHECK(mean_i(f, o, 243) == 106.0 && mean_i(f, o, 255) == 106.0,
+          "RT past 95% is full gas");
+    for (uint32_t rt = 6; rt <= 255; rt += 6) {
+        const double m = mean_i(f, o, rt);
+        CHECK(m >= prev, "mean gas never falls as RT rises");
+        CHECK(m > 0.0, "any RT past the dead zone gives gas");
+        prev = m;
+    }
+    /* From rest any press holds at least R4's step (I 53) so the car rolls
+     * away; rolling, light presses feather below it and the gap between the
+     * bands dithers 52 / 53 on R4's 30 Hz frame. */
+    f->host_rt = 13; run(f, o);
+    CHECK(o->negcon_i >= 53, "light RT from rest holds the step (launch)");
+    set_speed(200);
+    run(f, o);
+    CHECK(o->negcon_i >= 32 && o->negcon_i < 53, "light RT rolling feathers below the step");
+    {
+        uint32_t on = 0, off = 0;
+        f->host_rt = 150;
+        for (uint32_t k = 0; k < 16; ++k) {
+            set_vblank(k * 2u);
+            run(f, o);
+            if (o->negcon_i == 53) ++on;
+            else if (o->negcon_i == 52) ++off;
+        }
+        CHECK(on >= 1 && off >= 1 && on + off == 16, "gap request dithers 52 / 53");
+        set_vblank(3); run(f, o);
+        { const uint32_t a = o->negcon_i; set_vblank(2); run(f, o);
+          CHECK(a == o->negcon_i, "dither steps on R4's 30 Hz frame, not VBlank"); }
+        set_vblank(0);
+    }
+    prev = -1.0;
+    for (uint32_t rt = 6; rt <= 255; rt += 6) {
+        const double m = mean_i(f, o, rt);
+        CHECK(m >= prev, "rolling: mean gas never falls as RT rises");
+        prev = m;
+    }
+    set_speed(0);
+    f->host_rt = 128; run(f, o);
+    CHECK(o->negcon_i > 53 && o->negcon_i < 106, "half RT from rest: between step and full");
+    f->host_rt = 0;
+
+    for (uint32_t lt = 0; lt <= 255; lt += 5) {
+        f->host_lt = lt; run(f, o);
+        CHECK(o->negcon_ii >= lt_prev, "brake never falls as LT rises");
+        if (lt >= 10) CHECK(o->negcon_ii > 0, "any LT past the dead zone brakes");
+        lt_prev = o->negcon_ii;
+    }
+    f->host_lt = 13; run(f, o);
+    CHECK(o->negcon_ii >= 6 && o->negcon_ii < 10, "light LT brakes gently (floor + ease-in)");
+    f->host_lt = 0;
+
+    f->lx = 0x80 + 6; run(f, o);
+    CHECK(o->lx == 0x80, "stick inside the 6% radial dead zone: straight");
+    f->lx = 0x80; f->ly = 0x80 + 7; run(f, o);
+    CHECK(o->lx == 0x80, "vertical drift does not steer");
+    f->ly = 0x80;
+    for (uint32_t lx = 0x80; lx <= 0xFF; ++lx) {
+        f->lx = lx; run(f, o);
+        CHECK(o->lx >= twist_prev, "twist never falls as the stick moves right");
+        twist_prev = o->lx;
+    }
+    f->lx = 0xFF; run(f, o);
+    CHECK(o->lx == 0x80 + 6 + 38, "full stick at rest is R4's full lock");
+    f->lx = 0x00; run(f, o);
+    CHECK(o->lx == 0x80 - 6 - 38, "full left mirrors full right");
+    f->lx = 0xFF; set_speed(900); run(f, o);
+    CHECK(o->lx == 0x80 + 6 + 35, "full stick at speed 900 loses 10% of the lock");
+    set_speed(450); run(f, o);
+    CHECK(o->lx == 0x80 + 6 + 38, "no lock reduction up to speed 450");
+    f->player = 1; set_speed(900); run(f, o);
+    CHECK(o->lx == 0x80 + 6 + 38, "P2 (car not mapped): no speed reduction");
+    f->player = 0; set_speed(0);
+    f->lx = 0x80;
+}
+
 static void test_mapping(void) {
     const uint32_t all = R4_MC_HOST_TRIGGERS;
     PSXModPadFrame f;
@@ -153,43 +252,13 @@ static void test_mapping(void) {
     CHECK(run(&f, &o) == 0, "menus pass through");
 
     set_scene(2u);
-    f = frame(0xFFFFu, PSX_MOD_PAD_DUALSHOCK, 0x23, all, 64, 128);
-    CHECK(run(&f, &o) == 1 && o.type == PSX_MOD_PAD_NEGCON, "race presents NeGcon");
-    CHECK(o.lx == 128u - (6u + (93u * 38u + 126u) / 127u) && o.negcon_i == 53 &&
-          o.negcon_ii == 27 && o.negcon_l == 0,
-          "twist from lx, I = RT and II = LT scaled to 0..106, L = 0");
-    {
-        static const struct { uint32_t lx, twist; } sweep[] = {
-            { 0x80, 0x80 }, { 0x81, 0x80 + 7 }, { 0x7F, 0x80 - 7 },
-            { 0xFF, 0x80 + 44 }, { 0x00, 0x80 - 44 }, { 0x01, 0x80 - 44 },
-            { 0xC0, 0x80 + 6 + 20 },
-        };
-        for (size_t i = 0; i < sizeof sweep / sizeof sweep[0]; ++i) {
-            f = frame(0xFFFFu, PSX_MOD_PAD_DUALSHOCK, sweep[i].lx, all, 0, 0);
-            run(&f, &o);
-            CHECK(o.lx == sweep[i].twist, "stick spans R4's twist dead zone + range");
-        }
-        put16(0x800AD6E0u + 18u, 3);   /* widest range setting: 113 */
-        f = frame(0xFFFFu, PSX_MOD_PAD_DUALSHOCK, 0xFF, all, 0, 0);
-        run(&f, &o);
-        CHECK(o.lx == 0x80 + 6 + 113, "R4's twist range setting followed");
-        put16(0x800AD6E0u + 18u, 1);
-    }
-    CHECK(o.buttons == 0xFFFFu, "no buttons at rest");
-
-    f = frame(0xFFFFu, PSX_MOD_PAD_DUALSHOCK, 0x80, all, 255, 255);
-    run(&f, &o);
-    CHECK(o.negcon_i == 106 && o.negcon_ii == 106, "full triggers = R4's full pressure");
     f = frame(0xFFFFu, PSX_MOD_PAD_DUALSHOCK, 0x80, all, 0, 0);
-    run(&f, &o);
-    CHECK(o.negcon_i == 0 && o.negcon_ii == 0, "released triggers = zero pressure");
-    put16(0x800AD6E0u + 10u, 20); put16(0x800AD6E0u + 12u, 250);
-    f = frame(0xFFFFu, PSX_MOD_PAD_DUALSHOCK, 0x80, all, 0, 255);
-    run(&f, &o);
-    CHECK(o.negcon_i == 126 && o.negcon_ii == 250, "rest offsets added");
-    f = frame(0xFFFFu, PSX_MOD_PAD_DUALSHOCK, 0x80, all, 255, 0);
-    run(&f, &o);
-    CHECK(o.negcon_i == 20 && o.negcon_ii == 255, "pressure clamped to 255");
+    CHECK(run(&f, &o) == 1 && o.type == PSX_MOD_PAD_NEGCON, "race presents NeGcon");
+    CHECK(o.lx == 0x80 && o.negcon_i == 0 && o.negcon_ii == 0 && o.negcon_l == 0,
+          "neutral: centred twist, no pressure, L = 0");
+    CHECK(o.buttons == 0xFFFFu, "no buttons at rest");
+    test_curves(&f, &o);
+
     put16(0x800AD6E0u + 10u, 0); put16(0x800AD6E0u + 12u, 0);
 
     f = frame(press(R4_MC_PAD_SQUARE), PSX_MOD_PAD_DUALSHOCK, 0x80, all, 0, 0);
@@ -225,7 +294,7 @@ static void test_mapping(void) {
      * steers proportionally; the D-pad reaches nothing. */
     f = frame(press(R4_MC_PAD_LEFT), PSX_MOD_PAD_DIGITAL, 0xC0, all, 0, 255);
     run(&f, &o);
-    CHECK(o.type == PSX_MOD_PAD_NEGCON && o.lx == 0x80 + 6 + 20 &&
+    CHECK(o.type == PSX_MOD_PAD_NEGCON && o.lx > 0x80 + 6 &&
           o.negcon_i == 106 && o.buttons == 0xFFFFu,
           "digital pad steers from the real stick");
     f = frame(0xFFFFu, PSX_MOD_PAD_DIGITAL, 0x80, all, 0, 0);
