@@ -74,6 +74,7 @@ const SurfaceRule kSurface[] = {
     // Netplay: host and join (lobby, chat, seats are essentials by default).
     {"netplay.host", Vis::Shown, nullptr},
     {"netplay.join", Vis::Shown, nullptr},
+    {"netplay.spectators", Vis::Hidden, nullptr},  // owner: few options; spectating still works underneath
     // Mods: shown, simple (no package view, versions or resource pickers).
     {"mods.list", Vis::Shown, nullptr},
     {"mods.install", Vis::Shown, nullptr},
