@@ -514,11 +514,13 @@ def presented(peers, i, path, full_path=None):
                              path=str(path))
         if not response.get("ok"):
             continue
+        peers.fetch(path)
         if full_path is None:
             return response
         full = peers.ask(i, "display_ring_get", frame=frame,
                          path=str(full_path))
         if full.get("ok"):
+            peers.fetch(full_path)
             return response
     raise RuntimeError(f"present/display ring read failed on peer {i}")
 
