@@ -353,6 +353,9 @@ static void r4_widescreen_activate(void)
                 s_pvs_union, s_hooks_registered);
 }
 
+/* No option-changed callback on purpose: the View changes the native-wide
+ * scene (culling, projection), so switching it mid-race changes guest state
+ * (fingerprints diverge). The in-game menu saves it for the next start. */
 PSX_MOD_CONSTRUCTOR(r4_register_widescreen)
 {
     for (int i = 0; i < R4_HUD_PRODUCER_COUNT; i++)

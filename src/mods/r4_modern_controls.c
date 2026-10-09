@@ -119,6 +119,21 @@ static void r4_mc_activate(void) {
     (void)psx_mod_allow_direct_shortcut(PSX_MOD_SHORTCUT_REWIND);
 }
 
+/* In-game menu (psxrecomp P5): Modern <-> Classic on a running game. Classic
+ * drops the transform (stock pads from the next poll); Modern reinstalls it.
+ * The direct Rewind shortcut stays as activation left it until restart. */
+static int r4_mc_option_changed(const char *option_id, const char *value) {
+    if (strcmp(option_id, "scheme")) return 0;
+    if (r4_modern_controls_scheme_is_classic(value)) {
+        for (uint32_t player = 0; player < R4_MC_PLAYERS; ++player)
+            (void)psx_mod_set_pad_transform(player, NULL);
+        return 1;
+    }
+    r4_mc_activate();
+    return 1;
+}
+
 PSX_MOD_CONSTRUCTOR(r4_modern_controls_register) {
     (void)psx_mod_register_activation_plugin(R4_MC_PLUGIN, r4_mc_activate);
+    (void)psx_mod_register_option_changed_plugin(R4_MC_PLUGIN, r4_mc_option_changed);
 }

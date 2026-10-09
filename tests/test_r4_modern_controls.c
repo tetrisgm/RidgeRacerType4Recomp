@@ -33,8 +33,15 @@ int psx_mod_option_value(const char *package_id, const char *feature_id,
     snprintf(out, out_size, "%s", s_scheme);
     return 1;
 }
+static PSXModOptionChangedCallback s_changed;
+int psx_mod_register_option_changed_plugin(const char *id, PSXModOptionChangedCallback cb) {
+    if (!id || strcmp(id, "r4.modern-controls") != 0 || !cb) return 0;
+    s_changed = cb;
+    return 1;
+}
 int psx_mod_set_pad_transform(uint32_t player, const PSXModPadTransform *xf) {
-    if (player >= 4 || !xf) return 0;
+    if (player >= 4) return 0;
+    if (!xf) { s_xf_set[player] = 0; return 1; }
     s_xf[player] = *xf;
     s_xf_set[player] = 1;
     return 1;
@@ -264,8 +271,22 @@ static void test_mapping(void) {
           !r4_modern_controls_scheme_is_classic(NULL), "scheme parsing");
 }
 
+/* In-game menu: the scheme flips live (psxrecomp P5 option-changed). */
+static void test_live_scheme(void) {
+    reset_mocks();
+    s_scheme = "modern";
+    s_activate();
+    CHECK(s_changed != NULL, "option-changed callback registered");
+    CHECK(s_changed("scheme", "classic") == 1 && !s_xf_set[0] && !s_xf_set[3],
+          "Classic live: transforms dropped");
+    CHECK(s_changed("scheme", "modern") == 1 && s_xf_set[0] && s_xf_set[3],
+          "Modern live: transforms back");
+    CHECK(s_changed("other", "x") == 0, "unknown option is restart-only");
+}
+
 int main(void) {
     test_activation();
+    test_live_scheme();
     test_mapping();
     if (s_failures) {
         fprintf(stderr, "%d failure(s)\n", s_failures);
