@@ -8,7 +8,8 @@
 
 R4: Ridge Racer Type 4 (USA, SLUS-00797) statically recompiled to a native
 executable with [psxrecomp](https://github.com/RetroPortingToolKit/psxrecomp)
-and [recomp-ui](https://github.com/RetroPortingToolKit/recomp-ui), structured
+and [recomp-launcher](https://github.com/tetrisgm/recomp-launcher) (a drop-in
+for recomp-ui, checked out at the `recomp-ui` submodule path), structured
 after [MegaManX6Recomp](https://github.com/mstan/MegaManX6Recomp).
 
 ## What This Is
@@ -355,9 +356,19 @@ untested. Any option can be set back to Stock; with the package off the game
 runs exactly as before. Netplay sessions run without mods. Details:
 `docs/MAX_DETAIL.md`.
 
+## In-game menu
+
+Press Esc (keyboard), Guide, or Start+Select (gamepad) during play to open
+the launcher's menus over the game: Graphics, Controls, Mods and Credits. The
+game pauses while it is open, except in netplay, where the race keeps running
+and only your own inputs are held. Settings marked "Applies after restart"
+take effect on the next start; everything else applies at once and is saved.
+`PSX_OVERLAY=0` turns the menu off. Skins: `docs` in recomp-launcher
+(`assets/skins/<id>/skin.json`).
+
 ## Controls
 
-Keyboard and SDL gamepads per recomp-ui's input settings. Gamepads use R4's
+Keyboard and SDL gamepads per the launcher's Controls page. Gamepads use R4's
 native DualShock analog mode by default. SDL-mapped steering wheels with
 recognized names use JogCon steering on the mapped left-X axis; per-player
 deadzone calibration applies. The default R4 JogCon Input compatibility package
@@ -434,7 +445,7 @@ snapshots of the game's code.
 MIT for this repository's own code — see `LICENSE`. Files adapted from
 MegaManX6Recomp (listed in `THIRD-PARTY-LICENSES/README.md`) stay under
 PolyForm Noncommercial 1.0.0, and the
-`psxrecomp` and `recomp-ui` submodules carry their own licenses; release zips
+`psxrecomp` and `recomp-ui` (recomp-launcher) submodules carry their own licenses; release zips
 carry their notices in `licenses/` and `assets/`. R4: Ridge Racer Type 4 is
 © Namco (Bandai Namco Entertainment). Neither this repository nor its release
 zips contain the disc image or the game's data (models, textures, audio,
