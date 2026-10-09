@@ -558,6 +558,10 @@ direct_shortcut_button = "y"
 # players = 4 is the netplay seat ceiling for the online Link Battle; R4
 # itself has no multitap support, so offline play keeps two standalone pads.
 multitap = false
+# A wheel presented as JogCon gets R4's JogCon force feedback through SDL
+# haptics (constant force / centring spring) when it supports them; gamepads
+# are never driven by it (psxrecomp psx_jogcon_ffb.h).
+jogcon_force_feedback = true
 
 # Online mount gate: digests + track count + TOC fingerprint
 # (psxrecomp/docs/NETPLAY.md). required_tracks = 1 is correct for this disc.
