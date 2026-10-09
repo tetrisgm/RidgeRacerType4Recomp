@@ -1,25 +1,23 @@
 # Handoff
 
-## Current work (2026-10-08)
+## Current work (2026-10-09)
 
-Released: v0.1.0 only. **Everything planned for the next release is merged;
-only the release itself is left**, waiting on the owner's final go and version
-number. Never tag or publish without that ask.
+Released: v0.1.0 only. Next release waits on the open PRs below landing and
+the owner's go and version number. Never tag or publish without that ask.
 
-Merged on master: R4 #6-#13, #15, #17 (display defaults; #9 folded in and
-closed), #18 (bundled compiled releases), #10 (online 2-4 players), #20 (HD
-HUD), #21 (player guide + draft release notes). Pins: psxrecomp `67a21b73`
-(#583, all framework PRs this release needed), recomp-ui `7e884a2`.
+Merged since 2026-10-08: R4 #29 (analog sweep test), #30 (forgiving analog
+response curves), #33 (remote-seat test tooling).
 
-No open R4 or psxrecomp PRs gate the release.
-
-Release dry run (local only, not published): `analysis/handoff/rc-dry2-20261008/`
-(gitignored) holds the macOS arm64/x64 and Windows x64 zips from R4 master
-`8d360fa` and the check results.
-
-Owner test build: `~/dev/ridgeracertype4-wt/pacing-r4`, branch
-`test/owner-build-2` (R4 master), shipped defaults; race savestates slots
-1-4 (1P) and 9 (2P VS). The previous build's saves are backed up beside it.
+Open, waiting on psxrecomp review/merge (all review points answered):
+- Visual: psxrecomp #584 dither (stacked on #587), #586 xBR, #587 accurate
+  blending, #589 bloom.
+- Performance: #590 v_wait idle skip, #595, #596, #597 -> R4 #22, #25.
+- Presets: #591 + recomp-ui #86 -> R4 #23 (Low on low-end, Ultra otherwise).
+- Linux/Deck: #592, #593 -> R4 #24.
+- In-game menu: #598-#603 -> R4 #26 -> #27 -> #28 (tetrisgm/recomp-launcher).
+- Controls: #608, #610 -> R4 #31 (rumble); #609 -> R4 #32 (wheel FFB).
+- Netplay: #611 (false desync warnings); #607 spectators (inert until the
+  lobby server relays spectators; #612 and recomp-net #34 are drafts).
 
 ## Owner decisions
 
@@ -31,6 +29,10 @@ Owner test build: `~/dev/ridgeracertype4-wt/pacing-r4`, branch
 - Online: 2-4 players, each on their own full-screen view.
 - Rewind off in split screen and in every online session.
 - Release model: bundled compiled zips (#18). Version: TBD.
+- Graphics presets: low-end machines start Low (extras off); others Ultra
+  with dynamic resolution, frame rate and aspect.
+- Modern controls: NeGcon analog gas/brake/steering, forgiving curves.
+- New launcher: tetrisgm/recomp-launcher replaces recomp-ui, minimal R4 menus.
 
 ## Blockers
 
