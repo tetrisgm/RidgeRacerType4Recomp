@@ -13,8 +13,8 @@ it is not a physical-controller test. Settings the run needs, in
   grid  [--slot 9] [--manual]   fresh boot -> Grand Prix grid, save the slot
                                 (--manual picks the manual transmission)
   modern [--slot 9] [--mt-slot 7]
-                                Modern acceptance: guest pad type, throttle,
-                                brake, steering sweep, camera, Rewind, shifting
+                                Modern acceptance: guest pad type, RT / LT
+                                sweeps (0 64 128 192 255), steering sweep, camera, Rewind, shifting
                                 (shifting needs a --manual grid slot)
   classic [--slot 9]            Classic / feature off: stock pad in races,
                                 Y alone is Triangle, Select + Y opens Rewind
@@ -48,7 +48,9 @@ CAR_VIEW = 0x640           # u16, camera view index
 PAD0 = 0x800F3BE8          # R4's decoded pad 0 (0x5C per port)
 RACE_PHASE = 0x800FF860
 PAUSED = 0x800F4F6C
+CAR_THROTTLE = 0x2A0       # u16, R4's throttle 0..255 (NeGcon I rescaled)
 SIO_PAD_NEGCON = 3
+LEVELS = (0, 64, 128, 192, 255)   # trigger sweep
 NEGCON_ID = 0x23
 
 PSX = {"select": 0x0001, "start": 0x0008, "up": 0x0010, "down": 0x0040,
@@ -121,6 +123,14 @@ def car():
             "speed": int.from_bytes(r[CAR_SPEED:CAR_SPEED + 2], "little", signed=True),
             "gear": r[CAR_GEAR],
             "view": int.from_bytes(r[CAR_VIEW:CAR_VIEW + 2], "little")}
+
+
+def car_throttle():
+    return int.from_bytes(ram(CAR0 + CAR_THROTTLE, 2), "little")
+
+
+def increasing(seq):
+    return all(p < q for p, q in zip(seq, seq[1:]))
 
 
 def guest_pad():
@@ -220,30 +230,45 @@ def cmd_modern(args):
           seen == {(NEGCON_ID, 1, 0)} and status["type"] == SIO_PAD_NEGCON,
           seen=sorted(seen), sio_type=status["type"])
 
-    # Throttle: RT 0 / 128 / 255 from the same grid, 120 frames each.
+    # Throttle: RT sweep. R4's throttle (car+0x2A0) and NeGcon I must track
+    # the trigger linearly; from a rolling start speed must rise with it
+    # (from a standstill R4's launch physics needs about half throttle).
     thr = {}
-    for v in (0, 128, 255):
+    for v in LEVELS:
         restore(slot)
+        host(rt=255)
+        wait_frames(90)
         host(rt=v)
-        wait_frames(120)
-        thr[v] = {"speed": car()["speed"], "i": guest_pad()["i"]}
-    check(report, "RT raises speed proportionally (0 < RT128 < RT255)",
-          thr[0]["speed"] == 0 < thr[128]["speed"] < thr[255]["speed"]
-          and thr[0]["i"] == 0 < thr[128]["i"] < thr[255]["i"] == 106,
+        wait_frames(30)
+        throttle = car_throttle()
+        wait_frames(90)
+        thr[v] = {"throttle": throttle, "i": guest_pad()["i"],
+                  "speed": car()["speed"]}
+    t = [thr[v]["throttle"] for v in LEVELS]
+    i = [thr[v]["i"] for v in LEVELS]
+    sp = [thr[v]["speed"] for v in LEVELS]
+    check(report, "RT sweep: throttle, NeGcon I and speed rise proportionally",
+          increasing(t) and increasing(i) and increasing(sp)
+          and all(abs(thr[v]["throttle"] - v) <= 4 for v in LEVELS)
+          and all(abs(thr[v]["i"] - (v * 106 + 127) // 255) <= 1 for v in LEVELS),
           trials=thr)
 
-    # Brake: full throttle for 150 frames, then 60 frames of LT.
+    # Brake: full throttle for 150 frames, then 60 frames of LT per level.
     brk = {}
-    for v in (0, 128, 255):
+    for v in LEVELS:
         restore(slot)
         host(rt=255)
         wait_frames(150)
         before = car()["speed"]
         host(lt=v)
         wait_frames(60)
-        brk[v] = {"before": before, "after": car()["speed"], "ii": guest_pad()["ii"]}
-    check(report, "LT reduces speed proportionally (coast > LT128 > LT255)",
-          brk[0]["after"] > brk[128]["after"] > brk[255]["after"],
+        brk[v] = {"before": before, "drop": before - car()["speed"],
+                  "ii": guest_pad()["ii"]}
+    d = [brk[v]["drop"] for v in LEVELS]
+    ii = [brk[v]["ii"] for v in LEVELS]
+    check(report, "LT sweep: NeGcon II and deceleration rise proportionally",
+          increasing(d) and increasing(ii) and d[0] > 0
+          and all(abs(brk[v]["ii"] - (v * 106 + 127) // 255) <= 1 for v in LEVELS),
           trials=brk)
 
     # Steering: left stick sweep at full throttle.
