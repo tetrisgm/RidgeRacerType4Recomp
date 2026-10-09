@@ -6,7 +6,8 @@ R4 turns its enhancements on by default (README "On by default"):
   - game.toml [video] internal_resolution = Match display, at the display's
     full resolution (no match_display_max_lines cap; owner, 2026-10-01),
     supersample 1.5 and no post AA filter, with dynamic resolution on and
-    floored at the display's own lines ("display"; "720p" or another preset
+    floored at native x1 (owner, 2026-10-08: Ultra by default, the dynamic
+    systems are the safety net; "display" or another preset
     is accepted too) so the default holds full speed; the Display row turns
     it off;
   - game.toml [video] render_thread, present_thread and Smooth motion
@@ -111,11 +112,11 @@ def test_game_toml():
     check(video.get('dynamic_resolution') is True,
           'game.toml: dynamic resolution on by default')
     floor = video.get('dynamic_resolution_min')
-    check(floor == 'display' or (isinstance(floor, str) and floor.endswith('p'))
+    check(floor in ('display', 'native') or (isinstance(floor, str) and floor.endswith('p'))
           or (isinstance(floor, int) and floor >= 240),
-          'game.toml: dynamic resolution has a floor ("display" or a preset)')
-    check(floor == 'display',
-          'game.toml: dynamic resolution never below the display ("display")')
+          'game.toml: dynamic resolution has a floor ("native", "display" or a preset)')
+    check(floor == 'native',
+          'game.toml: Ultra dynamic resolution floor is native x1 (safety net)')
     check(video.get('supersample') == 1.5, 'game.toml: supersample = 1.5')
     check(video.get('antialiasing_mode') == 'off',
           'game.toml: no post-process AA filter (antialiasing_mode = "off")')
@@ -160,6 +161,13 @@ def test_quality_presets():
           'game.toml: Medium and up keep the PGXP extras')
     check(all(p.get('dynamic_resolution', True) is True for p in q.values()),
           'game.toml: dynamic resolution stays on in every preset')
+    check(video.get('texture_lod') == 'mipmap' and video.get('anisotropic_filtering') == 16
+          and video.get('fmv_chroma_smoothing') is True and video.get('bloom') == 1.0
+          and video.get('dithering') == 'off' and video.get('texture_filtering') != 'xbr'
+          and 'accurate_blending' not in video,
+          'game.toml: Ultra turns on mipmaps + 16x aniso, FMV chroma, bloom 1; dithering off; no xBR/accurate blending')
+    check(low.get('texture_lod') == 'off' and low.get('bloom') == 0.0,
+          'game.toml: Low turns the new visual features off')
     check(all(isinstance(v, (bool, int, float, str)) for p in q.values() for v in p.values()),
           'game.toml: presets hold plain [video] values')
     ss = [video.get('supersample'), q['high'].get('supersample', video.get('supersample')),
