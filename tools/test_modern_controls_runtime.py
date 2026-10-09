@@ -14,7 +14,7 @@ it is not a physical-controller test. Settings the run needs, in
                                 (--manual picks the manual transmission)
   modern [--slot 9] [--mt-slot 7]
                                 Modern acceptance: guest pad type, RT / LT
-                                sweeps (0 64 128 192 255), steering sweep, camera, Rewind, shifting
+                                sweeps (5 10 25 50 75 100 %), steering sweep, camera, Rewind, shifting
                                 (shifting needs a --manual grid slot)
   classic [--slot 9]            Classic / feature off: stock pad in races,
                                 Y alone is Triangle, Select + Y opens Rewind
@@ -50,7 +50,7 @@ RACE_PHASE = 0x800FF860
 PAUSED = 0x800F4F6C
 CAR_THROTTLE = 0x2A0       # u16, R4's throttle 0..255 (NeGcon I rescaled)
 SIO_PAD_NEGCON = 3
-LEVELS = (0, 64, 128, 192, 255)   # trigger sweep
+PCTS = (5, 10, 25, 50, 75, 100)   # trigger sweep, % of travel
 NEGCON_ID = 0x23
 
 PSX = {"select": 0x0001, "start": 0x0008, "up": 0x0010, "down": 0x0040,
@@ -127,6 +127,18 @@ def car():
 
 def car_throttle():
     return int.from_bytes(ram(CAR0 + CAR_THROTTLE, 2), "little")
+
+
+def pct_to_byte(pct):
+    return (pct * 255 + 50) // 100
+
+
+# Debug-server input timing jitters settled speed deltas by a few units.
+NOISE = 6
+
+
+def nondecreasing(seq, slack=0):
+    return all(p <= q + slack for p, q in zip(seq, seq[1:]))
 
 
 def increasing(seq):
@@ -230,46 +242,50 @@ def cmd_modern(args):
           seen == {(NEGCON_ID, 1, 0)} and status["type"] == SIO_PAD_NEGCON,
           seen=sorted(seen), sio_type=status["type"])
 
-    # Throttle: RT sweep. R4's throttle (car+0x2A0) and NeGcon I must track
-    # the trigger linearly; from a rolling start speed must rise with it
-    # (from a standstill R4's launch physics needs about half throttle).
-    thr = {}
-    for v in LEVELS:
+    # Throttle: RT 5/10/25/50/75/100 %. From rest, every press above the
+    # dead zone must move the car, more press more speed; rolling, the
+    # settled acceleration must rise with RT too.
+    rest, roll = {}, {}
+    for pct in PCTS:
+        v = pct_to_byte(pct)
         restore(slot)
-        host(rt=255)
-        wait_frames(90)
         host(rt=v)
-        wait_frames(30)
-        throttle = car_throttle()
         wait_frames(90)
-        thr[v] = {"throttle": throttle, "i": guest_pad()["i"],
-                  "speed": car()["speed"]}
-    t = [thr[v]["throttle"] for v in LEVELS]
-    i = [thr[v]["i"] for v in LEVELS]
-    sp = [thr[v]["speed"] for v in LEVELS]
-    check(report, "RT sweep: throttle, NeGcon I and speed rise proportionally",
-          increasing(t) and increasing(i) and increasing(sp)
-          and all(abs(thr[v]["throttle"] - v) <= 4 for v in LEVELS)
-          and all(abs(thr[v]["i"] - (v * 106 + 127) // 255) <= 1 for v in LEVELS),
-          trials=thr)
-
-    # Brake: full throttle for 150 frames, then 60 frames of LT per level.
-    brk = {}
-    for v in LEVELS:
+        rest[pct] = car()["speed"]
         restore(slot)
         host(rt=255)
-        wait_frames(150)
-        before = car()["speed"]
-        host(lt=v)
-        wait_frames(60)
-        brk[v] = {"before": before, "drop": before - car()["speed"],
-                  "ii": guest_pad()["ii"]}
-    d = [brk[v]["drop"] for v in LEVELS]
-    ii = [brk[v]["ii"] for v in LEVELS]
-    check(report, "LT sweep: NeGcon II and deceleration rise proportionally",
-          increasing(d) and increasing(ii) and d[0] > 0
-          and all(abs(brk[v]["ii"] - (v * 106 + 127) // 255) <= 1 for v in LEVELS),
-          trials=brk)
+        while car()["speed"] < 300:
+            wait_frames(1)
+        host(rt=v)
+        wait_frames(20)
+        s0 = car()["speed"]
+        wait_frames(30)
+        roll[pct] = car()["speed"] - s0
+    r = [rest[p] for p in PCTS]
+    g = [roll[p] for p in PCTS]
+    check(report, "RT sweep: any press launches from rest, speed and "
+          "rolling acceleration rise with RT",
+          r[0] > 0 and nondecreasing(r) and increasing(r[1:])
+          and nondecreasing(g, slack=NOISE) and g[-1] > g[0] + 2 * NOISE,
+          from_rest=rest, rolling_dv=roll)
+
+    # Brake: LT 5..100 % from ~450 for 30 settled frames.
+    brk = {}
+    for pct in (0,) + PCTS:
+        restore(slot)
+        host(rt=255)
+        while car()["speed"] < 450:
+            wait_frames(1)
+        host(lt=pct_to_byte(pct))
+        wait_frames(20)
+        s0 = car()["speed"]
+        wait_frames(30)
+        brk[pct] = s0 - car()["speed"]
+    d = [brk[p] for p in (0,) + PCTS]
+    check(report, "LT sweep: light press brakes gently, deceleration rises with LT",
+          d[1] > d[0] and nondecreasing(d[1:], slack=NOISE)
+          and d[-1] > 2 * d[1] - d[0],
+          drop=brk)
 
     # Steering: left stick sweep at full throttle.
     steer = {}

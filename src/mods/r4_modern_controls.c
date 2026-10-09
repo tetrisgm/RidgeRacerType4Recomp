@@ -4,7 +4,8 @@
  * psx_mod_set_pad_transform, stage 2b of the offline input layer). During a
  * race, on a gamepad with both trigger axes, P1/P2 are presented as a native
  * NeGcon: twist = left stick X, I = right trigger (gas), II = left trigger
- * (brake), L = 0, scaled onto R4's calibrated pressure span every poll.
+ * (brake), L = 0, shaped by the response curves in r4_modern_controls.h
+ * (docs/MODERN_CONTROLS.md) onto R4's calibrated pressure span every poll.
  * Square / Circle / R1 press whatever R4's own NeGcon button config uses
  * for shift down / shift up / camera view (D-pad Up / Down and B by
  * default); every other face, shoulder and D-pad bit reaches nothing.
@@ -23,6 +24,7 @@
  * The runtime never runs the transform under netplay, rollback resim,
  * selfcheck replay or a plain debug override (mod_plugins.h). */
 #include <stdint.h>
+#include <stdlib.h>
 #include <string.h>
 
 #include "mod_plugins.h"
@@ -47,6 +49,19 @@
 #define R4_MC_TWIST_DZ_TABLE  0x800A0324u   /* u16 stride 4: 0 6 10 14 */
 #define R4_MC_TWIST_MAX_TABLE 0x800A0170u   /* u16: 25 38 75 113 */
 #define R4_MC_ATTRACT_HANDLER 0x8005E118u
+/* Each player's car (speed s16 at car + 0x1D8) and a VBlank counter; R4's
+ * race logic runs every second VBlank, so counter >> 1 is its frame. Players
+ * 1 and 2 (offline ports, netplay seats 0 / 1) drive R4's P1 / P2 car objects
+ * 0x320 apart; Link Battle seats 3 and 4 drive the roster's cars
+ * (0x800FFDD0 + 4 * seat, as r4_link_netplay.c draws them). */
+#define R4_MC_P1_CAR          0x800AC0B0u
+#define R4_MC_CAR_BYTES       0x320u
+#define R4_MC_CAR_SPEED       0x1D8u
+#define R4_MC_CAR_ROSTER      0x800FFDD0u
+#define R4_MC_VBLANK_COUNTER  0x800A6548u
+#define R4_MC_TUNING_FEATURE  "controls-tuning"
+
+static R4ModernTuning s_r4_mc_tuning = R4_MC_TUNING_DEFAULTS;
 
 static uint32_t r4_mc_read_word(uint32_t address) {
     return psx_mod_read_word(address);
@@ -63,6 +78,15 @@ static int r4_mc_driving(void) {
         R4_MC_ATTRACT_HANDLER)
         return 0;
     return psx_mod_read_word(R4_MC_PAUSED_ADDR) == 0;
+}
+
+/* The car this player drives, 0 when none is mapped. */
+static uint32_t r4_mc_player_car(uint32_t player) {
+    uint32_t car;
+    if (player < 2u) return R4_MC_P1_CAR + R4_MC_CAR_BYTES * player;
+    if (player >= R4_MC_PLAYERS) return 0u;
+    car = psx_mod_read_word(R4_MC_CAR_ROSTER + 4u * player);
+    return (car & 0xFFE00003u) == 0x80000000u ? car : 0u;
 }
 
 static void r4_mc_negcon_config(uint32_t player, R4ModernNegcon *ng) {
@@ -85,6 +109,45 @@ static void r4_mc_negcon_config(uint32_t player, R4ModernNegcon *ng) {
         ? psx_mod_read_half(R4_MC_TWIST_MAX_TABLE + idx * 2u) : 38u;
     if (ng->twist_deadzone > 32u) ng->twist_deadzone = 6u;
     if (!ng->twist_range || ng->twist_range > 127u) ng->twist_range = 38u;
+    {
+        const uint32_t car = r4_mc_player_car(player);
+        const int16_t speed = car
+            ? (int16_t)psx_mod_read_half(car + R4_MC_CAR_SPEED) : 0;
+        ng->speed = speed > 0 ? (uint32_t)speed : 0u;
+    }
+    ng->phase = psx_mod_read_word(R4_MC_VBLANK_COUNTER) >> 1;
+    ng->tuning = s_r4_mc_tuning;
+}
+
+/* Hidden integer options; a missing or malformed value keeps the default. */
+static void r4_mc_tuning_option(const char *id, uint32_t *field, uint32_t max) {
+    char text[16];
+    char *end = NULL;
+    unsigned long v;
+    if (!psx_mod_option_value(R4_MC_PACKAGE, R4_MC_TUNING_FEATURE, id,
+                              text, sizeof text))
+        return;
+    v = strtoul(text, &end, 10);
+    if (end != text && *end == '\0' && v <= max) *field = (uint32_t)v;
+}
+
+static void r4_mc_load_tuning(void) {
+    R4ModernTuning t = R4_MC_TUNING_DEFAULTS;
+    r4_mc_tuning_option("trigger_deadzone", &t.trigger_deadzone, 50u);
+    r4_mc_tuning_option("trigger_full", &t.trigger_full, 100u);
+    r4_mc_tuning_option("trigger_gamma", &t.trigger_gamma, 300u);
+    r4_mc_tuning_option("throttle_low_share", &t.throttle_low_share, 99u);
+    r4_mc_tuning_option("throttle_step_share", &t.throttle_step_share, 99u);
+    r4_mc_tuning_option("launch_speed", &t.launch_speed, 1000u);
+    r4_mc_tuning_option("launch_span", &t.launch_span, 2000u);
+    r4_mc_tuning_option("feather_min", &t.feather_min, 52u);
+    r4_mc_tuning_option("brake_min", &t.brake_min, 50u);
+    r4_mc_tuning_option("stick_deadzone", &t.stick_deadzone, 50u);
+    r4_mc_tuning_option("stick_ease", &t.stick_ease, 100u);
+    r4_mc_tuning_option("steer_speed_cut", &t.steer_speed_cut, 90u);
+    r4_mc_tuning_option("steer_speed_low", &t.steer_speed_low, 4000u);
+    r4_mc_tuning_option("steer_speed_high", &t.steer_speed_high, 4000u);
+    s_r4_mc_tuning = t;
 }
 
 static int r4_mc_transform(const PSXModPadFrame *frame, PSXModPadOutput *out) {
@@ -106,6 +169,7 @@ static void r4_mc_activate(void) {
                              scheme, sizeof scheme) &&
         r4_modern_controls_scheme_is_classic(scheme))
         return; /* Classic: the stock input path, untouched. */
+    r4_mc_load_tuning();
 
     memset(&xf, 0, sizeof xf);
     xf.struct_size = sizeof xf;
