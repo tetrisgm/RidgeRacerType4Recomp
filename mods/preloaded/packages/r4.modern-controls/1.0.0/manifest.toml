@@ -44,6 +44,25 @@ id = "r4.modern-controls"
 # simulates (psxrecomp: [[plugin]] netplay = "input").
 netplay = "input"
 
+# R4 runs its vibration patterns for every pad but sends them only to a
+# DualShock; with Modern's NeGcon this forwards what R4 would have sent a
+# DualShock to the host pad (psxrecomp psx_mod_set_host_rumble). It only
+# reads guest RAM, so online it stays on per player (netplay = "host_output":
+# guest writes refused); the runtime keeps only this peer's own port and
+# skips rollback resims.
+[[feature]]
+id = "rumble"
+name = "Rumble"
+description = "Modern controls: your controller vibrates with R4's own DualShock vibration (crashes, scrapes) even though the game sees a NeGcon. Classic uses R4's DualShock rumble directly. R4's in-game vibration setting still applies."
+group = "Controllers"
+channel = "stable"
+default_enabled = true
+
+[[plugin]]
+feature = "rumble"
+id = "r4.modern-rumble"
+netplay = "host_output"
+
 # Response tuning for Modern (docs/MODERN_CONTROLS.md). Hidden: game.toml
 # hide_hidden_mod_features keeps it out of the launcher; edit the values in
 # mods/state.toml to experiment.
