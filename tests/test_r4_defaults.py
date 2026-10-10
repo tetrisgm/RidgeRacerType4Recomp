@@ -142,6 +142,14 @@ def test_game_toml():
           'game.toml: OpenGL renderer (render thread and native-wide need it)')
 
 
+def test_idle_skip():
+    with open(os.path.join(ROOT, 'game.toml'), 'rb') as fh:
+        runtime = tomllib.load(fh).get('runtime', {})
+    check(runtime.get('idle_skip') is True and
+          runtime.get('idle_skip_store_counters') is True,
+          'game.toml: idle_skip with store-counter loops (PsyQ v_wait)')
+
+
 def test_mod_state():
     tool = os.path.join(ROOT, 'tools', 'mod_state.py')
     with tempfile.TemporaryDirectory() as build:
@@ -198,6 +206,7 @@ def test_mod_state():
 def main():
     test_manifests()
     test_game_toml()
+    test_idle_skip()
     test_mod_state()
     if FAILS:
         print(f'{len(FAILS)} failure(s)')

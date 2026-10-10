@@ -110,6 +110,15 @@ hide_hidden_mod_features = true
 # and polls GetlocP, so the guest-visible CD must never be sped up. Fast loads,
 # if wanted, come from the framework's host-pacing mod, not from disc_speed.
 disc_speed = "1x"
+# Host-side wait-loop elision (psxrecomp docs/config_schema.md idle_skip):
+# PsyQ's v_wait -- the VSync(0) spin at 0x8008B4A8 that ends every race tick
+# -- counts a stack timeout down each pass, so it needs the store-counter
+# extension. Skips whole passes up to the next device event; guest cycles,
+# device writes and the scratchpad stay bit-identical (3600-frame race A/B),
+# and it is off under netplay. About a third less emulation-thread time in
+# races, which is what a Steam Deck or an M1 runs out of first.
+idle_skip = true
+idle_skip_store_counters = true
 # Code overlays: R4.BIN entries 659-672 are linked at 0x801149A8 (the end of
 # BSS) and loaded by the EXE at each mode change (garage, VS car select, time
 # attack / extra trial course info, records, link battle, the libpress movie
