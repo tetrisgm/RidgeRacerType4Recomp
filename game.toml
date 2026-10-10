@@ -167,9 +167,12 @@ antialiasing_mode = "off"
 # budgets, never below the display's own lines ("display": the monitor's
 # height, i.e. the supersample factor is what gives way first), and back up
 # after sustained headroom. It does nothing at Native. Off: Settings ->
-# Display -> Dynamic resolution.
+# Display -> Dynamic resolution. Owner decision 2026-10-08: Ultra is the
+# default everywhere and the dynamic systems are its safety net, so the floor
+# is native x1 (it only goes below the display's own lines when a machine
+# cannot hold 60 Hz above them).
 dynamic_resolution = true
-dynamic_resolution_min = "display"
+dynamic_resolution_min = "native"
 # Render thread (psxrecomp docs/RENDER_THREAD.md): the OpenGL backend runs on
 # its own thread, so a frame costs max(game, GL) instead of game + GL. Nothing
 # the guest reads back changes. Off for one run: PSX_RENDER_THREAD=0. Smooth
@@ -213,6 +216,58 @@ pgxp_preserve_projection = true  # exact projection: no residual wobble on near 
 pgxp_depth_buffer = true
 pgxp_color_correction = true
 pgxp_seam = "fine"
+# Ultra's visual features (psxrecomp #584, #585, #588, #589): emulated
+# mipmaps with 16x anisotropic taps on minified world textures, chroma
+# smoothing on 24-bit FMV frames, bloom from 3D and additive primitives (never
+# the HUD), and no PS1 dither pattern (true colour). xBR and accurate
+# blending stay off.
+texture_lod = "mipmap"
+anisotropic_filtering = 16
+fmv_chroma_smoothing = true
+bloom = 1.0
+dithering = "off"
+
+# Graphics presets (psxrecomp docs/QUALITY_PRESETS.md). Ultra is the default;
+# on first launch, and when the machine changes, psxrecomp steps down only a
+# machine whose GPU class cannot hold 60 Hz even at the dynamic floor (Steam
+# Deck, small iGPUs, software GL); Settings -> Display -> Graphics preset shows it, offers
+# Re-detect, and becomes Custom once the player changes a setting a preset
+# sets (Custom is never overridden). Each table is [video] keys laid over the
+# [video] block above, which is Ultra. Dynamic resolution stays on in every
+# preset as the safety net. Measured on R4 races (analysis/lowend-perf):
+# Smooth motion is the largest render-thread cost (~60-70 % of it), the
+# supersample factor the largest GPU cost; PGXP's depth/colour/seam extras
+# cost ~0.7 ms of render-thread CPU and no measurable GPU time; Low drops them.
+[quality.ultra]
+# The [video] block as shipped and the first-launch default: Match display
+# x1.5 floored at native, Smooth motion from surplus, PGXP extras, mipmaps +
+# 16x aniso, FMV chroma smoothing, bloom.
+
+[quality.high]
+supersample = 1.25
+
+[quality.medium]
+supersample = 1.0
+texture_lod = "off"
+anisotropic_filtering = 1
+bloom = 0.0
+
+[quality.low]
+# Detected low-end machines: Steam Deck, integrated GPUs, Apple M1/M2 base. PGXP
+# itself stays on (it closes the seams); its renderer extras go: depth
+# buffer, colour correction, seam expansion. In R4 they only move polygon
+# silhouette edges by one output pixel (0.02 % of a road frame, 0 pixels in
+# the tunnel at 10x; analysis/lowend-perf/seams), no cracks.
+supersample = 1.0
+dynamic_resolution_min = "native"
+frame_generation = false
+pgxp_depth_buffer = false
+pgxp_color_correction = false
+pgxp_seam = "off"
+texture_lod = "off"
+anisotropic_filtering = 1
+fmv_chroma_smoothing = false
+bloom = 0.0
 
 # Native-wide rendering for r4.enhancement.widescreen (docs/WIDESCREEN.md).
 # Inert at 4:3: every cull site below is the identity while the margin is 0.
