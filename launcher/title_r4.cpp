@@ -64,6 +64,10 @@ const SurfaceRule kSurface[] = {
     {"controls.bindings", Vis::Shown, nullptr},
     {"controls.devices", Vis::Shown, nullptr},
     {"controls.assist", Vis::Hidden, nullptr},
+    // Owner 2026-10-12: experimental JogCon wheel force feedback is a player
+    // toggle, off by default (settings.toml jogcon_force_feedback). Needs a
+    // launcher pin with tetrisgm/recomp-launcher#1; older pins ignore the key.
+    {"controls.force_feedback", Vis::Shown, nullptr},
     // Disc: found automatically; OpenBIOS is bundled, so no BIOS prompt.
     {"disc.autoscan", Vis::Auto, "auto"},
     {"disc.toolchain", Vis::Hidden, nullptr},
