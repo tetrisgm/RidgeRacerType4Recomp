@@ -3,7 +3,17 @@
 #endif
 #include <assert.h>
 #include <stdint.h>
+#include <stdlib.h>
 #include <string.h>
+
+#ifdef _WIN32
+/* MinGW has no POSIX setenv/unsetenv; the CRT's _putenv_s does both. */
+static int setenv(const char *name, const char *value, int overwrite) {
+    if (!overwrite && getenv(name)) return 0;
+    return _putenv_s(name, value);
+}
+static int unsetenv(const char *name) { return _putenv_s(name, ""); }
+#endif
 
 static uint8_t ram[2u * 1024u * 1024u];
 static uint8_t rollback_ram[sizeof ram];
