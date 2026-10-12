@@ -59,11 +59,11 @@ EXTRA+=(--runtime-file THIRD-PARTY-LICENSES/README.md)
 if [[ -d "${ROOT}/${BUILD_DIR}" ]]; then EXE_DIR="${ROOT}/${BUILD_DIR}"; else EXE_DIR="${BUILD_DIR}"; fi
 mkdir -p "${EXE_DIR}/licenses"
 # Statically linked libraries whose licenses (MIT) ask for their notice in
-# binary copies, and that no framework packager stages: Dear ImGui (recomp-ui's
+# binary copies, and that no framework packager stages: Dear ImGui (recomp-launcher's
 # launcher UI), recomp-net and retcomm-rbengine (netplay).
 # tools/package_release.sh requires all three in every zip.
 NOTICES=(
-  "recomp-ui/src/third_party/imgui/LICENSE.txt|dear-imgui-LICENSE.txt"
+  "recomp-ui/third_party/imgui/LICENSE.txt|dear-imgui-LICENSE.txt"
   "psxrecomp/lib/recomp-net/LICENSE|recomp-net-LICENSE"
   "psxrecomp/lib/retcomm-rbengine/LICENSE|retcomm-rbengine-LICENSE"
 )

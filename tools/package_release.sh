@@ -71,6 +71,8 @@ for sm in psxrecomp recomp-ui; do
 done
 git -C "$REL" "${GITC[@]}" -c protocol.file.allow=always submodule update -q --init
 git -C "$REL/psxrecomp" "${GITC[@]}" submodule update -q --init --recursive
+# recomp-launcher vendors Dear ImGui (and its own deps) as submodules.
+git -C "$REL/recomp-ui" "${GITC[@]}" submodule update -q --init --recursive
 cd "$REL"
 
 V="$(tr -d '[:space:]' < VERSION)"; V="${V#v}"
