@@ -168,12 +168,26 @@ static void r4_camera_look_restore(CPUState *cpu, uint32_t address) {
     r4_camera_look_restore_inputs();
 }
 
+/* In-game menu (psxrecomp P5): deadzone and sensitivity only scale the right
+ * stick; re-read them on a running game. */
+static int r4_camera_look_option_changed(const char *option_id, const char *value) {
+    (void)value;
+    if (strcmp(option_id, "deadzone") && strcmp(option_id, "sensitivity")) return 0;
+    r4_camera_look_option("deadzone", 18.0f, 10.0f, 35.0f, &s_deadzone);
+    r4_camera_look_option("sensitivity", 100.0f, 60.0f, 140.0f, &s_sensitivity);
+    s_deadzone *= 0.01f;
+    s_sensitivity *= 0.01f;
+    return 1;
+}
+
 static void r4_camera_look_register(void) __attribute__((constructor));
 static void r4_camera_look_register(void) {
     (void)psx_mod_register_activation_plugin(PLUGIN_ID,
                                              r4_camera_look_activate);
     (void)psx_mod_register_vblank_plugin(PLUGIN_ID,
                                         r4_camera_look_vblank);
+    (void)psx_mod_register_option_changed_plugin(PLUGIN_ID,
+                                                 r4_camera_look_option_changed);
     s_hooks_registered += psx_mod_register_function_entry_plugin(
         PLUGIN_ID, R4_CAMERA_BUILDER, r4_camera_look_build);
     s_hooks_registered += psx_mod_register_function_entry_plugin(
