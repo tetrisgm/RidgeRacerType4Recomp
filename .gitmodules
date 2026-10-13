@@ -1,6 +1,6 @@
 [submodule "recomp-ui"]
 	path = recomp-ui
-	url = https://github.com/tetrisgm/recomp-launcher.git
+	url = https://github.com/RetroPortingToolKit/recomp-launcher.git
 	branch = main
 [submodule "psxrecomp"]
 	path = psxrecomp
