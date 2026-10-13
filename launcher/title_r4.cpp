@@ -176,3 +176,17 @@ const TitleLayer kR4 = {
 const TitleLayer& active_title() { return kR4; }
 
 }  // namespace r4l
+
+// In-game menu: R4 selects recomp-launcher as its psxrecomp menu provider
+// (psx_menu_host.h). Optional on both sides: without the runtime contract or
+// the launcher's adapter this compiles to nothing, and titles that do not do
+// this keep their default UI.
+#if defined(__has_include)
+#if __has_include("psx_menu_host.h")
+#include "psx_menu_host.h"
+extern "C" const PsxMenuProvider* recomp_launcher_psx_menu_provider(void);
+namespace {
+const int g_r4_menu_provider = psx_menu_set_provider(recomp_launcher_psx_menu_provider());
+}  // namespace
+#endif
+#endif
