@@ -119,6 +119,13 @@ disc_speed = "1x"
 # races, which is what a Steam Deck or an M1 runs out of first.
 idle_skip = true
 idle_skip_store_counters = true
+# Audited site (psxrecomp docs/config_schema.md, store-counter contract):
+# v_wait's loop blocks. 0x8008B4D0 decrements the 0x10(sp) timeout and
+# leaves only when it equals -1 (the "VSync: timeout" path, 0x8008B4F0);
+# 0x8008B518 loops back while the VSync count at 0x800A6548 is below the
+# target, else exits at 0x8008B530. No other exit depends on the counter,
+# and the skip never lowers it to 1 or below. Unlisted sites never skip.
+idle_skip_store_counter_sites = ["0x8008B4D0", "0x8008B518"]
 # Code overlays: R4.BIN entries 659-672 are linked at 0x801149A8 (the end of
 # BSS) and loaded by the EXE at each mode change (garage, VS car select, time
 # attack / extra trial course info, records, link battle, the libpress movie

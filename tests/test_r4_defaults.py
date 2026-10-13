@@ -148,6 +148,8 @@ def test_idle_skip():
     check(runtime.get('idle_skip') is True and
           runtime.get('idle_skip_store_counters') is True,
           'game.toml: idle_skip with store-counter loops (PsyQ v_wait)')
+    check(runtime.get('idle_skip_store_counter_sites') == ['0x8008B4D0', '0x8008B518'],
+          'game.toml: store-counter skips only at the audited v_wait site')
 
 
 def test_mod_state():
