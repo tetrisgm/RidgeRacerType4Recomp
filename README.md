@@ -8,7 +8,7 @@
 
 R4: Ridge Racer Type 4 (USA, SLUS-00797) statically recompiled to a native
 executable with [psxrecomp](https://github.com/RetroPortingToolKit/psxrecomp)
-and [recomp-launcher](https://github.com/tetrisgm/recomp-launcher) (a drop-in
+and [recomp-launcher](https://github.com/RetroPortingToolKit/recomp-launcher) (a drop-in
 for recomp-ui, checked out at the `recomp-ui` submodule path), structured
 after [MegaManX6Recomp](https://github.com/mstan/MegaManX6Recomp).
 
