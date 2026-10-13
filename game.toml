@@ -250,7 +250,7 @@ supersample = 1.25
 supersample = 1.0
 texture_lod = "off"
 anisotropic_filtering = 1
-bloom = 0.0
+# Bloom stays on: R4 opts in (owner, 2026-10-13); only Low drops it.
 
 [quality.low]
 # Detected low-end machines: Steam Deck, integrated GPUs, Apple M1/M2 base. PGXP
