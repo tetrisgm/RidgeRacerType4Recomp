@@ -15,6 +15,9 @@ checks, through the runtime's `menu_host`, `frame`, `pad_status` and
   tray         Disc 2 inserted through the runtime's tray policy
   restart      a restart-only edit (render thread) relaunches on close, and
                the relaunched game keeps the new settings
+  presets      (rl) Graphics under R4's stacked presets: a pick, a governed
+               edit turning it Custom, xBR and back, the JogCon FFB toggle,
+               and every row reachable by wheel and by gamepad nav
   none         PSX_OVERLAY=0: no provider attaches, the menu keys reach the
                game, the game runs
 
@@ -57,7 +60,8 @@ class Run:
                    R4L_HIDDEN="1", R4L_SURFACE="all")
         env.update(extra_env or {})
         self.fh = self.log.open("w")
-        argv = ["./r4-runtime", "--game", "game.toml", "--disc", a.disc, "--debug-port", str(self.port)]
+        exe = str(Path(a.dir) / "r4-runtime.exe") if os.name == "nt" else "./r4-runtime"
+        argv = [exe, "--game", "game.toml", "--disc", a.disc, "--debug-port", str(self.port)]
         if not launcher:
             argv.append("--no-launcher")
         self.p = subprocess.Popen(argv,
@@ -273,7 +277,7 @@ def check_rl(a):
     script = Path(a.dir) / "check-rl-script.txt"
     script.write_text("\n".join([
         "sleep 30", "key Escape", "wait 30", "sleep 6",          # open: pause check window
-        "screen Graphics", "wait 10", "tap Texture filtering", "wait 10", "tap xBR (OpenGL)", "wait 10", "sleep 5",
+        "screen Graphics", "wait 10", "tap Texture filtering", "wait 10", "tap xBR", "wait 10", "sleep 5",
         "screen Disc setup", "wait 10", "tap disc:2", "wait 30", "sleep 8",  # tray (menu closes itself)
         "key Escape", "wait 30", "screen Graphics", "wait 10", "tap Render thread", "wait 10",
         "key Escape", "wait 20", ""]))
@@ -317,6 +321,12 @@ def check_session_rui(a):
         m = r.mh()
         nav = RuiNav(r)
         nav.open()
+        nav.go(1, 2)                 # Graphics > Texture filtering: xBR before leaving
+        for _ in range(3):
+            if r.mh()["texture_filter"] == 3:
+                break
+            r.key("Right")
+        tf_before = r.mh()["texture_filter"]
         nav.go(2, 2)                 # System > Return to launcher (press twice)
         r.key("Return"); r.key("Return")
         r.until(lambda: "in-game menu -> frontend loop" in r.text(), 15, "frontend loop")
@@ -329,6 +339,8 @@ def check_session_rui(a):
         m3 = r.mh()
         nav.close()
         r.until(lambda: r.mh()["open"] == 0, 5, "menu closed")
+        ok("session-filter", tf_before == 3 and m2["texture_filter"] == 3,
+           f"xBR across Return to launcher -> PLAY: {tf_before} -> {m2['texture_filter']}")
         ok("session", m2.get("attached") == 1 and m3["pause_depth"] >= 1 and r.advancing(),
            f"render_thread={m.get('render_thread')}: detached, launcher, PLAY, re-attached on the new context; "
            f"menu opens (pause_depth={m3['pause_depth']}) and closes, game running")
@@ -499,6 +511,51 @@ def check_none(a):
         r.stop()
 
 
+def check_presets_rl(a):
+    # The in-game Graphics page under R4's stacked presets: a pick, a governed
+    # edit (Smooth motion) turning it Custom, the texture filter row below the
+    # presets (xBR and back), and the Controls page's JogCon FFB toggle.
+    script = Path(a.dir) / "check-rl-presets.txt"
+    script.write_text("\n".join([
+        "sleep 30", "key Escape", "wait 30", "sleep 4",
+        "screen Graphics", "wait 10", "seen Ultra", "tap High", "wait 10", "sleep 4",
+        "tap Smooth motion", "wait 10", "sleep 4",
+        "find Texture filtering", "tap Texture filtering", "wait 10", "tap xBR", "wait 10", "sleep 4",
+        "tap Texture filtering", "wait 10", "tap Nearest", "wait 10", "sleep 4",
+        "top", "wait 5", "find High",
+        "screen Controls", "wait 10", "tap Wheel force feedback (experimental)", "wait 10", "sleep 4",
+        "screen Graphics", "wait 10"] + ["pad dpdown"] * 30 + ["wait 10", 
+        "visible Skin"] + ["pad dpup"] * 30 + ["wait 10", "visible High",
+        ""]))  # ends with the menu open: a closed menu stops stepping the script
+    # Hidden-window runs never detect a preset; a saved one still applies.
+    sp = Path(a.dir) / "settings.toml"
+    t = sp.read_text() if sp.exists() else "[video]\n"
+    t = re.sub(r"^quality_\w+\s*=.*\n", "", t, flags=re.M)
+    sp.write_text(t.replace("[video]", '[video]\nquality_preset = "ultra"', 1))
+    r = Run(a, {"R4L_OVERLAY_SCRIPT": str(script)}, label="presets")
+    q = lambda: (settings_value(a, "quality_preset") or "").strip('"')
+    try:
+        r.boot(300)
+        r.until(lambda: r.mh()["open"] == 1, 90, "menu open")
+        r.until(lambda: q() == "high", 40, "preset High saved")
+        ok("preset", True, "High picked and saved")
+        r.until(lambda: q() == "custom", 40, "governed edit -> Custom")
+        ok("custom", True, f"Smooth motion edit -> quality_preset=custom, frame_generation={settings_value(a, 'frame_generation')}")
+        r.until(lambda: r.mh()["texture_filter"] == 3, 40, "texture filter xBR")
+        time.sleep(1)
+        ok("xbr", saved_filter(a) == 3, f"live 3, saved={settings_value(a, 'texture_filtering')}")
+        r.until(lambda: r.mh()["texture_filter"] == 0, 40, "texture filter back to Nearest")
+        time.sleep(1)
+        ok("xbr-back", saved_filter(a) == 0, f"live 0, saved={settings_value(a, 'texture_filtering')}")
+        r.until(lambda: settings_value(a, "jogcon_force_feedback") == "true", 40, "FFB saved on")
+        ok("ffb", True, "jogcon_force_feedback = true")
+        r.until(lambda: "overlay script done" in r.text(), 300, "script done")
+        m = re.search(r"overlay script done, failures=(\d+)", r.text())
+        ok("script", m and m.group(1) == "0", f"failures={m.group(1) if m else '?'} (wheel and gamepad nav reached every row)")
+    finally:
+        r.stop()
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--adapter", choices=["rui", "rl"], required=True)
@@ -512,6 +569,8 @@ def main():
     a = ap.parse_args()
     parts = a.only.split(",") if a.only else ["provider", "session", "netplay", "lobby", "none"]
     set_render_thread(a, a.render_thread)
+    if "presets" in parts and a.adapter == "rl":
+        check_presets_rl(a)
     if "provider" in parts:
         (check_rui if a.adapter == "rui" else check_rl)(a)
     if "netplay" in parts and a.dir2:
