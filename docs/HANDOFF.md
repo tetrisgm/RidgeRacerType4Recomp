@@ -12,13 +12,16 @@ Final tunnel-exit burst: 60 consecutive native frames, no misses. Pin regenerati
 left all 50 game shards unchanged.
 Framework `8130e6fd`; Windows/Mac title ctest 21/21. [Evidence](../analysis/STATUS.md).
 Stage 2 branches are pushed: R4 `da09fac`, framework `8130e6fd`.
-Stage 3 is in progress on `feat/render-60fps-v2` in both repos. Transactional
-interpolation and HD/local-view admission are imported; redraws now preserve
-Maximum's expanded heaps. Off/on guest identity passes all 4,501 fingerprints
-(735 on-path passes, no aborts). Queued presentation/refusal cleanup is in
-progress; the 256 MiB image cap disabled passes at 8K, so the current build
-allows two images per generation up to 1 GiB. Timing, distinct-frame and final
-loaded gates remain. [Receipts/current results](../analysis/STATUS.md).
+Stage 3 is unfinished on `feat/render-60fps-v2` in both repos. Transactional
+interpolation and HD/local-view admission are imported; redraws preserve
+Maximum's expanded heaps. The heap fix's off/on identity test matches 4,501
+fingerprints (735 on-path passes, no aborts). Later host queue changes are not
+accepted: at 8K, quiet has 311 completion gaps and p99 busy 65.0%; 33.8 s are
+spent acquiring the GL context. Queued GPU transactions remain the next
+structural task. The recorded-geometry alternative also failed and was removed.
+Framework WIP `af942084`; Windows/Mac title ctest 25/25 and schedule/guards pass.
+Final regeneration leaves 50 shards unchanged. No Stage 3 push.
+[Current results and receipt references](../analysis/STATUS.md).
 Prior dirty work is preserved on
 `wip/draw-distance-old` in both repos. No PR, merge or release is authorized.
 

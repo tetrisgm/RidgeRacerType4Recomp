@@ -114,9 +114,27 @@ a stale 120 Hz override and is rejected. Its watchdog logs led to the heap fix.
 | Async eligibility + expanded heaps (749 passes) | quiet | 59.930 | 451 | 35.311 | 92.8% |
 | Queued deadlines (393 passes) | quiet | 60.093 | 422 | 42.187 | 95.6% |
 | Release refused plans (8K slot budget rejects passes) | quiet | 60.000 | 8 | 30.177 | 63.0% |
+| Size-aware 8K image budget (456 passes) | quiet | 58.528 | 311 | 63.434 | 65.0% |
+| Recorded geometry redraw (rejected) | quiet | 60.000 | 14 | 84.177 | 66.1% |
 
-The 256 MiB temporal queue cap cannot fit two 8K images per generation. The
-current build raises its size-aware allowance to at most 1 GiB; timing and
-consecutive distinct-frame proof remain open. Windows/Mac title tests pass
-25/25 for the preceding queue fix, plus scheduling and sandbox guards. No
-Stage 3 branch is pushed. No PR, merge or release.
+The retained transactional implementation permits two images per generation at
+8K, up to a 1 GiB image-queue budget. Full-resolution temporal execution still
+acquires the one GL context synchronously: 2,091 acquisitions cost 33.8 s in
+the 75 s replay (`stage3-8k-generations/quiet.csv.renderer.json`). Most requested
+passes were shed (456 completed / 2,090 wanted). It cannot qualify as distinct
+60 fps. The next structural work is queued GPU transaction begin/capture/restore,
+so guest-state restoration does not wait for the presentation queue.
+
+The alternative existing recorded-geometry generator also fails: 1,070 generated
+images / 2,255 game flips, with no image reprojection, plus the timing failure
+above. Its startup selector was removed; patch and executable receipts remain
+under local `stage3-geometry-redraw/`. No hidden switch selects it in this branch.
+
+All listed production runs have positive native overlays, zero interpreted/dirty
+execution and no dispatch/segment misses (`quiet-native-proof.json` in each
+receipt directory). The 4,501-frame identity result predates the latest host
+queue changes; it proves the expanded-heap transaction path, not final Stage 3
+acceptance. Final timing/distinct-frame gates remain open; loaded was not run
+while quiet fails. Windows/Mac title tests and interpolation schedule/guards
+pass. Stage 3 work is committed locally, unaccepted and unpushed. No PR, merge or
+release. Stage 2 remains accepted and pushed.
