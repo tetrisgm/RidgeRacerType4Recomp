@@ -147,7 +147,49 @@ static const R4MdBounds *r4_md_cached_poly(uint32_t p, unsigned k, R4MdBounds *t
 
 #define R4_MD_CULL_NODES 262144u
 #define R4_MD_CULL_ROOTS 8192u
-typedef struct { R4MdBounds bounds; uint32_t first, count, left, right; } R4MdCullNode;
+typedef struct {
+    R4MdBounds bounds;
+    uint32_t first, count, left, right;
+    float face_lo[4], face_hi[4];
+    int face_valid;
+} R4MdCullNode;
+
+/* The ordinary course kinds reject a quad when both NCLIP triangles face
+ * away (012 and 132), with the view's winding flip at scratch+0x64. Cache
+ * normalized world-space planes; a two-course-unit guard retains ambiguous
+ * edges. Local billboard geometry keeps its original renderer. */
+static void r4_md_face_bounds(R4MdCullNode *node, uint32_t p, unsigned k)
+{
+    node->face_valid = r4_md_poly_kinds[k].field != 0x30;
+    if (!node->face_valid) return;
+    uint32_t v[6];
+    for (unsigned j = 0; j < 6; j++) v[j] = rd32(p + 4*j);
+    double xyz[4][3] = {
+        {(int16_t)v[0], (int16_t)(v[0]>>16), (int16_t)v[1]},
+        {(int16_t)v[2], (int16_t)(v[2]>>16), (int16_t)(v[1]>>16)},
+        {(int16_t)v[3], (int16_t)(v[3]>>16), (int16_t)v[4]},
+        {(int16_t)v[5], (int16_t)(v[5]>>16), (int16_t)(v[4]>>16)}
+    };
+    const unsigned triangles[2][3] = {{0,1,2},{1,3,2}};
+    for (unsigned t = 0; t < (r4_md_poly_kinds[k].field >= 0x34 ? 1u : 2u); t++) {
+        const double *a = xyz[triangles[t][0]], *b = xyz[triangles[t][1]], *c = xyz[triangles[t][2]];
+        double u[3], vtx[3], normal[3], plane[4], scale = 0;
+        for (unsigned j = 0; j < 3; j++) { u[j] = b[j]-a[j]; vtx[j] = c[j]-a[j]; }
+        for (unsigned j = 0; j < 3; j++) {
+            normal[j] = u[(j+1)%3]*vtx[(j+2)%3] - u[(j+2)%3]*vtx[(j+1)%3];
+            scale += fabs(normal[j]);
+        }
+        plane[3] = 0;
+        for (unsigned j = 0; j < 3; j++) {
+            plane[j] = scale > 0 ? -normal[j]/scale : 0;
+            plane[3] -= plane[j]*a[j];
+        }
+        for (unsigned j = 0; j < 4; j++) {
+            if (!t || plane[j] < node->face_lo[j]) node->face_lo[j] = (float)plane[j];
+            if (!t || plane[j] > node->face_hi[j]) node->face_hi[j] = (float)plane[j];
+        }
+    }
+}
 static R4MdCullNode s_cull_nodes[R4_MD_CULL_NODES];
 static uint32_t s_cull_nodes_used;
 static struct { uint32_t p, count, kind, node; } s_cull_roots[R4_MD_CULL_ROOTS];
@@ -163,6 +205,7 @@ static uint32_t r4_md_build_cull_node(uint32_t table, uint32_t first, uint32_t c
     if (count == 1) {
         R4MdBounds temporary;
         node->bounds = *r4_md_cached_poly(table + first * r4_md_poly_kinds[k].stride, k, &temporary);
+        r4_md_face_bounds(node, table + first * r4_md_poly_kinds[k].stride, k);
     } else {
         unsigned half = count / 2;
         node->left = r4_md_build_cull_node(table, first, half, k);
@@ -175,6 +218,12 @@ static uint32_t r4_md_build_cull_node(uint32_t table, uint32_t first, uint32_t c
             if (b->hi[j] > node->bounds.hi[j]) node->bounds.hi[j] = b->hi[j];
         }
         node->bounds.has_local |= b->has_local;
+        const R4MdCullNode *left = &s_cull_nodes[node->left], *right = &s_cull_nodes[node->right];
+        node->face_valid = left->face_valid && right->face_valid;
+        for (unsigned j = 0; node->face_valid && j < 4; j++) {
+            node->face_lo[j] = fminf(left->face_lo[j], right->face_lo[j]);
+            node->face_hi[j] = fmaxf(left->face_hi[j], right->face_hi[j]);
+        }
     }
     return index;
 }
@@ -209,6 +258,21 @@ static void r4_md_visit_cull_node(uint32_t index, const R4MdFrustum *f, uint32_t
     const R4MdCullNode *node = &s_cull_nodes[index];
     const R4MdBounds *b = &node->bounds;
     if (!r4_md_frustum_visible(f, b)) return;
+    int facing_safe = 1;
+    if (f->face_enabled && node->face_valid) {
+        double nearz = f->plane[4][3];
+        for (unsigned j = 0; j < 3; j++) nearz += f->plane[4][j] * (f->plane[4][j] < 0 ? b->hi[j] : b->lo[j]);
+        if (nearz > f->near_limit) {
+            double minimum = 0, maximum = 0;
+            for (unsigned j = 0; j < 4; j++) {
+                double factor = f->face_sign * (j == 3 ? 1.0 : f->camera[j]);
+                minimum += factor * (factor < 0 ? node->face_hi[j] : node->face_lo[j]);
+                maximum += factor * (factor < 0 ? node->face_lo[j] : node->face_hi[j]);
+            }
+            if (maximum < -2.0) return;
+            facing_safe = minimum > 2.0;
+        }
+    }
     int inside = !b->has_local || f->local_valid;
     for (unsigned p = 0; inside && p < 6; p++) {
         double minimum = f->plane[p][3];
@@ -216,7 +280,7 @@ static void r4_md_visit_cull_node(uint32_t index, const R4MdFrustum *f, uint32_t
             minimum += f->plane[p][j] * (f->plane[p][j] < 0 ? b->hi[j] : b->lo[j]);
         if (minimum <= (p == 4 ? f->near_limit : 1.0)) inside = 0;
     }
-    if (inside || !node->left) r4_md_visible_run(runs, used, node->first, node->count);
+    if ((inside && facing_safe) || !node->left) r4_md_visible_run(runs, used, node->first, node->count);
     else {
         r4_md_visit_cull_node(node->left, f, runs, used);
         r4_md_visit_cull_node(node->right, f, runs, used);
@@ -373,6 +437,8 @@ static void r4_md_cull_course(CPUState *cpu)
     int margin = psx_mod_widescreen_x_margin();
     R4MdFrustum f;
     r4_md_frustum_init(&f, cpu->gte_ctrl, -margin - 2.0, 322.0 + margin, -2.0, 242.0);
+    f.face_enabled = pgxp_culling() && f.face_sign != 0;
+    if ((int32_t)rd32(0x1F800064u) > 0) f.face_sign = -f.face_sign;
     /* 0x8006EDEC saves the unscaled camera at 0x800FF840. The billboard
      * path rotates its centre with that matrix, multiplies the result by
      * four, and rotates local vertices with 0x800FF868 (0x80066D58). Only

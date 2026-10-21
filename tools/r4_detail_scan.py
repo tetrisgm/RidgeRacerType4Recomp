@@ -348,6 +348,7 @@ def check_poly_kinds(seg, seg_bytes):
     record size and table pointer: lw t1,F(t2); addiu t2,zero,S; ... lui t2 /
     ori t2 (the table)."""
     found = set()
+    errors = []
     for i in range(11):
         r = int.from_bytes(seg_bytes(0x800A2370 + 4 * i, 4), 'little')
         # The local-billboard renderer first saves/installs both GTE bases;
@@ -360,9 +361,17 @@ def check_poly_kinds(seg, seg_bytes):
             lo = next((x for x in words[k:] if (x >> 16) == 0x354A), None)
             if hi is not None and lo is not None:
                 found.add((w & 0xFFFF, words[k + 1] & 0xFFFF, ((hi & 0xFFFF) << 16) | (lo & 0xFFFF)))
+            field = w & 0xFFFF
+            if field != 0x30:
+                # Fine pre-GTE facing rejection must match the guest's winding
+                # tests (012/132 for quads, 012 for triangles), including flip.
+                required = {0x8C810064, 0x0001082A}
+                required |= ({0x0014A02A, 0x02A0A82A, 0x0281F826, 0x02A1A826, 0x03F5F825}
+                             if field < 0x30 else {0x0017B82A, 0x02E1B826})
+                if not required.issubset(words):
+                    errors.append(f'course renderer 0x{r:08X}: facing/flip guards differ from fine culling')
             break
     have = poly_kinds()
-    errors = []
     if found != have:
         errors.append(f'{MD_H}: r4_md_poly_kinds {sorted(have)} differs from the course '
                       f'renderers {sorted(found)}')

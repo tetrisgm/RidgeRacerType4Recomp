@@ -85,6 +85,7 @@ int psx_mod_register_savestate_plugin(const char *id, PSXModActivationCallback c
     return 1;
 }
 int pgxp_active(void) { return 1; }
+int pgxp_culling(void) { return 1; }
 int pgxp_preserve_projection(void) { return 1; }
 uint64_t psx_cycle_count;   /* the guest clock the frame budget reads */
 /* Guest-clock stubs for the guest-cycle-scale pacing (psx_cycles.h inlines). */
@@ -1309,12 +1310,13 @@ static void test_fine_course_cull(void) {
     build_course(2); put_centreline(NSEC * 5u);
     load_list(0, 0, 2); course_draw(0, 0, 0x8006F02Cu);
     for (unsigned i = 0; i < 20; i++) psx_mod_write_word(block + 4*i, 0);
-    psx_mod_write_word(block + 0x10, 5);
+    psx_mod_write_word(block + 0x10, 6);
     psx_mod_write_word(r4_md_poly_kinds[0].table, table);
-    for (unsigned i = 0; i < 5; i++) {
+    for (unsigned i = 0; i < 6; i++) {
         uint32_t x = (i == 2 || i == 4) ? 10000u : 0u;
-        for (unsigned j = 0; j < 6; j++)
-            psx_mod_write_word(table + 0x40*i + 4*j, (j == 1 || j == 4) ? 0 : x);
+        uint32_t y0 = i == 5 ? 10u : 0u, y1 = i == 5 ? 0u : 10u;
+        uint32_t vertices[6] = {x|(y0<<16),0,(x+10)|(y0<<16),x|(y1<<16),0,(x+10)|(y1<<16)};
+        for (unsigned j = 0; j < 6; j++) psx_mod_write_word(table + 0x40*i + 4*j, vertices[j]);
     }
     psx_mod_write_word(R4_PVS_LIST_ADDR, 1);
     psx_mod_write_word(R4_PVS_LIST_ADDR + 4, block);
@@ -1324,14 +1326,22 @@ static void test_fine_course_cull(void) {
     s_cpu.gte_ctrl[24] = 160u << 16; s_cpu.gte_ctrl[25] = 120u << 16;
     s_cpu.gte_ctrl[26] = 160;
     s_cpu.gpr[5] = R4_PVS_LIST_ADDR; s_ram8 = 1;
+    psx_mod_write_word(0x1F800064u, 0);
     hook(R4_MD_COURSE_DISPATCH_FN)(&s_cpu, R4_MD_COURSE_DISPATCH_FN);
     CHECK(s_cpu.gpr[5] == 0x80400000u && rd32(s_cpu.gpr[5]) == 2,
           "fine culling emits two visible runs before GTE work");
     uint32_t a = rd32(s_cpu.gpr[5]+4), b = rd32(s_cpu.gpr[5]+8);
     CHECK(rd32(a+0x10) == 2 && rd32(b+0x10) == ((3u<<16)|1u),
           "fine culling preserves visible primitive order across rejected gaps");
-    CHECK(rd32(block+0x10) == 5 && rd32(r4_md_poly_kinds[0].table) == table,
+    CHECK(rd32(block+0x10) == 6 && rd32(r4_md_poly_kinds[0].table) == table,
           "fine culling preserves original block and polygon table");
+    /* The reflected view reverses the same facing decision. */
+    load_list(0, 0, 2); course_draw(0, 0, 0x8006F02Cu);
+    psx_mod_write_word(R4_PVS_LIST_ADDR, 1); psx_mod_write_word(R4_PVS_LIST_ADDR+4, block);
+    psx_mod_write_word(0x1F800064u, 1); s_cpu.gpr[5] = R4_PVS_LIST_ADDR;
+    hook(R4_MD_COURSE_DISPATCH_FN)(&s_cpu, R4_MD_COURSE_DISPATCH_FN);
+    CHECK(rd32(s_cpu.gpr[5]) == 1 && rd32(rd32(s_cpu.gpr[5]+4)+0x10) == ((5u<<16)|1u),
+          "fine facing cull follows the guest view's winding flip");
     s_ram8 = 0;
 }
 

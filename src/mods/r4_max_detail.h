@@ -266,7 +266,7 @@ static inline int r4_md_block_bounds(R4MdRead32 rd32, uint32_t block, R4MdBounds
  * already includes the game's x4 rotation and camera translation. Evaluating
  * the AABB's support point rejects a whole block without executing GTE commands
  * or creating PGXP shadows. Intersecting boxes are deliberately retained. */
-typedef struct { double plane[6][4]; double near_limit; int local_valid, reject_far; } R4MdFrustum;
+typedef struct { double plane[6][4]; double near_limit; int local_valid, reject_far, face_enabled, face_sign; double camera[3]; } R4MdFrustum;
 
 static inline void r4_md_frustum_init(R4MdFrustum *f, const uint32_t ctrl[32],
                                      double left, double right, double top, double bottom)
@@ -283,6 +283,17 @@ static inline void r4_md_frustum_init(R4MdFrustum *f, const uint32_t ctrl[32],
     f->near_limit = h / 2.0 + 1.0;
     f->local_valid = 0;
     f->reject_far = 1;
+    f->face_enabled = 0;
+    double co[3][3];
+    for (unsigned r = 0; r < 3; r++) for (unsigned c = 0; c < 3; c++) {
+        unsigned r1 = (r+1)%3, r2 = (r+2)%3, c1 = (c+1)%3, c2 = (c+2)%3;
+        co[r][c] = m[r1][c1]*m[r2][c2] - m[r1][c2]*m[r2][c1];
+    }
+    double det = m[0][0]*co[0][0] + m[0][1]*co[0][1] + m[0][2]*co[0][2];
+    f->face_sign = det > 0 ? 1 : det < 0 ? -1 : 0;
+    for (unsigned r = 0; r < 3; r++)
+        f->camera[r] = det != 0 ? -(co[0][r]*m[0][3] + co[1][r]*m[1][3] + co[2][r]*m[2][3]) / det : 0;
+
     double ox = (double)(int32_t)ctrl[24] / 65536.0;
     double oy = (double)(int32_t)ctrl[25] / 65536.0;
     for (unsigned i = 0; i < 4; i++) {
