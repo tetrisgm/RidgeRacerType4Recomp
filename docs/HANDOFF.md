@@ -15,12 +15,19 @@ Stage 2 branches are pushed: R4 `da09fac`, framework `8130e6fd`.
 Stage 3 remains unfinished on `feat/render-60fps-v2` in both repos.
 Queued GPU transactions remove temporal context handoffs; the CPU replay's
 4,501-frame off/on identity check matches (1,224 on passes). GPU-only redraw
-now uses PGXP-carried vertex identities and immutable command lists, without
-the rejected camera-fitting generator. Latest quiet still fails timing and
-physical cadence. Producer PTS scheduling and GTE-only origin bookkeeping are
-being corrected; final quiet/loaded, identity and distinct-frame gates remain
-open. No Stage 3 loaded run or push. Existing local heads remain R4 `ec6a64c`,
-framework `af942084`, with ongoing edits. [Receipts/current findings](../analysis/STATUS.md).
+uses PGXP-carried vertex identities and immutable command lists, without
+the rejected camera-fitting generator. The latest quiet receipt
+`analysis/brief4/local/stage3-source-pts/quiet-summary.json` fails: 88 completion
+gaps and p99 busy 96.1%. Its final physical-present trace reaches 60 Hz; that
+does not satisfy completion timing. No Stage 3 loaded run or push.
+Owner redirect #2 now supersedes that implementation direction: move the guest
+draw replay onto a worker with private snapshot state, leaving only snapshot
+publication on emulation, then quiet followed by loaded if quiet qualifies.
+Current WIP is checkpointed at R4 `e57b46a`, framework `f4b68091`.
+The worker rewrite has not been implemented. The existing transaction saves
+and restores singleton runtime state; concurrent execution needs isolation of
+RAM, GTE/PGXP, GPU/DMA and dispatch state, not merely another thread calling
+the existing callback. [Receipts/current findings](../analysis/STATUS.md).
 Prior dirty work is preserved on
 `wip/draw-distance-old` in both repos. No PR, merge or release is authorized.
 
