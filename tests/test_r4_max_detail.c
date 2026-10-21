@@ -1286,6 +1286,8 @@ static void test_course_frustum(void) {
     b.complete = 1; b.lo[0] = b.lo[1] = -10; b.hi[0] = b.hi[1] = 10;
     b.lo[2] = 16000; b.hi[2] = 17000;
     CHECK(!r4_md_frustum_visible(&f, &b), "course frustum: unsigned GTE depth limit rejects far box");
+    f.reject_far = 0;
+    CHECK(r4_md_frustum_visible(&f, &b), "course frustum: original saturated-depth scenery retained");
 }
 
 int main(void) {

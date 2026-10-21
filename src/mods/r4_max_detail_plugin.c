@@ -203,12 +203,38 @@ static void r4_md_cull_course(CPUState *cpu)
     if (cpu->gpr[5] != R4_MD_LIST_ADDR ||
         !pgxp_active() || !pgxp_preserve_projection()) return;
     uint32_t count = rd32(R4_MD_LIST_ADDR);
-    if (count > R4_MD_LIST_MAX || count <= s_unculled_count) return;
+    if (count > R4_MD_LIST_MAX) return;
     int margin = psx_mod_widescreen_x_margin();
     R4MdFrustum f;
     r4_md_frustum_init(&f, cpu->gte_ctrl, -margin - 2.0, 322.0 + margin, -2.0, 242.0);
-    uint32_t out = s_unculled_count;
+    /* 0x8006EDEC saves the unscaled camera at 0x800FF840. The billboard
+     * path rotates its centre with that matrix, multiplies the result by
+     * four, and rotates local vertices with 0x800FF868 (0x80066D58). Only
+     * trust the yaw-independent bound when these are the expected bases. */
+    f.local_valid = 1;
+    int16_t local[9];
+    for (unsigned i = 0; i < 9; i++) {
+        int actual = (int16_t)(cpu->gte_ctrl[i / 2] >> (16 * (i & 1)));
+        int base = (int16_t)rd16(0x800FF840u + 2u * i);
+        if (abs(actual - 4 * base) > 4) f.local_valid = 0;
+        local[i] = (int16_t)rd16(0x800FF868u + 2u * i);
+    }
+    for (unsigned r = 0; r < 3; r++) {
+        if (llabs((int64_t)(int32_t)cpu->gte_ctrl[5 + r] -
+                  4 * (int64_t)(int32_t)rd32(0x800FF854u + 4u * r)) > 8)
+            f.local_valid = 0;
+        for (unsigned c = 0; c < 3; c++) {
+            int64_t dot = 0;
+            for (unsigned i = 0; i < 3; i++) dot += (int64_t)local[3*r+i] * local[3*c+i];
+            if (llabs(dot - (r == c ? 16777216 : 0)) > 131072) f.local_valid = 0;
+        }
+    }
+    uint32_t out = 0;
     for (uint32_t n = out; n < count; n++) {
+        /* Original baked entries can deliberately use saturated depth.
+         * Retain them; only new distance entries have the qualified SZ cap.
+         * Ordinary original entries can still be rejected off-screen. */
+        f.reject_far = n >= s_unculled_count;
         uint32_t block = rd32(R4_MD_LIST_ADDR + 4u * (n + 1u));
         const R4MdBounds *bounds = NULL;
         R4MdBounds temporary;

@@ -49,6 +49,7 @@
 
 #include <math.h>
 #include <stdint.h>
+#include <stdlib.h>
 #include <string.h>
 
 /* ---- guest layout (US) --------------------------------------------------- */
@@ -140,8 +141,7 @@ static inline void r4_md_apply_matrix(const int16_t m[9], const int32_t d[3], in
  * a word (count | first << 16) at `field`; that kind's polys live in the
  * table *`table`, `stride` bytes each (the 1P renderer chain 0x800A2370:
  * 0x80061078, 0x80061C34, ... each loads its own field, table pointer and
- * record size; the kind at +0x30, 0x80066D58, is drawn differently and is
- * left out). Every kind starts with the same packed vertices: x0|y0,
+ * record size). Every kind starts with the same packed vertices: x0|y0,
  * z0|z1, x1|y1, x2|y2, z2|z3, x3|y3 (s16), with world (>> 8) = v + 0x8000
  * for x and z (the course draw translates by 0x8000 - camera >> 2,
  * 0x8006EDEC). */
@@ -151,6 +151,8 @@ static const R4MdPolyKind r4_md_poly_kinds[] = {
     { 0x1C, 0x34, 0x800F4ED8u }, { 0x20, 0x40, 0x800F4E10u }, { 0x24, 0x44, 0x800AC060u },
     { 0x28, 0x30, 0x800F4DD0u }, { 0x2C, 0x34, 0x800AC054u }, { 0x34, 0x34, 0x800F4DE0u },
     { 0x38, 0x38, 0x800AC058u },
+    /* 0x80066D58: local billboard vertices, centre XY at +0x28, Z at +0x26. */
+    { 0x30, 0x30, 0x800FFDF0u },
 };
 #define R4_MD_POLY_KINDS (sizeof r4_md_poly_kinds / sizeof r4_md_poly_kinds[0])
 #define R4_MD_BLOCK_POLYS_MAX 4096u
@@ -166,6 +168,7 @@ typedef struct {
     uint32_t sig;
     int32_t lo[3], hi[3];  /* packed course coordinates, before the GTE */
     int complete;           /* special local-object polygons need their own transform */
+    int has_local;
 } R4MdBounds;
 
 static inline uint32_t r4_md_block_sig(R4MdRead32 rd32, uint32_t block)
@@ -173,19 +176,20 @@ static inline uint32_t r4_md_block_sig(R4MdRead32 rd32, uint32_t block)
     uint32_t sig = 0x9E3779B9u;
     for (unsigned k = 0; k < R4_MD_POLY_KINDS; k++)
         sig = (sig ^ rd32(block + r4_md_poly_kinds[k].field)) * 0x01000193u;
-    return (sig ^ rd32(block + 0x30u)) * 0x01000193u;
+    return sig;
 }
 
 static inline int r4_md_block_bounds(R4MdRead32 rd32, uint32_t block, R4MdBounds *b)
 {
     int32_t x0 = INT32_MAX, x1 = INT32_MIN, z0 = INT32_MAX, z1 = INT32_MIN;
     int32_t y0 = INT32_MAX, y1 = INT32_MIN;
+    b->has_local = 0;
     for (unsigned k = 0; k < R4_MD_POLY_KINDS; k++) {
         uint32_t w = rd32(block + r4_md_poly_kinds[k].field);
         uint32_t polys = rd32(r4_md_poly_kinds[k].table);
         uint32_t n = w & 0xFFFFu, first = w >> 16;
-        if (n == 0u || (polys & 0xFFE00000u) != 0x80000000u || n > R4_MD_BLOCK_POLYS_MAX)
-            continue;
+        if (n == 0u) continue;
+        if ((polys & 0xFFE00000u) != 0x80000000u || n > R4_MD_BLOCK_POLYS_MAX) return 0;
         for (uint32_t i = 0; i < n; i++) {
             uint32_t p = polys + r4_md_poly_kinds[k].stride * (first + i);
             uint32_t v[6];
@@ -195,6 +199,27 @@ static inline int r4_md_block_bounds(R4MdRead32 rd32, uint32_t block, R4MdBounds
                               (int16_t)(v[3] >> 16), (int16_t)(v[5] >> 16) };
             int32_t zs[4] = { (int16_t)v[1], (int16_t)(v[1] >> 16), (int16_t)v[4],
                               (int16_t)(v[4] >> 16) };
+            if (r4_md_poly_kinds[k].field == 0x30) {
+                /* The centre uses the full camera; the local quad uses a
+                 * yaw-facing basis. A sphere encloses it for every yaw.
+                 * L1 radius (without the centre's x4 scale reduction) is
+                 * deliberately generous. The caller verifies both live bases. */
+                int32_t radius = 8;
+                for (unsigned j = 0; j < 4; j++) {
+                    int32_t r = abs(xs[j]) + abs(ys[j]) + abs(zs[j]) + 8;
+                    if (r > radius) radius = r;
+                }
+                uint32_t xy = rd32(p + 0x28u), zw = rd32(p + 0x24u);
+                int32_t x = (int16_t)xy, y = (int16_t)(xy >> 16), z = (int16_t)(zw >> 16);
+                if (x - radius < x0) x0 = x - radius;
+                if (x + radius > x1) x1 = x + radius;
+                if (y - radius < y0) y0 = y - radius;
+                if (y + radius > y1) y1 = y + radius;
+                if (z - radius < z0) z0 = z - radius;
+                if (z + radius > z1) z1 = z + radius;
+                b->has_local = 1;
+                continue;
+            }
             for (unsigned j = 0; j < 4u; j++) {
                 if (xs[j] < x0) x0 = xs[j];
                 if (xs[j] > x1) x1 = xs[j];
@@ -213,7 +238,7 @@ static inline int r4_md_block_bounds(R4MdRead32 rd32, uint32_t block, R4MdBounds
     b->sig = r4_md_block_sig(rd32, block);
     b->lo[0] = x0; b->lo[1] = y0; b->lo[2] = z0;
     b->hi[0] = x1; b->hi[1] = y1; b->hi[2] = z1;
-    b->complete = (rd32(block + 0x30u) & 0xFFFFu) == 0;
+    b->complete = 1;
     return 1;
 }
 
@@ -221,7 +246,7 @@ static inline int r4_md_block_bounds(R4MdRead32 rd32, uint32_t block, R4MdBounds
  * already includes the game's x4 rotation and camera translation. Evaluating
  * the AABB's support point rejects a whole block without executing GTE commands
  * or creating PGXP shadows. Intersecting boxes are deliberately retained. */
-typedef struct { double plane[6][4]; } R4MdFrustum;
+typedef struct { double plane[6][4]; double near_limit; int local_valid, reject_far; } R4MdFrustum;
 
 static inline void r4_md_frustum_init(R4MdFrustum *f, const uint32_t ctrl[32],
                                      double left, double right, double top, double bottom)
@@ -235,6 +260,9 @@ static inline void r4_md_frustum_init(R4MdFrustum *f, const uint32_t ctrl[32],
         m[r][3] = (int32_t)ctrl[5 + r];
     }
     double h = (uint16_t)ctrl[26];
+    f->near_limit = h / 2.0 + 1.0;
+    f->local_valid = 0;
+    f->reject_far = 1;
     double ox = (double)(int32_t)ctrl[24] / 65536.0;
     double oy = (double)(int32_t)ctrl[25] / 65536.0;
     for (unsigned i = 0; i < 4; i++) {
@@ -254,7 +282,18 @@ static inline void r4_md_frustum_init(R4MdFrustum *f, const uint32_t ctrl[32],
 
 static inline int r4_md_frustum_visible(const R4MdFrustum *f, const R4MdBounds *b)
 {
-    if (!b->complete) return 1;
+    if (!b->complete || (b->has_local && !f->local_valid)) return 1;
+    double minz = f->plane[4][3], maxz = minz;
+    for (unsigned i = 0; i < 3; i++) {
+        double a = f->plane[4][i];
+        minz += a * (a < 0 ? b->hi[i] : b->lo[i]);
+        maxz += a * (a < 0 ? b->lo[i] : b->hi[i]);
+    }
+    if (maxz < -1.0) return 0;
+    if (minz > 65536.0) return !f->reject_far;
+    /* Near-division and partly saturated depth boxes can contain vertices
+     * using the hardware-clamped projection. Do not use side planes on them. */
+    if (minz <= f->near_limit || maxz >= 65534.0) return 1;
     for (unsigned p = 0; p < 6; p++) {
         double maximum = f->plane[p][3];
         for (unsigned i = 0; i < 3; i++)

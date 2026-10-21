@@ -350,7 +350,9 @@ def check_poly_kinds(seg, seg_bytes):
     found = set()
     for i in range(11):
         r = int.from_bytes(seg_bytes(0x800A2370 + 4 * i, 4), 'little')
-        words = [seg.word(r + 4 * k) for k in range(40)]
+        # The local-billboard renderer first saves/installs both GTE bases;
+        # its block-field/table load is 73 instructions into the function.
+        words = [seg.word(r + 4 * k) for k in range(128)]
         for k, w in enumerate(words[:-6]):
             if (w >> 16) != 0x8D49 or (words[k + 1] >> 16) != 0x240A:
                 continue
