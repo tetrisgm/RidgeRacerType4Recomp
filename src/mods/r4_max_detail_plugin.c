@@ -119,15 +119,16 @@ static uint32_t rd32(uint32_t a) { return psx_mod_read_word(a); }
 static uint16_t rd16(uint32_t a) { return psx_mod_read_half(a); }
 
 /* ---- course renderer entry --------------------------------------------- */
+static void r4_md_cull_course(CPUState *cpu);
 
 /* 0x80060F94(0x1F800000, list, type): the main, alternate and mirror course
  * draws all come through here, after the game has written both scratch
  * values for this draw. */
 static void r4_md_course(CPUState *cpu, uint32_t address)
 {
-    (void)cpu;
     (void)address;
     if (!s_enabled) return;
+    r4_md_cull_course(cpu);
     if (s_opt.course_full)
         psx_mod_write_half(R4_MD_COURSE_FAR_ADDR, (uint16_t)R4_MD_COURSE_FAR_FULL);
     if (s_opt.split_same)
@@ -159,6 +160,8 @@ static struct {
     int bounds_valid, visible;
 } s_bounds[R4_MD_BOUNDS_CACHE];
 static uint64_t s_visibility_epoch;
+static uint32_t s_unculled_count;
+static int s_course_cull_pending;
 static struct {
     double camx, camz, fx, fz, slope;
     int range;
@@ -191,6 +194,37 @@ static int r4_md_keep_block(void *ctx, uint32_t block)
     R4MdBounds b;   /* cache full here: compute without keeping */
     if (!r4_md_block_bounds(rd32, block, &b)) return 1;
     return r4_md_block_visible_limit(&b, s_cone.camx, s_cone.camz, s_cone.fx, s_cone.fz, s_cone.slope, s_cone.range);
+}
+
+static void r4_md_cull_course(CPUState *cpu)
+{
+    if (!s_course_cull_pending) return;
+    s_course_cull_pending = 0;
+    if (cpu->gpr[5] != R4_MD_LIST_ADDR ||
+        !pgxp_active() || !pgxp_preserve_projection()) return;
+    uint32_t count = rd32(R4_MD_LIST_ADDR);
+    if (count > R4_MD_LIST_MAX || count <= s_unculled_count) return;
+    int margin = psx_mod_widescreen_x_margin();
+    R4MdFrustum f;
+    r4_md_frustum_init(&f, cpu->gte_ctrl, -margin - 2.0, 322.0 + margin, -2.0, 242.0);
+    uint32_t out = s_unculled_count;
+    for (uint32_t n = out; n < count; n++) {
+        uint32_t block = rd32(R4_MD_LIST_ADDR + 4u * (n + 1u));
+        const R4MdBounds *bounds = NULL;
+        R4MdBounds temporary;
+        uint32_t h = ((block >> 4) * 2654435761u) >> 20;
+        for (uint32_t probe = 0; probe < 8u; probe++) {
+            uint32_t i = (h + probe) & (R4_MD_BOUNDS_CACHE - 1u);
+            if (s_bounds[i].block == block && s_bounds[i].epoch == s_visibility_epoch) {
+                if (s_bounds[i].bounds_valid) bounds = &s_bounds[i].b;
+                break;
+            }
+        }
+        if (!bounds && r4_md_block_bounds(rd32, block, &temporary)) bounds = &temporary;
+        if (bounds && !r4_md_frustum_visible(&f, bounds)) continue;
+        psx_mod_write_word(R4_MD_LIST_ADDR + 4u * (++out), block);
+    }
+    psx_mod_write_word(R4_MD_LIST_ADDR, out);
 }
 
 static int s_frame_has_course;   /* a main course draw ran this frame */
@@ -262,6 +296,8 @@ static void r4_md_pvs_merge_body(void)
     R4PvsMerge m = r4_pvs_merge_dir(rd32, rd16, psx_mod_write_word, s_pvs.section,
                                     s_pvs.octant, nsec, dir, ahead, behind, oct_reach,
                                     r4_md_keep_block, 0);
+    s_unculled_count = m.before;
+    s_course_cull_pending = m.ok;
     if (s_trace && m.ok) {
         s_stat.nsec = nsec;
         s_stat.pvs_frames++;
@@ -572,6 +608,7 @@ static void r4_md_savestate_loaded(void)
 {
     if (!s_enabled) return;
     memset(s_bounds, 0, sizeof s_bounds);
+    s_course_cull_pending = 0;
     r4_md_gov_reset(&s_gov, r4_md_gov_start_level(s_frame.last_oct));
     memset(&s_frame, 0, sizeof s_frame);
     s_frame.last_oct = -1;

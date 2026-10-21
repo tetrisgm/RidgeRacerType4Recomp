@@ -161,19 +161,25 @@ typedef uint32_t (*R4MdRead32)(uint32_t address);
  * x/z box and the half-diagonal. `sig` folds the block's kind words, so a
  * cached circle can be checked against the block it was made from. Returns
  * 0 for a block with no polygons or an implausible table. */
-typedef struct { int32_t cx, cz, r; uint32_t sig; } R4MdBounds;
+typedef struct {
+    int32_t cx, cz, r;
+    uint32_t sig;
+    int32_t lo[3], hi[3];  /* packed course coordinates, before the GTE */
+    int complete;           /* special local-object polygons need their own transform */
+} R4MdBounds;
 
 static inline uint32_t r4_md_block_sig(R4MdRead32 rd32, uint32_t block)
 {
     uint32_t sig = 0x9E3779B9u;
     for (unsigned k = 0; k < R4_MD_POLY_KINDS; k++)
         sig = (sig ^ rd32(block + r4_md_poly_kinds[k].field)) * 0x01000193u;
-    return sig;
+    return (sig ^ rd32(block + 0x30u)) * 0x01000193u;
 }
 
 static inline int r4_md_block_bounds(R4MdRead32 rd32, uint32_t block, R4MdBounds *b)
 {
     int32_t x0 = INT32_MAX, x1 = INT32_MIN, z0 = INT32_MAX, z1 = INT32_MIN;
+    int32_t y0 = INT32_MAX, y1 = INT32_MIN;
     for (unsigned k = 0; k < R4_MD_POLY_KINDS; k++) {
         uint32_t w = rd32(block + r4_md_poly_kinds[k].field);
         uint32_t polys = rd32(r4_md_poly_kinds[k].table);
@@ -185,6 +191,8 @@ static inline int r4_md_block_bounds(R4MdRead32 rd32, uint32_t block, R4MdBounds
             uint32_t v[6];
             for (unsigned j = 0; j < 6u; j++) v[j] = rd32(p + 4u * j);
             int32_t xs[4] = { (int16_t)v[0], (int16_t)v[2], (int16_t)v[3], (int16_t)v[5] };
+            int32_t ys[4] = { (int16_t)(v[0] >> 16), (int16_t)(v[2] >> 16),
+                              (int16_t)(v[3] >> 16), (int16_t)(v[5] >> 16) };
             int32_t zs[4] = { (int16_t)v[1], (int16_t)(v[1] >> 16), (int16_t)v[4],
                               (int16_t)(v[4] >> 16) };
             for (unsigned j = 0; j < 4u; j++) {
@@ -192,6 +200,8 @@ static inline int r4_md_block_bounds(R4MdRead32 rd32, uint32_t block, R4MdBounds
                 if (xs[j] > x1) x1 = xs[j];
                 if (zs[j] < z0) z0 = zs[j];
                 if (zs[j] > z1) z1 = zs[j];
+                if (ys[j] < y0) y0 = ys[j];
+                if (ys[j] > y1) y1 = ys[j];
             }
         }
     }
@@ -201,6 +211,58 @@ static inline int r4_md_block_bounds(R4MdRead32 rd32, uint32_t block, R4MdBounds
     int64_t hx = ((int64_t)x1 - x0 + 1) / 2 + 1, hz = ((int64_t)z1 - z0 + 1) / 2 + 1;
     b->r = (int32_t)sqrt((double)(hx * hx + hz * hz)) + 1;
     b->sig = r4_md_block_sig(rd32, block);
+    b->lo[0] = x0; b->lo[1] = y0; b->lo[2] = z0;
+    b->hi[0] = x1; b->hi[1] = y1; b->hi[2] = z1;
+    b->complete = (rd32(block + 0x30u) & 0xFFFFu) == 0;
+    return 1;
+}
+
+/* Six homogeneous planes in packed course coordinates. The live course GTE
+ * already includes the game's x4 rotation and camera translation. Evaluating
+ * the AABB's support point rejects a whole block without executing GTE commands
+ * or creating PGXP shadows. Intersecting boxes are deliberately retained. */
+typedef struct { double plane[6][4]; } R4MdFrustum;
+
+static inline void r4_md_frustum_init(R4MdFrustum *f, const uint32_t ctrl[32],
+                                     double left, double right, double top, double bottom)
+{
+    double m[3][4];
+    for (unsigned r = 0; r < 3; r++) {
+        for (unsigned c = 0; c < 3; c++) {
+            unsigned i = r * 3 + c;
+            m[r][c] = (double)(int16_t)(ctrl[i / 2] >> (16 * (i & 1))) / 4096.0;
+        }
+        m[r][3] = (int32_t)ctrl[5 + r];
+    }
+    double h = (uint16_t)ctrl[26];
+    double ox = (double)(int32_t)ctrl[24] / 65536.0;
+    double oy = (double)(int32_t)ctrl[25] / 65536.0;
+    for (unsigned i = 0; i < 4; i++) {
+        f->plane[0][i] = h * m[0][i] + (ox - left) * m[2][i];
+        f->plane[1][i] = -h * m[0][i] + (right - ox) * m[2][i];
+        f->plane[2][i] = h * m[1][i] + (oy - top) * m[2][i];
+        f->plane[3][i] = -h * m[1][i] + (bottom - oy) * m[2][i];
+        f->plane[4][i] = m[2][i];
+        f->plane[5][i] = -m[2][i];
+    }
+    f->plane[0][3] += h + fabs(ox - left);
+    f->plane[1][3] += h + fabs(right - ox);
+    f->plane[2][3] += h + fabs(oy - top);
+    f->plane[3][3] += h + fabs(bottom - oy);
+    f->plane[5][3] += 65535.0;
+}
+
+static inline int r4_md_frustum_visible(const R4MdFrustum *f, const R4MdBounds *b)
+{
+    if (!b->complete) return 1;
+    for (unsigned p = 0; p < 6; p++) {
+        double maximum = f->plane[p][3];
+        for (unsigned i = 0; i < 3; i++)
+            maximum += f->plane[p][i] * (f->plane[p][i] < 0 ? b->lo[i] : b->hi[i]);
+        /* One course unit covers the GTE's truncation; two screen pixels
+         * of padding are included by the caller in the side planes. */
+        if (maximum < -1.0) return 0;
+    }
     return 1;
 }
 

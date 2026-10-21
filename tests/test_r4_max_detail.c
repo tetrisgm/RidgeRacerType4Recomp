@@ -1264,7 +1264,32 @@ static void test_rand_guard(void) {
     set_options(NULL, NULL, NULL, NULL);
 }
 
+static void test_course_frustum(void) {
+    uint32_t ctrl[32] = {0};
+    ctrl[0] = ctrl[2] = ctrl[4] = 16384; /* course rotation is x4 */
+    ctrl[7] = 4000;
+    ctrl[24] = 160u << 16; ctrl[25] = 120u << 16; ctrl[26] = 160;
+    R4MdFrustum f;
+    R4MdBounds b = {0};
+    b.complete = 1;
+    for (int i = 0; i < 3; i++) { b.lo[i] = -10; b.hi[i] = 10; }
+    r4_md_frustum_init(&f, ctrl, -2, 322, -2, 242);
+    CHECK(r4_md_frustum_visible(&f, &b), "course frustum: visible box retained");
+    b.lo[0] = 1200; b.hi[0] = 1300;
+    CHECK(!r4_md_frustum_visible(&f, &b), "course frustum: off-screen far box rejected before GTE");
+    r4_md_frustum_init(&f, ctrl, -82, 402, -2, 242);
+    CHECK(r4_md_frustum_visible(&f, &b), "course frustum: native-wide margin retains visible box");
+    b.lo[1] = 2000; b.hi[1] = 2100;
+    CHECK(!r4_md_frustum_visible(&f, &b), "course frustum: vertical rejection uses live camera");
+    b.complete = 0;
+    CHECK(r4_md_frustum_visible(&f, &b), "course frustum: unknown local-object bounds retained");
+    b.complete = 1; b.lo[0] = b.lo[1] = -10; b.hi[0] = b.hi[1] = 10;
+    b.lo[2] = 16000; b.hi[2] = 17000;
+    CHECK(!r4_md_frustum_visible(&f, &b), "course frustum: unsigned GTE depth limit rejects far box");
+}
+
 int main(void) {
+    test_course_frustum();
     test_options();
     test_car_tables();
     test_pvs();
