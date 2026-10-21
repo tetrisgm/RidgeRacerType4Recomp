@@ -96,3 +96,27 @@ jump is not building drift evidence.
 Stage 2 accepted; final pin: framework `8130e6fd`. Regeneration leaves all
 50 game shards unchanged. Stage 3 remains next. No PR, merge or
 release is authorized. See the owner brief for the ordered acceptance gates.
+
+## Stage 3 (in progress; not accepted)
+
+`feat/render-60fps-v2` imports transactional interpolation and HD/local-view
+admission over accepted Stages 1?2. R4 redraw now preserves Maximum's expanded
+primitive-heap layout; using the old stock heap caused watchdog rollbacks.
+Fullscreen, native-cadence identity: 4,501 off/on fingerprints match exactly,
+with 0 / 735 completed temporal passes and no on-path aborts/discards.
+Local receipts: `stage3-identity-native-{off,on}/identity.json` and
+`stage3-identity-native-compare.json`. An earlier mislabeled off setup carried
+a stale 120 Hz override and is rejected. Its watchdog logs led to the heap fix.
+
+| Stage 3 change | Load | Completion Hz | Gaps >25 ms | Max gap ms | p99 busy |
+|---|---|---:|---:|---:|---:|
+| Imported plugin (render thread disabled; no passes) | quiet | 59.845 | 38 | 75.212 | 100.0% |
+| Async eligibility + expanded heaps (749 passes) | quiet | 59.930 | 451 | 35.311 | 92.8% |
+| Queued deadlines (393 passes) | quiet | 60.093 | 422 | 42.187 | 95.6% |
+| Release refused plans (8K slot budget rejects passes) | quiet | 60.000 | 8 | 30.177 | 63.0% |
+
+The 256 MiB temporal queue cap cannot fit two 8K images per generation. The
+current build raises its size-aware allowance to at most 1 GiB; timing and
+consecutive distinct-frame proof remain open. Windows/Mac title tests pass
+25/25 for the preceding queue fix, plus scheduling and sandbox guards. No
+Stage 3 branch is pushed. No PR, merge or release.

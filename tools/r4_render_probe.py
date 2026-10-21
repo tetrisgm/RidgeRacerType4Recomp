@@ -2,7 +2,7 @@
 """Bounded TCP measurements; launch exactly one runtime directly from the shell.
 
 Identity: launch fullscreen, select the mod before launch, run twice with the
-same build/settings/state, then compare. Turbo stays on throughout. An on
+same build/settings/state, then compare. Identity runs at native cadence. An on
 receipt must contain completed temporal passes; headless cannot prove this.
 Timing: launch windowed with PSX_RUNTIME_PERF_DIAG=1 and
 PSX_RUNTIME_PERF_DIAG_MS=250; the probe sets a 960x540 window.
@@ -71,7 +71,7 @@ def main():
                 raise RuntimeError((name, reply))
             return reply
 
-        ask('turbo', enabled=1)
+        ask('turbo', enabled=0 if args.mode == 'identity' else 1)
         ask('clear_input')
         ask('input_route_clear')
         record = json.loads(args.route.read_text())

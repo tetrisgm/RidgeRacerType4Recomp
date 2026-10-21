@@ -29,6 +29,7 @@ void psx_mod_write_word(uint32_t a, uint32_t v) { memcpy(at(a), &v, 4); }
  * (mod_packages.cpp mod_register_function_entry_plugin). The hook table is
  * the framework's; here the test calls the callbacks itself. */
 static PSXModFunctionEntryCallback s_vsync_hook, s_otag_hook;
+static uint32_t s_pass_heap;
 static int s_owner_ok = 1, s_register_calls, s_register_refused;
 static struct { char id[32]; uint32_t addr; } s_registered[8];
 static int s_n_registered;
@@ -106,6 +107,7 @@ void psx_dispatch_call(CPUState *cpu, uint32_t addr, uint32_t ra) {
     (void)cpu; (void)ra;
     if (!s_in_fn) return;
     s_calls_in_pass++;
+    if (addr == 0x80093418u) s_pass_heap = psx_mod_read_word(0x1F800000u);
     /* The guest's own ClearOTagR entry fires the plugin's entry hook. */
     if (addr == 0x80093418u && s_otag_hook) s_otag_hook(cpu, addr);
     if (s_abort_next && s_calls_in_pass >= 3) {
@@ -181,6 +183,14 @@ int main(void) {
     tick(&cpu);                                         /* first tick: history */
     tick(&cpu);
     CHECK(s_passes == 1, "a continuous demo tick renders a pass");
+    psx_mod_write_word(0x1F800000u, 0x80240000u);
+    tick(&cpu);
+    CHECK(s_pass_heap == 0x80200000u || s_pass_heap == 0x80300000u,
+          "intermediate frames retain Maximum's expanded primitive heaps");
+    CHECK(psx_mod_read_word(0x1F800000u) == 0x80240000u,
+          "the transaction restores the live heap cursor");
+    s_passes--; /* this integration check is independent of the cases below */
+
 
     s_abort_next = 1;
     s_calls_in_pass = 0;

@@ -41,11 +41,14 @@
 #include "r4_interp.h"
 
 #include <string.h>
+#include <stdlib.h>
+#include <stdio.h>
 
 #include "cpu_state.h"
 #include "mod_plugins.h"
 #include "r4_interp_fields.h"
 #include "r4_interp_math.h"
+#include "r4_primitive_heap.h"
 
 #define R4_FR_PLUGIN "r4.framerate"
 
@@ -514,7 +517,13 @@ static int r4_pass(struct CPUState *cpu, void *user, uint32_t alpha_q16) {
     wr32(R4_CUR_BUF, buf);
     wr32(R4_BUF_INDEX, b->bp);
     wr32(R4_SPAD_OT, buf + 0x70u);
-    wr32(R4_SPAD_HEAP, buf + 0x1670u);
+    /* Maximum may have moved the live packet allocator out of the stock
+     * buffers. The dead buffer must use the matching expanded heap too. */
+    uint32_t live_heap = rd32(R4_SPAD_HEAP);
+    int expanded = live_heap >= R4_BIG_HEAP_BASE &&
+                   live_heap < R4_BIG_HEAP_BASE + 2u * R4_BIG_HEAP_SIZE;
+    wr32(R4_SPAD_HEAP, expanded ? R4_BIG_HEAP_BASE + b->bp * R4_BIG_HEAP_SIZE
+                              : buf + 0x1670u);
     CALL2(R4_CLEAR_OTAG_R, buf + 0x70u, 0x2C0u);
     CALL2(R4_CLEAR_OTAG_R, buf + 0xB70u, 0x2C0u);
     r4_apply(b, alpha_q16);
@@ -566,6 +575,14 @@ static void r4_pass_point(CPUState *cpu, uint32_t address) {
     int mode, continuous, pre_valid = R.pre_valid;
     R4Blend blend;
     (void)address;
+    if (cpu->gpr[31] == R4_RA_PASS_POINT && cpu->gpr[4] == 0u) {
+        static int trace = -1; static unsigned points;
+        if (trace < 0) trace = getenv("R4_INTERP_TRACE") != NULL;
+        if (trace && (++points <= 8u || points % 300u == 0u))
+            fprintf(stderr, "[r4-interp] enabled=%d pre=%d prev=%d handler=%08X mode=%d phase=%u tick=%u previous=%u\n",
+                    R.enabled, pre_valid, R.prev_valid, r4_handler(), r4_mode_of(r4_handler()),
+                    rd32(R4_PHASE), rd32(R4_TICK), R.prev_tick);
+    }
     if (!R.enabled || R.in_pass || cpu->gpr[31] != R4_RA_PASS_POINT ||
         cpu->gpr[4] != 0u)
         return;
