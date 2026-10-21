@@ -179,19 +179,12 @@ static inline uint32_t r4_md_block_sig(R4MdRead32 rd32, uint32_t block)
     return sig;
 }
 
-static inline int r4_md_block_bounds(R4MdRead32 rd32, uint32_t block, R4MdBounds *b)
+/* One primitive bound, shared by whole-block and fine frustum rejection. */
+static inline void r4_md_poly_bounds(R4MdRead32 rd32, uint32_t p, unsigned k, R4MdBounds *b)
 {
     int32_t x0 = INT32_MAX, x1 = INT32_MIN, z0 = INT32_MAX, z1 = INT32_MIN;
     int32_t y0 = INT32_MAX, y1 = INT32_MIN;
     b->has_local = 0;
-    for (unsigned k = 0; k < R4_MD_POLY_KINDS; k++) {
-        uint32_t w = rd32(block + r4_md_poly_kinds[k].field);
-        uint32_t polys = rd32(r4_md_poly_kinds[k].table);
-        uint32_t n = w & 0xFFFFu, first = w >> 16;
-        if (n == 0u) continue;
-        if ((polys & 0xFFE00000u) != 0x80000000u || n > R4_MD_BLOCK_POLYS_MAX) return 0;
-        for (uint32_t i = 0; i < n; i++) {
-            uint32_t p = polys + r4_md_poly_kinds[k].stride * (first + i);
             uint32_t v[6];
             for (unsigned j = 0; j < 6u; j++) v[j] = rd32(p + 4u * j);
             int32_t xs[4] = { (int16_t)v[0], (int16_t)v[2], (int16_t)v[3], (int16_t)v[5] };
@@ -218,9 +211,9 @@ static inline int r4_md_block_bounds(R4MdRead32 rd32, uint32_t block, R4MdBounds
                 if (z - radius < z0) z0 = z - radius;
                 if (z + radius > z1) z1 = z + radius;
                 b->has_local = 1;
-                continue;
+
             }
-            for (unsigned j = 0; j < 4u; j++) {
+            else for (unsigned j = 0; j < 4u; j++) {
                 if (xs[j] < x0) x0 = xs[j];
                 if (xs[j] > x1) x1 = xs[j];
                 if (zs[j] < z0) z0 = zs[j];
@@ -228,6 +221,33 @@ static inline int r4_md_block_bounds(R4MdRead32 rd32, uint32_t block, R4MdBounds
                 if (ys[j] < y0) y0 = ys[j];
                 if (ys[j] > y1) y1 = ys[j];
             }
+    b->lo[0] = x0; b->lo[1] = y0; b->lo[2] = z0;
+    b->hi[0] = x1; b->hi[1] = y1; b->hi[2] = z1;
+    b->complete = 1;
+}
+
+static inline int r4_md_block_bounds(R4MdRead32 rd32, uint32_t block, R4MdBounds *b)
+{
+    int32_t x0 = INT32_MAX, x1 = INT32_MIN, z0 = INT32_MAX, z1 = INT32_MIN;
+    int32_t y0 = INT32_MAX, y1 = INT32_MIN;
+    b->has_local = 0;
+    for (unsigned k = 0; k < R4_MD_POLY_KINDS; k++) {
+        uint32_t w = rd32(block + r4_md_poly_kinds[k].field);
+        uint32_t polys = rd32(r4_md_poly_kinds[k].table);
+        uint32_t n = w & 0xFFFFu, first = w >> 16;
+        if (n == 0u) continue;
+        if ((polys & 0xFFE00000u) != 0x80000000u || n > R4_MD_BLOCK_POLYS_MAX) return 0;
+        for (uint32_t i = 0; i < n; i++) {
+            uint32_t p = polys + r4_md_poly_kinds[k].stride * (first + i);
+            R4MdBounds poly;
+            r4_md_poly_bounds(rd32, p, k, &poly);
+            if (poly.lo[0] < x0) x0 = poly.lo[0];
+            if (poly.hi[0] > x1) x1 = poly.hi[0];
+            if (poly.lo[1] < y0) y0 = poly.lo[1];
+            if (poly.hi[1] > y1) y1 = poly.hi[1];
+            if (poly.lo[2] < z0) z0 = poly.lo[2];
+            if (poly.hi[2] > z1) z1 = poly.hi[2];
+            b->has_local |= poly.has_local;
         }
     }
     if (x0 > x1) return 0;
@@ -277,7 +297,7 @@ static inline void r4_md_frustum_init(R4MdFrustum *f, const uint32_t ctrl[32],
     f->plane[1][3] += h + fabs(right - ox);
     f->plane[2][3] += h + fabs(oy - top);
     f->plane[3][3] += h + fabs(bottom - oy);
-    f->plane[5][3] += 65535.0;
+    f->plane[5][3] += 2147483647.0; /* positive, unwrapped 44-bit MAC >> 12 */
 }
 
 static inline int r4_md_frustum_visible(const R4MdFrustum *f, const R4MdBounds *b)
@@ -290,10 +310,10 @@ static inline int r4_md_frustum_visible(const R4MdFrustum *f, const R4MdBounds *
         maxz += a * (a < 0 ? b->lo[i] : b->hi[i]);
     }
     if (maxz < -1.0) return 0;
-    if (minz > 65536.0) return !f->reject_far;
-    /* Near-division and partly saturated depth boxes can contain vertices
+    if (minz > 2147483648.0) return !f->reject_far;
+    /* Near-division boxes can contain vertices
      * using the hardware-clamped projection. Do not use side planes on them. */
-    if (minz <= f->near_limit || maxz >= 65534.0) return 1;
+    if (minz <= f->near_limit) return 1;
     for (unsigned p = 0; p < 6; p++) {
         double maximum = f->plane[p][3];
         for (unsigned i = 0; i < 3; i++)
@@ -312,10 +332,10 @@ static inline int r4_md_frustum_visible(const R4MdFrustum *f, const R4MdBounds *
  *     roll and pitch), so the PS1 never transforms the polygons of a block
  *     behind or beside the camera;
  *   - in range: every point of the circle within R4_MD_BLOCK_RANGE of the
- *     camera. The course draw feeds camera-space vertices through the GTE's
- *     unsigned 16-bit SZ register. Exact PGXP projections recover saturated X/Y;
+ *     camera. Exact PGXP projection preserves positive, unwrapped MAC depth
+ *     beyond the hardware SZ register as well as saturated X/Y;
  *     callers without that enhancement keep the original conservative range. */
-#define R4_MD_BLOCK_RANGE 65535 /* unsigned GTE SZ limit, exact X/Y via PGXP */
+#define R4_MD_BLOCK_RANGE INT32_MAX /* loaded circuit, full positive MAC projection via PGXP */
 static inline int r4_md_block_visible_limit(const R4MdBounds *b, double camx, double camz,
                                       double fx, double fz, double slope, int range)
 {

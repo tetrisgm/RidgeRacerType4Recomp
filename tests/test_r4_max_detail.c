@@ -32,13 +32,14 @@ static int failures;
 #define CHECK(c, m) do { if (!(c)) { fprintf(stderr, "FAIL: %s\n", m); failures++; } } while (0)
 
 /* ---- guest memory ------------------------------------------------------ */
-static uint8_t s_ram[2u * 1024u * 1024u];
+static uint8_t s_ram[8u * 1024u * 1024u];
+static int s_ram8;
 static uint8_t s_spad[1024];
 static int s_spad_writes, s_ram_half_writes;
 
 static uint8_t *at(uint32_t a) {
     if ((a & 0xFFFFFC00u) == 0x1F800000u) return &s_spad[a & 0x3FFu];
-    return &s_ram[a & 0x1FFFFFu];
+    return &s_ram[a & (s_ram8 ? 0x7FFFFFu : 0x1FFFFFu)];
 }
 uint8_t psx_mod_read_byte(uint32_t a) { return *at(a); }
 uint16_t psx_mod_read_half(uint32_t a) { uint16_t v; memcpy(&v, at(a), 2); return v; }
@@ -109,7 +110,7 @@ uint32_t interrupts_get_cycles_since_vblank(void) {
 uint32_t interrupts_cycles_to_vblank(void) {
     return VB_PERIOD - interrupts_get_cycles_since_vblank();
 }
-static int s_ram8 = 0;
+
 int psx_ram_8mb_active(void) { return s_ram8; }
 static PSXModVBlankCallback s_vblank;
 static char s_vblank_id[32];
@@ -1125,7 +1126,7 @@ static void test_plugin_far(void) {
     for (int i = 0; i < 8; i++) plugin_frame(R4_MD_FRAME_BUDGET);
     load_list(5, 0, 2);
     course_draw(5, 0, 0x8006F02Cu);
-    CHECK(rd32(R4_PVS_LIST_ADDR) == 2u, "overloaded frames: down to the floor (no sections)");
+    CHECK(rd32(R4_PVS_LIST_ADDR) == NSEC * 2u, "Maximum retains full distance under load");
     car_lookup(0, r4_md_car_after_lod_ra[0]);
     CHECK(car_table_is(r4_md_car_lod_full), "below level 1: the stock cull distance");
     /* Frames that never reach the VSync(1) wait, or VSync from elsewhere,
@@ -1295,9 +1296,43 @@ static void test_course_frustum(void) {
     CHECK(r4_md_frustum_visible(&f, &b), "course frustum: unknown local-object bounds retained");
     b.complete = 1; b.lo[0] = b.lo[1] = -10; b.hi[0] = b.hi[1] = 10;
     b.lo[2] = 16000; b.hi[2] = 17000;
-    CHECK(!r4_md_frustum_visible(&f, &b), "course frustum: unsigned GTE depth limit rejects far box");
+    CHECK(r4_md_frustum_visible(&f, &b), "course frustum: visible scenery beyond hardware SZ retained");
+    b.lo[2] = 536870912; b.hi[2] = 536870922;
+    CHECK(!r4_md_frustum_visible(&f, &b), "course frustum: unrepresentable positive MAC depth rejected");
     f.reject_far = 0;
     CHECK(r4_md_frustum_visible(&f, &b), "course frustum: original saturated-depth scenery retained");
+}
+
+static void test_fine_course_cull(void) {
+    const uint32_t block = 0x80150000u, table = 0x80160000u;
+    set_options(NULL, NULL, NULL, NULL); s_activate();
+    build_course(2); put_centreline(NSEC * 5u);
+    load_list(0, 0, 2); course_draw(0, 0, 0x8006F02Cu);
+    for (unsigned i = 0; i < 20; i++) psx_mod_write_word(block + 4*i, 0);
+    psx_mod_write_word(block + 0x10, 5);
+    psx_mod_write_word(r4_md_poly_kinds[0].table, table);
+    for (unsigned i = 0; i < 5; i++) {
+        uint32_t x = (i == 2 || i == 4) ? 10000u : 0u;
+        for (unsigned j = 0; j < 6; j++)
+            psx_mod_write_word(table + 0x40*i + 4*j, (j == 1 || j == 4) ? 0 : x);
+    }
+    psx_mod_write_word(R4_PVS_LIST_ADDR, 1);
+    psx_mod_write_word(R4_PVS_LIST_ADDR + 4, block);
+    memset(s_cpu.gte_ctrl, 0, sizeof s_cpu.gte_ctrl);
+    s_cpu.gte_ctrl[0] = s_cpu.gte_ctrl[2] = s_cpu.gte_ctrl[4] = 16384;
+    s_cpu.gte_ctrl[7] = 4000;
+    s_cpu.gte_ctrl[24] = 160u << 16; s_cpu.gte_ctrl[25] = 120u << 16;
+    s_cpu.gte_ctrl[26] = 160;
+    s_cpu.gpr[5] = R4_PVS_LIST_ADDR; s_ram8 = 1;
+    hook(R4_MD_COURSE_DISPATCH_FN)(&s_cpu, R4_MD_COURSE_DISPATCH_FN);
+    CHECK(s_cpu.gpr[5] == 0x80400000u && rd32(s_cpu.gpr[5]) == 2,
+          "fine culling emits two visible runs before GTE work");
+    uint32_t a = rd32(s_cpu.gpr[5]+4), b = rd32(s_cpu.gpr[5]+8);
+    CHECK(rd32(a+0x10) == 2 && rd32(b+0x10) == ((3u<<16)|1u),
+          "fine culling preserves visible primitive order across rejected gaps");
+    CHECK(rd32(block+0x10) == 5 && rd32(r4_md_poly_kinds[0].table) == table,
+          "fine culling preserves original block and polygon table");
+    s_ram8 = 0;
 }
 
 int main(void) {
@@ -1318,6 +1353,7 @@ int main(void) {
     test_pacing_and_heap();
     test_pacing_vblank_aligned();
     test_rand_guard();
+    test_fine_course_cull();
     if (failures) {
         fprintf(stderr, "test_r4_max_detail: %d failure(s)\n", failures);
         return 1;

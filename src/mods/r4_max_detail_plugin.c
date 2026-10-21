@@ -118,7 +118,172 @@ static struct {
 static uint32_t rd32(uint32_t a) { return psx_mod_read_word(a); }
 static uint16_t rd16(uint32_t a) { return psx_mod_read_half(a); }
 
+static R4PvsSnapshot s_visibility_lists;
+
 /* ---- course renderer entry --------------------------------------------- */
+/* The expanded RAM's upper half is a transient course-list arena. Source
+ * records and polygon tables stay intact. Each descriptor selects contiguous
+ * visible runs, preserving the renderer's per-kind primitive order. */
+#define R4_MD_FINE_LIST 0x80400000u
+#define R4_MD_FINE_BLOCKS 0x80410000u
+#define R4_MD_FINE_MAX 16383u
+#define R4_MD_POLY_CACHE 65536u
+static struct { uint32_t polygon; R4MdBounds bounds; } s_poly_bounds[R4_MD_POLY_CACHE];
+
+static const R4MdBounds *r4_md_cached_poly(uint32_t p, unsigned k, R4MdBounds *temporary)
+{
+    uint32_t h = ((p >> 2) * 2654435761u) >> 16;
+    for (unsigned probe = 0; probe < 8; probe++) {
+        unsigned i = (h + probe) & (R4_MD_POLY_CACHE - 1u);
+        if (!s_poly_bounds[i].polygon) {
+            r4_md_poly_bounds(rd32, p, k, &s_poly_bounds[i].bounds);
+            s_poly_bounds[i].polygon = p;
+        }
+        if (s_poly_bounds[i].polygon == p) return &s_poly_bounds[i].bounds;
+    }
+    r4_md_poly_bounds(rd32, p, k, temporary);
+    return temporary;
+}
+
+#define R4_MD_CULL_NODES 262144u
+#define R4_MD_CULL_ROOTS 8192u
+typedef struct { R4MdBounds bounds; uint32_t first, count, left, right; } R4MdCullNode;
+static R4MdCullNode s_cull_nodes[R4_MD_CULL_NODES];
+static uint32_t s_cull_nodes_used;
+static struct { uint32_t p, count, kind, node; } s_cull_roots[R4_MD_CULL_ROOTS];
+static uint32_t s_visible_runs[R4_MD_POLY_KINDS][R4_MD_BLOCK_POLYS_MAX];
+
+static uint32_t r4_md_build_cull_node(uint32_t table, uint32_t first, uint32_t count, unsigned k)
+{
+    if (s_cull_nodes_used + 2u * count >= R4_MD_CULL_NODES) return 0;
+    uint32_t index = ++s_cull_nodes_used;
+    R4MdCullNode *node = &s_cull_nodes[index];
+    node->first = first; node->count = count;
+    node->left = node->right = 0;
+    if (count == 1) {
+        R4MdBounds temporary;
+        node->bounds = *r4_md_cached_poly(table + first * r4_md_poly_kinds[k].stride, k, &temporary);
+    } else {
+        unsigned half = count / 2;
+        node->left = r4_md_build_cull_node(table, first, half, k);
+        node->right = r4_md_build_cull_node(table, first + half, count - half, k);
+        if (!node->left || !node->right) return 0;
+        const R4MdBounds *a = &s_cull_nodes[node->left].bounds, *b = &s_cull_nodes[node->right].bounds;
+        node->bounds = *a;
+        for (unsigned j = 0; j < 3; j++) {
+            if (b->lo[j] < node->bounds.lo[j]) node->bounds.lo[j] = b->lo[j];
+            if (b->hi[j] > node->bounds.hi[j]) node->bounds.hi[j] = b->hi[j];
+        }
+        node->bounds.has_local |= b->has_local;
+    }
+    return index;
+}
+
+static uint32_t r4_md_cull_root(uint32_t table, uint32_t first, uint32_t count, unsigned k)
+{
+    uint32_t p = table + first * r4_md_poly_kinds[k].stride;
+    unsigned h = ((p >> 2) * 2654435761u) >> 19;
+    for (unsigned probe = 0; probe < 8; probe++) {
+        unsigned i = (h + probe) & (R4_MD_CULL_ROOTS - 1u);
+        if (!s_cull_roots[i].p) {
+            uint32_t node = r4_md_build_cull_node(table, first, count, k);
+            if (!node) return 0;
+            s_cull_roots[i].p = p; s_cull_roots[i].count = count;
+            s_cull_roots[i].kind = k; s_cull_roots[i].node = node;
+        }
+        if (s_cull_roots[i].p == p && s_cull_roots[i].count == count && s_cull_roots[i].kind == k)
+            return s_cull_roots[i].node;
+    }
+    return 0;
+}
+
+static void r4_md_visible_run(uint32_t *runs, unsigned *used, uint32_t first, uint32_t count)
+{
+    if (*used && (runs[*used-1] >> 16) + (runs[*used-1] & 0xffffu) == first)
+        runs[*used-1] += count;
+    else runs[(*used)++] = (first << 16) | count;
+}
+
+static void r4_md_visit_cull_node(uint32_t index, const R4MdFrustum *f, uint32_t *runs, unsigned *used)
+{
+    const R4MdCullNode *node = &s_cull_nodes[index];
+    const R4MdBounds *b = &node->bounds;
+    if (!r4_md_frustum_visible(f, b)) return;
+    int inside = !b->has_local || f->local_valid;
+    for (unsigned p = 0; inside && p < 6; p++) {
+        double minimum = f->plane[p][3];
+        for (unsigned j = 0; j < 3; j++)
+            minimum += f->plane[p][j] * (f->plane[p][j] < 0 ? b->hi[j] : b->lo[j]);
+        if (minimum <= (p == 4 ? f->near_limit : 1.0)) inside = 0;
+    }
+    if (inside || !node->left) r4_md_visible_run(runs, used, node->first, node->count);
+    else {
+        r4_md_visit_cull_node(node->left, f, runs, used);
+        r4_md_visit_cull_node(node->right, f, runs, used);
+    }
+}
+
+/* Build immutable group bounds once per loaded course, before driving. */
+static void r4_md_prime_cull_tree(void)
+{
+    if (!s_visibility_lists.valid) return;
+    uint8_t seen[8192] = {0};
+    for (unsigned slot = 0; slot < s_visibility_lists.nsec * R4_PVS_COLUMNS; slot++) {
+        for (unsigned i = 0; i < s_visibility_lists.count[slot]; i++) {
+            uint32_t id = s_visibility_lists.ids[slot][i];
+            uint8_t bit = (uint8_t)(1u << (id & 7u));
+            if (seen[id >> 3] & bit) continue;
+            seen[id >> 3] |= bit;
+            uint32_t block = s_visibility_lists.blocks + id * R4_PVS_BLOCK_STRIDE;
+            for (unsigned k = 0; k < R4_MD_POLY_KINDS; k++) {
+                uint32_t w = rd32(block + r4_md_poly_kinds[k].field);
+                uint32_t table = rd32(r4_md_poly_kinds[k].table), polys = w & 0xffffu;
+                if (polys && polys <= R4_MD_BLOCK_POLYS_MAX && (table & 0xffe00000u) == 0x80000000u)
+                    (void)r4_md_cull_root(table, w >> 16, polys, k);
+            }
+        }
+    }
+}
+
+static void r4_md_fine_course(CPUState *cpu, const R4MdFrustum *frustum, uint32_t count)
+{
+    if (!psx_ram_8mb_active()) return;
+    uint32_t out = 0;
+    for (unsigned n = 0; n < count; n++) {
+        uint32_t block = rd32(R4_MD_LIST_ADDR + 4u * (n + 1u));
+        uint32_t words[20]; unsigned used[R4_MD_POLY_KINDS], maximum = 0;
+        for (unsigned j = 0; j < 20; j++) words[j] = rd32(block + j * 4u);
+        for (unsigned k = 0; k < R4_MD_POLY_KINDS; k++) {
+            const R4MdPolyKind *kind = &r4_md_poly_kinds[k];
+            uint32_t w = words[kind->field/4], first = w >> 16, polys = w & 0xffffu;
+            uint32_t table = rd32(kind->table);
+            used[k] = 0;
+            if (!polys) continue;
+            if (polys > R4_MD_BLOCK_POLYS_MAX || (table & 0xffe00000u) != 0x80000000u) return;
+            uint32_t root = r4_md_cull_root(table, first, polys, k);
+            if (root) r4_md_visit_cull_node(root, frustum, s_visible_runs[k], &used[k]);
+            else { /* Cache capacity cannot lower visual quality. */
+                for (unsigned i = first; i < first + polys; i++) {
+                    R4MdBounds temporary;
+                    const R4MdBounds *b = r4_md_cached_poly(table + i * kind->stride, k, &temporary);
+                    if (r4_md_frustum_visible(frustum, b)) r4_md_visible_run(s_visible_runs[k], &used[k], i, 1);
+                }
+            }
+            if (used[k] > maximum) maximum = used[k];
+        }
+        for (unsigned i = 0; i < maximum; i++) {
+            if (out == R4_MD_FINE_MAX) return;
+            uint32_t target = R4_MD_FINE_BLOCKS + out * 0x50u;
+            for (unsigned k = 0; k < R4_MD_POLY_KINDS; k++)
+                words[r4_md_poly_kinds[k].field/4] = i < used[k] ? s_visible_runs[k][i] : 0;
+            for (unsigned j = 0; j < 20; j++) psx_mod_write_word(target + j * 4u, words[j]);
+            psx_mod_write_word(R4_MD_FINE_LIST + 4u * (++out), target);
+        }
+    }
+    psx_mod_write_word(R4_MD_FINE_LIST, out);
+    cpu->gpr[5] = R4_MD_FINE_LIST;
+}
+
 static void r4_md_cull_course(CPUState *cpu);
 
 /* 0x80060F94(0x1F800000, list, type): the main, alternate and mirror course
@@ -160,7 +325,6 @@ static struct {
     int bounds_valid, visible;
 } s_bounds[R4_MD_BOUNDS_CACHE];
 static uint64_t s_visibility_epoch;
-static R4PvsSnapshot s_visibility_lists;
 static int s_previous_race = -1;
 static uint32_t s_unculled_count;
 static int s_course_cull_pending;
@@ -233,8 +397,8 @@ static void r4_md_cull_course(CPUState *cpu)
     }
     uint32_t out = 0;
     for (uint32_t n = out; n < count; n++) {
-        /* Original baked entries can deliberately use saturated depth.
-         * Retain them; only new distance entries have the qualified SZ cap.
+        /* Original baked entries may exceed the positive MAC range.
+         * Retain those exceptional entries rather than adding a new clip.
          * Ordinary original entries can still be rejected off-screen. */
         f.reject_far = n >= s_unculled_count;
         uint32_t block = rd32(R4_MD_LIST_ADDR + 4u * (n + 1u));
@@ -253,6 +417,7 @@ static void r4_md_cull_course(CPUState *cpu)
         psx_mod_write_word(R4_MD_LIST_ADDR + 4u * (++out), block);
     }
     psx_mod_write_word(R4_MD_LIST_ADDR, out);
+    r4_md_fine_course(cpu, &f, out);
 }
 
 static int s_frame_has_course;   /* a main course draw ran this frame */
@@ -319,12 +484,17 @@ static void r4_md_pvs_merge_body(void)
      * change during this merge, so compute each visibility decision once. */
     if (++s_visibility_epoch == 0) {
         memset(s_bounds, 0, sizeof s_bounds);
+        memset(s_poly_bounds, 0, sizeof s_poly_bounds);
+        memset(s_cull_roots, 0, sizeof s_cull_roots);
+        s_cull_nodes_used = 0;
         s_visibility_epoch = 1;
     }
     if (!s_visibility_lists.valid || s_visibility_lists.nsec != nsec ||
         s_visibility_lists.table != rd32(R4_PVS_TABLE_PTR_ADDR) ||
-        s_visibility_lists.blocks != rd32(R4_PVS_BLOCK_BASE_ADDR))
+        s_visibility_lists.blocks != rd32(R4_PVS_BLOCK_BASE_ADDR)) {
         r4_pvs_snapshot_build(&s_visibility_lists, rd32, rd16, nsec);
+        if (pgxp_active() && pgxp_preserve_projection()) r4_md_prime_cull_tree();
+    }
     R4PvsMerge m = r4_pvs_merge_dir_cached(rd32, rd16, psx_mod_write_word, s_pvs.section,
                                     s_pvs.octant, nsec, dir, ahead, behind, oct_reach,
                                     r4_md_keep_block, 0, &s_visibility_lists);
@@ -575,7 +745,10 @@ static void r4_md_measure_frame(CPUState *cpu)
     (void)r4_md_gov_update_heap(&s_gov, busy, s_frame.heap_pm);
     uint32_t sections = r4_pvs_section_count(rd32);
     int ceiling = sections > 3u ? (int)sections - 3 : 0;
-    if (s_gov.level > ceiling) s_gov.level = ceiling;
+    /* Maximum with exact projection is a fixed full-circuit horizon.
+     * Off-screen work is culled rather than trading distance for timing. */
+    if ((s_opt.draw == R4_MD_DRAW_MAXIMUM && pgxp_active() && pgxp_preserve_projection()) ||
+        s_gov.level > ceiling) s_gov.level = ceiling;
     s_frame.heap_pm = 0;
     if (s_trace) {
         uint32_t pm = (uint32_t)(busy * 1000u / R4_MD_FRAME_BUDGET);
@@ -640,6 +813,9 @@ static void r4_md_savestate_loaded(void)
 {
     if (!s_enabled) return;
     memset(s_bounds, 0, sizeof s_bounds);
+    memset(s_poly_bounds, 0, sizeof s_poly_bounds);
+    memset(s_cull_roots, 0, sizeof s_cull_roots);
+    s_cull_nodes_used = 0;
     s_course_cull_pending = 0;
     s_visibility_lists.valid = 0;
     r4_md_gov_reset(&s_gov, r4_md_gov_start_level(s_frame.last_oct));
@@ -730,6 +906,9 @@ static void r4_md_vblank(void)
         s_previous_race = race;
         s_visibility_lists.valid = 0;
         memset(s_bounds, 0, sizeof s_bounds);
+        memset(s_poly_bounds, 0, sizeof s_poly_bounds);
+        memset(s_cull_roots, 0, sizeof s_cull_roots);
+        s_cull_nodes_used = 0;
     }
     if (s_opt.cars_full) return;
     int restored = 0;
@@ -907,6 +1086,9 @@ static void r4_max_detail_activate(void)
     s_visibility_lists.valid = 0;
     s_previous_race = -1;
     memset(s_bounds, 0, sizeof s_bounds);
+    memset(s_poly_bounds, 0, sizeof s_poly_bounds);
+    memset(s_cull_roots, 0, sizeof s_cull_roots);
+    s_cull_nodes_used = 0;
     char draw[16], course[16], cars[16], split[16], reflections[16], mirror[16];
     const char *env = getenv("R4_MD_TRACE");
     s_trace = env ? atoi(env) : 0;
@@ -939,6 +1121,9 @@ static void r4_max_detail_activate(void)
     env = getenv("R4_MD_FAR_XFORM");
     s_far_xform_off = env && env[0] == '0';
     memset(s_bounds, 0, sizeof s_bounds);
+    memset(s_poly_bounds, 0, sizeof s_poly_bounds);
+    memset(s_cull_roots, 0, sizeof s_cull_roots);
+    s_cull_nodes_used = 0;
     memset(&s_cone, 0, sizeof s_cone);
 
     memset(&s_xf, 0, sizeof s_xf);
