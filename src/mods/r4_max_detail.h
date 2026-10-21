@@ -571,7 +571,7 @@ static inline int r4_md_car_row_far(R4MdOptions o, unsigned row, const int16_t c
  * frame start (0x8009375C, called at 0x8001E7E8) to its first VSync(1)
  * (0x8008B330 from 0x8001E7C8: the handler, DrawSync and the course and car
  * draws all come before it), and steers a level:
- *   level -2..1021: sections ahead = 2 + level, one section behind (none at
+ *   level -2..40: sections ahead = min(40, 2 + level), one section behind (none at
  *   -2), far cars (cull distance 14000) from level 1.
  * Over 96 % of the budget the level drops by 2 and holds for 60 frames; over
  * 93 % by 1 (hold 30); after 20 frames in a row under 86 % it rises by 1
@@ -589,7 +589,7 @@ static inline int r4_md_car_row_far(R4MdOptions o, unsigned row, const int16_t c
 #define R4_MD_PACING_RACE      0x180u
 #define R4_MD_FRAME_BUDGET     1130090u      /* two NTSC VBlanks: 2 * 33868800 / 59.94 */
 #define R4_MD_LEVEL_MIN        (-2)
-#define R4_MD_LEVEL_MAX        1021 /* all 1024 validated sections, minus base/behind */
+#define R4_MD_LEVEL_MAX        40 /* owner: exactly 40 sections ahead in Maximum */
 #define R4_MD_BEHIND           1
 
 typedef struct {
@@ -666,7 +666,7 @@ static inline int r4_md_gov_start_level(int oct_reach)
 static inline int r4_md_level_ahead(int level)
 {
     int a = 2 + level;
-    return a < 0 ? 0 : a;
+    return a < 0 ? 0 : a > R4_MD_LEVEL_MAX ? R4_MD_LEVEL_MAX : a;
 }
 static inline int r4_md_level_behind(int level)
 {

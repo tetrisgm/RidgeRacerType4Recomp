@@ -49,49 +49,50 @@ prescribed production-counter save directly; `pgxp-production/state-proof.json`
 confirms the same guest/device payload. Prior Windows/Mac component checks are
 archived locally; no extra experiments were run after the minimum-testing note.
 
-## Stage 2 (not accepted)
+## Stage 2
 
-Local `fix/draw-distance` branch pair, from master with accepted Stage 1 carried
-forward. R4 `e7c0677` implements full-circuit visibility (105 sections in the
-slot), 65,535 range with qualified exact PGXP, 8 MB RAM/1 MiB heaps, HUD bounds
-and per-merge visibility caching. Framework runtime source is identical to
-`4b2fdfad` after removing unsuccessful later optimizations. Neither Stage 2
-branch is pushed; Stage 3 has not started because the stages are ordered.
+Owner decision: exactly **40 sections ahead**, one behind, in Maximum. No
+ceiling search continues. Stage 1 settings, full-depth PGXP and conservative
+pre-GTE visibility rejection remain. The fixed default does not step down
+under load. Course RAM is 8 MB; the private prescribed slot zero-extends RAM
+without changing the original guest/device payload.
 
-| Stage 2 change | Load | Completion Hz | Gaps >25 ms | Max gap ms | p99 emulation busy |
+The post-tunnel turn is route frame 2400. Master has 60 consecutive fullscreen
+frames with unchanged distance, plus the requested PGXP-off/widescreen-off
+controls. The gross skyline shift survives both controls. The correction
+preserves positive unwrapped MAC3 through validated PGXP dataflow and GPU
+perspective/depth encoding; guest GTE registers and legacy u16 depth APIs stay
+unchanged. The rejected 65,535 far-plane cull hid visible towers and never
+qualified as a pass. Full depth restores their correct far projection.
+
+| Stage 2 change | Load | Completion Hz | Gaps >25 ms | Max gap ms | p99 busy |
 |---|---|---:|---:|---:|---:|
-| Stage 1 baseline | quiet | 59.973 | 0 | 20.266 | 46.1% |
-| Stage 1 baseline | 23.28% host CPU | 59.990 | 0 | 22.035 | 55.9% |
-| Full circuit/range + exact far projection | quiet | 59.990 | 1 | 28.281 | 68.7% |
-| Full circuit/range + exact far projection | 23.32% host CPU | 59.986 | 3 | 40.563 | 72.7% |
-| Visibility + material caches | quiet | 59.953 | 3 | 37.317 | 65.3% |
-| Visibility + material caches | 23.44% host CPU | 59.990 | 2 | 33.539 | 73.8% |
-| Opaque bloom coverage fusion (current source) | quiet | 60.000 | 1 | 25.498 | 69.7% |
-| Opaque bloom coverage fusion (current source) | 23.28% host CPU | 60.036 | 3 | 29.718 | 72.8% |
-| Indexed decode + diagnostic receipt removal (removed) | quiet | 60.000 | 1 | 25.316 | 72.4% |
-| Indexed decode + diagnostic receipt removal (removed) | 23.24% host CPU | 59.973 | 10 | 38.573 | 80.4% |
-| Dead PGXP ALU clears (removed) | quiet | 60.020 | 14 | 34.190 | 92.8% |
-| Dead PGXP ALU clears (removed) | 22.81% host CPU | 60.000 | 6 | 30.455 | 93.1% |
+| Full depth, full circuit, flat fine culling | quiet | 59.874 | 16 | 30.951 | 91.7% |
+| Same | moderate CPU | 54.929 | 287 | 40.882 | 80.8% |
+| Owner-fixed 40 ahead | quiet | 60.000 | 0 | 22.851 | 56.0% |
+| Same | 23.39% host CPU | 60.000 | 1 | 25.641 | 61.5% |
+| Submit before pacing (reverted) | moderate CPU | 60.000 | 8 | 31.057 | 71.4% |
+| Match Windows producer priority | moderate CPU | 60.000 | 0 | 24.455 | 61.6% |
+| Inherit proven planes (reverted) | moderate CPU | 60.003 | 2 | 26.242 | 73.7% |
+| Bulk queued uploads + matched priority | moderate CPU | 60.000 | 0 | 23.013 | 58.7% |
 
-Receipts under local `analysis/brief4/local/`: `stage2-final/`, `stage2-cache/`,
-`stage2-bloom/`, `stage2-decoded/`, `stage2-producer/`. Only failing timing cases
-were repeated after code fixes. A subsequent noinline adjustment was removed
-without another run; it did not reduce the enlarged binary. No ablation runs.
-The producer warm-up sampler ended at frame 103, before measurement starts at
-900 (`warmup-only.json`); its stacks show cycle stepping, GTE and PGXP work.
-All receipts show native overlays, zero interpreted/dirty execution and no
-reported dispatch/segment misses. Full-circuit timing remains over the bar.
+Accepted timing receipts (local `analysis/brief4/local/`):
+`stage2-fixed40/quiet-*` and `stage2-fixed40-upload/loaded-*`. Only failing
+loaded was repeated after cost fixes, per the minimum-testing rule. Both have
+positive native overlay counts (69,996 / 69,998), zero interpreted/dirty
+execution and no dispatch/segment misses. Windows and isolated Mac title ctest
+pass 21/21 (`stage2-fixed40-upload-title-tests.txt`). Mac production PGXP
+numeric checks also pass. Bulk uploads reuse `910eef11` without its unrelated
+coverage changes; failed pacing and plane-traversal experiments are removed.
 
-Matching 8K captures at route 800/1202 (1202 holds left steering) are in
-`stage2-before-turn/` and `stage2-cache/`; `comparison.jpg` verifies the expanded
-heap HUD repair. They do not isolate the reported building motion, so the
-IR-saturation correction is not claimed to fix that specific report. A
-landmark/frame clarification is pending; no further exploratory captures are
-made under the minimum-testing rule. Both timing and visual gates remain open.
+Visual receipts: `master-corner-2400/` (before and controls),
+`stage2-facing-turn-2400/` (full-depth after; 60 consecutive native frames),
+and `stage2-fixed40-turn-2400/` (final 40-section after: frames 2398..2457,
+60 consecutive, 38,404 native calls, zero interpreted calls/misses). The hierarchy and
+backface-culling captures were pixel-identical at the first/last frames.
+Late grey-roof tracking was occluded by a foreground pole; its correlation
+jump is not building drift evidence.
 
-The private slot extends RAM with 6 MiB of zeros, preserves the original 2 MiB
-and every other device section, and updates compatibility cookies for the
-selected execution/RAM map (`state-proof.json`). Original saves are untouched.
-Title ctest: 21/21 on Windows and the isolated Mac title build. Final source
-checks: `stage2-restored-title-tests.txt` on both hosts. Generated shards remain
-unchanged. No PR, merge or release.
+Stage 2 accepted; final pin: framework `8130e6fd`. Regeneration leaves all
+50 game shards unchanged. Stage 3 remains next. No PR, merge or
+release is authorized. See the owner brief for the ordered acceptance gates.

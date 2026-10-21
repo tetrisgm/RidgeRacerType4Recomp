@@ -255,8 +255,8 @@ static void test_options(void) {
           "level 0: two ahead, one behind, stock car distance");
     CHECK(r4_md_level_ahead(R4_MD_LEVEL_MIN) == 0 && r4_md_level_behind(R4_MD_LEVEL_MIN) == 0,
           "the floor adds no sections (what Extended draws)");
-    CHECK(r4_md_level_ahead(R4_MD_LEVEL_MAX) == 1023 && r4_md_level_far_cars(1),
-          "the ceiling: all validated sections ahead; far cars from level 1");
+    CHECK(r4_md_level_ahead(R4_MD_LEVEL_MAX) == 40 && r4_md_level_far_cars(1),
+          "the ceiling: exactly 40 sections ahead; far cars from level 1");
     CHECK(r4_md_gov_start_level(0) == 0 && r4_md_gov_start_level(1) == 0 &&
               r4_md_gov_start_level(2) == R4_MD_LEVEL_MIN,
           "views from about 30:9 start with no sections");

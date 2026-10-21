@@ -512,9 +512,10 @@ static void r4_md_pvs_merge_body(void)
     if (oct_reach != s_frame.last_oct) {   /* the view changed width */
         s_frame.last_oct = oct_reach;
         uint32_t sections = r4_pvs_section_count(rd32);
-        /* Maximum begins with the full loaded circuit, not an arbitrary 32
-         * section horizon. Existing guest-work/heap guards can still back off. */
+        /* Owner-selected horizon: 40 ahead, one behind (or the whole
+         * circuit when fewer sections exist). */
         int level = sections > 3u ? (int)sections - 3 : 0;
+        if (level > R4_MD_LEVEL_MAX) level = R4_MD_LEVEL_MAX;
         if (oct_reach >= 2) level = r4_md_gov_start_level(oct_reach);
         r4_md_gov_reset(&s_gov, level);
     }
@@ -811,8 +812,8 @@ static void r4_md_measure_frame(CPUState *cpu)
     (void)r4_md_gov_update_heap(&s_gov, busy, s_frame.heap_pm);
     uint32_t sections = r4_pvs_section_count(rd32);
     int ceiling = sections > 3u ? (int)sections - 3 : 0;
-    /* Maximum with exact projection is a fixed full-circuit horizon.
-     * Off-screen work is culled rather than trading distance for timing. */
+    if (ceiling > R4_MD_LEVEL_MAX) ceiling = R4_MD_LEVEL_MAX;
+    /* Keep the owner-selected horizon fixed with exact projection. */
     if ((s_opt.draw == R4_MD_DRAW_MAXIMUM && pgxp_active() && pgxp_preserve_projection()) ||
         s_gov.level > ceiling) s_gov.level = ceiling;
     s_frame.heap_pm = 0;
