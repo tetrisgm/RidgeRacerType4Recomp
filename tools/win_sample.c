@@ -3,7 +3,7 @@
  * Sampling briefly suspends selected threads: use for attribution, never FPS
  * acceptance. CSV is written after sampling, not on the target's hot path.
  * Build: gcc -O2 tools/win_sample.c -ldbghelp -o <local-output.exe>
- * Usage: win_sample PID seconds new-output.csv [all|stack]
+ * Usage: win_sample PID seconds new-output.csv [all|stack|stack:TID]
  * The default selects the earliest process thread; all selects every thread.
  * stack unwinds that earliest thread with DbgHelp (local images, no symbol server). */
 #define WIN32_LEAN_AND_MEAN
@@ -42,7 +42,9 @@ static void load_modules(DWORD pid) {
 int main(int argc, char **argv) {
     if (argc != 4 && argc != 5) return 2;
     int all = argc == 5 && !strcmp(argv[4], "all");
-    int unwind = argc == 5 && !strcmp(argv[4], "stack");
+    DWORD selected_tid = argc == 5 && !strncmp(argv[4], "stack:", 6)
+        ? (DWORD)strtoul(argv[4] + 6, NULL, 10) : 0;
+    int unwind = argc == 5 && (!strcmp(argv[4], "stack") || selected_tid);
     if (argc == 5 && !all && !unwind) return 2;
     DWORD pid = (DWORD)strtoul(argv[1], NULL, 10);
     unsigned seconds = (unsigned)strtoul(argv[2], NULL, 10);
@@ -65,7 +67,8 @@ int main(int argc, char **argv) {
     HANDLE target = NULL; uint64_t earliest = UINT64_MAX;
     HANDLE targets[256]; unsigned target_count = 0;
     if (Thread32First(snapshot, &te)) do {
-        if (te.th32OwnerProcessID != pid) continue;
+        if (te.th32OwnerProcessID != pid ||
+            (selected_tid && te.th32ThreadID != selected_tid)) continue;
         HANDLE t = OpenThread(THREAD_QUERY_INFORMATION | THREAD_SUSPEND_RESUME | THREAD_GET_CONTEXT, FALSE, te.th32ThreadID);
         if (all) {
             if (t && target_count < 256) targets[target_count++] = t;
