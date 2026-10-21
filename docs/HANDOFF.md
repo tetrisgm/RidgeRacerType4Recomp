@@ -12,16 +12,15 @@ Final tunnel-exit burst: 60 consecutive native frames, no misses. Pin regenerati
 left all 50 game shards unchanged.
 Framework `8130e6fd`; Windows/Mac title ctest 21/21. [Evidence](../analysis/STATUS.md).
 Stage 2 branches are pushed: R4 `da09fac`, framework `8130e6fd`.
-Stage 3 is unfinished on `feat/render-60fps-v2` in both repos. Transactional
-interpolation and HD/local-view admission are imported; redraws preserve
-Maximum's expanded heaps. The heap fix's off/on identity test matches 4,501
-fingerprints (735 on-path passes, no aborts). Later host queue changes are not
-accepted: at 8K, quiet has 311 completion gaps and p99 busy 65.0%; 33.8 s are
-spent acquiring the GL context. Queued GPU transactions remain the next
-structural task. The recorded-geometry alternative also failed and was removed.
-Framework WIP `af942084`; Windows/Mac title ctest 25/25 and schedule/guards pass.
-Final regeneration leaves 50 shards unchanged. No Stage 3 push.
-[Current results and receipt references](../analysis/STATUS.md).
+Stage 3 remains unfinished on `feat/render-60fps-v2` in both repos.
+Queued GPU transactions remove temporal context handoffs; the CPU replay's
+4,501-frame off/on identity check matches (1,224 on passes). GPU-only redraw
+now uses PGXP-carried vertex identities and immutable command lists, without
+the rejected camera-fitting generator. Latest quiet still fails timing and
+physical cadence. Producer PTS scheduling and GTE-only origin bookkeeping are
+being corrected; final quiet/loaded, identity and distinct-frame gates remain
+open. No Stage 3 loaded run or push. Existing local heads remain R4 `ec6a64c`,
+framework `af942084`, with ongoing edits. [Receipts/current findings](../analysis/STATUS.md).
 Prior dirty work is preserved on
 `wip/draw-distance-old` in both repos. No PR, merge or release is authorized.
 

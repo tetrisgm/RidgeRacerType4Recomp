@@ -138,3 +138,38 @@ acceptance. Final timing/distinct-frame gates remain open; loaded was not run
 while quiet fails. Windows/Mac title tests and interpolation schedule/guards
 pass. Stage 3 work is committed locally, unaccepted and unpushed. No PR, merge or
 release. Stage 2 remains accepted and pushed.
+
+### Stage 3 owner-direction follow-up (unaccepted)
+
+Temporal GPU begin/draw/capture/restore is queued on the GL-owning render
+thread. Context acquires fall to one startup `sync_cpu`. The asynchronous
+CPU-sandbox path still matches 4,501 off/on fingerprints (0 / 1,224 passes):
+`stage3-identity-render-owned-{off,on}/identity.json`,
+`stage3-identity-render-owned-compare.json`.
+
+| Follow-up | Completion Hz | Gaps >25 ms | Max gap ms | p99 busy |
+|---|---:|---:|---:|---:|
+| Queued transactions, initial resources | 58.194 | 7 | 1801.230 | 71.2% |
+| Retained resources, broader CPU admission | 60.000 | 8 | 75.540 | 98.8% |
+| First dataflow build (activation refused before GL init; rejected) | 59.997 | 214 | 62.879 | 97.1% |
+| Dataflow GPU redraw + nonblocking present queue | 60.006 | 3 | 25.639 | 70.1% |
+
+Corresponding local directories: `stage3-render-owned`, `stage3-retained-ready`,
+`stage3-dataflow-rendered`, `stage3-dataflow-nonblocking`. Native counters remain
+positive with no interpreted/dirty instructions or dispatch misses.
+
+The current dataflow path redraws actual recorded geometry in a display-rect
+GPU transaction. Value-validated PGXP word copies carry model identities and
+signed full-depth homogeneous positions; matching is per view, with no fitted
+camera or image warp. The last run completes 2,225 GPU redraws, matching 6,920 /
+6,990 projected vertices in its final generation. Presenter queue waits are
+zero, versus 31.4 s before nonblocking submission. Physical cadence still
+fails: the last 128 completed swaps are only 19.54 Hz; most extras are dropped.
+Producer wall-clock PTS now replaces replay-time clock advancement, and input
+origin metadata is restricted to the six GTE model words rather than ordinary
+integer instructions. These corrections are not yet qualified. Loaded remains
+pending. Stage 2's fixed 40 sections and full-depth projection fix remain intact.
+
+Windows geometry, production PGXP, transaction sandbox/abort and presenter
+ownership tests pass. The Mac dataflow build/title check passes 25/25 before
+the newest producer-clock correction. No Stage 3 push or acceptance.
