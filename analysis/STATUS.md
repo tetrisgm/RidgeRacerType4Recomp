@@ -48,3 +48,38 @@ dispatch misses. Title ctest: 21/21 pass (`stage1-title-tests.txt`).
 prescribed production-counter save directly; `pgxp-production/state-proof.json`
 confirms the same guest/device payload. Prior Windows/Mac component checks are
 archived locally; no extra experiments were run after the minimum-testing note.
+
+## Stage 2 (in progress)
+
+`fix/draw-distance` branch pair, from master with accepted Stage 1 carried
+forward. Raise the course ceiling from 32 to all 105 loaded sections and the
+PGXP-qualified range from 30,000 to 65,535; retain guest-work/heap guards.
+Validated intact GTE words carry exact IR-unclamped X/Y; altered/half words
+and fallback caches cannot inherit that privilege. R4 enables 8 MB RAM and
+1 MiB primitive heaps; the HUD packet bounds support both heap layouts.
+
+| Stage 2 change | Load | Completion Hz | Gaps >25 ms | Max gap ms | p99 emulation busy |
+|---|---|---:|---:|---:|---:|
+| Stage 1 baseline | quiet | 59.973 | 0 | 20.266 | 46.1% |
+| Stage 1 baseline | 23.28% host CPU | 59.990 | 0 | 22.035 | 55.9% |
+| Full-circuit/range + exact far projection | quiet | 59.990 | 1 | 28.281 | 68.7% |
+| Full-circuit/range + exact far projection | 23.32% host CPU | 59.986 | 3 | 40.563 | 72.7% |
+| Per-merge visibility + material-command caches | quiet | 59.953 | 3 | 37.317 | 65.3% |
+| Per-merge visibility + material-command caches | 23.44% host CPU | 59.990 | 2 | 33.539 | 73.8% |
+
+Initial timing receipts: local `analysis/brief4/local/stage2-final/`.
+Both initial runs and their cache-fix repeats failed. Opaque bloom-source
+coverage fusion is applied before the next failing-case repeats. Per-merge
+visibility caching reduces cone decisions
+about 16x with identical block counts and guest-cycle totals in the visual trace.
+The private save extends RAM with 6 MiB of zeros, preserving the original 2 MiB
+and every other section; `state-proof.json` records the section hashes and
+compatibility-cookie changes. Original saves are untouched.
+
+Matching fullscreen visual captures target route 800 and 1202 (left steering),
+under local `stage2-before-turn/` and `stage2-cache/`. The first visual after
+capture exposed a HUD range regression, fixed before timing acceptance.
+Title ctest: 21/21 Windows and 21/21 isolated Mac build; receipts
+`stage2-title-tests-fixed.txt` on each host. The 800/1202 images verify the HUD repair but do not isolate the reported
+building drift; that visual acceptance remains open. No Stage 2 acceptance yet.
+Stage 3 waits for Stage 2.

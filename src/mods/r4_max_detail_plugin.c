@@ -31,9 +31,11 @@
 #include "cpu_state.h"
 #include "psx_cycles.h"
 #include "psx_memory.h"
+#include "pgxp.h"
 #include "r4_max_detail.h"
 #include "interrupts.h"
 #include "r4_pvs.h"
+#include "r4_primitive_heap.h"
 #include "r4_widescreen_scene.h"
 
 #include <math.h>
@@ -67,6 +69,7 @@ static int s_hooks_registered;
 
 static int s_enabled;
 static int s_trace;
+static int s_sample_before_pace = 1;
 static R4MdOptions s_opt;
 static int s_clamp_available;
 static int s_car_restore_logged;
@@ -152,9 +155,13 @@ static void r4_md_pvs_octant(CPUState *cpu, uint32_t address)
 static struct {
     uint32_t block;
     R4MdBounds b;
+    uint64_t epoch;
+    int bounds_valid, visible;
 } s_bounds[R4_MD_BOUNDS_CACHE];
+static uint64_t s_visibility_epoch;
 static struct {
     double camx, camz, fx, fz, slope;
+    int range;
     uint32_t kept, dropped;
 } s_cone;
 
@@ -164,27 +171,26 @@ static int r4_md_keep_block(void *ctx, uint32_t block)
     uint32_t h = ((block >> 4) * 2654435761u) >> 20;   /* 12 bits */
     for (uint32_t probe = 0; probe < 8u; probe++) {
         uint32_t i = (h + probe) & (R4_MD_BOUNDS_CACHE - 1u);
-        if (s_bounds[i].block == block) {
-            if (s_bounds[i].b.sig != r4_md_block_sig(rd32, block) &&
-                !r4_md_block_bounds(rd32, block, &s_bounds[i].b))
-                return 1;
-            int v = r4_md_block_visible(&s_bounds[i].b, s_cone.camx, s_cone.camz, s_cone.fx,
-                                        s_cone.fz, s_cone.slope);
-            if (v) s_cone.kept++; else s_cone.dropped++;
-            return v;
-        }
-        if (s_bounds[i].block == 0u) {
-            if (!r4_md_block_bounds(rd32, block, &s_bounds[i].b)) return 1;
-            s_bounds[i].block = block;
-            int v = r4_md_block_visible(&s_bounds[i].b, s_cone.camx, s_cone.camz, s_cone.fx,
-                                        s_cone.fz, s_cone.slope);
+        if (s_bounds[i].block == block || s_bounds[i].block == 0u) {
+            if (s_bounds[i].block && s_bounds[i].epoch == s_visibility_epoch)
+                return s_bounds[i].visible;
+            uint32_t sig = r4_md_block_sig(rd32, block);
+            if (!s_bounds[i].block || s_bounds[i].b.sig != sig) {
+                s_bounds[i].bounds_valid = r4_md_block_bounds(rd32, block, &s_bounds[i].b);
+                s_bounds[i].b.sig = sig;
+                s_bounds[i].block = block;
+            }
+            int v = !s_bounds[i].bounds_valid || r4_md_block_visible_limit(&s_bounds[i].b,
+                    s_cone.camx, s_cone.camz, s_cone.fx, s_cone.fz, s_cone.slope, s_cone.range);
+            s_bounds[i].visible = v;
+            s_bounds[i].epoch = s_visibility_epoch;
             if (v) s_cone.kept++; else s_cone.dropped++;
             return v;
         }
     }
     R4MdBounds b;   /* cache full here: compute without keeping */
     if (!r4_md_block_bounds(rd32, block, &b)) return 1;
-    return r4_md_block_visible(&b, s_cone.camx, s_cone.camz, s_cone.fx, s_cone.fz, s_cone.slope);
+    return r4_md_block_visible_limit(&b, s_cone.camx, s_cone.camz, s_cone.fx, s_cone.fz, s_cone.slope, s_cone.range);
 }
 
 static int s_frame_has_course;   /* a main course draw ran this frame */
@@ -212,7 +218,12 @@ static void r4_md_pvs_merge_body(void)
     int oct_reach = r4_pvs_octant_reach(psx_mod_widescreen_x_margin());
     if (oct_reach != s_frame.last_oct) {   /* the view changed width */
         s_frame.last_oct = oct_reach;
-        r4_md_gov_reset(&s_gov, r4_md_gov_start_level(oct_reach));
+        uint32_t sections = r4_pvs_section_count(rd32);
+        /* Maximum begins with the full loaded circuit, not an arbitrary 32
+         * section horizon. Existing guest-work/heap guards can still back off. */
+        int level = sections > 3u ? (int)sections - 3 : 0;
+        if (oct_reach >= 2) level = r4_md_gov_start_level(oct_reach);
+        r4_md_gov_reset(&s_gov, level);
     }
     int ahead = 0, behind = 0;
     if (s_opt.draw == R4_MD_DRAW_MAXIMUM) {
@@ -241,6 +252,13 @@ static void r4_md_pvs_merge_body(void)
     s_cone.camx = (double)(int32_t)rd32(R4_MD_CAMERA_POS_ADDR) / 4.0;
     s_cone.camz = (double)(int32_t)rd32(R4_MD_CAMERA_POS_ADDR + 8u) / 4.0;
     s_cone.slope = r4_md_view_slope(psx_mod_widescreen_x_margin());
+    s_cone.range = pgxp_active() && pgxp_preserve_projection() ? R4_MD_BLOCK_RANGE : 30000;
+    /* A block occurs in many baked PVS lists. The camera/geometry cannot
+     * change during this merge, so compute each visibility decision once. */
+    if (++s_visibility_epoch == 0) {
+        memset(s_bounds, 0, sizeof s_bounds);
+        s_visibility_epoch = 1;
+    }
     R4PvsMerge m = r4_pvs_merge_dir(rd32, rd16, psx_mod_write_word, s_pvs.section,
                                     s_pvs.octant, nsec, dir, ahead, behind, oct_reach,
                                     r4_md_keep_block, 0);
@@ -473,8 +491,34 @@ static void r4_md_frame_start(CPUState *cpu, uint32_t address)
     s_frame.measured = 0;
 }
 
-/* VSync from the main loop's floor wait: the frame's work (handler, DrawSync)
- * is done. The first call of the frame ends the measurement. */
+/* At the main loop's first VSync the handler and DrawSync are done.
+ * Sample only guest work. Scaled-clock pacing below deliberately advances
+ * idle cycles; including that advance can make a half-full frame look full
+ * and incorrectly shrink Maximum's visibility list. */
+static void r4_md_measure_frame(CPUState *cpu)
+{
+    if (!s_enabled || !s_frame.started || s_frame.measured ||
+        cpu->gpr[31] != R4_MD_VSYNC_WAIT_RA)
+        return;
+    s_frame.measured = 1;
+    if (s_opt.draw != R4_MD_DRAW_MAXIMUM || !s_frame_has_course) return;
+    s_frame_has_course = 0;
+    uint64_t busy = psx_cycle_count - s_frame.start;
+    (void)r4_md_gov_update_heap(&s_gov, busy, s_frame.heap_pm);
+    uint32_t sections = r4_pvs_section_count(rd32);
+    int ceiling = sections > 3u ? (int)sections - 3 : 0;
+    if (s_gov.level > ceiling) s_gov.level = ceiling;
+    s_frame.heap_pm = 0;
+    if (s_trace) {
+        uint32_t pm = (uint32_t)(busy * 1000u / R4_MD_FRAME_BUDGET);
+        if (pm > s_stat.busy_max_pm) s_stat.busy_max_pm = pm;
+        if (!s_stat.gov_frames || s_gov.level + 100 < (int)s_stat.level_min) s_stat.level_min = (uint32_t)(s_gov.level + 100);
+        if (!s_stat.gov_frames || s_gov.level + 100 > (int)s_stat.level_max) s_stat.level_max = (uint32_t)(s_gov.level + 100);
+        s_stat.level_sum += s_gov.level;
+        s_stat.gov_frames++;
+    }
+}
+
 static void r4_md_vsync(CPUState *cpu, uint32_t address)
 {
     (void)address;
@@ -498,6 +542,7 @@ static void r4_md_vsync(CPUState *cpu, uint32_t address)
     {
         s_pace_active = 1;
         psx_cyc_batch_flush();
+        if (s_sample_before_pace) r4_md_measure_frame(cpu);
         /* Release just short of the second edge: VSync(0) then waits out
          * the remainder and returns on the VBlank itself. Released past it,
          * VSync(0) would wait a whole third VBlank. */
@@ -519,29 +564,14 @@ static void r4_md_vsync(CPUState *cpu, uint32_t address)
             }
         }
     }
-    if (!s_enabled || !s_frame.started || s_frame.measured ||
-        cpu->gpr[31] != R4_MD_VSYNC_WAIT_RA)
-        return;
-    s_frame.measured = 1;
-    if (s_opt.draw != R4_MD_DRAW_MAXIMUM || !s_frame_has_course) return;
-    s_frame_has_course = 0;
-    uint64_t busy = psx_cycle_count - s_frame.start;
-    (void)r4_md_gov_update_heap(&s_gov, busy, s_frame.heap_pm);
-    s_frame.heap_pm = 0;
-    if (s_trace) {
-        uint32_t pm = (uint32_t)(busy * 1000u / R4_MD_FRAME_BUDGET);
-        if (pm > s_stat.busy_max_pm) s_stat.busy_max_pm = pm;
-        if (!s_stat.gov_frames || s_gov.level < (int)s_stat.level_min) s_stat.level_min = (uint32_t)(s_gov.level + 100);
-        if (!s_stat.gov_frames || s_gov.level + 100 > (int)s_stat.level_max) s_stat.level_max = (uint32_t)(s_gov.level + 100);
-        s_stat.level_sum += s_gov.level;
-        s_stat.gov_frames++;
-    }
+    r4_md_measure_frame(cpu);
 }
 
 /* A save state's frames run from the starting level again. */
 static void r4_md_savestate_loaded(void)
 {
     if (!s_enabled) return;
+    memset(s_bounds, 0, sizeof s_bounds);
     r4_md_gov_reset(&s_gov, r4_md_gov_start_level(s_frame.last_oct));
     memset(&s_frame, 0, sizeof s_frame);
     s_frame.last_oct = -1;
@@ -652,14 +682,12 @@ static void r4_md_vblank(void)
  * 24-bit links (the GPU DMA walks them in the 8 MB map), the OTs stay put. */
 #define R4_MD_CLEAR_OTAG_FN      0x80093418u
 #define R4_MD_CLEAR_OTAG_HEAP_RA 0x8001E764u
-#define R4_MD_BIG_HEAP_BASE      0x80200000u
-#define R4_MD_BIG_HEAP_SIZE      0x00100000u
 static int s_big_heap;          /* expanded heap in use (8 MB RAM live) */
 static int s_big_heap_allowed;  /* R4_MD_BIG_HEAP=0 turns it off for A/B */
 
 static uint32_t r4_md_heap_cap(void)
 {
-    return s_big_heap ? R4_MD_BIG_HEAP_SIZE : (R4_BUF_HEAP_END - R4_BUF_HEAP);
+    return s_big_heap ? R4_BIG_HEAP_SIZE : (R4_BUF_HEAP_END - R4_BUF_HEAP);
 }
 
 /* Bytes of heap the frame on buffer `buf` has used, or ~0u if the pointer is
@@ -667,7 +695,7 @@ static uint32_t r4_md_heap_cap(void)
 static uint32_t r4_md_heap_used(uint32_t buf, uint32_t heap)
 {
     uint32_t base = buf + R4_BUF_HEAP;
-    if (s_big_heap) base = R4_MD_BIG_HEAP_BASE + (buf == R4_BUF0 ? 0u : R4_MD_BIG_HEAP_SIZE);
+    if (s_big_heap) base = R4_BIG_HEAP_BASE + (buf == R4_BUF0 ? 0u : R4_BIG_HEAP_SIZE);
     uint32_t used = heap - base;
     return (heap >= base && used <= r4_md_heap_cap()) ? used : ~0u;
 }
@@ -687,7 +715,7 @@ static void r4_md_clear_otag(CPUState *cpu, uint32_t address)
     uint32_t buf = heap - R4_BUF_HEAP;
     if (buf != R4_BUF0 && buf != R4_BUF0 + R4_BUF_STRIDE) return;
     psx_mod_write_word(R4_HEAP_PTR_ADDR,
-                       R4_MD_BIG_HEAP_BASE + (buf == R4_BUF0 ? 0u : R4_MD_BIG_HEAP_SIZE));
+                       R4_BIG_HEAP_BASE + (buf == R4_BUF0 ? 0u : R4_BIG_HEAP_SIZE));
 }
 
 /* Highest occupied slot of a ClearOTagR table ending at `head`, below the
@@ -802,6 +830,9 @@ static void r4_max_detail_activate(void)
     char draw[16], course[16], cars[16], split[16], reflections[16], mirror[16];
     const char *env = getenv("R4_MD_TRACE");
     s_trace = env ? atoi(env) : 0;
+    /* Diagnostic old-path control; normal play excludes deliberate idle. */
+    env = getenv("R4_MD_SAMPLE_BEFORE_PACE");
+    s_sample_before_pace = !(env && env[0] == '0');
     memset(&s_pop, 0, sizeof s_pop);
     env = getenv("R4_MD_SECTIONS");
     s_sections_override = env ? atoi(env) : -1;

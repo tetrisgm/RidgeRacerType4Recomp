@@ -72,6 +72,9 @@ def option_values(m, fid, oid):
 
 
 def test_manifests():
+    ram = manifest('psx.enhancement.8mb-ram')
+    check(feature(ram, '8mb-ram').get('default_enabled') is True,
+          'Maximum draw distance: 8 MB RAM enables the expanded primitive heaps')
     ws = manifest('r4.enhancement.widescreen')
     f = feature(ws, 'widescreen')
     check(f is not None and f.get('default_enabled') is True,

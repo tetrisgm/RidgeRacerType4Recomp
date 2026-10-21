@@ -5,7 +5,13 @@
 Stage 1 is accepted on `fix/slowdowns` in R4 and psxrecomp.
 Quiet/loaded completion checks pass; title ctest passes 21/21.
 [Results and receipts](../analysis/STATUS.md); [owner brief](../analysis/BRIEF-4.md).
-Stages 2 and 3 have not started. Prior dirty work is preserved on
+Stage 1 branches are pushed (R4 `6355416`, framework `766f9d72`).
+Stage 2 is in progress on `fix/draw-distance`: full-circuit/range and qualified
+far-projection changes, 8 MB RAM/expanded heaps, HUD bounds and visibility/material
+caches are implemented. Timing acceptance still fails; bloom-pass fusion is in
+validation. The reported drifting-building landmark/frame remains unverified;
+matching route 800/1202 captures alone do not establish that visual fix.
+Stage 3 has not started. Prior dirty work is preserved on
 `wip/draw-distance-old` in both repos. No PR, merge or release is authorized.
 
 ## Current work (2026-10-14)

@@ -339,6 +339,11 @@ there, with perspective-correct textures.
 Mods -> Detail -> **R4 Max Detail** removes the detail R4 drops with distance
 to fit the PlayStation:
 
+R4 enables 8 MB main RAM for the expanded primitive heaps. Maximum scans the
+loaded circuit, with the existing heap/work guards; exact PGXP keeps far
+X/Y projections from bending at the GTE integer limit. Old 2 MB save states
+need conversion before loading with the new RAM map.
+
 - **Draw distance** (Maximum / Extended / Stock): far bridges, buildings and
   road no longer pop in late; Maximum also loads the scenery of the track
   sections ahead and behind (in views narrower than about 30:9).

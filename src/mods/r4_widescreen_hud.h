@@ -21,6 +21,7 @@
 #define R4_WIDESCREEN_HUD_H
 
 #include <stdint.h>
+#include "r4_primitive_heap.h"
 
 enum {
     R4_HUD_CENTRE = 0,   /* stays centred: not tagged */

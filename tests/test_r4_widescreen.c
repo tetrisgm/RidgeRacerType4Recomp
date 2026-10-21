@@ -278,6 +278,16 @@ static void test_pvs(void)
 
 int main(void)
 {
+    CHECK(r4_heap_range_valid(0, 0x1000, 0x2000, 0x1000, 0x2000, 0), "stock HUD range");
+    CHECK(r4_heap_range_valid(0, R4_BIG_HEAP_BASE, R4_BIG_HEAP_BASE+64,
+          0x1000, 0x2000, 1), "expanded HUD range");
+    CHECK(!r4_heap_range_valid(1, R4_BIG_HEAP_BASE, R4_BIG_HEAP_BASE+64,
+          0x1000, 0x2000, 1), "other buffer's expanded heap rejected");
+    CHECK(!r4_heap_range_valid(0, R4_BIG_HEAP_BASE, R4_BIG_HEAP_BASE+64,
+          0x1000, 0x2000, 0), "expanded range rejected in retail RAM");
+    CHECK(!r4_heap_range_valid(0, R4_BIG_HEAP_BASE, R4_BIG_HEAP_BASE+R4_BIG_HEAP_SIZE+4,
+          0x1000, 0x2000, 1), "expanded heap overflow rejected");
+
     test_view();
     test_class_table();
     test_auto_thresholds();

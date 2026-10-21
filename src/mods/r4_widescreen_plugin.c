@@ -26,6 +26,8 @@
  */
 #include "mod_plugins.h"
 #include "cpu_state.h"
+#include "psx_memory.h"
+#include "r4_primitive_heap.h"
 #include "r4_widescreen_hud.h"
 #include "r4_pvs.h"
 #include "r4_widescreen_scene.h"
@@ -175,7 +177,7 @@ static void r4_hud_close(void)
     uint32_t base = r4_buffer_base(s_open.buf);
     uint32_t lo = base + R4_BUF_HEAP, hi = base + R4_BUF_HEAP_END;
     uint32_t end = rd32(R4_HEAP_PTR_ADDR);
-    if (s_open.start < lo || end > hi || end < s_open.start) {
+    if (!r4_heap_range_valid(s_open.buf, s_open.start, end, lo, hi, psx_ram_8mb_active())) {
         s_stat.bad_ranges++;
         return;
     }

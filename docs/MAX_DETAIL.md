@@ -15,6 +15,17 @@ choice, and with the package off the game runs the stock path unchanged
 | Car reflections | On, Stock | Reflective car bodies in live races too (stock R4 shows them only in the fly-by, replays and the attract demo). For now in 4:3 views only: widened views keep Stock (Limitations) |
 | Mirror scenery | Stock, Full | **Off by default.** Full draws the rear-view mirror's whole course list instead of its first few blocks; it costs the emulated PS1 more time than any other option (Verification) |
 
+## BRIEF-4 update (2026-10-21)
+
+Maximum starts with the loaded circuit (105 sections in the recorded route),
+replacing the 32-section ceiling. Exact PGXP permits the 65,535-unit GTE depth
+limit; without it the original 30,000-unit guard remains. The 8 MB RAM override
+provides the existing 1 MiB primitive heaps; widescreen HUD tagging accepts
+those heaps too. Heap/work safety remains active, with deliberate VSync idle
+excluded from the governor. Visibility decisions are cached only within one
+merge and invalidated on save load. Earlier measurements below describe the
+previous policy. Current acceptance and receipts: [STATUS](../analysis/STATUS.md).
+
 ## How it works
 
 | Piece | Where | What |

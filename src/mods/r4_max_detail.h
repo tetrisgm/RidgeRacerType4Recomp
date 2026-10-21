@@ -212,15 +212,15 @@ static inline int r4_md_block_bounds(R4MdRead32 rd32, uint32_t block, R4MdBounds
  *     behind or beside the camera;
  *   - in range: every point of the circle within R4_MD_BLOCK_RANGE of the
  *     camera. The course draw feeds camera-space vertices through the GTE's
- *     16-bit IR registers (RTPT, sf = 1): past 32767 they saturate and the
- *     polygon would be drawn bent. */
-#define R4_MD_BLOCK_RANGE 30000
-static inline int r4_md_block_visible(const R4MdBounds *b, double camx, double camz,
-                                      double fx, double fz, double slope)
+ *     unsigned 16-bit SZ register. Exact PGXP projections recover saturated X/Y;
+ *     callers without that enhancement keep the original conservative range. */
+#define R4_MD_BLOCK_RANGE 65535 /* unsigned GTE SZ limit, exact X/Y via PGXP */
+static inline int r4_md_block_visible_limit(const R4MdBounds *b, double camx, double camz,
+                                      double fx, double fz, double slope, int range)
 {
     double x = (double)b->cx - camx, z = (double)b->cz - camz, r = (double)b->r;
     double d2 = x * x + z * z;
-    double lim = (double)R4_MD_BLOCK_RANGE - r;
+    double lim = (double)range - r;
     if (lim <= 0.0 || d2 > lim * lim) return 0;
     double fwd = x * fx + z * fz, lat = x * fz - z * fx;
     if (lat < 0) lat = -lat;
@@ -229,6 +229,12 @@ static inline int r4_md_block_visible(const R4MdBounds *b, double camx, double c
      * (lat - fwd * slope) / sqrt(1 + slope^2). */
     if (fwd < -r) return 0;
     return (lat - fwd * slope) <= r * sqrt(1.0 + slope * slope);
+}
+
+static inline int r4_md_block_visible(const R4MdBounds *b, double camx, double camz,
+                                      double fx, double fz, double slope)
+{
+    return r4_md_block_visible_limit(b, camx, camz, fx, fz, slope, R4_MD_BLOCK_RANGE);
 }
 
 /* The view cone's half-angle slope for a view `margin` pixels wider than
@@ -433,7 +439,7 @@ static inline int r4_md_car_row_far(R4MdOptions o, unsigned row, const int16_t c
  * frame start (0x8009375C, called at 0x8001E7E8) to its first VSync(1)
  * (0x8008B330 from 0x8001E7C8: the handler, DrawSync and the course and car
  * draws all come before it), and steers a level:
- *   level -2..30: sections ahead = 2 + level, one section behind (none at
+ *   level -2..1021: sections ahead = 2 + level, one section behind (none at
  *   -2), far cars (cull distance 14000) from level 1.
  * Over 96 % of the budget the level drops by 2 and holds for 60 frames; over
  * 93 % by 1 (hold 30); after 20 frames in a row under 86 % it rises by 1
@@ -451,7 +457,7 @@ static inline int r4_md_car_row_far(R4MdOptions o, unsigned row, const int16_t c
 #define R4_MD_PACING_RACE      0x180u
 #define R4_MD_FRAME_BUDGET     1130090u      /* two NTSC VBlanks: 2 * 33868800 / 59.94 */
 #define R4_MD_LEVEL_MIN        (-2)
-#define R4_MD_LEVEL_MAX        30
+#define R4_MD_LEVEL_MAX        1021 /* all 1024 validated sections, minus base/behind */
 #define R4_MD_BEHIND           1
 
 typedef struct {

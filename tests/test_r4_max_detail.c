@@ -83,6 +83,8 @@ int psx_mod_register_savestate_plugin(const char *id, PSXModActivationCallback c
     s_savestate = cb;
     return 1;
 }
+int pgxp_active(void) { return 1; }
+int pgxp_preserve_projection(void) { return 1; }
 uint64_t psx_cycle_count;   /* the guest clock the frame budget reads */
 /* Guest-clock stubs for the guest-cycle-scale pacing (psx_cycles.h inlines). */
 uint64_t psx_next_service_cycle = 0;
@@ -251,8 +253,8 @@ static void test_options(void) {
           "level 0: two ahead, one behind, stock car distance");
     CHECK(r4_md_level_ahead(R4_MD_LEVEL_MIN) == 0 && r4_md_level_behind(R4_MD_LEVEL_MIN) == 0,
           "the floor adds no sections (what Extended draws)");
-    CHECK(r4_md_level_ahead(R4_MD_LEVEL_MAX) == 32 && r4_md_level_far_cars(1),
-          "the ceiling: 32 sections ahead; far cars from level 1");
+    CHECK(r4_md_level_ahead(R4_MD_LEVEL_MAX) == 1023 && r4_md_level_far_cars(1),
+          "the ceiling: all validated sections ahead; far cars from level 1");
     CHECK(r4_md_gov_start_level(0) == 0 && r4_md_gov_start_level(1) == 0 &&
               r4_md_gov_start_level(2) == R4_MD_LEVEL_MIN,
           "views from about 30:9 start with no sections");
@@ -927,7 +929,7 @@ static void test_block_cone(void) {
     CHECK(!r4_md_block_visible(&b, 40000.0, 40000.0, 0.0, -1.0, sl), "behind the camera: dropped");
     CHECK(!r4_md_block_visible(&b, 20000.0, 50000.0, 0.0, 1.0, sl), "beside the camera: dropped");
     CHECK(r4_md_block_visible(&b, 32000.0, 44000.0, 0.0, 1.0, sl), "inside the cone edge: kept");
-    CHECK(!r4_md_block_visible(&b, 40000.0, 50000.0 - 30000.0, 0.0, 1.0, sl),
+    CHECK(!r4_md_block_visible(&b, 40000.0, 50000.0 - R4_MD_BLOCK_RANGE, 0.0, 1.0, sl),
           "past the GTE-safe range: dropped");
     CHECK(r4_md_view_slope(240) > r4_md_view_slope(0) + 1.5, "a wide view widens the cone");
     psx_mod_write_word(BLK + r4_md_poly_kinds[0].field, 0u);
@@ -988,7 +990,7 @@ static void test_governor_pure(void) {
     (void)r4_md_gov_update(&g, B * 2u);
     (void)r4_md_gov_update(&g, B * 2u);
     CHECK(g.level == R4_MD_LEVEL_MIN, "never below the floor");
-    r4_md_gov_reset(&g, 99);
+    r4_md_gov_reset(&g, R4_MD_LEVEL_MAX + 1);
     CHECK(g.level == R4_MD_LEVEL_MAX, "never above the ceiling");
     (void)r4_md_gov_update(&g, B * 7u / 10u);
     CHECK(g.level == R4_MD_LEVEL_MAX, "calm at the ceiling stays there");
@@ -1097,20 +1099,20 @@ static void test_plugin_far(void) {
     put_centreline(NSEC * 5u);
     psx_cycle_count = 1000000u;
     plugin_frame(R4_MD_FRAME_BUDGET / 2u);
-    CHECK(rd32(R4_PVS_LIST_ADDR) == 8u && list_has(block_ptr(3, 0, 0)) &&
-              list_has(block_ptr(6, 0, 0)) && !list_has(block_ptr(7, 0, 0)),
-          "level 0: two sections ahead (toward lower sections), one behind");
+    CHECK(rd32(R4_PVS_LIST_ADDR) == NSEC * 2u && list_has(block_ptr(0, 0, 0)) &&
+              list_has(block_ptr(9, 0, 0)),
+          "Maximum starts with the complete loaded circuit");
     for (int i = 0; i < 20; i++) plugin_frame(R4_MD_FRAME_BUDGET * 7u / 10u);
     load_list(5, 0, 2);
     course_draw(5, 0, 0x8006F02Cu);
-    CHECK(rd32(R4_PVS_LIST_ADDR) == 10u && list_has(block_ptr(2, 0, 0)),
-          "20 calm frames: three ahead");
+    CHECK(rd32(R4_PVS_LIST_ADDR) == NSEC * 2u && list_has(block_ptr(2, 0, 0)),
+          "calm frames keep full-circuit visibility");
     put_car_table(r4_md_car_lod_full);
     s_cpu.gpr[5] = 0;
     hook(R4_MD_CAR_DRAW_FN)(&s_cpu, R4_MD_CAR_DRAW_FN);
     CHECK((int16_t)rd16(R4_MD_CAR_LOD_TABLE + 4u) == R4_MD_CAR_FAR, "level 1: far cars");
     car_lookup(0, r4_md_car_after_lod_ra[0]);
-    for (int i = 0; i < 3; i++) plugin_frame(R4_MD_FRAME_BUDGET);
+    for (int i = 0; i < 8; i++) plugin_frame(R4_MD_FRAME_BUDGET);
     load_list(5, 0, 2);
     course_draw(5, 0, 0x8006F02Cu);
     CHECK(rd32(R4_PVS_LIST_ADDR) == 2u, "overloaded frames: down to the floor (no sections)");
@@ -1126,7 +1128,7 @@ static void test_plugin_far(void) {
     s_savestate();
     load_list(5, 0, 2);
     course_draw(5, 0, 0x8006F02Cu);
-    CHECK(rd32(R4_PVS_LIST_ADDR) == 8u, "a save state starts again from level 0");
+    CHECK(rd32(R4_PVS_LIST_ADDR) == NSEC * 2u, "a save state starts again at full circuit reach");
     put_car_table(r4_md_car_lod_stock);
 }
 
