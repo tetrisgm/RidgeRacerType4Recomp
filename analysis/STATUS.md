@@ -99,6 +99,17 @@ release is authorized. See the owner brief for the ordered acceptance gates.
 
 ## Stage 3 (in progress; not accepted)
 
+BRIEF-5 checkpoint: framework `8d73618f` / `58f17410` makes overlay callback
+tables, pending cycle charges and host dispatch pointers thread-local. Each
+executing thread must bind each shard with `overlay_init`; rebinding publishes
+pending charges through the previous binding. The concurrent production-shim
+test, store-PC forwarding, memory-address forwarding and shim compilation
+pass on Windows and macOS. Windows title ctest passes 25/25. OpenBIOS
+regeneration updates only its emitter fingerprint; all 50 R4 shards remain
+unchanged. This is a prerequisite only: private RAM/GTE/PGXP/GPU/DMA/dispatch
+contexts, snapshot publication and replay-worker execution are not implemented.
+No new fingerprint, performance or cadence acceptance runs; branches unpushed.
+
 `feat/render-60fps-v2` imports transactional interpolation and HD/local-view
 admission over accepted Stages 1?2. R4 redraw now preserves Maximum's expanded
 primitive-heap layout; using the old stock heap caused watchdog rollbacks.
