@@ -333,6 +333,16 @@ static void test_pvs(void) {
         CHECK(list_at(2u + 2u * (uint32_t)i) == block_ptr(order[i], 3, 0) &&
                   list_at(3u + 2u * (uint32_t)i) == block_ptr(order[i], 3, 1),
               "section order is -1, +1, -2, +2");
+    static R4PvsSnapshot snapshot;
+    CHECK(r4_pvs_snapshot_build(&snapshot, rd32, rd16, NSEC), "loaded visibility snapshot built");
+    uint32_t reference[R4_PVS_LIST_MAX];
+    for (uint32_t i = 0; i < m.after; i++) reference[i] = list_at(i);
+    load_list(0, 3, 2);
+    R4PvsMerge cached = r4_pvs_merge_dir_cached(rd32, rd16, psx_mod_write_word,
+                                                0, 3, NSEC, -1, 2, 2, 0, NULL, NULL, &snapshot);
+    CHECK(cached.after == m.after, "cached visibility preserves count");
+    for (uint32_t i = 0; i < m.after; i++)
+        CHECK(reference[i] == list_at(i), "cached visibility preserves exact nearest-first admission");
     /* Idempotent: a second merge adds nothing. */
     m = r4_pvs_merge(rd32, rd16, psx_mod_write_word, 0, 3, NSEC, 2, 0);
     CHECK(m.ok && m.before == 10 && m.after == 10, "merge is idempotent");

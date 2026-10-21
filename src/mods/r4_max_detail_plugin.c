@@ -160,6 +160,8 @@ static struct {
     int bounds_valid, visible;
 } s_bounds[R4_MD_BOUNDS_CACHE];
 static uint64_t s_visibility_epoch;
+static R4PvsSnapshot s_visibility_lists;
+static int s_previous_race = -1;
 static uint32_t s_unculled_count;
 static int s_course_cull_pending;
 static struct {
@@ -319,9 +321,13 @@ static void r4_md_pvs_merge_body(void)
         memset(s_bounds, 0, sizeof s_bounds);
         s_visibility_epoch = 1;
     }
-    R4PvsMerge m = r4_pvs_merge_dir(rd32, rd16, psx_mod_write_word, s_pvs.section,
+    if (!s_visibility_lists.valid || s_visibility_lists.nsec != nsec ||
+        s_visibility_lists.table != rd32(R4_PVS_TABLE_PTR_ADDR) ||
+        s_visibility_lists.blocks != rd32(R4_PVS_BLOCK_BASE_ADDR))
+        r4_pvs_snapshot_build(&s_visibility_lists, rd32, rd16, nsec);
+    R4PvsMerge m = r4_pvs_merge_dir_cached(rd32, rd16, psx_mod_write_word, s_pvs.section,
                                     s_pvs.octant, nsec, dir, ahead, behind, oct_reach,
-                                    r4_md_keep_block, 0);
+                                    r4_md_keep_block, 0, &s_visibility_lists);
     s_unculled_count = m.before;
     s_course_cull_pending = m.ok;
     if (s_trace && m.ok) {
@@ -635,6 +641,7 @@ static void r4_md_savestate_loaded(void)
     if (!s_enabled) return;
     memset(s_bounds, 0, sizeof s_bounds);
     s_course_cull_pending = 0;
+    s_visibility_lists.valid = 0;
     r4_md_gov_reset(&s_gov, r4_md_gov_start_level(s_frame.last_oct));
     memset(&s_frame, 0, sizeof s_frame);
     s_frame.last_oct = -1;
@@ -717,7 +724,14 @@ static void r4_md_mirror_list(CPUState *cpu, uint32_t address)
  * state's table stays until the game reloads its EXE (docs/MAX_DETAIL.md). */
 static void r4_md_vblank(void)
 {
-    if (!s_enabled || s_opt.cars_full || !psx_mod_game_started()) return;
+    if (!s_enabled || !psx_mod_game_started()) return;
+    int race = r4_in_race(rd32, rd16);
+    if (race != s_previous_race) {
+        s_previous_race = race;
+        s_visibility_lists.valid = 0;
+        memset(s_bounds, 0, sizeof s_bounds);
+    }
+    if (s_opt.cars_full) return;
     int restored = 0;
     for (unsigned r = 0; r < R4_MD_CAR_LOD_ROWS; r++) {
         uint32_t a = R4_MD_CAR_LOD_TABLE + 6u * r;
@@ -890,6 +904,9 @@ static void r4_md_option(const char *id, char *out, size_t cap)
 
 static void r4_max_detail_activate(void)
 {
+    s_visibility_lists.valid = 0;
+    s_previous_race = -1;
+    memset(s_bounds, 0, sizeof s_bounds);
     char draw[16], course[16], cars[16], split[16], reflections[16], mirror[16];
     const char *env = getenv("R4_MD_TRACE");
     s_trace = env ? atoi(env) : 0;

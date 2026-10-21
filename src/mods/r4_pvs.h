@@ -163,11 +163,45 @@ typedef struct {
  * Nothing is written when the guest's table or list does not look valid. */
 typedef int (*R4PvsKeep)(void *ctx, uint32_t block);
 
-static inline R4PvsMerge r4_pvs_merge_dir(R4PvsRead32 rd32, R4PvsRead16 rd16,
+/* Immutable baked visibility data for the loaded circuit. A title must
+ * invalidate this snapshot on course/session changes and state loads. This
+ * keeps traversing distant sections out of guest-memory accessors each frame;
+ * the merge still visits entries in the game's exact nearest-first order. */
+typedef struct {
+    uint32_t table, blocks, nsec;
+    int valid;
+    uint16_t count[R4_PVS_SECTIONS_MAX * R4_PVS_COLUMNS];
+    uint16_t ids[R4_PVS_SECTIONS_MAX * R4_PVS_COLUMNS][R4_PVS_LIST_MAX];
+} R4PvsSnapshot;
+
+static inline int r4_pvs_snapshot_build(R4PvsSnapshot *s, R4PvsRead32 rd32,
+                                       R4PvsRead16 rd16, uint32_t nsec)
+{
+    s->valid = 0;
+    if (!nsec || nsec > R4_PVS_SECTIONS_MAX) return 0;
+    s->table = rd32(R4_PVS_TABLE_PTR_ADDR);
+    s->blocks = rd32(R4_PVS_BLOCK_BASE_ADDR);
+    if ((s->table & 0xFFE00003u) != 0x80000000u ||
+        (s->blocks & 0xFFE00000u) != 0x80000000u) return 0;
+    s->nsec = nsec;
+    for (uint32_t slot = 0; slot < nsec * R4_PVS_COLUMNS; slot++) {
+        uint32_t entry = rd32(s->table + 4u * slot);
+        s->count[slot] = 0;
+        if ((entry & 0xFFE00003u) != 0x80000000u) continue;
+        uint32_t n = rd32(entry);
+        if (n > R4_PVS_LIST_MAX) n = R4_PVS_LIST_MAX;
+        s->count[slot] = (uint16_t)n;
+        for (uint32_t i = 0; i < n; i++) s->ids[slot][i] = rd16(entry + 4u + 2u * i);
+    }
+    s->valid = 1;
+    return 1;
+}
+
+static inline R4PvsMerge r4_pvs_merge_dir_cached(R4PvsRead32 rd32, R4PvsRead16 rd16,
                                           R4PvsWrite32 wr32, uint32_t section,
                                           uint32_t octant, uint32_t nsec, int dir,
                                           int ahead, int behind, int oct_reach,
-                                          R4PvsKeep keep, void *keep_ctx)
+                                          R4PvsKeep keep, void *keep_ctx, const R4PvsSnapshot *snapshot)
 {
     R4PvsMerge r = { 0, 0u, 0u };
     if (ahead < 0) ahead = 0;
@@ -187,6 +221,9 @@ static inline R4PvsMerge r4_pvs_merge_dir(R4PvsRead32 rd32, R4PvsRead16 rd16,
     uint32_t blocks = rd32(R4_PVS_BLOCK_BASE_ADDR);
     if ((table & 0xFFE00003u) != 0x80000000u || (blocks & 0xFFE00000u) != 0x80000000u)
         return r;
+    if (snapshot && (!snapshot->valid || snapshot->table != table ||
+                     snapshot->blocks != blocks || snapshot->nsec != nsec)) snapshot = 0;
+    uint8_t seen[8192] = {0}; /* every possible u16 block index */
     uint32_t list[R4_PVS_LIST_MAX], count = rd32(R4_PVS_LIST_ADDR);
     if (count > R4_PVS_LIST_MAX) return r;
     for (uint32_t i = 0; i < count; i++) list[i] = rd32(R4_PVS_LIST_ADDR + 4u + 4u * i);
@@ -204,13 +241,18 @@ static inline R4PvsMerge r4_pvs_merge_dir(R4PvsRead32 rd32, R4PvsRead16 rd16,
                 for (int os = od ? -1 : 1; os <= 1; os += 2) {
                     if (sd == 0 && od == 0) continue;
                     uint32_t oct = (octant + 8u + (uint32_t)(os * od)) & 7u;
-                    uint32_t entry = rd32(table + 4u * (sec * R4_PVS_COLUMNS + oct));
-                    if ((entry & 0xFFE00003u) != 0x80000000u) continue;
-                    uint32_t n = rd32(entry);
+                    uint32_t slot = sec * R4_PVS_COLUMNS + oct;
+                    uint32_t entry = snapshot ? 0 : rd32(table + 4u * slot);
+                    if (!snapshot && (entry & 0xFFE00003u) != 0x80000000u) continue;
+                    uint32_t n = snapshot ? snapshot->count[slot] : rd32(entry);
                     if (n > R4_PVS_LIST_MAX) n = R4_PVS_LIST_MAX;
                     uint32_t add[R4_PVS_LIST_MAX], nadd = 0;
                     for (uint32_t i = 0; i < n; i++) {
-                        uint32_t b = blocks + R4_PVS_BLOCK_STRIDE * rd16(entry + 4u + 2u * i);
+                        uint32_t id = snapshot ? snapshot->ids[slot][i] : rd16(entry + 4u + 2u * i);
+                        uint8_t bit = (uint8_t)(1u << (id & 7u));
+                        if (seen[id >> 3] & bit) continue;
+                        seen[id >> 3] |= bit;
+                        uint32_t b = blocks + R4_PVS_BLOCK_STRIDE * id;
                         if (!keep || keep(keep_ctx, b)) add[nadd++] = b;
                     }
                     (void)r4_pvs_union(list, &count, add, nadd, R4_PVS_LIST_MAX);
@@ -223,6 +265,16 @@ static inline R4PvsMerge r4_pvs_merge_dir(R4PvsRead32 rd32, R4PvsRead16 rd16,
     if (count != r.before) wr32(R4_PVS_LIST_ADDR, count);
     r.after = count;
     return r;
+}
+
+static inline R4PvsMerge r4_pvs_merge_dir(R4PvsRead32 rd32, R4PvsRead16 rd16,
+                                          R4PvsWrite32 wr32, uint32_t section,
+                                          uint32_t octant, uint32_t nsec, int dir,
+                                          int ahead, int behind, int oct_reach,
+                                          R4PvsKeep keep, void *keep_ctx)
+{
+    return r4_pvs_merge_dir_cached(rd32, rd16, wr32, section, octant, nsec, dir,
+                                   ahead, behind, oct_reach, keep, keep_ctx, 0);
 }
 
 /* The symmetric form: `sec_reach` sections each way (toward lower sections
