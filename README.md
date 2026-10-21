@@ -85,6 +85,7 @@ Switching a feature off gives you the stock game for that part.
 | **JogCon input**: recognized steering wheels drive as R4's JogCon; ordinary gamepads use native DualShock analog steering | Yes | Mods → **JogCon Input** off; the pad mode is under Settings → Controller |
 | **PGXP**: steady geometry and straight (perspective-correct) textures, with precise culling so the far road has no gaps | Yes | Mods → Visual → **PGXP Precision** off, or turn only its **Precise culling** option off |
 | **Max Detail**: longer draw distance (far bridges, buildings and road no longer pop in), full course and car detail at every distance, 1P detail in split screen, car reflections in the race | Yes | Mods → Detail → **R4 Max Detail** off, or set any one option (Draw distance, Course detail, Car detail, Split screen, Car reflections) back to **Stock**. Mirror scenery stays Stock unless you choose Full |
+| **Race frame rate** (experimental): redraws intermediate race geometry while logic keeps its original cadence | Yes, display refresh target | Mods → Display → **Race frame rate** off, or choose a presentation rate |
 | **VS split screen**: the OpenGL renderer draws 2P split screen in about a tenth of the draws (same picture) | Yes | Set `PSX_GL_TEXWIN_BATCH=0` for one run |
 | **Widescreen**: races fill the window at whatever shape you give it (Fit to Window), with real extra scenery at the sides and the HUD at the edges | Yes, Fit to Window | Mods → Display → **R4 Custom Renderer** off (stock 4:3), or pick 16:9 / 21:9 / 32:9 |
 | **Match display + supersampling**: the game renders at your monitor's pixel height, capped at 8K, with 1.5x supersampling below 4K and is resolved down, for clean edges (no blur filter on top) | Yes | Settings → Display → **Internal resolution** (Native for the stock picture) and **Supersampling** (1×) |
@@ -237,8 +238,18 @@ executable. Defaults live in `game.toml`:
 ## Smooth motion
 
 Not offered in R4 (owner, 2026-10-20): psxrecomp's frame generation is off in
-every graphics preset and its launcher row is hidden. The game runs at its
-original 30 Hz in races.
+every graphics preset and its launcher row is hidden. Race logic keeps its
+original 30 Hz cadence.
+
+The experimental **Race frame rate** mod uses the game's draw routines with
+interpolated car and camera fields. It targets display refresh (or 60, 120,
+144, or 240 FPS), restores guest state after each extra frame, and holds the
+stock image when a pass is unavailable. It never falls back to image warping
+or crossfading. Online frames are local to each player's view.
+
+Performance validation is ongoing: the current Mac debug build does not
+sustain 120 distinct race frames per second. See the implementation report
+at `analysis/render-60fps/REPORT.md` in the development clone.
 
 ## HD HUD
 

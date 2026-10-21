@@ -25,6 +25,15 @@ static uint8_t gpu_dma_ram[4u * 0xB00u + 8u];
 
 #include "../src/mods/r4_link_netplay.c"
 
+/* Temporal replay is covered by test_r4_interp_plugin; this fixture checks
+ * that link setup and the base own-view renderer remain unchanged. */
+void r4_interp_local_begin(CPUState *cpu, unsigned seat) { (void)cpu; (void)seat; }
+void r4_interp_local_camera(void) {}
+void r4_interp_local_end(CPUState *cpu, const PSXModRenderPass *rect,
+                         PSXModRenderPassFn draw, void *user, int ok) {
+    (void)cpu; (void)rect; (void)draw; (void)user; (void)ok;
+}
+
 static PsxNetPad sample_pads[4];
 static int sample_pad_valid[4];
 

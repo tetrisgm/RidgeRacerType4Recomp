@@ -14,6 +14,7 @@
 #include "psx_netplay.h"
 #include "cpu_state.h"
 #include "r4_link_analog_steering.h"
+#include "r4_interp.h"
 
 #include <stdint.h>
 #include <stdlib.h>
@@ -926,7 +927,13 @@ static int r4_link_draw_local_view(struct CPUState *cpu, void *user,
     const uint32_t tick = psx_mod_read_word(R4_LINK_TICK);
     uint32_t car_k, angle, position;
     R4LinkCall call = {cpu, (cpu->gpr[29] - 0x100u) & ~7u, 0};
-    (void)alpha_q16;
+    uint32_t temporal_camera[6];
+    if (alpha_q16) {
+        for (unsigned i = 0; i < 3; i++) {
+            temporal_camera[i] = psx_mod_read_word(0x1F800008u + 4u * i);
+            temporal_camera[i + 3] = psx_mod_read_word(0x1F800018u + 4u * i);
+        }
+    }
     if (!r4_link_seat_view(v->seat, &car_k, &angle, &position)) return 0;
 
     /* The other buffer is the draw target everywhere the code looks. */
@@ -993,10 +1000,20 @@ static int r4_link_draw_local_view(struct CPUState *cpu, void *user,
          * course position from its blocks. The shared frame already took
          * this tick's step for the seat, so the image leads by at most one
          * smoothing step; the sandbox discards the advanced blocks. */
-        if (phase == 0u && tick < 90u)
-            r4_link_call(&call, 0x80033974u, car, 0);
-        else
-            r4_link_call(&call, 0x800340ECu, car, 0);
+        if (alpha_q16) {
+            /* The temporal sandbox already interpolated this seat's camera.
+             * Never advance camera simulation in an intermediate frame. */
+            for (unsigned i = 0; i < 3; i++) {
+                psx_mod_write_word(0x1F800008u + 4u * i, temporal_camera[i]);
+                psx_mod_write_word(0x1F800018u + 4u * i, temporal_camera[i + 3]);
+            }
+        } else {
+            if (phase == 0u && tick < 90u)
+                r4_link_call(&call, 0x80033974u, car, 0);
+            else
+                r4_link_call(&call, 0x800340ECu, car, 0);
+            r4_interp_local_camera();
+        }
         r4_link_call(&call, 0x8006E4D0u, 0, 0);
         const uint32_t side = psx_mod_read_half(0x800AD6C0u) ^ 1u;
         r4_link_call(&call, 0x8002E554u, 2u * side + 2u, 0); /* 0x801160C4 */
@@ -1014,7 +1031,8 @@ static int r4_link_draw_local_view(struct CPUState *cpu, void *user,
          * is this peer's presentation state, kept on the host. */
         psx_mod_write_word(R4_LINK_MIRROR_SLIDE, (uint32_t)r4_link_mirror_slide);
         r4_link_call(&call, 0x80070A58u, psx_mod_read_word(0x800AC068u), 0);
-        r4_link_mirror_next = (int32_t)psx_mod_read_word(R4_LINK_MIRROR_SLIDE);
+        if (!alpha_q16)
+            r4_link_mirror_next = (int32_t)psx_mod_read_word(R4_LINK_MIRROR_SLIDE);
     }
     r4_link_call(&call, 0x80093590u, buf, 0);               /* PutDrawEnv */
     r4_link_call(&call, 0x80093520u, buf + 0xB6Cu, 0);      /* DrawOTag */
@@ -1087,8 +1105,10 @@ static void r4_link_local_view(struct CPUState *cpu)
         r4_link_in_local_view = 1;
         r4_link_test_spend(r4_link_test_cost_ms("PSX_R4_LINK_TEST_VIEW_COST_MS",
                                                 &view_cost));
+        r4_interp_local_begin(cpu, view.seat);
         const int ok = psx_mod_render_local_view(cpu, &rect,
                                                  r4_link_draw_local_view, &view);
+        r4_interp_local_end(cpu, &rect, r4_link_draw_local_view, &view, ok);
         r4_link_in_local_view = 0;
         if (ok) {
             r4_link_mirror_slide = r4_link_mirror_next;

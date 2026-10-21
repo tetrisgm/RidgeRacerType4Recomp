@@ -1,0 +1,398 @@
+{
+  "_doc": "R4 US (SLUS-00797) render-input state captured once per 30 Hz race tick and interpolated in render passes (src/mods/r4_interp.c). kind: linear = s32 lerp; angle12 = s32 12-bit wrap (d = sext12(curr-prev)); angle12_h = s16 12-bit wrap. snap = per-tick |d| limit. group: 'body' fields snap together (one car, or one camera), 'self' fields snap alone. src: cheat = field list first found by dogewow2048 in the JP '60 FPS' cheat and re-derived for the US EXE (credit required); draw = read by the US car draw 0x8002D630/0x8002DC00 but not in the cheat table. tools/gen_r4_interp_fields.py turns this file into src/mods/r4_interp_fields.h.",
+  "gates": {
+    "pacing_word": "0x800AC794 (u32) == 0x180",
+    "state_table": "0x8009EBCC; handler = T[*(u16*)0x800F4E1A][*(u16*)0x800F3BD6]",
+    "pause_byte": "0x800F4E18 (s8) == 0",
+    "phase": "(*(u32*)0x800FF860 - 1) <u 3",
+    "demo_submode": "mode 4 only: *(u32*)0x800ACCD0 <u 2",
+    "continuity": "modes 1,2,3,5: *(u32)0x800F2F94 == prev+1; mode 4: *(u32)0x800ACCC4 == prev+1"
+  },
+  "modes": [
+    {
+      "mode": 1,
+      "handler": "0x8011729C",
+      "where": "US overlay 660 (T1[53])",
+      "sig": [
+        "0x3C04800F",
+        "0x3C038010",
+        "0x8C822F94",
+        "0x8C63F860",
+        "0x27BDFFD8",
+        "0xAFBF0024"
+      ]
+    },
+    {
+      "mode": 2,
+      "handler": "0x80114A38",
+      "where": "US overlay 659 (T1[47]); T2[1] aliases overlay-665 code",
+      "sig": [
+        "0x27BDFFC8",
+        "0x3C03800F",
+        "0x8C622F94",
+        "0x00002021",
+        "0xAFBF0030",
+        "0xAFB5002C"
+      ]
+    },
+    {
+      "mode": 3,
+      "handler": "0x80114C30",
+      "where": "US overlay 661 (T1[38])",
+      "sig": [
+        "0x3C04800F",
+        "0x3C038010",
+        "0x8C822F94",
+        "0x8C63F860",
+        "0x27BDFFC8",
+        "0xAFBF0034"
+      ]
+    },
+    {
+      "mode": 4,
+      "handler": "0x8005E118",
+      "where": "EXE (T2[9])"
+    },
+    {
+      "mode": 5,
+      "handler": "0x8002A464",
+      "where": "EXE (T1[22])"
+    }
+  ],
+  "cars": {
+    "bases": [
+      "0x800AC0B0",
+      "0x800AC3D0",
+      "0x80107348",
+      "0x80107668",
+      "0x80107988",
+      "0x80107CA8",
+      "0x80107FC8",
+      "0x801082E8",
+      "0x80108608",
+      "0x80108928"
+    ],
+    "note": "P1, P2, 8 opponents, stride 0x320. Key snapshots by base address, not by car-list slot (list 0x800FFDD0, count (s16)0x800AC754).",
+    "fields": [
+      {
+        "off": "0x00",
+        "kind": "linear",
+        "snap": "0x40000",
+        "src": "cheat",
+        "what": "fine X (pos<<8)",
+        "group": "body"
+      },
+      {
+        "off": "0x08",
+        "kind": "linear",
+        "snap": "0x40000",
+        "src": "cheat",
+        "what": "fine Z (pos<<8)",
+        "group": "body"
+      },
+      {
+        "off": "0x10",
+        "kind": "linear",
+        "snap": "0x1000",
+        "src": "cheat+draw",
+        "what": "world X",
+        "group": "body"
+      },
+      {
+        "off": "0x14",
+        "kind": "linear",
+        "snap": "0x1000",
+        "src": "cheat+draw",
+        "what": "world Y",
+        "group": "body"
+      },
+      {
+        "off": "0x18",
+        "kind": "linear",
+        "snap": "0x1000",
+        "src": "cheat+draw",
+        "what": "world Z",
+        "group": "body"
+      },
+      {
+        "off": "0x70",
+        "kind": "linear",
+        "snap": "0x1000",
+        "src": "cheat+draw",
+        "what": "body/render X (+0x60)",
+        "group": "body"
+      },
+      {
+        "off": "0x74",
+        "kind": "linear",
+        "snap": "0x1000",
+        "src": "cheat+draw",
+        "what": "body/render Y (+0x64)",
+        "group": "body"
+      },
+      {
+        "off": "0x78",
+        "kind": "linear",
+        "snap": "0x1000",
+        "src": "cheat+draw",
+        "what": "body/render Z (+0x68)",
+        "group": "body"
+      },
+      {
+        "off": "0xC8",
+        "kind": "linear",
+        "snap": "0x1000",
+        "src": "cheat+draw",
+        "what": "vector copied to sp+0x168 by car draw [I]",
+        "group": "body"
+      },
+      {
+        "off": "0xCC",
+        "kind": "linear",
+        "snap": "0x1000",
+        "src": "cheat+draw",
+        "what": "idem",
+        "group": "body"
+      },
+      {
+        "off": "0xD0",
+        "kind": "linear",
+        "snap": "0x1000",
+        "src": "cheat+draw",
+        "what": "idem",
+        "group": "body"
+      },
+      {
+        "off": "0x50",
+        "kind": "angle12",
+        "snap": "0x200",
+        "src": "cheat+draw",
+        "what": "pitch (RotX(-x), RotX(0x1A8-x))",
+        "group": "body"
+      },
+      {
+        "off": "0x54",
+        "kind": "angle12",
+        "snap": "0x200",
+        "src": "cheat+draw",
+        "what": "yaw (RotY(-x))",
+        "group": "body"
+      },
+      {
+        "off": "0x58",
+        "kind": "angle12",
+        "snap": "0x200",
+        "src": "cheat+draw",
+        "what": "roll (RotZ(-x), RotZ(0x1AA-x))",
+        "group": "body"
+      }
+    ],
+    "optional": [
+      {
+        "off": "0x60",
+        "kind": "linear",
+        "snap": "0x400",
+        "src": "draw",
+        "what": "body offset X added to +0x70/+0x10",
+        "group": "body",
+        "enabled": true
+      },
+      {
+        "off": "0x64",
+        "kind": "linear",
+        "snap": "0x400",
+        "src": "draw",
+        "what": "body offset Y",
+        "group": "body",
+        "enabled": true
+      },
+      {
+        "off": "0x68",
+        "kind": "linear",
+        "snap": "0x400",
+        "src": "draw",
+        "what": "body offset Z",
+        "group": "body",
+        "enabled": true
+      },
+      {
+        "off": "0x1A8",
+        "kind": "angle12_h",
+        "snap": "0x200",
+        "src": "draw",
+        "what": "s16 pitch add",
+        "group": "body",
+        "enabled": true
+      },
+      {
+        "off": "0x1AA",
+        "kind": "angle12_h",
+        "snap": "0x200",
+        "src": "draw",
+        "what": "s16 roll add",
+        "group": "body",
+        "enabled": true
+      },
+      {
+        "off": "0x80",
+        "kind": "angle12_h",
+        "snap": "0x800",
+        "src": "draw",
+        "what": "s16 wheel angle (RotX(-x)); snap at half turn",
+        "group": "self",
+        "enabled": true
+      },
+      {
+        "off": "0x84",
+        "kind": "angle12_h",
+        "snap": "0x200",
+        "src": "draw",
+        "what": "s16 wheel angle (RotZ(-x))",
+        "group": "self",
+        "enabled": true
+      }
+    ]
+  },
+  "camera_scratch": {
+    "base": "0x1F800000",
+    "fields": [
+      {
+        "off": "0x08",
+        "kind": "linear",
+        "snap": "0x1000",
+        "src": "cheat",
+        "what": "camera X",
+        "group": "body"
+      },
+      {
+        "off": "0x0C",
+        "kind": "linear",
+        "snap": "0x1000",
+        "src": "cheat",
+        "what": "camera Y",
+        "group": "body"
+      },
+      {
+        "off": "0x10",
+        "kind": "linear",
+        "snap": "0x1000",
+        "src": "cheat",
+        "what": "camera Z",
+        "group": "body"
+      },
+      {
+        "off": "0x18",
+        "kind": "angle12",
+        "snap": "0x200",
+        "src": "cheat",
+        "what": "RotX input of 0x8006E4D0",
+        "group": "body"
+      },
+      {
+        "off": "0x1C",
+        "kind": "angle12",
+        "snap": "0x200",
+        "src": "cheat",
+        "what": "RotY input",
+        "group": "body"
+      },
+      {
+        "off": "0x20",
+        "kind": "angle12",
+        "snap": "0x200",
+        "src": "cheat",
+        "what": "RotZ input",
+        "group": "body"
+      }
+    ],
+    "modes": [
+      1,
+      2,
+      4,
+      5
+    ]
+  },
+  "camera_2p": {
+    "modes": [
+      3
+    ],
+    "angle_blocks": [
+      "0x80118500",
+      "0x80118510"
+    ],
+    "pos_blocks": [
+      "0x80118520",
+      "0x80118530"
+    ],
+    "fields_angle": [
+      {
+        "off": "0x0",
+        "kind": "angle12",
+        "snap": "0x200",
+        "what": "RotX input (-> 1F800018)",
+        "src": "cheat"
+      },
+      {
+        "off": "0x4",
+        "kind": "angle12",
+        "snap": "0x200",
+        "what": "RotY input (-> 1F80001C)",
+        "src": "cheat"
+      },
+      {
+        "off": "0x8",
+        "kind": "angle12",
+        "snap": "0x200",
+        "what": "RotZ input (-> 1F800020)",
+        "src": "cheat"
+      }
+    ],
+    "fields_pos": [
+      {
+        "off": "0x0",
+        "kind": "linear",
+        "snap": "0x1000",
+        "what": "camera X (-> 1F800008)",
+        "src": "cheat"
+      },
+      {
+        "off": "0x4",
+        "kind": "linear",
+        "snap": "0x1000",
+        "what": "camera Y (-> 1F80000C)",
+        "src": "cheat"
+      },
+      {
+        "off": "0x8",
+        "kind": "linear",
+        "snap": "0x1000",
+        "what": "camera Z (-> 1F800010)",
+        "src": "cheat"
+      }
+    ],
+    "note": "overlay-661 data; pass copies 4 words of each block to 1F800018/1F800008 per player"
+  },
+  "gte_h": {
+    "modes": [
+      4,
+      5
+    ],
+    "source": "cpu->gte_ctrl[26] at the VSync(0) hook (end of handler; set by SetGeomScreen 0x800914B0 inside TV camera 0x8004448C)",
+    "kind": "linear",
+    "snap": "|dH| > max(Hprev,Hcur)/4 or TV shot change [I]",
+    "shot_change": {
+      "mode4": "*(u32)0x800ACCCC reset to 0 (0x8005E6D4)",
+      "mode5": "*(u32)0x800AC824 reset to 0 (0x80044500)"
+    }
+  },
+  "pre_handler_capture": {
+    "hook": "ClearOTagR 0x80093418 entry, ra == 0x8001E764",
+    "values": [
+      "handler = T[major][minor]",
+      "*(s16)0x800AC788 (fade-out)",
+      "*(u32)0x800AC760 (mode-5 fade-in/blink)",
+      "*(u32)0x800F2F94",
+      "*(u32)0x800ACCC4"
+    ]
+  }
+}

@@ -1,0 +1,52 @@
+format_version = 7
+id = "r4.enhancement.frame-rate"
+version = "1.0.0"
+name = "R4 Frame Rate"
+author = "Shokunin"
+description = "Redraws intermediate race frames while preserving the original game logic."
+license = "MIT"
+resolver = "declarative"
+save_compatibility = "shared"
+
+[[target]]
+game_id = "SLUS-00797"
+
+[[feature]]
+id = "frame-rate"
+name = "Race frame rate"
+description = "Interpolate car and camera positions between game ticks. Extra frames redraw geometry; logic, input and audio keep their original cadence."
+group = "Display"
+default_enabled = true
+
+[[option]]
+feature = "frame-rate"
+id = "rate"
+label = "Presentation rate"
+group = "Display"
+type = "choice"
+default = "display"
+
+[[option.choice]]
+value = "display"
+label = "Display refresh"
+
+[[option.choice]]
+value = "60"
+label = "60 FPS"
+
+[[option.choice]]
+value = "120"
+label = "120 FPS"
+
+[[option.choice]]
+value = "144"
+label = "144 FPS"
+
+[[option.choice]]
+value = "240"
+label = "240 FPS"
+
+[[plugin]]
+feature = "frame-rate"
+id = "r4.framerate"
+netplay = "local_view"

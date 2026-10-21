@@ -16,7 +16,7 @@ cd "$ROOT"
 # Always (re)built incrementally, so a pin bump never generates with emitters
 # from the previous pin.
 bash psxrecomp/tools/ci/build_emitters.sh --framework psxrecomp \
-    --build-dir build-recompiler >/dev/null
+    --build-dir build-recompiler --jobs "${JOBS:-8}" >/dev/null
 python3 psxrecomp/psxrecomp_cli.py generate --config game.toml --project-root . \
     --no-toolchain-download "$@"
 # GEN_FULL_GLOB is evaluated at configure time, so re-configure existing build
