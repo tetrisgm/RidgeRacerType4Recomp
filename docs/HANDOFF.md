@@ -1,5 +1,13 @@
 # Handoff
 
+## BRIEF-4 (2026-10-21)
+
+Stage 1 is accepted on `fix/slowdowns` in R4 and psxrecomp.
+Quiet/loaded completion checks pass; title ctest passes 21/21.
+[Results and receipts](../analysis/STATUS.md); [owner brief](../analysis/BRIEF-4.md).
+Stages 2 and 3 have not started. Prior dirty work is preserved on
+`wip/draw-distance-old` in both repos. No PR, merge or release is authorized.
+
 ## Current work (2026-10-14)
 
 Released: v0.1.0 only. Next release waits on the psxrecomp PRs below, then a

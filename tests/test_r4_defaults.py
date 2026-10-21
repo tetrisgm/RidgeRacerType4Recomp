@@ -4,8 +4,8 @@
 R4 turns its enhancements on by default (README "On by default"):
   - r4.enhancement.widescreen: on, View = Fit to Window;
   - game.toml [video] internal_resolution = Match display, at the display's
-    full resolution (no match_display_max_lines cap; owner, 2026-10-01),
-    supersample 1.5 and no post AA filter, with dynamic resolution on and
+    full resolution up to 8K/18x (owner, 2026-10-21),
+    supersample 1.5 below 2160 display lines, 1.0 above, and no post AA filter, with dynamic resolution on and
     floored at native x1 (owner, 2026-10-08: Ultra by default, the dynamic
     systems are the safety net; "display" or another preset
     is accepted too) so the default holds full speed; the Display row turns
@@ -108,8 +108,10 @@ def test_game_toml():
     video = g.get('video', {})
     check(video.get('internal_resolution') == 'display',
           'game.toml: internal_resolution = "display" (Match display)')
-    check('match_display_max_lines' not in video,
-          'game.toml: Match display is not capped (full display resolution)')
+    check(video.get('match_display_max_lines') == 4320,
+          'game.toml: Match display capped at 8K')
+    check(video.get('supersample_disable_at_lines') == 2160,
+          'game.toml: supersample 1.0 on 4K/8K displays')
     check(video.get('dynamic_resolution') is True,
           'game.toml: dynamic resolution on by default')
     floor = video.get('dynamic_resolution_min')
