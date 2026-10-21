@@ -42,20 +42,33 @@ def name(rva):
 pc = Counter()
 returns = Counter()
 total = 0
+unwound = False
+cpu_ranges = {}
 for row in csv.DictReader(a.samples.open()):
     if not a.start*1e6 <= int(row['us']) <= a.end*1e6:
         continue
     if a.tid is not None and int(row['tid']) != a.tid:
         continue
     total += 1
+    unwound |= row.get('stack_kind') == 'unwind'
+    if row.get('cpu_us'):
+        point = (int(row['us']), int(row['cpu_us']))
+        span = cpu_ranges.setdefault(row['tid'], [point, point])
+        span[1] = point
     if row['module'].lower() == a.exe.name.lower():
         pc[name(int(row['rva'], 16))] += 1
     else:
         pc[row['module']] += 1
-        # Candidate return PCs, not a stack unwind. Only executable addresses
-        # were retained by the sampler; deduplicate each sample's candidates.
+        # Only executable frames are retained. Old captures contain scan
+        # candidates; stack mode contains DbgHelp-unwound frames. Counts here
+        # describe samples whose PC was outside the executable, not complete
+        # inclusive CPU time. Deduplicate each sample's frame names.
         returns.update({name(int(row[f'stack{i}'], 16)) for i in range(16)
                         if is_code(int(row[f'stack{i}'], 16))})
+cpu_percent = {tid: round(100*(end[1]-start[1])/(end[0]-start[0]), 2)
+               for tid,(start,end) in cpu_ranges.items() if end[0] > start[0]}
 print(json.dumps(dict(samples=total, seconds=[a.start, a.end],
+                     thread_cpu_percent=cpu_percent,
                      pc=pc.most_common(30),
-                     blocked_return_candidates=returns.most_common(30)), indent=2))
+                     **{('unwound_frames' if unwound else 'blocked_return_candidates'):
+                        returns.most_common(30)}), indent=2))
