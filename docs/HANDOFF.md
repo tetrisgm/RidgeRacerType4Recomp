@@ -11,7 +11,13 @@ fixed 40 sections ahead (+1 behind), retaining the full-depth PGXP drift fix.
 Final tunnel-exit burst: 60 consecutive native frames, no misses. Pin regeneration
 left all 50 game shards unchanged.
 Framework `8130e6fd`; Windows/Mac title ctest 21/21. [Evidence](../analysis/STATUS.md).
-Stage 3 has not started. Prior dirty work is preserved on
+Stage 2 branches are pushed: R4 `da09fac`, framework `8130e6fd`.
+Stage 3 is in progress on `feat/render-60fps-v2` in both repos. Transactional
+interpolation and HD/local-view admission are imported; Windows/Mac title tests
+pass 25/25. Initial production quiet fails (38 gaps, p99 busy 100%, zero passes);
+restoring the prior asynchronous temporal path and diagnosing plan refusal.
+Timing, distinct-frame and off/on guest-identity gates remain.
+Prior dirty work is preserved on
 `wip/draw-distance-old` in both repos. No PR, merge or release is authorized.
 
 ## Current work (2026-10-14)
