@@ -29,6 +29,11 @@ int psx_mod_register_function_entry_plugin(const char *id, uint32_t address,
     return 1;
 }
 
+int psx_mod_register_execution_state(const PSXModExecutionState *state) {
+    return state && state->struct_size == sizeof(*state) &&
+        !strcmp(state->plugin_id, "r4.jogcon-input") && !state->bytes;
+}
+
 static void set_pad(uint8_t type, uint32_t mode) {
     *at(PAD_TYPE) = type;
     psx_mod_write_word(PAD_MODE, mode);

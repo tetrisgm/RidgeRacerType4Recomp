@@ -23,6 +23,7 @@
 #include <string.h>
 
 #include "cpu_state.h"
+#include "psx_thread_local.h"
 #include "mod_plugins.h"
 #include "r4_max_detail.h"
 #include "r4_pvs.h"
@@ -56,6 +57,10 @@ static void put_car_table(const int16_t rows[R4_MD_CAR_LOD_ROWS][3]);
 static int car_table_is(const int16_t rows[R4_MD_CAR_LOD_ROWS][3]);
 
 /* ---- the mod API the plugin uses ---------------------------------------- */
+int psx_mod_register_execution_state(const PSXModExecutionState *state) {
+    return state && state->struct_size == sizeof(*state) && state->plugin_id &&
+        state->bytes && state->capture && state->bind;
+}
 #define MAX_HOOKS 16
 static struct { char id[32]; uint32_t addr; PSXModFunctionEntryCallback cb; } s_hooks[MAX_HOOKS];
 static int s_nhooks;
@@ -87,14 +92,14 @@ int psx_mod_register_savestate_plugin(const char *id, PSXModActivationCallback c
 int pgxp_active(void) { return 1; }
 int pgxp_culling(void) { return 1; }
 int pgxp_preserve_projection(void) { return 1; }
-uint64_t psx_cycle_count;   /* the guest clock the frame budget reads */
+PSX_THREAD_LOCAL uint64_t psx_cycle_count;   /* the guest clock the frame budget reads */
 /* Guest-clock stubs for the guest-cycle-scale pacing (psx_cycles.h inlines). */
-uint64_t psx_next_service_cycle = 0;
-int psx_in_device_service = 0;
+PSX_THREAD_LOCAL uint64_t psx_next_service_cycle = 0;
+PSX_THREAD_LOCAL int psx_in_device_service = 0;
 int g_event_step_conservative = 0;
 int g_ls_replay_active = 0;
-uint32_t g_psx_cyc_batch = 0, g_psx_cyc_batch_limit = 0;
-uint32_t *g_psx_cyc_local_acc = 0;
+PSX_THREAD_LOCAL uint32_t g_psx_cyc_batch = 0, g_psx_cyc_batch_limit = 0;
+PSX_THREAD_LOCAL uint32_t *g_psx_cyc_local_acc = 0;
 void psx_devices_service_to_now(void) { psx_next_service_cycle = psx_cycle_count + (1ull << 40); }
 void psx_advance_cycles_slow(uint32_t c) { psx_cycle_count += c; }
 static uint32_t s_gcs = 1u;

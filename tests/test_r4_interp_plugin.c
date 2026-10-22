@@ -1,5 +1,6 @@
 /* Draw replay guards: watchdog recovery, unavailable passes, and 2P gating. */
 #include <setjmp.h>
+#include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -52,6 +53,16 @@ int psx_mod_register_function_entry_plugin(const char *id, uint32_t address,
     return 1;
 }
 
+/* The constructor registers the state image copied with each worker job. */
+static PSXModExecutionState s_execution;
+int psx_mod_register_execution_state(const PSXModExecutionState *state) {
+    if (!state || state->struct_size != sizeof(*state) ||
+        strcmp(state->plugin_id, "r4.framerate") || !state->bytes ||
+        !state->capture || !state->bind || s_execution.bytes) return 0;
+    s_execution = *state;
+    return 1;
+}
+
 /* ---- presenter blend --------------------------------------------------- */
 static uint32_t s_blend = PSX_MOD_FRAME_INTERPOLATION_HOLD;
 static int s_blend_calls;
@@ -100,6 +111,22 @@ int psx_mod_render_pass(CPUState *cpu, const PSXModRenderPass *pass,
     memcpy(s_ram, s_ram_ck, sizeof s_ram);
     memcpy(s_spad, s_spad_ck, sizeof s_spad);
     *cpu = ck;
+    return ok;
+}
+
+/* Execute an owned payload/CPU image through the existing sandbox fixture.
+ * Binding and restoring the plugin image models its independent worker TLS. */
+int psx_mod_render_pass_async(CPUState *cpu, const PSXModRenderPass *pass,
+    PSXModRenderPassFn fn, const void *payload, size_t bytes) {
+    CPUState private_cpu = *cpu;
+    void *owned = malloc(bytes), *image = calloc(1, s_execution.bytes);
+    if (!owned || !image) abort();
+    memcpy(owned, payload, bytes);
+    s_execution.capture(image);
+    s_execution.bind(image);
+    int ok = psx_mod_render_pass(&private_cpu, pass, fn, owned);
+    s_execution.bind(image);
+    free(image); free(owned);
     return ok;
 }
 

@@ -112,3 +112,7 @@ with timed loads and inline constant operands. PC cycle equivalence, scale,
 gate and event-boundary checks pass; regen leaves 50 shards/2,992 entries
 unchanged. Previous candidate quiet still fails p99 81.1%; qualification
 continues, no acceptance or push.
+
+2026-10-21 BRIEF-5 checkpoint `b1636f97`: remove regressing full-load expansion;
+avoid unused/non-aliased PGXP operand copies. Relevant PC PGXP/cycle checks pass;
+regeneration leaves game shards unchanged. Production qualification continues.

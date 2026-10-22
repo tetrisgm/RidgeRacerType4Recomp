@@ -281,3 +281,13 @@ its receipt is not a cross-build equivalence proof. Quiet still FAILS: 60.000 Hz
 locally but remain unqualified. Source sampling continues; loaded/cadence and
 push remain pending. No true blocker. Per the brief redirect, no further Mac
 builds or verification are used for this stage.
+
+BRIEF-5 timed-load checkpoint: same-build identity again matches all 4,511
+rows, with positive native calls and zero misses/interpretation. Forced full
+load inlining regresses quiet p99 to 92.1% (60.000 Hz, zero >25 ms gaps), so
+that expansion is removed. Keep the independently checked common base fastpath.
+Heavy-route profiling points to PGXP arithmetic; avoid copying non-aliased or
+unused operand shadows. PC PGXP in-place/repack, production, snapshot and
+word-shadow checks pass. Refresh/qualification continues at framework b1636f97.
+Receipts: local `brief5-worker-load-cycle`, `brief5-worker-fast-cycle/heavy-profile*`.
+Loaded/cadence remain pending; no true blocker or push.
