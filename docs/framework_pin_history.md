@@ -106,3 +106,9 @@ unchanged. Repeat identity before timing/cadence; no acceptance or push.
 | 2026-10-21 | `56a8b24f` (feat/render-60fps-v2) | unchanged | unchanged | unchanged | BRIEF-5 GPU accounting/admission and composing-owner state shadow. Windows/Mac Release builds and real-GL checks pass. Updated production identity matches 4,511 rows; quiet remains failed (1 gap, p99 100%). Qualification continues, unaccepted and unpushed. |
 
 | 2026-10-21 | `8114565a` (feat/render-60fps-v2) | unchanged | unchanged | unchanged | BRIEF-5 read-side snapshot tracking, publication epochs and common cycle-step inlining. Windows/Mac snapshot/GTE/cycle checks pass. Identity matches 4,511 rows; latest quiet is 60.000 Hz / 0 gaps but p99 busy 100%, still failed. Continuing Release/native refresh and ordered qualification. |
+
+2026-10-21 BRIEF-5 checkpoint `45a54ec4`: share the checked base charge fastpath
+with timed loads and inline constant operands. PC cycle equivalence, scale,
+gate and event-boundary checks pass; regen leaves 50 shards/2,992 entries
+unchanged. Previous candidate quiet still fails p99 81.1%; qualification
+continues, no acceptance or push.
