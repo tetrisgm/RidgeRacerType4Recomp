@@ -102,7 +102,8 @@ release is authorized. See the owner brief for the ordered acceptance gates.
 Both `feat/render-60fps-v2` branches remain local and unpushed. Continue until
 identity, quiet, loaded and distinct-60-Hz gates pass, then PC title ctest and
 push framework before title. PC-only per [BRIEF-5](BRIEF-5.md)'s resume redirect.
-No true blocker. No PR, merge or release is authorized.
+Blocked on the common loaded baseline versus the setting-1-only scope; see the
+true-blocker paragraph at the end. No PR, merge or release is authorized.
 
 The dedicated worker executes native guest draw code on private CPU/clock,
 RAM/scratch/mod memory, GTE/PGXP, GPU/DMA and dispatch state. The emulation owner
@@ -132,6 +133,8 @@ Local receipts below are under `analysis/brief4/local/`.
 | Thread-owned overlay callbacks / `brief5-worker-callbacks` | quiet | 60.000 | 0 | 18.093 | 64.0% |
 | GPU scratch + smaller PGXP pages (page change removed) / `brief5-worker-footprint` | quiet | 60.000 | 0 | 21.354 | 100.0% |
 | Original pages + publication spans / `brief5-worker-publication-spans` | quiet | 60.000 | 1 | 29.901 | 64.7% |
+| Idle-budget replay / `brief5-worker-idle` | quiet | 60.000 | 0 | 16.842 | **58.4% PASS** |
+| Idle-budget replay / `brief5-worker-idle` | 22.90% host CPU | 60.000 | 1 | 79.635 | **92.6% FAIL** |
 
 Current original-off identity passes all 4,511 rows: CPU, clock/IRQ, timers,
 RAM/dirty/scratch, DMA/SIO/CD/SPU/MDEC/GPU. Positive native source and worker
@@ -223,3 +226,30 @@ the worker also uses below-normal Windows scheduling, matching other optional
 workers. Existing publication receipts also tag background RWRK execution.
 Production compilation passes; refresh and ordered qualification continue. No
 true blocker, push, PR, merge or release.
+
+Idle-budget replay retains all 4,511 original-off identity rows. Both timing runs
+have positive native source/worker execution and zero interpretation, dirty
+instructions, dispatch/segment/worker misses. The loaded profile pair then uses
+the same executable, route, 40 sections and defaults, with 23.19% / 23.21% host
+CPU load. Native source calls are identical (67,568); worker publication is zero
+at setting 0. Sampled source CPU is 59.39% off / 59.75% on. Publication is the
+only setting-1-only stack (0.603% of samples). Receipts:
+`brief5-loaded-profile-diff/{source,profile-analysis,leaf-diff,inclusive-diff,unprofiled-prefix-proof}.json`.
+The unprofiled prefix ends before sampler attachment at frame 3450, so its busy
+windows are separate from sampling overhead. At setting 0 it already contains
+18 windows >=60% (seventh-highest 64.2%): enough to fail the full 60-second p99
+bar even if every remaining window were below 60%. This is diagnostic evidence
+of a baseline failure, not a claimed passing acceptance run.
+
+**True blocker - scope decision:** The current production code's setting-0
+loaded baseline already exceeds the <60% busy bar (unprofiled frames 900..3439:
+p99 65.9%, 18 windows >=60%, no worker publication), while the paired setting-1
+prefix is 67.1% and sampled source CPU differs by only 0.36 points. The latest
+direction is to move exactly setting-1-only work and stop general hot-path
+optimization; addressing the common loaded baseline requires work beyond that
+restriction. Options: (1) authorize common emulation/context cost regression
+work under load while retaining 40 sections and the existing acceptance bar;
+(2) explicitly revise the load/bar. Quiet passes 60.000 Hz / zero hitches /
+58.4% p99; loaded remains failed. Distinct-cadence qualification, setting-3
+achieved FPS, final PC title ctest and both pushes remain pending. Both matching
+branches are committed and unpushed; no PR, merge or release was made.

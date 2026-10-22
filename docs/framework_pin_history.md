@@ -156,3 +156,8 @@ attribution. PC PGXP boundary/reuse tests pass; qualification continues.
 and paired pre-sampling windows isolate worker contention. Schedule native
 extras inside source pacing idle budgets and cancel at their host deadline;
 source guest helpers unchanged. Production compilation passes; gates pending.
+
+2026-10-21 BRIEF-5 documentation checkpoint `fe593b82`: record passing quiet
+and loaded baseline scope blocker. Runtime code is unchanged from `502072f9`
+(the executable in brief5-worker-idle / brief5-loaded-profile-diff). Regeneration
+unchanged. Both branches remain committed and unpushed because loaded fails.
