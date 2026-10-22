@@ -223,3 +223,16 @@ changed title plugins. Release integration links before the final lifecycle
 edits and is being rebuilt. Native SDK/cache refresh, integrated verification,
 and ordered route identity/quiet/loaded/distinct-frame gates remain pending.
 This is continuing implementation, not a blocker or acceptance. No push.
+
+
+BRIEF-5 qualification checkpoint `87270c7e`: native cache refresh builds 14
+modules with zero failures. Production off/on replay fingerprints match all
+4,511 collected rows (CPU/clock/timers/RAM/dirty/scratch/DMA/SIO/CD/SPU/MDEC/GPU).
+Both source paths have positive native overlay calls, zero interpretation and
+zero dispatch/segment misses; worker lookup also has zero misses. This gate is
+still FAILED: two jobs remained unconsumed, producing zero extras, and shutdown
+terminated with a joinable worker. The present handoff and shutdown fixes are
+committed and rebuilding; repeat identity before quiet/loaded/cadence. Evidence:
+local `brief5-identity-off-v2`, `brief5-identity-on`, `brief5-native-compile-fixed.txt`.
+Fixture migration changes only host header IDs; the guest payload hash is
+unchanged and linked to the original counter save by the Stage 2 proof. No push.

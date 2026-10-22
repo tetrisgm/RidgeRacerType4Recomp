@@ -93,3 +93,10 @@ is removed. Overlay ABI 35 requires per-thread initialization. Regenerated game
 dispatch and all 50 instruction shards are unchanged. Windows/Mac component
 checks pass; integrated Release/SDK refresh and ordered acceptance gates are in
 progress. No acceptance, push or release.
+
+2026-10-21 BRIEF-5 checkpoint `87270c7e`: SDK header guard, production core/device
+fingerprint export, canonical-present handoff and shutdown. Native cache refresh
+builds 14 modules; SDK binding checks pass on Windows/Mac. The first identity
+pair matches 4,511 rows with zero native misses but fails because no extras were
+consumed and exit did not join the worker. Those fixes are rebuilding. Regen
+unchanged. Repeat identity before timing/cadence; no acceptance or push.
