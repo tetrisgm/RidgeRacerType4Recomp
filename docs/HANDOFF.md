@@ -93,3 +93,10 @@ both sides of `docs/framework_pin_history.md` when rebasing.
 - A/B guest identity (mod off, warm vs cold shards):
   `psxrecomp/tools/fp_identity.py` with
   `--launch 'tools/run_r4.sh {build} --debug-port {port} {headless}'`.
+
+
+BRIEF-5 continuation: framework `efe800c9` adds private dispatch/device metadata
+and bounded worker command capture; component checks pass on Windows/Mac.
+Worker/plugin-state and GL handoff integration remain active. See
+[STATUS](../analysis/STATUS.md) and [BRIEF-5](../analysis/BRIEF-5.md).
+No acceptance or push; continue through all ordered gates.

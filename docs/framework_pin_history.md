@@ -78,3 +78,10 @@ its own.
 | 2026-10-21 | `58f17410` (`feat/render-60fps-v2`, local WIP) | `e341244` | unchanged | unchanged | BRIEF-5 prerequisite: overlay callbacks, pending cycles and dispatch pointers bind per execution thread; rebinding flushes the previous context's charges. Concurrent shim, store-PC/address forwarding and shim compilation pass on Windows/Mac; Windows title ctest 25/25. OpenBIOS regeneration changes only its fingerprint; 50 R4 shards unchanged. Worker/runtime isolation and Stage 3 acceptance remain unfinished; unpushed. |
 
 | 2026-10-21 | `2bedbe9a` (`feat/render-60fps-v2`, local WIP) | `e341244` | unchanged | unchanged | BRIEF-5 private memory backing, paged PGXP/GTE snapshots, frozen replay clocks and instance-selected GPU state. Concurrent component, GP0 history and upload-retention checks pass on Windows/Mac; GPU compiler proof is tracked in the framework. DMA/dispatch and worker integration continue; no new route gate, no push. |
+
+2026-10-21 BRIEF-5 checkpoint `efe800c9`: private dispatch/device metadata and
+bounded immutable worker command capture. Regenerated game dispatch/declarations
+expose native lookup and TLS provenance; game instruction bodies are unchanged.
+Windows/Mac concurrent memory/IRQ and command capture checks pass; Mac device,
+mod runtime and generated BIOS syntax checks pass. Worker integration and final
+acceptance gates remain open; no push or release.

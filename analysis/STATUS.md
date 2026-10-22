@@ -194,3 +194,16 @@ pending. Stage 2's fixed 40 sections and full-depth projection fix remain intact
 Windows geometry, production PGXP, transaction sandbox/abort and presenter
 ownership tests pass. The Mac dataflow build/title check passes 25/25 before
 the newest producer-clock correction. No Stage 3 push or acceptance.
+
+
+### BRIEF-5 private execution continuation (unaccepted)
+
+Framework `efe800c9` adds private IRQ/DMA/timer/I-cache and plugin callback
+ownership, captured code-validity/MMIO metadata, native code lookup in generated
+game/BIOS dispatch, and bounded immutable command capture independent of the
+live render-ring producer. Memory/IRQ concurrency and capture/consumer/overflow
+fixtures pass on Windows and Mac; Mac syntax checks cover the changed devices,
+mod runtime and regenerated OpenBIOS. This is an implementation checkpoint,
+not a blocker or gate result. Worker/plugin-host-state binding and GL handoff
+remain in progress. No final route fingerprint, quiet, loaded or distinct-frame
+gate has run for this implementation; neither branch is pushed.
