@@ -1,11 +1,15 @@
 /* Presentation-only US R4 draw replay. Guest pacing remains stock. */
 #include "mod_plugins.h"
 #include "r4_interp.h"
+#include <string.h>
 
 static int hooks_ready, active;
 static int worker;
 static void activate(void) {
-    int ready = hooks_ready && psx_mod_activate_render_pass_rate(
+    char rate[16];
+    int stock = psx_mod_option_value("r4.enhancement.frame-rate", "frame-rate", "rate",
+                                    rate, sizeof rate) && !strcmp(rate, "30");
+    int ready = !stock && hooks_ready && psx_mod_activate_render_pass_rate(
         "r4.enhancement.frame-rate", "frame-rate", "rate",
         PSX_MOD_RENDER_PASS_FLIP_PENDING);
     active = ready;

@@ -271,3 +271,13 @@ path is now checked against the complete charge/interlock path across 65,536
 steps and scale/gate modes, with assertions enabled on Windows/Mac. Independent
 PGXP snapshot/validation and GTE corpus checks also pass on both. Release/native
 refresh and ordered qualification continue; no blocker, loaded/cadence or push.
+
+BRIEF-5 PC-only resume: Release/native refresh passes. Cycle candidate off/on
+fingerprints match all 4,511 rows in the same executable, with zero native
+misses or interpretation. The older build differs with interpolation off too;
+its receipt is not a cross-build equivalence proof. Quiet still FAILS: 60.000 Hz,
+0 gaps >25 ms (max 22.247), p99 busy 81.1%. Receipts: local
+`brief5-worker-fast-cycle`. Default/stock/high-rate menu choices are implemented
+locally but remain unqualified. Source sampling continues; loaded/cadence and
+push remain pending. No true blocker. Per the brief redirect, no further Mac
+builds or verification are used for this stage.

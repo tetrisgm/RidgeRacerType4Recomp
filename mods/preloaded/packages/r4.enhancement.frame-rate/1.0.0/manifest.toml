@@ -21,10 +21,14 @@ default_enabled = true
 [[option]]
 feature = "frame-rate"
 id = "rate"
-label = "Presentation rate"
+label = "Race frame rate"
 group = "Display"
 type = "choice"
-default = "display"
+default = "60"
+
+[[option.choice]]
+value = "30"
+label = "30 FPS (Stock)"
 
 [[option.choice]]
 value = "display"
@@ -36,15 +40,19 @@ label = "60 FPS"
 
 [[option.choice]]
 value = "120"
-label = "120 FPS"
+label = "120 FPS (Best effort)"
+
+[[option.choice]]
+value = "150"
+label = "150 FPS (Best effort)"
 
 [[option.choice]]
 value = "144"
-label = "144 FPS"
+label = "144 FPS (Best effort)"
 
 [[option.choice]]
 value = "240"
-label = "240 FPS"
+label = "240 FPS (Best effort)"
 
 [[plugin]]
 feature = "frame-rate"

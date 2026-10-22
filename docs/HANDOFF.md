@@ -1,37 +1,10 @@
-# Handoff
-
-## BRIEF-4 (2026-10-21)
-
-Stage 1 is accepted on `fix/slowdowns` in R4 and psxrecomp.
-Quiet/loaded completion checks pass; title ctest passes 21/21.
-[Results and receipts](../analysis/STATUS.md); [owner brief](../analysis/BRIEF-4.md).
-Stage 1 branches are pushed (R4 `6355416`, framework `766f9d72`).
-Stage 2 on `fix/draw-distance` now meets quiet/loaded timing at the owner's
-fixed 40 sections ahead (+1 behind), retaining the full-depth PGXP drift fix.
-Final tunnel-exit burst: 60 consecutive native frames, no misses. Pin regeneration
-left all 50 game shards unchanged.
-Framework `8130e6fd`; Windows/Mac title ctest 21/21. [Evidence](../analysis/STATUS.md).
-Stage 2 branches are pushed: R4 `da09fac`, framework `8130e6fd`.
-Stage 3 remains unfinished on `feat/render-60fps-v2` in both repos.
-Queued GPU transactions remove temporal context handoffs; the CPU replay's
-4,501-frame off/on identity check matches (1,224 on passes). GPU-only redraw
-uses PGXP-carried vertex identities and immutable command lists, without
-the rejected camera-fitting generator. The latest quiet receipt
-`analysis/brief4/local/stage3-source-pts/quiet-summary.json` fails: 88 completion
-gaps and p99 busy 96.1%. Its final physical-present trace reaches 60 Hz; that
-does not satisfy completion timing. No Stage 3 loaded run or push.
-Owner redirect #2 now supersedes that implementation direction: move the guest
-draw replay onto a worker with private snapshot state, leaving only snapshot
-publication on emulation, then quiet followed by loaded if quiet qualifies.
-BRIEF-5 worker integration is committed through framework `8114565a`.
-Production identity passes 4,511 rows. Latest quiet holds 60.000 Hz and 0 gaps
->25 ms, but p99 busy is 100%, so qualification remains failed. PGXP lookup/page
-tracking and per-cache publication are corrected. A common cycle-step inline
-path now passes a 65,536-step equivalence matrix and scale/gate checks on
-Windows/Mac; Release/native refresh and ordered qualification continue.
-Loaded and distinct cadence remain pending. Receipts: local
-`analysis/brief4/local/brief5-worker-readonly`; no blocker, acceptance or push.
-[Current evidence](../analysis/STATUS.md), [brief](../analysis/BRIEF-5.md).
+BRIEF-5 continues on `feat/render-60fps-v2` in both repositories. PC-only per
+[brief redirect](../analysis/BRIEF-5.md). Same-build off/on identity passes all
+4,511 rows. Latest quiet: 60.000 Hz, zero gaps >25 ms, p99 busy 81.1% (FAILED).
+Cycle helper fastpath reduced cost; source profiling continues. Loaded and
+distinct cadence remain pending, as do both pushes. Current receipts: local
+`analysis/brief4/local/brief5-worker-fast-cycle`; [status](../analysis/STATUS.md).
+No true blocker or acceptance.
 Prior dirty work is preserved on
 `wip/draw-distance-old` in both repos. No PR, merge or release is authorized.
 

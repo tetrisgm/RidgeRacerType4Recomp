@@ -241,15 +241,13 @@ Not offered in R4 (owner, 2026-10-20): psxrecomp's frame generation is off in
 every graphics preset and its launcher row is hidden. Race logic keeps its
 original 30 Hz cadence.
 
-The experimental **Race frame rate** mod uses the game's draw routines with
-interpolated car and camera fields. It targets display refresh (or 60, 120,
-144, or 240 FPS), restores guest state after each extra frame, and holds the
-stock image when a pass is unavailable. It never falls back to image warping
-or crossfading. Online frames are local to each player's view.
+The experimental **Race frame rate** mod runs the game's intermediate draw
+routines on a private worker while logic retains its original 30 Hz cadence.
+The default target is 60 FPS. Select 30 FPS for stock rendering; higher targets
+and display refresh are best effort. Unfinished extras are dropped without
+holding up the game. It never falls back to image warping or crossfading.
 
-Performance validation is ongoing: the current Mac debug build does not
-sustain 120 distinct race frames per second. See the implementation report
-at `analysis/render-60fps/REPORT.md` in the development clone.
+Performance qualification is ongoing; see `analysis/STATUS.md` in the development clone.
 
 ## HD HUD
 
