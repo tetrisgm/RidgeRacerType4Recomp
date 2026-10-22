@@ -23,14 +23,14 @@ does not satisfy completion timing. No Stage 3 loaded run or push.
 Owner redirect #2 now supersedes that implementation direction: move the guest
 draw replay onto a worker with private snapshot state, leaving only snapshot
 publication on emulation, then quiet followed by loaded if quiet qualifies.
-BRIEF-5 worker integration is committed through framework `fb28d7c0`.
-Production identity passes all 4,511 rows with actual private draws and clean
-shutdown. First quiet timing fails (6 gaps, p99 busy 68.9%); loaded/cadence
-remain pending. Versioned private course-cache copies, retained temporal history
-storage and duplicate-VBlank admission fixes are built on Windows and Mac.
-Updated identity/quiet qualification is continuing in local
-`analysis/brief4/local/brief5-worker-retained`; no blocker, acceptance or push.
-[Current evidence](../analysis/STATUS.md), [brief](../analysis/BRIEF-5.md).
+BRIEF-5 worker integration is committed through framework `56a8b24f`.
+Production identity passes all 4,511 rows with private draws and clean shutdown.
+Windows/Mac Release builds and GL state/equivalence/dynres checks pass. Private
+GPU work is timed and bounded; large plugin cache copies are versioned separately.
+Latest quiet fails: 59.802 Hz, one 25.018 ms gap, p99 busy 100%. Source cycle/PGXP
+cost remains under investigation. Loaded and distinct cadence remain pending.
+Receipts: local `analysis/brief4/local/brief5-worker-admission`; no blocker,
+acceptance or push. [Current evidence](../analysis/STATUS.md), [brief](../analysis/BRIEF-5.md).
 Prior dirty work is preserved on
 `wip/draw-distance-old` in both repos. No PR, merge or release is authorized.
 

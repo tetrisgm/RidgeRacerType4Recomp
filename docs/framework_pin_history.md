@@ -102,3 +102,5 @@ consumed and exit did not join the worker. Those fixes are rebuilding. Regen
 unchanged. Repeat identity before timing/cadence; no acceptance or push.
 
 | 2026-10-21 | `fb28d7c0` (feat/render-60fps-v2) | unchanged | unchanged | unchanged | BRIEF-5 timing fixes: persistent private plugin images, retained temporal history capacity and duplicate-VBlank admission. Production identity passed before these performance fixes; quiet failed. Windows/Mac component checks and Release builds pass; updated ordered qualification continues, unaccepted and unpushed. |
+
+| 2026-10-21 | `56a8b24f` (feat/render-60fps-v2) | unchanged | unchanged | unchanged | BRIEF-5 GPU accounting/admission and composing-owner state shadow. Windows/Mac Release builds and real-GL checks pass. Updated production identity matches 4,511 rows; quiet remains failed (1 gap, p99 100%). Qualification continues, unaccepted and unpushed. |

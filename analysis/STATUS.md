@@ -249,3 +249,15 @@ course-cache copies. Sampling and receipts: local `brief5-worker-production`;
 updated qualification: `brief5-worker-retained`. Windows/Mac plugin snapshot
 checks and Release runtime builds pass. Continuing qualification, no blocker,
 acceptance or push.
+
+BRIEF-5 rendering-cost checkpoint `56a8b24f`: composing-owner post-effect state
+tracking removes a sampled driver round trip. Private GPU backup/capture cost
+now enters dynamic-resolution timing, and a readiness-only fence bounds optional
+GPU work. Windows/Mac GL restoration/equivalence/dynres checks and Release builds
+pass. Per-cache R4 publication revisions retain 4,511 identical production rows
+with positive native execution and zero interpretation, dirty instructions or
+source/worker lookup misses. Latest quiet still fails: 59.802 Hz, 1 gap >25 ms
+(max 25.018), p99 busy 100%. Loaded/cadence are pending. Source-thread sampling
+now attributes remaining work primarily to cycle/PGXP execution, with only three
+samples in the R4 cache capture. Continuing cost fixes; no true blocker or push.
+Receipts: local `brief5-worker-admission` and `brief5-gpu-accounting-check`.
