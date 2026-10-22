@@ -146,3 +146,8 @@ improved to zero hitches / 69.4% p99 but remains unqualified. Regen unchanged.
 omit derived GPU scratch and narrow PGXP copy pages. Private partial transfer,
 checkpoint/provenance, PGXP page-boundary/reuse and O0/O2 upload-history checks
 pass on PC. General hot paths unchanged. Latest quiet fails 64% p99; continue.
+
+2026-10-21 BRIEF-5 checkpoint `dd49ca4d`: undo the smaller PGXP page size after
+its candidate regressed quiet p99 to 100%; retain GPU derived scratch removal.
+Add publication stage spans to existing receipts for direct high-percentile
+attribution. PC PGXP boundary/reuse tests pass; qualification continues.

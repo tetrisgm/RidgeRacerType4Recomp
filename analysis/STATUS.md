@@ -130,6 +130,7 @@ Local receipts below are under `analysis/brief4/local/`.
 | Publication-only / `brief5-worker-publication` | quiet | 60.000 | 1 | 31.474 | 100.0% |
 | Worker-prepared images / `brief5-worker-prepared-native` | quiet | 60.000 | 0 | 19.545 | 69.4% |
 | Thread-owned overlay callbacks / `brief5-worker-callbacks` | quiet | 60.000 | 0 | 18.093 | 64.0% |
+| GPU scratch + smaller PGXP pages (page change removed) / `brief5-worker-footprint` | quiet | 60.000 | 0 | 21.354 | 100.0% |
 
 Current original-off identity passes all 4,511 rows: CPU, clock/IRQ, timers,
 RAM/dirty/scratch, DMA/SIO/CD/SPU/MDEC/GPU. Positive native source and worker
@@ -196,3 +197,12 @@ filled by their consumer before use; active checkpoints refuse capture. Private
 partial-transfer/checkpoint, provenance, PGXP boundary/reuse and O0/O2 upload
 history checks pass. Refreshing production and continuing ordered gates. No
 true blocker; both branches remain unpushed.
+
+The combined footprint candidate regressed quiet p99 to 100% despite identical
+4,511-row guest identity, native execution, zero misses and zero >25 ms gaps.
+Framework `dd49ca4d` restores the original 256-word PGXP publication pages first
+and retains the private derived GPU scratch. Existing host-span receipts now
+separate RPUB total publication, RRAM backing/metadata, RPRE precision and RGPU
+GPU/GL capture. This directly attributes high-percentile windows; sampled means
+alone do not establish their cause. Boundary/reuse tests pass. Refresh/gates
+continue; loaded/cadence/title ctest/pushes remain pending. No true blocker.
