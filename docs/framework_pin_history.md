@@ -85,3 +85,11 @@ expose native lookup and TLS provenance; game instruction bodies are unchanged.
 Windows/Mac concurrent memory/IRQ and command capture checks pass; Mac device,
 mod runtime and generated BIOS syntax checks pass. Worker integration and final
 acceptance gates remain open; no push or release.
+
+2026-10-21 BRIEF-5 checkpoint `6ae7f390`: private double-buffered native draw
+worker, sealed dispatch, plugin execution images, frame provenance and immutable
+GPU list handoff. R4 publishes owned blend endpoints; recorded-redraw activation
+is removed. Overlay ABI 35 requires per-thread initialization. Regenerated game
+dispatch and all 50 instruction shards are unchanged. Windows/Mac component
+checks pass; integrated Release/SDK refresh and ordered acceptance gates are in
+progress. No acceptance, push or release.

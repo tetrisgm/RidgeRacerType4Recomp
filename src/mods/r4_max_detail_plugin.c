@@ -28,6 +28,8 @@
  * so a netplay match always plays stock.
  */
 #include "mod_plugins.h"
+#include "psx_thread_local.h"
+static void r4_register_execution_state(void);
 #include "cpu_state.h"
 #include "psx_cycles.h"
 #include "psx_memory.h"
@@ -67,44 +69,44 @@ static int s_hooks_registered;
 #define R4_BUF_HEAP         0x1670u
 #define R4_BUF_HEAP_END     0x22688u
 
-static int s_enabled;
-static int s_trace;
-static int s_sample_before_pace = 1;
-static R4MdOptions s_opt;
-static int s_clamp_available;
-static int s_car_restore_logged;
-static int s_sections_override = -1;   /* R4_MD_SECTIONS: developer A/B */
-static int s_ahead_override = -1, s_behind_override = -1;   /* R4_MD_AHEAD/BEHIND */
-static int s_far_xform_off;                                    /* R4_MD_FAR_XFORM=0 */
-static struct {
+static PSX_THREAD_LOCAL int s_enabled;
+static PSX_THREAD_LOCAL int s_trace;
+static PSX_THREAD_LOCAL int s_sample_before_pace = 1;
+static PSX_THREAD_LOCAL R4MdOptions s_opt;
+static PSX_THREAD_LOCAL int s_clamp_available;
+static PSX_THREAD_LOCAL int s_car_restore_logged;
+static PSX_THREAD_LOCAL int s_sections_override = -1;   /* R4_MD_SECTIONS: developer A/B */
+static PSX_THREAD_LOCAL int s_ahead_override = -1, s_behind_override = -1;   /* R4_MD_AHEAD/BEHIND */
+static PSX_THREAD_LOCAL int s_far_xform_off;                                    /* R4_MD_FAR_XFORM=0 */
+static PSX_THREAD_LOCAL struct {
     int valid;
     uint32_t section, octant, yaw;
 } s_pvs;
 /* Maximum's budget governor (r4_md_gov_update). */
-static R4MdGovernor s_gov;
-static struct {
+static PSX_THREAD_LOCAL R4MdGovernor s_gov;
+static PSX_THREAD_LOCAL struct {
     int started, measured, last_oct;
     uint64_t start;
     uint32_t heap_pm;   /* highest primitive-heap use this frame, permille */
 } s_frame;
-static struct {
+static PSX_THREAD_LOCAL struct {
     int valid;
     uint32_t out;           /* a0 of 0x8006F160: SVECTOR, then VECTOR, MATRIX */
     int32_t d[3];           /* the true object - camera delta */
 } s_xf;
-static struct {
+static PSX_THREAD_LOCAL struct {
     int valid;
     uint32_t built;   /* the mirror list's count before the limit */
 } s_mirror;
-static int s_env_wrote;   /* the reflection page holds this plugin's write */
+static PSX_THREAD_LOCAL int s_env_wrote;   /* the reflection page holds this plugin's write */
 /* R4_MD_TRACE=2: pop-in census. The main view's final list of the previous
  * frame; a block that joins it and has a vertex in view is a pop, and its
  * nearest in-view vertex distance (world >> 8) is recorded. */
-static struct {
+static PSX_THREAD_LOCAL struct {
     uint32_t prev[R4_PVS_LIST_MAX], nprev;
     uint32_t pops, pop_min, hist[6];
 } s_pop;
-static struct {
+static PSX_THREAD_LOCAL struct {
     uint32_t frames, course_calls, heap_max, heap_limit_hits;
     uint32_t ot1_max, ot2_max, pvs_frames, pvs_before_max, pvs_after_max, pvs_added;
     uint32_t nsec;
@@ -118,7 +120,7 @@ static struct {
 static uint32_t rd32(uint32_t a) { return psx_mod_read_word(a); }
 static uint16_t rd16(uint32_t a) { return psx_mod_read_half(a); }
 
-static R4PvsSnapshot s_visibility_lists;
+static PSX_THREAD_LOCAL R4PvsSnapshot s_visibility_lists;
 
 /* ---- course renderer entry --------------------------------------------- */
 /* The expanded RAM's upper half is a transient course-list arena. Source
@@ -128,7 +130,7 @@ static R4PvsSnapshot s_visibility_lists;
 #define R4_MD_FINE_BLOCKS 0x80410000u
 #define R4_MD_FINE_MAX 16383u
 #define R4_MD_POLY_CACHE 65536u
-static struct { uint32_t polygon; R4MdBounds bounds; } s_poly_bounds[R4_MD_POLY_CACHE];
+static PSX_THREAD_LOCAL struct { uint32_t polygon; R4MdBounds bounds; } s_poly_bounds[R4_MD_POLY_CACHE];
 
 static const R4MdBounds *r4_md_cached_poly(uint32_t p, unsigned k, R4MdBounds *temporary)
 {
@@ -190,10 +192,10 @@ static void r4_md_face_bounds(R4MdCullNode *node, uint32_t p, unsigned k)
         }
     }
 }
-static R4MdCullNode s_cull_nodes[R4_MD_CULL_NODES];
-static uint32_t s_cull_nodes_used;
-static struct { uint32_t p, count, kind, node; } s_cull_roots[R4_MD_CULL_ROOTS];
-static uint32_t s_visible_runs[R4_MD_POLY_KINDS][R4_MD_BLOCK_POLYS_MAX];
+static PSX_THREAD_LOCAL R4MdCullNode s_cull_nodes[R4_MD_CULL_NODES];
+static PSX_THREAD_LOCAL uint32_t s_cull_nodes_used;
+static PSX_THREAD_LOCAL struct { uint32_t p, count, kind, node; } s_cull_roots[R4_MD_CULL_ROOTS];
+static PSX_THREAD_LOCAL uint32_t s_visible_runs[R4_MD_POLY_KINDS][R4_MD_BLOCK_POLYS_MAX];
 
 static uint32_t r4_md_build_cull_node(uint32_t table, uint32_t first, uint32_t count, unsigned k)
 {
@@ -382,17 +384,17 @@ static void r4_md_pvs_octant(CPUState *cpu, uint32_t address)
 /* Block bounds, cached per block address and checked against the block's
  * kind words (a new course or a save state rebuilds them). */
 #define R4_MD_BOUNDS_CACHE 4096u
-static struct {
+static PSX_THREAD_LOCAL struct {
     uint32_t block;
     R4MdBounds b;
     uint64_t epoch;
     int bounds_valid, visible;
 } s_bounds[R4_MD_BOUNDS_CACHE];
-static uint64_t s_visibility_epoch;
-static int s_previous_race = -1;
-static uint32_t s_unculled_count;
-static int s_course_cull_pending;
-static struct {
+static PSX_THREAD_LOCAL uint64_t s_visibility_epoch;
+static PSX_THREAD_LOCAL int s_previous_race = -1;
+static PSX_THREAD_LOCAL uint32_t s_unculled_count;
+static PSX_THREAD_LOCAL int s_course_cull_pending;
+static PSX_THREAD_LOCAL struct {
     double camx, camz, fx, fz, slope;
     int range;
     uint32_t kept, dropped;
@@ -486,10 +488,10 @@ static void r4_md_cull_course(CPUState *cpu)
     r4_md_fine_course(cpu, &f, out);
 }
 
-static int s_frame_has_course;   /* a main course draw ran this frame */
+static PSX_THREAD_LOCAL int s_frame_has_course;   /* a main course draw ran this frame */
 #define R4_MD_PACE_LEAD_CYCLES 2048u  /* ~60 us: VSync(0) covers the rest */
-static uint64_t s_pace_anchor;  /* guest-cycle-scale pacing: the VBlank edge the frame started after */
-static int s_pace_active;        /* the spin was held this frame */
+static PSX_THREAD_LOCAL uint64_t s_pace_anchor;  /* guest-cycle-scale pacing: the VBlank edge the frame started after */
+static PSX_THREAD_LOCAL int s_pace_active;        /* the spin was held this frame */
 static void r4_md_pvs_merge_body(void);
 static void r4_md_pop_census(uint32_t yaw);
 static void r4_md_pvs_merge(CPUState *cpu, uint32_t address)
@@ -688,7 +690,7 @@ static void r4_md_pop_census(uint32_t yaw)
 
 /* ---- far cars ------------------------------------------------------------------ */
 
-static struct {
+static PSX_THREAD_LOCAL struct {
     int valid;
     uint32_t addr;
     int16_t saved[3];
@@ -704,7 +706,7 @@ static void r4_md_car_restore(void)
 
 /* Far cars at this moment: Extended always (no sections to pay for), Maximum
  * from governor level 1 (R4_MD_FAR_CARS=0/1 overrides for A/B runs). */
-static int s_far_cars_override = -1;
+static PSX_THREAD_LOCAL int s_far_cars_override = -1;
 static int r4_md_far_cars_now(void)
 {
     if (s_far_cars_override >= 0) return s_far_cars_override;
@@ -713,9 +715,9 @@ static int r4_md_far_cars_now(void)
 }
 
 /* The BIOS random seed guard (r4_md_rand_guard_call). */
-static R4MdRandGuard s_rand;
-static int s_car_past_stock;   /* this lookup's car is past the stock cull distance */
-static int s_rand_guard_off;   /* R4_MD_RAND_GUARD=0: A/B */
+static PSX_THREAD_LOCAL R4MdRandGuard s_rand;
+static PSX_THREAD_LOCAL int s_car_past_stock;   /* this lookup's car is past the stock cull distance */
+static PSX_THREAD_LOCAL int s_rand_guard_off;   /* R4_MD_RAND_GUARD=0: A/B */
 
 static void r4_md_rand_end(void)
 {
@@ -1005,8 +1007,8 @@ static void r4_md_vblank(void)
  * 24-bit links (the GPU DMA walks them in the 8 MB map), the OTs stay put. */
 #define R4_MD_CLEAR_OTAG_FN      0x80093418u
 #define R4_MD_CLEAR_OTAG_HEAP_RA 0x8001E764u
-static int s_big_heap;          /* expanded heap in use (8 MB RAM live) */
-static int s_big_heap_allowed;  /* R4_MD_BIG_HEAP=0 turns it off for A/B */
+static PSX_THREAD_LOCAL int s_big_heap;          /* expanded heap in use (8 MB RAM live) */
+static PSX_THREAD_LOCAL int s_big_heap_allowed;  /* R4_MD_BIG_HEAP=0 turns it off for A/B */
 
 static uint32_t r4_md_heap_cap(void)
 {
@@ -1230,6 +1232,7 @@ static void r4_max_detail_activate(void)
 
 PSX_MOD_CONSTRUCTOR(r4_register_max_detail)
 {
+    r4_register_execution_state();
     R4_MD_REGISTER_ENTRY(R4_MD_COURSE_DISPATCH_FN, r4_md_course);
     R4_MD_REGISTER_ENTRY(R4_PVS_OCTANT_FN, r4_md_pvs_octant);
     R4_MD_REGISTER_ENTRY(R4_PVS_MERGE_FN, r4_md_pvs_merge);
@@ -1248,4 +1251,101 @@ PSX_MOD_CONSTRUCTOR(r4_register_max_detail)
     (void)psx_mod_register_savestate_plugin(PLUGIN_ID, r4_md_savestate_loaded);
     (void)psx_mod_register_activation_plugin(PLUGIN_ID, r4_max_detail_activate);
     (void)psx_mod_register_vblank_plugin(PLUGIN_ID, r4_md_vblank);
+}
+
+/* Mutable draw-hook objects are thread-owned. All fields are fixed values
+ * or guest keys; no mutable host pointers cross the execution boundary. */
+static void r4_execution_capture(void *destination) {
+    unsigned char *out = (unsigned char *)destination;
+    memcpy(out, &s_enabled, sizeof s_enabled); out += sizeof s_enabled;
+    memcpy(out, &s_trace, sizeof s_trace); out += sizeof s_trace;
+    memcpy(out, &s_sample_before_pace, sizeof s_sample_before_pace); out += sizeof s_sample_before_pace;
+    memcpy(out, &s_opt, sizeof s_opt); out += sizeof s_opt;
+    memcpy(out, &s_clamp_available, sizeof s_clamp_available); out += sizeof s_clamp_available;
+    memcpy(out, &s_car_restore_logged, sizeof s_car_restore_logged); out += sizeof s_car_restore_logged;
+    memcpy(out, &s_sections_override, sizeof s_sections_override); out += sizeof s_sections_override;
+    memcpy(out, &s_ahead_override, sizeof s_ahead_override); out += sizeof s_ahead_override;
+    memcpy(out, &s_behind_override, sizeof s_behind_override); out += sizeof s_behind_override;
+    memcpy(out, &s_far_xform_off, sizeof s_far_xform_off); out += sizeof s_far_xform_off;
+    memcpy(out, &s_pvs, sizeof s_pvs); out += sizeof s_pvs;
+    memcpy(out, &s_gov, sizeof s_gov); out += sizeof s_gov;
+    memcpy(out, &s_frame, sizeof s_frame); out += sizeof s_frame;
+    memcpy(out, &s_xf, sizeof s_xf); out += sizeof s_xf;
+    memcpy(out, &s_mirror, sizeof s_mirror); out += sizeof s_mirror;
+    memcpy(out, &s_env_wrote, sizeof s_env_wrote); out += sizeof s_env_wrote;
+    memcpy(out, &s_pop, sizeof s_pop); out += sizeof s_pop;
+    memcpy(out, &s_stat, sizeof s_stat); out += sizeof s_stat;
+    memcpy(out, &s_visibility_lists, sizeof s_visibility_lists); out += sizeof s_visibility_lists;
+    memcpy(out, &s_poly_bounds, sizeof s_poly_bounds); out += sizeof s_poly_bounds;
+    memcpy(out, &s_cull_nodes, sizeof s_cull_nodes); out += sizeof s_cull_nodes;
+    memcpy(out, &s_cull_nodes_used, sizeof s_cull_nodes_used); out += sizeof s_cull_nodes_used;
+    memcpy(out, &s_cull_roots, sizeof s_cull_roots); out += sizeof s_cull_roots;
+    memcpy(out, &s_visible_runs, sizeof s_visible_runs); out += sizeof s_visible_runs;
+    memcpy(out, &s_bounds, sizeof s_bounds); out += sizeof s_bounds;
+    memcpy(out, &s_visibility_epoch, sizeof s_visibility_epoch); out += sizeof s_visibility_epoch;
+    memcpy(out, &s_previous_race, sizeof s_previous_race); out += sizeof s_previous_race;
+    memcpy(out, &s_unculled_count, sizeof s_unculled_count); out += sizeof s_unculled_count;
+    memcpy(out, &s_course_cull_pending, sizeof s_course_cull_pending); out += sizeof s_course_cull_pending;
+    memcpy(out, &s_cone, sizeof s_cone); out += sizeof s_cone;
+    memcpy(out, &s_frame_has_course, sizeof s_frame_has_course); out += sizeof s_frame_has_course;
+    memcpy(out, &s_pace_anchor, sizeof s_pace_anchor); out += sizeof s_pace_anchor;
+    memcpy(out, &s_pace_active, sizeof s_pace_active); out += sizeof s_pace_active;
+    memcpy(out, &s_car, sizeof s_car); out += sizeof s_car;
+    memcpy(out, &s_far_cars_override, sizeof s_far_cars_override); out += sizeof s_far_cars_override;
+    memcpy(out, &s_rand, sizeof s_rand); out += sizeof s_rand;
+    memcpy(out, &s_car_past_stock, sizeof s_car_past_stock); out += sizeof s_car_past_stock;
+    memcpy(out, &s_rand_guard_off, sizeof s_rand_guard_off); out += sizeof s_rand_guard_off;
+    memcpy(out, &s_big_heap, sizeof s_big_heap); out += sizeof s_big_heap;
+    memcpy(out, &s_big_heap_allowed, sizeof s_big_heap_allowed); out += sizeof s_big_heap_allowed;
+}
+static void r4_execution_bind(const void *image) {
+    const unsigned char *in = (const unsigned char *)image;
+    memcpy(&s_enabled, in, sizeof s_enabled); in += sizeof s_enabled;
+    memcpy(&s_trace, in, sizeof s_trace); in += sizeof s_trace;
+    memcpy(&s_sample_before_pace, in, sizeof s_sample_before_pace); in += sizeof s_sample_before_pace;
+    memcpy(&s_opt, in, sizeof s_opt); in += sizeof s_opt;
+    memcpy(&s_clamp_available, in, sizeof s_clamp_available); in += sizeof s_clamp_available;
+    memcpy(&s_car_restore_logged, in, sizeof s_car_restore_logged); in += sizeof s_car_restore_logged;
+    memcpy(&s_sections_override, in, sizeof s_sections_override); in += sizeof s_sections_override;
+    memcpy(&s_ahead_override, in, sizeof s_ahead_override); in += sizeof s_ahead_override;
+    memcpy(&s_behind_override, in, sizeof s_behind_override); in += sizeof s_behind_override;
+    memcpy(&s_far_xform_off, in, sizeof s_far_xform_off); in += sizeof s_far_xform_off;
+    memcpy(&s_pvs, in, sizeof s_pvs); in += sizeof s_pvs;
+    memcpy(&s_gov, in, sizeof s_gov); in += sizeof s_gov;
+    memcpy(&s_frame, in, sizeof s_frame); in += sizeof s_frame;
+    memcpy(&s_xf, in, sizeof s_xf); in += sizeof s_xf;
+    memcpy(&s_mirror, in, sizeof s_mirror); in += sizeof s_mirror;
+    memcpy(&s_env_wrote, in, sizeof s_env_wrote); in += sizeof s_env_wrote;
+    memcpy(&s_pop, in, sizeof s_pop); in += sizeof s_pop;
+    memcpy(&s_stat, in, sizeof s_stat); in += sizeof s_stat;
+    memcpy(&s_visibility_lists, in, sizeof s_visibility_lists); in += sizeof s_visibility_lists;
+    memcpy(&s_poly_bounds, in, sizeof s_poly_bounds); in += sizeof s_poly_bounds;
+    memcpy(&s_cull_nodes, in, sizeof s_cull_nodes); in += sizeof s_cull_nodes;
+    memcpy(&s_cull_nodes_used, in, sizeof s_cull_nodes_used); in += sizeof s_cull_nodes_used;
+    memcpy(&s_cull_roots, in, sizeof s_cull_roots); in += sizeof s_cull_roots;
+    memcpy(&s_visible_runs, in, sizeof s_visible_runs); in += sizeof s_visible_runs;
+    memcpy(&s_bounds, in, sizeof s_bounds); in += sizeof s_bounds;
+    memcpy(&s_visibility_epoch, in, sizeof s_visibility_epoch); in += sizeof s_visibility_epoch;
+    memcpy(&s_previous_race, in, sizeof s_previous_race); in += sizeof s_previous_race;
+    memcpy(&s_unculled_count, in, sizeof s_unculled_count); in += sizeof s_unculled_count;
+    memcpy(&s_course_cull_pending, in, sizeof s_course_cull_pending); in += sizeof s_course_cull_pending;
+    memcpy(&s_cone, in, sizeof s_cone); in += sizeof s_cone;
+    memcpy(&s_frame_has_course, in, sizeof s_frame_has_course); in += sizeof s_frame_has_course;
+    memcpy(&s_pace_anchor, in, sizeof s_pace_anchor); in += sizeof s_pace_anchor;
+    memcpy(&s_pace_active, in, sizeof s_pace_active); in += sizeof s_pace_active;
+    memcpy(&s_car, in, sizeof s_car); in += sizeof s_car;
+    memcpy(&s_far_cars_override, in, sizeof s_far_cars_override); in += sizeof s_far_cars_override;
+    memcpy(&s_rand, in, sizeof s_rand); in += sizeof s_rand;
+    memcpy(&s_car_past_stock, in, sizeof s_car_past_stock); in += sizeof s_car_past_stock;
+    memcpy(&s_rand_guard_off, in, sizeof s_rand_guard_off); in += sizeof s_rand_guard_off;
+    memcpy(&s_big_heap, in, sizeof s_big_heap); in += sizeof s_big_heap;
+    memcpy(&s_big_heap_allowed, in, sizeof s_big_heap_allowed); in += sizeof s_big_heap_allowed;
+}
+static void r4_register_execution_state(void) {
+    const PSXModExecutionState state = {
+        sizeof(PSXModExecutionState), PLUGIN_ID,
+        sizeof s_enabled + sizeof s_trace + sizeof s_sample_before_pace + sizeof s_opt + sizeof s_clamp_available + sizeof s_car_restore_logged + sizeof s_sections_override + sizeof s_ahead_override + sizeof s_behind_override + sizeof s_far_xform_off + sizeof s_pvs + sizeof s_gov + sizeof s_frame + sizeof s_xf + sizeof s_mirror + sizeof s_env_wrote + sizeof s_pop + sizeof s_stat + sizeof s_visibility_lists + sizeof s_poly_bounds + sizeof s_cull_nodes + sizeof s_cull_nodes_used + sizeof s_cull_roots + sizeof s_visible_runs + sizeof s_bounds + sizeof s_visibility_epoch + sizeof s_previous_race + sizeof s_unculled_count + sizeof s_course_cull_pending + sizeof s_cone + sizeof s_frame_has_course + sizeof s_pace_anchor + sizeof s_pace_active + sizeof s_car + sizeof s_far_cars_override + sizeof s_rand + sizeof s_car_past_stock + sizeof s_rand_guard_off + sizeof s_big_heap + sizeof s_big_heap_allowed,
+        r4_execution_capture, r4_execution_bind
+    };
+    if (!psx_mod_register_execution_state(&state)) abort();
 }

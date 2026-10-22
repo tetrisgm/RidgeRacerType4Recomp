@@ -207,3 +207,19 @@ mod runtime and regenerated OpenBIOS. This is an implementation checkpoint,
 not a blocker or gate result. Worker/plugin-host-state binding and GL handoff
 remain in progress. No final route fingerprint, quiet, loaded or distinct-frame
 gate has run for this implementation; neither branch is pushed.
+
+
+### BRIEF-5 worker integration checkpoint (unaccepted)
+
+Framework `6ae7f390` adds the double-buffered native guest draw worker, sealed
+native dispatch, per-plugin host-state images, captured GPU/GTE frame provenance,
+and nonblocking immutable-command handoff on the existing render queue. R4 now
+publishes owned interpolation endpoints instead of selecting recorded GPU redraw.
+Activation changes quiesce the worker before changing hook tables. Windows five
+focused checks pass (GTE reference/enhanced, dispatch, plugin state, capture);
+Mac dispatch/plugin/memory/capture and GTE reference checks pass. GPU snapshot
+concurrency passes O0/O2 on both hosts. Mac syntax checks cover the worker and
+changed title plugins. Release integration links before the final lifecycle
+edits and is being rebuilt. Native SDK/cache refresh, integrated verification,
+and ordered route identity/quiet/loaded/distinct-frame gates remain pending.
+This is continuing implementation, not a blocker or acceptance. No push.

@@ -25,6 +25,8 @@
  * predicate derive from dogewow2048's R4 JP patch analysis; see the headers.
  */
 #include "mod_plugins.h"
+#include "psx_thread_local.h"
+static void r4_register_execution_state(void);
 #include "cpu_state.h"
 #include "psx_memory.h"
 #include "r4_primitive_heap.h"
@@ -99,20 +101,20 @@ typedef struct {
     int nkeys;
 } R4BufferTags;
 
-static int s_enabled;
-static int s_pvs_union = R4_WS_PVS_UNION;
-static int s_trace;
-static R4BufferTags s_buf[2];
-static struct {
+static PSX_THREAD_LOCAL int s_enabled;
+static PSX_THREAD_LOCAL int s_pvs_union = R4_WS_PVS_UNION;
+static PSX_THREAD_LOCAL int s_trace;
+static PSX_THREAD_LOCAL R4BufferTags s_buf[2];
+static PSX_THREAD_LOCAL struct {
     int open, buf;
     uint32_t start;
     uint8_t cls;
 } s_open;
-static struct {
+static PSX_THREAD_LOCAL struct {
     int valid;
     uint32_t section, octant;
 } s_pvs;
-static struct {
+static PSX_THREAD_LOCAL struct {
     uint32_t frames, heap_max, heap_limit_hits, tags, ranges, bad_ranges;
     uint32_t pvs_frames, pvs_before_max, pvs_after_max, pvs_added;
     uint32_t last_handler, last_phase;
@@ -136,7 +138,7 @@ static uint32_t r4_buffer_base(int b) { return R4_BUF0 + (uint32_t)b * R4_BUF_ST
  * publishes the answer once per frame instead; savestate load and activation
  * invalidate it, and an invalid cache reads live. R4_WS_SCENE_CACHE=0 reads
  * live every time (developer A/B). */
-static int s_scene_cache_on = 1, s_scene_valid = 0, s_scene_value = 0;
+static PSX_THREAD_LOCAL int s_scene_cache_on = 1, s_scene_valid = 0, s_scene_value = 0;
 
 static int r4_race_scene_live(void)
 {
@@ -389,6 +391,7 @@ static void r4_widescreen_activate(void)
  * (fingerprints diverge). The in-game menu saves it for the next start. */
 PSX_MOD_CONSTRUCTOR(r4_register_widescreen)
 {
+    r4_register_execution_state();
     for (int i = 0; i < R4_HUD_PRODUCER_COUNT; i++)
         R4_WS_REGISTER_ENTRY(r4_hud_producers[i].fn, r4_hud_enter);
     for (size_t i = 0; i < R4_WS_CLOSER_COUNT; i++)
@@ -400,4 +403,41 @@ PSX_MOD_CONSTRUCTOR(r4_register_widescreen)
     (void)psx_mod_register_activation_plugin(PLUGIN_ID, r4_widescreen_activate);
     (void)psx_mod_register_vblank_plugin(PLUGIN_ID, r4_ws_vblank);
     (void)psx_mod_register_savestate_plugin(PLUGIN_ID, r4_ws_savestate_loaded);
+}
+
+/* Mutable draw-hook objects are thread-owned. All fields are fixed values
+ * or guest keys; no mutable host pointers cross the execution boundary. */
+static void r4_execution_capture(void *destination) {
+    unsigned char *out = (unsigned char *)destination;
+    memcpy(out, &s_enabled, sizeof s_enabled); out += sizeof s_enabled;
+    memcpy(out, &s_pvs_union, sizeof s_pvs_union); out += sizeof s_pvs_union;
+    memcpy(out, &s_trace, sizeof s_trace); out += sizeof s_trace;
+    memcpy(out, &s_buf, sizeof s_buf); out += sizeof s_buf;
+    memcpy(out, &s_open, sizeof s_open); out += sizeof s_open;
+    memcpy(out, &s_pvs, sizeof s_pvs); out += sizeof s_pvs;
+    memcpy(out, &s_stat, sizeof s_stat); out += sizeof s_stat;
+    memcpy(out, &s_scene_cache_on, sizeof s_scene_cache_on); out += sizeof s_scene_cache_on;
+    memcpy(out, &s_scene_valid, sizeof s_scene_valid); out += sizeof s_scene_valid;
+    memcpy(out, &s_scene_value, sizeof s_scene_value); out += sizeof s_scene_value;
+}
+static void r4_execution_bind(const void *image) {
+    const unsigned char *in = (const unsigned char *)image;
+    memcpy(&s_enabled, in, sizeof s_enabled); in += sizeof s_enabled;
+    memcpy(&s_pvs_union, in, sizeof s_pvs_union); in += sizeof s_pvs_union;
+    memcpy(&s_trace, in, sizeof s_trace); in += sizeof s_trace;
+    memcpy(&s_buf, in, sizeof s_buf); in += sizeof s_buf;
+    memcpy(&s_open, in, sizeof s_open); in += sizeof s_open;
+    memcpy(&s_pvs, in, sizeof s_pvs); in += sizeof s_pvs;
+    memcpy(&s_stat, in, sizeof s_stat); in += sizeof s_stat;
+    memcpy(&s_scene_cache_on, in, sizeof s_scene_cache_on); in += sizeof s_scene_cache_on;
+    memcpy(&s_scene_valid, in, sizeof s_scene_valid); in += sizeof s_scene_valid;
+    memcpy(&s_scene_value, in, sizeof s_scene_value); in += sizeof s_scene_value;
+}
+static void r4_register_execution_state(void) {
+    const PSXModExecutionState state = {
+        sizeof(PSXModExecutionState), PLUGIN_ID,
+        sizeof s_enabled + sizeof s_pvs_union + sizeof s_trace + sizeof s_buf + sizeof s_open + sizeof s_pvs + sizeof s_stat + sizeof s_scene_cache_on + sizeof s_scene_valid + sizeof s_scene_value,
+        r4_execution_capture, r4_execution_bind
+    };
+    if (!psx_mod_register_execution_state(&state)) abort();
 }

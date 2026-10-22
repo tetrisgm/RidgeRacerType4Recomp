@@ -46,6 +46,7 @@
 
 #include "cpu_state.h"
 #include "mod_plugins.h"
+#include "psx_thread_local.h"
 #include "r4_interp_fields.h"
 #include "r4_interp_math.h"
 #include "r4_primitive_heap.h"
@@ -115,7 +116,7 @@ typedef struct R4Blend {
     uint32_t pre_replay_fade;
 } R4Blend;
 
-static struct {
+static PSX_THREAD_LOCAL struct {
     int enabled;            /* frame-rate feature active in this session */
     int in_pass;
     /* loop head */
@@ -132,7 +133,7 @@ static struct {
 
 } R;
 
-static struct {
+static PSX_THREAD_LOCAL struct {
     R4Capture prev, cur;
     uint32_t tick, prev_tick;
     unsigned seat, prev_seat;
@@ -544,6 +545,15 @@ static int r4_pass(struct CPUState *cpu, void *user, uint32_t alpha_q16) {
     return !call.broken;
 }
 
+/* Own both endpoint captures in the published image. The worker rebinds these
+ * local pointers after the byte copy, before any guest draw uses the blend. */
+typedef struct R4DrawWork { R4Blend blend; R4Capture prev, cur; } R4DrawWork;
+static int r4_worker_pass(CPUState *cpu, void *image, uint32_t alpha) {
+    R4DrawWork *work = (R4DrawWork *)image;
+    work->blend.prev = &work->prev; work->blend.cur = &work->cur;
+    return r4_pass(cpu, &work->blend, alpha);
+}
+
 /* ---- hooks ------------------------------------------------------------ */
 
 static void r4_loop_head(CPUState *cpu, uint32_t address) {
@@ -624,7 +634,9 @@ static void r4_pass_point(CPUState *cpu, uint32_t address) {
             pass.h = rd16(disp + 6u);
             for (uint32_t i = 0; i < n; i++) {
                 pass.alpha_q16 = alphas[i];
-                (void)psx_mod_render_pass(cpu, &pass, r4_pass, &blend);
+                R4DrawWork work;
+                work.blend = blend; work.prev = R.prev; work.cur = R.cur;
+                (void)psx_mod_render_pass_async(cpu, &pass, r4_worker_pass, &work, sizeof work);
                 /* r4_pass clears this itself only when it returns; a pass
                  * the framework's watchdog rolls back leaves by longjmp. */
                 R.in_pass = 0;
@@ -640,7 +652,12 @@ static void r4_pass_point(CPUState *cpu, uint32_t address) {
 }
 
 /* Entry hooks accepted by psxrecomp (2 = both); set once per process. */
+static void r4_interp_execution_capture(void *out) { memcpy(out, &R, sizeof R); }
+static void r4_interp_execution_bind(const void *in) { memcpy(&R, in, sizeof R); }
 int r4_interp_register_hooks(void) {
+    const PSXModExecutionState context = {sizeof(PSXModExecutionState), R4_FR_PLUGIN,
+        sizeof R, r4_interp_execution_capture, r4_interp_execution_bind};
+    if (!psx_mod_register_execution_state(&context)) abort();
     return psx_mod_register_function_entry_plugin(R4_FR_PLUGIN, R4_VSYNC,
                                                    r4_pass_point) +
            psx_mod_register_function_entry_plugin(R4_FR_PLUGIN, R4_CLEAR_OTAG_R,

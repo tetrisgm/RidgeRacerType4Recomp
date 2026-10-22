@@ -1,5 +1,9 @@
 /* Local right-stick camera look for R4's single-player race cameras. */
 #include "mod_plugins.h"
+#include "psx_thread_local.h"
+#include <string.h>
+#include <stdlib.h>
+static void r4_register_execution_state(void);
 #include "cpu_state.h"
 #include "r4_camera_look.h"
 #include "r4_widescreen_scene.h"
@@ -19,14 +23,14 @@
 #define R4_CAMERA_INPUT_YAW   0x1F80001Cu
 #define R4_CAR_WORLD_POS      0x800AC0C0u
 
-static int s_enabled;
+static PSX_THREAD_LOCAL int s_enabled;
 static int s_hooks_registered;
-static float s_deadzone = R4_CAMERA_LOOK_DEFAULT_DEADZONE;
-static float s_sensitivity = 1.0f;
-static R4CameraLookState s_look;
-static int s_restore_pending;
-static uint32_t s_original[5];
-static uint32_t s_written[5];
+static PSX_THREAD_LOCAL float s_deadzone = R4_CAMERA_LOOK_DEFAULT_DEADZONE;
+static PSX_THREAD_LOCAL float s_sensitivity = 1.0f;
+static PSX_THREAD_LOCAL R4CameraLookState s_look;
+static PSX_THREAD_LOCAL int s_restore_pending;
+static PSX_THREAD_LOCAL uint32_t s_original[5];
+static PSX_THREAD_LOCAL uint32_t s_written[5];
 
 static const uint32_t k_camera_inputs[5] = {
     R4_CAMERA_INPUT_POS + 0u, R4_CAMERA_INPUT_POS + 4u, R4_CAMERA_INPUT_POS + 8u,
@@ -182,6 +186,7 @@ static int r4_camera_look_option_changed(const char *option_id, const char *valu
 
 static void r4_camera_look_register(void) __attribute__((constructor));
 static void r4_camera_look_register(void) {
+    r4_register_execution_state();
     (void)psx_mod_register_activation_plugin(PLUGIN_ID,
                                              r4_camera_look_activate);
     (void)psx_mod_register_vblank_plugin(PLUGIN_ID,
@@ -192,4 +197,30 @@ static void r4_camera_look_register(void) {
         PLUGIN_ID, R4_CAMERA_BUILDER, r4_camera_look_build);
     s_hooks_registered += psx_mod_register_function_entry_plugin(
         PLUGIN_ID, R4_CAMERA_LOOK_INPUT_RESTORE_ENTRY, r4_camera_look_restore);
+}
+
+static void r4_execution_capture(void *destination) {
+    unsigned char *out = destination;
+    memcpy(out, &s_enabled, sizeof s_enabled); out += sizeof s_enabled;
+    memcpy(out, &s_deadzone, sizeof s_deadzone); out += sizeof s_deadzone;
+    memcpy(out, &s_sensitivity, sizeof s_sensitivity); out += sizeof s_sensitivity;
+    memcpy(out, &s_look, sizeof s_look); out += sizeof s_look;
+    memcpy(out, &s_restore_pending, sizeof s_restore_pending); out += sizeof s_restore_pending;
+    memcpy(out, &s_original, sizeof s_original); out += sizeof s_original;
+    memcpy(out, &s_written, sizeof s_written); out += sizeof s_written;
+}
+static void r4_execution_bind(const void *image) {
+    const unsigned char *in = image;
+    memcpy(&s_enabled, in, sizeof s_enabled); in += sizeof s_enabled;
+    memcpy(&s_deadzone, in, sizeof s_deadzone); in += sizeof s_deadzone;
+    memcpy(&s_sensitivity, in, sizeof s_sensitivity); in += sizeof s_sensitivity;
+    memcpy(&s_look, in, sizeof s_look); in += sizeof s_look;
+    memcpy(&s_restore_pending, in, sizeof s_restore_pending); in += sizeof s_restore_pending;
+    memcpy(&s_original, in, sizeof s_original); in += sizeof s_original;
+    memcpy(&s_written, in, sizeof s_written); in += sizeof s_written;
+}
+static void r4_register_execution_state(void) {
+    const PSXModExecutionState state = { sizeof(PSXModExecutionState), PLUGIN_ID,
+        sizeof s_enabled + sizeof s_deadzone + sizeof s_sensitivity + sizeof s_look + sizeof s_restore_pending + sizeof s_original + sizeof s_written, r4_execution_capture, r4_execution_bind };
+    if (!psx_mod_register_execution_state(&state)) abort();
 }

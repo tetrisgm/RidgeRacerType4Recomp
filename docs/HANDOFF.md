@@ -23,15 +23,13 @@ does not satisfy completion timing. No Stage 3 loaded run or push.
 Owner redirect #2 now supersedes that implementation direction: move the guest
 draw replay onto a worker with private snapshot state, leaving only snapshot
 publication on emulation, then quiet followed by loaded if quiet qualifies.
-BRIEF-5 runtime isolation is committed through framework `2bedbe9a`: private
-memory backing, paged PGXP/GTE precision snapshots, frozen clocks, and bound
-GPU machine/presentation regions. Concurrent component checks pass on Windows
-and Mac. DMA/dispatch isolation and the replay worker are being integrated;
-the ordered route gates have not run. [Current checkpoint](../analysis/STATUS.md).
-The worker rewrite has not been implemented. The existing transaction saves
-and restores singleton runtime state; concurrent execution needs isolation of
-RAM, GTE/PGXP, GPU/DMA and dispatch state, not merely another thread calling
-the existing callback. [Receipts/current findings](../analysis/STATUS.md).
+BRIEF-5 worker integration is committed through framework `6ae7f390`.
+R4 publishes owned endpoint images; a private native draw worker records an
+immutable GPU list and the render owner drops unfinished/stale extras without
+waiting. Plugin state and activation/stop lifetimes are isolated. Windows/Mac
+component checks pass; the integrated Release build is being qualified. Route
+identity, quiet, loaded and distinct-frame gates remain open; no acceptance or
+push. [Current evidence](../analysis/STATUS.md), [brief](../analysis/BRIEF-5.md).
 Prior dirty work is preserved on
 `wip/draw-distance-old` in both repos. No PR, merge or release is authorized.
 
@@ -94,9 +92,3 @@ both sides of `docs/framework_pin_history.md` when rebasing.
   `psxrecomp/tools/fp_identity.py` with
   `--launch 'tools/run_r4.sh {build} --debug-port {port} {headless}'`.
 
-
-BRIEF-5 continuation: framework `efe800c9` adds private dispatch/device metadata
-and bounded worker command capture; component checks pass on Windows/Mac.
-Worker/plugin-state and GL handoff integration remain active. See
-[STATUS](../analysis/STATUS.md) and [BRIEF-5](../analysis/BRIEF-5.md).
-No acceptance or push; continue through all ordered gates.

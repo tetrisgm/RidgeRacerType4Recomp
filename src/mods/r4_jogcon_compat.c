@@ -8,6 +8,7 @@
  * SIO identity and the decoded wheel/button fields remain untouched.
  */
 #include "mod_plugins.h"
+#include <stdlib.h>
 #include "cpu_state.h"
 
 #define R4_JOGCON_PLUGIN  "r4.jogcon-input"
@@ -28,6 +29,10 @@ static void r4_jogcon_input_compat(CPUState *cpu, uint32_t address) {
 }
 
 PSX_MOD_CONSTRUCTOR(r4_jogcon_compat_register) {
+    const PSXModExecutionState context = { sizeof(PSXModExecutionState),
+        R4_JOGCON_PLUGIN, 0, NULL, NULL };
+    if (!psx_mod_register_execution_state(&context)) abort();
+
     (void)psx_mod_register_function_entry_plugin(
         R4_JOGCON_PLUGIN, R4_INPUT_UPDATE, r4_jogcon_input_compat);
 }

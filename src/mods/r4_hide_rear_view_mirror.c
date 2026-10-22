@@ -1,13 +1,17 @@
 /* Hide R4's dedicated rear-view render pass as a presentation-only mod. */
 #include "cpu_state.h"
 #include "mod_plugins.h"
+#include "psx_thread_local.h"
+#include <string.h>
+#include <stdlib.h>
+static void r4_register_execution_state(void);
 #include "r4_hide_rear_view_mirror.h"
 
 #include <stdio.h>
 
 #define PLUGIN_ID "r4.hide-rear-view-mirror"
 
-static int s_enabled;
+static PSX_THREAD_LOCAL int s_enabled;
 static int s_hook_registered;
 
 static void r4_hide_rear_mirror_entry(CPUState *cpu, uint32_t address)
@@ -31,8 +35,23 @@ static void r4_hide_rear_mirror_activate(void)
 
 PSX_MOD_CONSTRUCTOR(r4_register_hide_rear_view_mirror)
 {
+    r4_register_execution_state();
     s_hook_registered += psx_mod_register_function_entry_plugin(
         PLUGIN_ID, R4_REAR_MIRROR_ENTRY, r4_hide_rear_mirror_entry);
     (void)psx_mod_register_activation_plugin(PLUGIN_ID,
                                               r4_hide_rear_mirror_activate);
+}
+
+static void r4_execution_capture(void *destination) {
+    unsigned char *out = destination;
+    memcpy(out, &s_enabled, sizeof s_enabled); out += sizeof s_enabled;
+}
+static void r4_execution_bind(const void *image) {
+    const unsigned char *in = image;
+    memcpy(&s_enabled, in, sizeof s_enabled); in += sizeof s_enabled;
+}
+static void r4_register_execution_state(void) {
+    const PSXModExecutionState state = { sizeof(PSXModExecutionState), PLUGIN_ID,
+        sizeof s_enabled, r4_execution_capture, r4_execution_bind };
+    if (!psx_mod_register_execution_state(&state)) abort();
 }
