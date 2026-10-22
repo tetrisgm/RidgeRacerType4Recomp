@@ -68,3 +68,9 @@ both sides of `docs/framework_pin_history.md` when rebasing.
   `psxrecomp/tools/fp_identity.py` with
   `--launch 'tools/run_r4.sh {build} --debug-port {port} {headless}'`.
 
+
+BRIEF-5 current checkpoint: framework `e1662e49` prepares both replay images on
+the worker, including PGXP/GTE allocation and page commitment; source drops
+extras until ready. Publication-only quiet still failed (one 31.474 ms gap,
+p99 100%, 71,712 faults at the gap). Original-off 4,511-row identity passed.
+Focused PC checks pass; refreshing production and continuing ordered gates.

@@ -127,13 +127,13 @@ Local receipts below are under `analysis/brief4/local/`.
 | Forced full-load expansion (removed) / `brief5-worker-load-cycle` | quiet | 60.000 | 0 | 24.826 | 92.1% |
 | PGXP operand copies / `brief5-worker-operands` | quiet | 60.001 | 2 | 212.257 | 85.6% |
 | Shared clock body / `brief5-worker-shared-clock` | quiet | 60.002 | 0 | 24.519 | 100.0% |
+| Publication-only / `brief5-worker-publication` | quiet | 60.000 | 1 | 31.474 | 100.0% |
 
-Current same-build identity passes all 4,511 rows: CPU, clock/IRQ, timers,
+Current original-off identity passes all 4,511 rows: CPU, clock/IRQ, timers,
 RAM/dirty/scratch, DMA/SIO/CD/SPU/MDEC/GPU. Positive native source and worker
 execution; zero interpretation, dirty instructions and source/worker misses.
-Evidence: `brief5-worker-shared-clock/identity-compare.json`. This code-layout
-change differs from the preceding build, so a fresh same-build off receipt was
-used. Host-only fixture header migrations preserve guest payload SHA-256
+Evidence: `brief5-worker-publication/identity-compare.json`. General timing/ALU
+experiments were removed; this build matches the original off receipt. Host-only fixture header migrations preserve guest payload SHA-256
 `6edce3ec0caea3fc7cb83c5cbaf40e7ff9389c40319e747965f946f6e3903410`.
 The original production counter save is unchanged.
 
@@ -159,3 +159,10 @@ Prior implementation/checkpoint detail is archived in
 (local commit until push). Framework reasons and focused receipts are linked
 from [pin history](../docs/framework_pin_history.md). Earlier Mac checks predate
 the PC-only redirect and are not being continued for this stage.
+
+Framework `e1662e49` moves private slot allocation and page commitment onto
+worker bootstrap. Extras are refused until both slots are ready; slot selection
+alternates to avoid a late first use. PGXP/GTE no longer allocate private word
+images during source capture. The preceding quiet gap coincides with 71,712
+page faults. PC cross-thread PGXP/GTE/plugin creation, private GPU, command
+capture and O0/O2 RAM checks pass. Production refresh and ordered gates continue.

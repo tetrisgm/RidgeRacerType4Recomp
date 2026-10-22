@@ -131,3 +131,8 @@ unchanged. Qualification continues; latest quiet still fails p99, no push.
 remove unqualified general cycle/ALU experiments and target only RAM snapshot
 publication with cache-bypassing stores on SSE2. O0/O2 full-RAM concurrent/reuse
 checks and relevant PC cycle/PGXP checks pass. Regen unchanged; gates pending.
+
+2026-10-21 BRIEF-5 checkpoint `e1662e49`: move replay slot allocation and page
+commitment off the source; reject extras until both worker-owned slots are ready.
+PC cross-thread PGXP/GTE/plugin creation, GPU/capture and O0/O2 RAM checks pass.
+Regen unchanged; production qualification continues, no acceptance or push.
