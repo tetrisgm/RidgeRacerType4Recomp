@@ -131,6 +131,7 @@ Local receipts below are under `analysis/brief4/local/`.
 | Worker-prepared images / `brief5-worker-prepared-native` | quiet | 60.000 | 0 | 19.545 | 69.4% |
 | Thread-owned overlay callbacks / `brief5-worker-callbacks` | quiet | 60.000 | 0 | 18.093 | 64.0% |
 | GPU scratch + smaller PGXP pages (page change removed) / `brief5-worker-footprint` | quiet | 60.000 | 0 | 21.354 | 100.0% |
+| Original pages + publication spans / `brief5-worker-publication-spans` | quiet | 60.000 | 1 | 29.901 | 64.7% |
 
 Current original-off identity passes all 4,511 rows: CPU, clock/IRQ, timers,
 RAM/dirty/scratch, DMA/SIO/CD/SPU/MDEC/GPU. Positive native source and worker
@@ -206,3 +207,19 @@ separate RPUB total publication, RRAM backing/metadata, RPRE precision and RGPU
 GPU/GL capture. This directly attributes high-percentile windows; sampled means
 alone do not establish their cause. Boundary/reuse tests pass. Refresh/gates
 continue; loaded/cadence/title ctest/pushes remain pending. No true blocker.
+
+Direct publication attribution (`brief5-worker-publication-spans/publication-attribution.json`)
+measures RPUB mean 0.488 ms/job, p99 0.667/max 0.813; RAM p99 0.373,
+precision 0.165, GPU 0.140 ms. Publication accounts for 1..3 points in the
+worst windows; residual p99 is 63.3%. The hitch overlaps source disc reads
+(8.2/13.0 ms). The paired profile's unprofiled 900..2990 prefix has off p99
+58.1% (zero windows >=60) versus on 65.5% (12 >=60), supporting worker
+contention rather than 36 points of source publication.
+
+Framework `502072f9` runs optional guest draws only inside declared source
+pacing waits. It admits against a measured execution estimate and cancels
+private dispatch at the idle deadline. Source execution never waits for a job;
+the worker also uses below-normal Windows scheduling, matching other optional
+workers. Existing publication receipts also tag background RWRK execution.
+Production compilation passes; refresh and ordered qualification continue. No
+true blocker, push, PR, merge or release.

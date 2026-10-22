@@ -1,11 +1,11 @@
 BRIEF-5 continues on `feat/render-60fps-v2` in both repositories, PC only per
 [brief redirect](../analysis/BRIEF-5.md). Original-off identity passes 4,511 rows.
-Latest quiet: 60.000 Hz, zero >25 ms gaps, p99 busy 100% (failed; prior callback
-build 64%). Framework `dd49ca4d` restores original PGXP page sizing and adds
-source-publication stage spans to existing receipts; derived GPU scratch stays
-private. Focused PC checks pass; refresh and ordered gates continue. Loaded,
-distinct cadence, final PC title ctest and both pushes remain pending. Evidence:
-[STATUS](../analysis/STATUS.md). No true blocker, acceptance, PR, merge or release.
+Latest quiet: 60.000 Hz, one 29.901 ms gap, p99 64.7% (failed). Publication
+p99 is 0.667 ms/job; paired unprofiled windows point to worker contention.
+Framework `502072f9` schedules extras in source pacing waits and cancels at the
+idle deadline. Production compilation passes; refresh and ordered gates continue.
+Loaded, distinct cadence, final PC title ctest and both pushes remain pending.
+Evidence: [STATUS](../analysis/STATUS.md). No true blocker, acceptance or release.
 Prior dirty work is preserved on
 `wip/draw-distance-old` in both repos. No PR, merge or release is authorized.
 

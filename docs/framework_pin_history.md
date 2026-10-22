@@ -151,3 +151,8 @@ pass on PC. General hot paths unchanged. Latest quiet fails 64% p99; continue.
 its candidate regressed quiet p99 to 100%; retain GPU derived scratch removal.
 Add publication stage spans to existing receipts for direct high-percentile
 attribution. PC PGXP boundary/reuse tests pass; qualification continues.
+
+2026-10-21 BRIEF-5 checkpoint `502072f9`: publication spans show <0.82 ms/job
+and paired pre-sampling windows isolate worker contention. Schedule native
+extras inside source pacing idle budgets and cancel at their host deadline;
+source guest helpers unchanged. Production compilation passes; gates pending.
