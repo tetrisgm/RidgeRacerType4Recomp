@@ -1,11 +1,11 @@
 BRIEF-5 continues on `feat/render-60fps-v2` in both repositories, PC only per
 [brief redirect](../analysis/BRIEF-5.md). Original-off identity passes 4,511 rows.
-Worker preparation removes hitches: quiet 60.000 Hz, zero >25 ms gaps, p99 busy
-69.4% (still fails). Late-window profiling exposed a startup TLS lifetime bug;
-framework `2ef58c54` binds overlay host pointers on their executing thread.
-Focused PC checks pass; production refresh and ordered gates continue. Loaded,
-distinct cadence, final PC title ctest and both pushes remain pending. Evidence:
-[STATUS](../analysis/STATUS.md). No true blocker, acceptance, PR, merge or release.
+Latest quiet: 60.000 Hz, zero >25 ms gaps, p99 busy 64.0% (still fails). Critical
+0/1 source profiles isolate publication copies; framework `c30fc917` omits GPU
+derived scratch and narrows PGXP copy pages. Focused PC checks pass; production
+refresh and ordered gates continue. Loaded, distinct cadence, final PC title
+ctest and both pushes remain pending. Evidence: [STATUS](../analysis/STATUS.md).
+No true blocker, acceptance, PR, merge or release.
 Prior dirty work is preserved on
 `wip/draw-distance-old` in both repos. No PR, merge or release is authorized.
 

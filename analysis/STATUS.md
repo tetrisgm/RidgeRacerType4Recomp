@@ -129,6 +129,7 @@ Local receipts below are under `analysis/brief4/local/`.
 | Shared clock body / `brief5-worker-shared-clock` | quiet | 60.002 | 0 | 24.519 | 100.0% |
 | Publication-only / `brief5-worker-publication` | quiet | 60.000 | 1 | 31.474 | 100.0% |
 | Worker-prepared images / `brief5-worker-prepared-native` | quiet | 60.000 | 0 | 19.545 | 69.4% |
+| Thread-owned overlay callbacks / `brief5-worker-callbacks` | quiet | 60.000 | 0 | 18.093 | 64.0% |
 
 Current original-off identity passes all 4,511 rows: CPU, clock/IRQ, timers,
 RAM/dirty/scratch, DMA/SIO/CD/SPU/MDEC/GPU. Positive native source and worker
@@ -180,3 +181,18 @@ source shard writes via an expired initializer-thread TLS breadcrumb pointer
 own host callback table and binds source DLL TLS on the executing thread.
 Production-loader O0/O2 cross-thread lifetime, shim binding and pre-init checks
 pass. Production refresh and ordered qualification continue. No true blocker.
+
+Callback fix passes original-off identity again. Quiet remains failed at 64.0%
+p99 with zero hitches. The fresh 3000..4200 profile pair has identical native
+source calls and zero interpreted/dirty/missed execution. Mean sampled source
+CPU: off 53.63%, on 52.05%; the 2.375% setting-1-only publication stack is RAM,
+PGXP-page and GPU-region copying. Receipts: `brief5-critical-profile-diff/`
+(source, profile-analysis, leaf/inclusive diff, async-disassembly). Sampling is
+attribution, not acceptance timing.
+
+Framework `c30fc917` omits 2.38 MiB of GPU derived scratch from publication and
+narrows PGXP publication pages (256 to 64 words). Both scratch buffers are
+filled by their consumer before use; active checkpoints refuse capture. Private
+partial-transfer/checkpoint, provenance, PGXP boundary/reuse and O0/O2 upload
+history checks pass. Refreshing production and continuing ordered gates. No
+true blocker; both branches remain unpushed.

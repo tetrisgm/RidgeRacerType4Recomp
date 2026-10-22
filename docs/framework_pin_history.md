@@ -141,3 +141,8 @@ Regen unchanged; production qualification continues, no acceptance or push.
 bind source module callbacks on the executing thread. O0/O2 production-loader
 lifetime, shard binding and pre-init checks pass on PC. Worker preparation quiet
 improved to zero hitches / 69.4% p99 but remains unqualified. Regen unchanged.
+
+2026-10-21 BRIEF-5 checkpoint `c30fc917`: measured publication copies only;
+omit derived GPU scratch and narrow PGXP copy pages. Private partial transfer,
+checkpoint/provenance, PGXP page-boundary/reuse and O0/O2 upload-history checks
+pass on PC. General hot paths unchanged. Latest quiet fails 64% p99; continue.
