@@ -27,6 +27,9 @@
 #define R4_AD_ACCEL         0xBFFFu   /* Cross held (active-low) */
 #define R4_AD_RIGHT         0xBFDFu
 #define R4_AD_LEFT          0xBF7Fu
+#define R4_AD_COAST_RIGHT   0xFFDFu   /* steer off the throttle */
+#define R4_AD_COAST_LEFT    0xFF7Fu
+#define R4_AD_SHARP         0.30      /* radians: lift in sharp corners */
 
 static int r4_autodrive_enabled(void) {
     static int on = -1;
@@ -61,6 +64,7 @@ static uint32_t r4_autodrive_buttons(void) {
     seg = best;
     const int t = ((seg - R4_AD_LOOKAHEAD) % (int)n + (int)n) % (int)n;
     double hx = x - px, hz = z - pz;
+    const int moving = have_prev && hx * hx + hz * hz >= 16.0;   /* else never lift */
     if (!have_prev || hx * hx + hz * hz < 1.0) {   /* barely moving: track direction */
         const int a = (seg - 1 + (int)n) % (int)n;
         hx = R4_AD_SEG(a, R4_TRACK_SEGMENT_X) - R4_AD_SEG(seg, R4_TRACK_SEGMENT_X);
@@ -73,6 +77,8 @@ static uint32_t r4_autodrive_buttons(void) {
     while (err > 3.14159265358979) err -= 6.28318530717959;
     while (err < -3.14159265358979) err += 6.28318530717959;
     px = x; pz = z; have_prev = 1;
+    if (moving && err > R4_AD_SHARP) return R4_AD_COAST_RIGHT;
+    if (moving && err < -R4_AD_SHARP) return R4_AD_COAST_LEFT;
     if (err > R4_AD_DEADZONE) return R4_AD_RIGHT;
     if (err < -R4_AD_DEADZONE) return R4_AD_LEFT;
     return R4_AD_ACCEL;
