@@ -99,7 +99,17 @@ release is authorized. See the owner brief for the ordered acceptance gates.
 
 ## Stage 3 (in progress; not accepted)
 
-BRIEF-5 checkpoint: framework `8d73618f` / `58f17410` makes overlay callback
+BRIEF-5 runtime checkpoint: framework `a54b9f00` / `2bedbe9a` adds private memory
+backing, page-versioned PGXP/GTE precision snapshots, a thread-local frozen
+clock, and GPU state selection across 323 fixed regions. Concurrent memory,
+precision, GPU and clock checks pass on Windows and Mac. Actual-GPU GP0 history
+and upload-retention checks pass on both; the Apple fixture linker was fixed
+to avoid replacing tentative fixture globals with abort functions. The GPU
+region manifest/proof is tracked at framework
+`docs/internal/receipts/brief5-gpu-isolation.json`. DMA/dispatch and the replay
+worker remain in progress; no new route gate has run, and branches are unpushed.
+
+Earlier prerequisite: framework `8d73618f` / `58f17410` makes overlay callback
 tables, pending cycle charges and host dispatch pointers thread-local. Each
 executing thread must bind each shard with `overlay_init`; rebinding publishes
 pending charges through the previous binding. The concurrent production-shim

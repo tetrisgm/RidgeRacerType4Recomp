@@ -23,10 +23,11 @@ does not satisfy completion timing. No Stage 3 loaded run or push.
 Owner redirect #2 now supersedes that implementation direction: move the guest
 draw replay onto a worker with private snapshot state, leaving only snapshot
 publication on emulation, then quiet followed by loaded if quiet qualifies.
-BRIEF-5's overlay-binding prerequisite is committed in framework `58f17410`:
-callback tables, cycle accumulators and dispatch pointers bind per thread.
-Focused Windows/Mac checks and Windows title ctest 25/25 pass; game regeneration
-leaves all 50 shards unchanged. [Current checkpoint](../analysis/STATUS.md).
+BRIEF-5 runtime isolation is committed through framework `2bedbe9a`: private
+memory backing, paged PGXP/GTE precision snapshots, frozen clocks, and bound
+GPU machine/presentation regions. Concurrent component checks pass on Windows
+and Mac. DMA/dispatch isolation and the replay worker are being integrated;
+the ordered route gates have not run. [Current checkpoint](../analysis/STATUS.md).
 The worker rewrite has not been implemented. The existing transaction saves
 and restores singleton runtime state; concurrent execution needs isolation of
 RAM, GTE/PGXP, GPU/DMA and dispatch state, not merely another thread calling
