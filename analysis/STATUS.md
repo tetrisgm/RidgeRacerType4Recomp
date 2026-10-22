@@ -261,3 +261,13 @@ source/worker lookup misses. Latest quiet still fails: 59.802 Hz, 1 gap >25 ms
 now attributes remaining work primarily to cycle/PGXP execution, with only three
 samples in the R4 cache capture. Continuing cost fixes; no true blocker or push.
 Receipts: local `brief5-worker-admission` and `brief5-gpu-accounting-check`.
+
+BRIEF-5 source-cost checkpoint `8114565a`: read-only PGXP lookup tracking and
+publication epochs preserve identity (4,511 rows) and quiet now reaches 60.000 Hz
+with 0 gaps >25 ms (max 24.536 ms), but p99 busy remains 100%; still FAILED.
+Receipts: local `brief5-worker-readonly`. GPU admission/drop remains nonblocking.
+Visible-fullscreen sampling identifies cycle helpers; a small inline one-cycle
+path is now checked against the complete charge/interlock path across 65,536
+steps and scale/gate modes, with assertions enabled on Windows/Mac. Independent
+PGXP snapshot/validation and GTE corpus checks also pass on both. Release/native
+refresh and ordered qualification continue; no blocker, loaded/cadence or push.
