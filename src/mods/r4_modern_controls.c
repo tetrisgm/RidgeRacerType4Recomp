@@ -30,6 +30,7 @@
 #include "mod_plugins.h"
 #include "r4_modern_controls.h"
 #include "r4_widescreen_scene.h"
+#include "r4_autodrive.h"
 
 #define R4_MC_PACKAGE "r4.modern-controls"
 #define R4_MC_FEATURE "modern-controls"
@@ -154,6 +155,15 @@ static int r4_mc_transform(const PSXModPadFrame *frame, PSXModPadOutput *out) {
     R4ModernNegcon ng;
     if (!frame || frame->player >= R4_MC_PLAYERS || !r4_mc_driving())
         return 0;
+    if (frame->player == 0 && r4_autodrive_enabled()) {   /* test runs only */
+        const uint32_t buttons = r4_autodrive_buttons();
+        if (buttons) {
+            out->type = PSX_MOD_PAD_DIGITAL;
+            out->buttons = buttons;
+            out->lx = out->ly = out->rx = out->ry = 0x80;
+            return 1;
+        }
+    }
     r4_mc_negcon_config(frame->player, &ng);
     return r4_modern_controls_map(frame, &ng, out);
 }
