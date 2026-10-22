@@ -241,15 +241,11 @@ windows are separate from sampling overhead. At setting 0 it already contains
 bar even if every remaining window were below 60%. This is diagnostic evidence
 of a baseline failure, not a claimed passing acceptance run.
 
-**True blocker - scope decision:** The current production code's setting-0
-loaded baseline already exceeds the <60% busy bar (unprofiled frames 900..3439:
-p99 65.9%, 18 windows >=60%, no worker publication), while the paired setting-1
-prefix is 67.1% and sampled source CPU differs by only 0.36 points. The latest
-direction is to move exactly setting-1-only work and stop general hot-path
-optimization; addressing the common loaded baseline requires work beyond that
-restriction. Options: (1) authorize common emulation/context cost regression
-work under load while retaining 40 sections and the existing acceptance bar;
-(2) explicitly revise the load/bar. Quiet passes 60.000 Hz / zero hitches /
-58.4% p99; loaded remains failed. Distinct-cadence qualification, setting-3
-achieved FPS, final PC title ctest and both pushes remain pending. Both matching
-branches are committed and unpushed; no PR, merge or release was made.
+**Scope resolved (Claude, 2026-10-21):** Option 1 is authorized in BRIEF-5.
+Compare loaded setting 0 at framework 8130e6fd/root da09fac against current
+head, one profile each on the same route window, then remove the isolation
+regression. Reuse the existing current-head loaded setting-0 profile; build
+an archived Stage 2 source tree because the retained Stage 2 executable
+predates the final pin. Quiet remains passed; loaded setting 1, cadence,
+setting-3 achieved FPS, PC title ctest and both pushes remain pending.
+No current blocker; no PR, merge or release authorized.

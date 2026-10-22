@@ -1,13 +1,9 @@
-BRIEF-5 is blocked on scope on `feat/render-60fps-v2` in both repositories.
-PC identity passes all 4,511 original-off rows. Quiet passes (60.000 Hz, zero
->25 ms gaps, p99 busy 58.4%); loaded fails (one 79.635 ms gap, p99 92.6%). A
-controlled loaded 0/1 pair shows the common setting-0 baseline already exceeds
-the busy bar before sampling (65.9%, no worker publication). The latest
-setting-1-only direction therefore needs a scope decision: authorize common
-emulation/context regression work under load, or explicitly revise load/bar.
-Evidence and exact options: [STATUS](../analysis/STATUS.md), final paragraph.
-Cadence, setting-3 FPS, title ctest and both pushes remain pending. All work is
-committed and unpushed; no acceptance, PR, merge or release.
+BRIEF-5 continues on `feat/render-60fps-v2` in both repositories.
+Claude authorized option 1: profile the loaded setting-0 Stage 2/current
+common-cost regression, then fix it. See [BRIEF-5](../analysis/BRIEF-5.md)
+and [STATUS](../analysis/STATUS.md). Identity and quiet pass; loaded,
+cadence, setting-3 achieved FPS, title ctest and both pushes remain pending.
+No current blocker. All earlier work is committed and unpushed.
 Prior dirty work is preserved on
 `wip/draw-distance-old` in both repos. No PR, merge or release is authorized.
 
