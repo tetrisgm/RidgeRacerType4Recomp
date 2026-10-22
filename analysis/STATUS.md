@@ -249,3 +249,17 @@ an archived Stage 2 source tree because the retained Stage 2 executable
 predates the final pin. Quiet remains passed; loaded setting 1, cadence,
 setting-3 achieved FPS, PC title ctest and both pushes remain pending.
 No current blocker; no PR, merge or release authorized.
+
+Authorized setting-0 regression comparison: exact archived root `da09fac` /
+framework `8130e6fd`, matching production options, route and 8-thread load.
+Frames 3450..4350 sampled once; reuse the existing current setting-0 profile.
+Old/current source CPU is 60.96% / 59.39%; unprofiled frames 900..3439 have
+p99 67.4% / 65.9%, with 32 / 18 windows >=60%. The historical Stage 2 58.7%
+is not reproduced. This comparison does not establish a net Stage 3 common
+regression. GPU display-query leaf samples rise from 0 to 1.003%; cache its
+derived geometry per reader/context until register changes or restore.
+Private/source isolation, resolution modes, checkpoint/savestate restore,
+reset and PAL initialization pass the production GPU fixture. Framework
+`a20f25a3`; production regeneration leaves game shards unchanged. Receipts:
+`brief5-stage2-regression/valid-*`; initial mismatched netplay-OFF diagnostic
+is explicitly INVALID. Loaded setting 1 and remaining gates continue.

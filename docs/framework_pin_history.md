@@ -161,3 +161,9 @@ source guest helpers unchanged. Production compilation passes; gates pending.
 and loaded baseline scope blocker. Runtime code is unchanged from `502072f9`
 (the executable in brief5-worker-idle / brief5-loaded-profile-diff). Regeneration
 unchanged. Both branches remain committed and unpushed because loaded fails.
+
+2026-10-21 BRIEF-5 `a20f25a3`: cache derived GPU display geometry per reader
+and private execution context, invalidate at GP1/reset/state boundaries.
+Targets the measured display-query context cost in the authorized loaded
+Stage 2/current comparison. GPU cache/isolation/restore fixture passes;
+regeneration unchanged. Loaded setting 1 and remaining gates continue.
