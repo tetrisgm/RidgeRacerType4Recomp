@@ -126,24 +126,24 @@ Local receipts below are under `analysis/brief4/local/`.
 | Inline cycle step / `brief5-worker-fast-cycle` | quiet | 60.000 | 0 | 22.247 | 81.1% |
 | Forced full-load expansion (removed) / `brief5-worker-load-cycle` | quiet | 60.000 | 0 | 24.826 | 92.1% |
 | PGXP operand copies / `brief5-worker-operands` | quiet | 60.001 | 2 | 212.257 | 85.6% |
+| Shared clock body / `brief5-worker-shared-clock` | quiet | 60.002 | 0 | 24.519 | 100.0% |
 
-Current identity passes all 4,511 rows against the prior off receipt: CPU,
-clock/IRQ, timers, RAM/dirty/scratch, DMA/SIO/CD/SPU/MDEC/GPU. Positive native
-source and worker execution; zero interpretation, dirty instructions and
-source/worker lookup misses. Evidence: `brief5-worker-operands/identity-compare.json`.
-The first optimized cycle build differed from the older off build, so that
-candidate was also compared off/on in the same executable (4,511 identical
-rows); later changes retain those results. Host-only fixture header migrations
-preserve guest payload SHA-256
+Current same-build identity passes all 4,511 rows: CPU, clock/IRQ, timers,
+RAM/dirty/scratch, DMA/SIO/CD/SPU/MDEC/GPU. Positive native source and worker
+execution; zero interpretation, dirty instructions and source/worker misses.
+Evidence: `brief5-worker-shared-clock/identity-compare.json`. This code-layout
+change differs from the preceding build, so a fresh same-build off receipt was
+used. Host-only fixture header migrations preserve guest payload SHA-256
 `6edce3ec0caea3fc7cb83c5cbaf40e7ff9389c40319e747965f946f6e3903410`.
 The original production counter save is unchanged.
 
 Quiet still FAILS. Loaded and distinct cadence have not run while quiet fails.
 Sampling points to cycle and PGXP execution. Full-load forced inlining grew
 code from about 98 to 116 MiB and regressed cost, so it was removed. Current
-framework checkpoint `a0730198` retains constant dependency-mask folding but
-shares the repeated clock-charge body. Independent 65,536-step full-charge
-comparisons, scale/gate and event-boundary checks pass on PC. PGXP in-place,
+framework checkpoint `25f71809` keeps only the compact scaled-charge path
+inline, including the full helper's zero-whole-cycle return ordering. Independent 65,536-step full-charge
+comparisons (including service callbacks that mutate CPU pipeline fields),
+scale/gate and event-boundary checks pass on PC. PGXP in-place,
 repack, production, word-shadow and private snapshot checks pass. Production
 refresh and ordered qualification continue. Required final title ctest is pending.
 

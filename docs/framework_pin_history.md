@@ -121,3 +121,8 @@ regeneration leaves game shards unchanged. Production qualification continues.
 constant register-dependency folding. PC charge/interlock, scale/gate and
 event-boundary checks pass. Latest production gate still fails; qualification
 continues, no acceptance or push.
+
+2026-10-21 BRIEF-5 checkpoint `25f71809`: compact inline scaled charges retain
+full-helper ordering and cold fallback. PC equivalence matrix includes CPU
+mutations from event callbacks; scale/gate and event checks pass. Regeneration
+unchanged. Qualification continues; latest quiet still fails p99, no push.

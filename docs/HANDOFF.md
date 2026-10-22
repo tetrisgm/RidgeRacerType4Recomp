@@ -1,7 +1,7 @@
 BRIEF-5 continues on `feat/render-60fps-v2` in both repositories. PC-only per
 [brief redirect](../analysis/BRIEF-5.md). Identity passes all 4,511 rows. Latest
-quiet fails: 60.001 Hz, two >25 ms gaps, p99 busy 85.6%. Source sampling led to
-PGXP operand-copy fixes and shared clock charging; production refresh continues.
+quiet fails: 60.002 Hz, zero >25 ms gaps, p99 busy 100%. Source sampling led to
+PGXP operand-copy fixes and compact scaled charges; production refresh continues.
 Loaded, distinct cadence, final PC title ctest and both pushes remain pending.
 Current results/receipts: [STATUS](../analysis/STATUS.md). No true blocker,
 acceptance, PR, merge or release.
