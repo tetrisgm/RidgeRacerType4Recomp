@@ -136,3 +136,8 @@ checks and relevant PC cycle/PGXP checks pass. Regen unchanged; gates pending.
 commitment off the source; reject extras until both worker-owned slots are ready.
 PC cross-thread PGXP/GTE/plugin creation, GPU/capture and O0/O2 RAM checks pass.
 Regen unchanged; production qualification continues, no acceptance or push.
+
+2026-10-21 BRIEF-5 checkpoint `2ef58c54`: correct overlay host TLS lifetime and
+bind source module callbacks on the executing thread. O0/O2 production-loader
+lifetime, shard binding and pre-init checks pass on PC. Worker preparation quiet
+improved to zero hitches / 69.4% p99 but remains unqualified. Regen unchanged.

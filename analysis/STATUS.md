@@ -128,6 +128,7 @@ Local receipts below are under `analysis/brief4/local/`.
 | PGXP operand copies / `brief5-worker-operands` | quiet | 60.001 | 2 | 212.257 | 85.6% |
 | Shared clock body / `brief5-worker-shared-clock` | quiet | 60.002 | 0 | 24.519 | 100.0% |
 | Publication-only / `brief5-worker-publication` | quiet | 60.000 | 1 | 31.474 | 100.0% |
+| Worker-prepared images / `brief5-worker-prepared-native` | quiet | 60.000 | 0 | 19.545 | 69.4% |
 
 Current original-off identity passes all 4,511 rows: CPU, clock/IRQ, timers,
 RAM/dirty/scratch, DMA/SIO/CD/SPU/MDEC/GPU. Positive native source and worker
@@ -166,3 +167,16 @@ alternates to avoid a late first use. PGXP/GTE no longer allocate private word
 images during source capture. The preceding quiet gap coincides with 71,712
 page faults. PC cross-thread PGXP/GTE/plugin creation, private GPU, command
 capture and O0/O2 RAM checks pass. Production refresh and ordered gates continue.
+
+Worker preparation passes original-off identity (4,511 rows) with native source
+and worker execution, zero interpretation/dirty instructions/misses. Quiet now
+has no >25 ms gaps and p99 69.4%; loaded/cadence remain pending. The wrongly
+nested cache attempt is explicitly invalid in `brief5-worker-prepared/INVALID.json`.
+
+A late-window profile comparison (3450..4350) completed setting 0 natively but
+setting 1 exposed a reproducible startup access violation. GDB proves the
+source shard writes via an expired initializer-thread TLS breadcrumb pointer
+(`brief5-startup-gdb-detail.txt`). Framework `2ef58c54` gives each thread its
+own host callback table and binds source DLL TLS on the executing thread.
+Production-loader O0/O2 cross-thread lifetime, shim binding and pre-init checks
+pass. Production refresh and ordered qualification continue. No true blocker.

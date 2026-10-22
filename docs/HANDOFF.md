@@ -1,11 +1,11 @@
-BRIEF-5 continues on `feat/render-60fps-v2` in both repositories. PC-only per
-[brief redirect](../analysis/BRIEF-5.md). Identity passes all 4,511 rows. Latest
-quiet fails: 60.002 Hz, zero >25 ms gaps, p99 busy 100%. The evening 0/1 profile diff
-is recorded in STATUS. General clock/ALU experiments are removed; only the
-measured RAM publication copy is being changed. Production refresh continues.
-Loaded, distinct cadence, final PC title ctest and both pushes remain pending.
-Current results/receipts: [STATUS](../analysis/STATUS.md). No true blocker,
-acceptance, PR, merge or release.
+BRIEF-5 continues on `feat/render-60fps-v2` in both repositories, PC only per
+[brief redirect](../analysis/BRIEF-5.md). Original-off identity passes 4,511 rows.
+Worker preparation removes hitches: quiet 60.000 Hz, zero >25 ms gaps, p99 busy
+69.4% (still fails). Late-window profiling exposed a startup TLS lifetime bug;
+framework `2ef58c54` binds overlay host pointers on their executing thread.
+Focused PC checks pass; production refresh and ordered gates continue. Loaded,
+distinct cadence, final PC title ctest and both pushes remain pending. Evidence:
+[STATUS](../analysis/STATUS.md). No true blocker, acceptance, PR, merge or release.
 Prior dirty work is preserved on
 `wip/draw-distance-old` in both repos. No PR, merge or release is authorized.
 
@@ -67,10 +67,3 @@ both sides of `docs/framework_pin_history.md` when rebasing.
 - A/B guest identity (mod off, warm vs cold shards):
   `psxrecomp/tools/fp_identity.py` with
   `--launch 'tools/run_r4.sh {build} --debug-port {port} {headless}'`.
-
-
-BRIEF-5 current checkpoint: framework `e1662e49` prepares both replay images on
-the worker, including PGXP/GTE allocation and page commitment; source drops
-extras until ready. Publication-only quiet still failed (one 31.474 ms gap,
-p99 100%, 71,712 faults at the gap). Original-off 4,511-row identity passed.
-Focused PC checks pass; refreshing production and continuing ordered gates.
