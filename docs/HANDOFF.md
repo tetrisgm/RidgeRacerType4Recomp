@@ -1,10 +1,10 @@
 BRIEF-5 continues on `feat/render-60fps-v2` in both repositories. PC-only per
-[brief redirect](../analysis/BRIEF-5.md). Same-build off/on identity passes all
-4,511 rows. Latest quiet: 60.000 Hz, zero gaps >25 ms, p99 busy 81.1% (FAILED).
-Cycle helper fastpath reduced cost; source profiling continues. Loaded and
-distinct cadence remain pending, as do both pushes. Current receipts: local
-`analysis/brief4/local/brief5-worker-fast-cycle`; [status](../analysis/STATUS.md).
-No true blocker or acceptance.
+[brief redirect](../analysis/BRIEF-5.md). Identity passes all 4,511 rows. Latest
+quiet fails: 60.001 Hz, two >25 ms gaps, p99 busy 85.6%. Source sampling led to
+PGXP operand-copy fixes and shared clock charging; production refresh continues.
+Loaded, distinct cadence, final PC title ctest and both pushes remain pending.
+Current results/receipts: [STATUS](../analysis/STATUS.md). No true blocker,
+acceptance, PR, merge or release.
 Prior dirty work is preserved on
 `wip/draw-distance-old` in both repos. No PR, merge or release is authorized.
 

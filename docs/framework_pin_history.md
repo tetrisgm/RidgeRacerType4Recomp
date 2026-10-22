@@ -116,3 +116,8 @@ continues, no acceptance or push.
 2026-10-21 BRIEF-5 checkpoint `b1636f97`: remove regressing full-load expansion;
 avoid unused/non-aliased PGXP operand copies. Relevant PC PGXP/cycle checks pass;
 regeneration leaves game shards unchanged. Production qualification continues.
+
+2026-10-21 BRIEF-5 checkpoint `a0730198`: share clock-charge code while retaining
+constant register-dependency folding. PC charge/interlock, scale/gate and
+event-boundary checks pass. Latest production gate still fails; qualification
+continues, no acceptance or push.

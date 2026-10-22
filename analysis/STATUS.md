@@ -97,197 +97,58 @@ Stage 2 accepted; final pin: framework `8130e6fd`. Regeneration leaves all
 50 game shards unchanged. Stage 3 remains next. No PR, merge or
 release is authorized. See the owner brief for the ordered acceptance gates.
 
-## Stage 3 (in progress; not accepted)
+## Stage 3 / BRIEF-5 (in progress; not accepted)
 
-BRIEF-5 runtime checkpoint: framework `a54b9f00` / `2bedbe9a` adds private memory
-backing, page-versioned PGXP/GTE precision snapshots, a thread-local frozen
-clock, and GPU state selection across 323 fixed regions. Concurrent memory,
-precision, GPU and clock checks pass on Windows and Mac. Actual-GPU GP0 history
-and upload-retention checks pass on both; the Apple fixture linker was fixed
-to avoid replacing tentative fixture globals with abort functions. The GPU
-region manifest/proof is tracked at framework
-`docs/internal/receipts/brief5-gpu-isolation.json`. DMA/dispatch and the replay
-worker remain in progress; no new route gate has run, and branches are unpushed.
+Both `feat/render-60fps-v2` branches remain local and unpushed. Continue until
+identity, quiet, loaded and distinct-60-Hz gates pass, then PC title ctest and
+push framework before title. PC-only per [BRIEF-5](BRIEF-5.md)'s resume redirect.
+No true blocker. No PR, merge or release is authorized.
 
-Earlier prerequisite: framework `8d73618f` / `58f17410` makes overlay callback
-tables, pending cycle charges and host dispatch pointers thread-local. Each
-executing thread must bind each shard with `overlay_init`; rebinding publishes
-pending charges through the previous binding. The concurrent production-shim
-test, store-PC forwarding, memory-address forwarding and shim compilation
-pass on Windows and macOS. Windows title ctest passes 25/25. OpenBIOS
-regeneration updates only its emitter fingerprint; all 50 R4 shards remain
-unchanged. This is a prerequisite only: private RAM/GTE/PGXP/GPU/DMA/dispatch
-contexts, snapshot publication and replay-worker execution are not implemented.
-No new fingerprint, performance or cadence acceptance runs; branches unpushed.
+The dedicated worker executes native guest draw code on private CPU/clock,
+RAM/scratch/mod memory, GTE/PGXP, GPU/DMA and dispatch state. The emulation owner
+publishes snapshots; the GL owner consumes immutable command lists. Optional
+work uses readiness checks and is dropped when late. Recorded redraw is off.
+The menu exposes stock 30, default 60, and higher best-effort targets including
+120/150. Default 60 remains unqualified until full distinct cadence passes.
 
-`feat/render-60fps-v2` imports transactional interpolation and HD/local-view
-admission over accepted Stages 1?2. R4 redraw now preserves Maximum's expanded
-primitive-heap layout; using the old stock heap caused watchdog rollbacks.
-Fullscreen, native-cadence identity: 4,501 off/on fingerprints match exactly,
-with 0 / 735 completed temporal passes and no on-path aborts/discards.
-Local receipts: `stage3-identity-native-{off,on}/identity.json` and
-`stage3-identity-native-compare.json`. An earlier mislabeled off setup carried
-a stale 120 Hz override and is rejected. Its watchdog logs led to the heap fix.
+All timings use production Release without debug tools, fullscreen
+7680x4320@60, owner defaults, exactly 40 ahead + 1 behind, slot 2 and the recorded
+route. Existing completion-clock summary uses the 60 seconds after frame 900.
+Local receipts below are under `analysis/brief4/local/`.
 
-| Stage 3 change | Load | Completion Hz | Gaps >25 ms | Max gap ms | p99 busy |
+| Worker change / receipt | Load | Completion Hz | Gaps >25 ms | Max gap ms | p99 busy |
 |---|---|---:|---:|---:|---:|
-| Imported plugin (render thread disabled; no passes) | quiet | 59.845 | 38 | 75.212 | 100.0% |
-| Async eligibility + expanded heaps (749 passes) | quiet | 59.930 | 451 | 35.311 | 92.8% |
-| Queued deadlines (393 passes) | quiet | 60.093 | 422 | 42.187 | 95.6% |
-| Release refused plans (8K slot budget rejects passes) | quiet | 60.000 | 8 | 30.177 | 63.0% |
-| Size-aware 8K image budget (456 passes) | quiet | 58.528 | 311 | 63.434 | 65.0% |
-| Recorded geometry redraw (rejected) | quiet | 60.000 | 14 | 84.177 | 66.1% |
+| Initial working handoff / `brief5-worker-production` | quiet | 60.000 | 6 | 79.632 | 68.9% |
+| Retained textures/cache revisions / `brief5-worker-retained` | quiet | 59.296 | 5 | 374 | 75.7% |
+| GL query removal before cost accounting / `brief5-worker-postfx` | quiet | 56.785 | 58 | 2394 | 68.6% |
+| Accounted/bounded optional GPU work / `brief5-worker-admission` | quiet | 59.802 | 1 | 25.018 | 100.0% |
+| Read-only PGXP lookup/epochs / `brief5-worker-readonly` | quiet | 60.000 | 0 | 24.536 | 100.0% |
+| Inline cycle step / `brief5-worker-fast-cycle` | quiet | 60.000 | 0 | 22.247 | 81.1% |
+| Forced full-load expansion (removed) / `brief5-worker-load-cycle` | quiet | 60.000 | 0 | 24.826 | 92.1% |
+| PGXP operand copies / `brief5-worker-operands` | quiet | 60.001 | 2 | 212.257 | 85.6% |
 
-The retained transactional implementation permits two images per generation at
-8K, up to a 1 GiB image-queue budget. Full-resolution temporal execution still
-acquires the one GL context synchronously: 2,091 acquisitions cost 33.8 s in
-the 75 s replay (`stage3-8k-generations/quiet.csv.renderer.json`). Most requested
-passes were shed (456 completed / 2,090 wanted). It cannot qualify as distinct
-60 fps. The next structural work is queued GPU transaction begin/capture/restore,
-so guest-state restoration does not wait for the presentation queue.
+Current identity passes all 4,511 rows against the prior off receipt: CPU,
+clock/IRQ, timers, RAM/dirty/scratch, DMA/SIO/CD/SPU/MDEC/GPU. Positive native
+source and worker execution; zero interpretation, dirty instructions and
+source/worker lookup misses. Evidence: `brief5-worker-operands/identity-compare.json`.
+The first optimized cycle build differed from the older off build, so that
+candidate was also compared off/on in the same executable (4,511 identical
+rows); later changes retain those results. Host-only fixture header migrations
+preserve guest payload SHA-256
+`6edce3ec0caea3fc7cb83c5cbaf40e7ff9389c40319e747965f946f6e3903410`.
+The original production counter save is unchanged.
 
-The alternative existing recorded-geometry generator also fails: 1,070 generated
-images / 2,255 game flips, with no image reprojection, plus the timing failure
-above. Its startup selector was removed; patch and executable receipts remain
-under local `stage3-geometry-redraw/`. No hidden switch selects it in this branch.
+Quiet still FAILS. Loaded and distinct cadence have not run while quiet fails.
+Sampling points to cycle and PGXP execution. Full-load forced inlining grew
+code from about 98 to 116 MiB and regressed cost, so it was removed. Current
+framework checkpoint `a0730198` retains constant dependency-mask folding but
+shares the repeated clock-charge body. Independent 65,536-step full-charge
+comparisons, scale/gate and event-boundary checks pass on PC. PGXP in-place,
+repack, production, word-shadow and private snapshot checks pass. Production
+refresh and ordered qualification continue. Required final title ctest is pending.
 
-All listed production runs have positive native overlays, zero interpreted/dirty
-execution and no dispatch/segment misses (`quiet-native-proof.json` in each
-receipt directory). The 4,501-frame identity result predates the latest host
-queue changes; it proves the expanded-heap transaction path, not final Stage 3
-acceptance. Final timing/distinct-frame gates remain open; loaded was not run
-while quiet fails. Windows/Mac title tests and interpolation schedule/guards
-pass. Stage 3 work is committed locally, unaccepted and unpushed. No PR, merge or
-release. Stage 2 remains accepted and pushed.
-
-### Stage 3 owner-direction follow-up (unaccepted)
-
-Temporal GPU begin/draw/capture/restore is queued on the GL-owning render
-thread. Context acquires fall to one startup `sync_cpu`. The asynchronous
-CPU-sandbox path still matches 4,501 off/on fingerprints (0 / 1,224 passes):
-`stage3-identity-render-owned-{off,on}/identity.json`,
-`stage3-identity-render-owned-compare.json`.
-
-| Follow-up | Completion Hz | Gaps >25 ms | Max gap ms | p99 busy |
-|---|---:|---:|---:|---:|
-| Queued transactions, initial resources | 58.194 | 7 | 1801.230 | 71.2% |
-| Retained resources, broader CPU admission | 60.000 | 8 | 75.540 | 98.8% |
-| First dataflow build (activation refused before GL init; rejected) | 59.997 | 214 | 62.879 | 97.1% |
-| Dataflow GPU redraw + nonblocking present queue | 60.006 | 3 | 25.639 | 70.1% |
-
-Corresponding local directories: `stage3-render-owned`, `stage3-retained-ready`,
-`stage3-dataflow-rendered`, `stage3-dataflow-nonblocking`. Native counters remain
-positive with no interpreted/dirty instructions or dispatch misses.
-
-The current dataflow path redraws actual recorded geometry in a display-rect
-GPU transaction. Value-validated PGXP word copies carry model identities and
-signed full-depth homogeneous positions; matching is per view, with no fitted
-camera or image warp. The last run completes 2,225 GPU redraws, matching 6,920 /
-6,990 projected vertices in its final generation. Presenter queue waits are
-zero, versus 31.4 s before nonblocking submission. Physical cadence still
-fails: the last 128 completed swaps are only 19.54 Hz; most extras are dropped.
-Producer wall-clock PTS now replaces replay-time clock advancement, and input
-origin metadata is restricted to the six GTE model words rather than ordinary
-integer instructions. These corrections are not yet qualified. Loaded remains
-pending. Stage 2's fixed 40 sections and full-depth projection fix remain intact.
-
-Windows geometry, production PGXP, transaction sandbox/abort and presenter
-ownership tests pass. The Mac dataflow build/title check passes 25/25 before
-the newest producer-clock correction. No Stage 3 push or acceptance.
-
-
-### BRIEF-5 private execution continuation (unaccepted)
-
-Framework `efe800c9` adds private IRQ/DMA/timer/I-cache and plugin callback
-ownership, captured code-validity/MMIO metadata, native code lookup in generated
-game/BIOS dispatch, and bounded immutable command capture independent of the
-live render-ring producer. Memory/IRQ concurrency and capture/consumer/overflow
-fixtures pass on Windows and Mac; Mac syntax checks cover the changed devices,
-mod runtime and regenerated OpenBIOS. This is an implementation checkpoint,
-not a blocker or gate result. Worker/plugin-host-state binding and GL handoff
-remain in progress. No final route fingerprint, quiet, loaded or distinct-frame
-gate has run for this implementation; neither branch is pushed.
-
-
-### BRIEF-5 worker integration checkpoint (unaccepted)
-
-Framework `6ae7f390` adds the double-buffered native guest draw worker, sealed
-native dispatch, per-plugin host-state images, captured GPU/GTE frame provenance,
-and nonblocking immutable-command handoff on the existing render queue. R4 now
-publishes owned interpolation endpoints instead of selecting recorded GPU redraw.
-Activation changes quiesce the worker before changing hook tables. Windows five
-focused checks pass (GTE reference/enhanced, dispatch, plugin state, capture);
-Mac dispatch/plugin/memory/capture and GTE reference checks pass. GPU snapshot
-concurrency passes O0/O2 on both hosts. Mac syntax checks cover the worker and
-changed title plugins. Release integration links before the final lifecycle
-edits and is being rebuilt. Native SDK/cache refresh, integrated verification,
-and ordered route identity/quiet/loaded/distinct-frame gates remain pending.
-This is continuing implementation, not a blocker or acceptance. No push.
-
-
-BRIEF-5 qualification checkpoint `87270c7e`: native cache refresh builds 14
-modules with zero failures. Production off/on replay fingerprints match all
-4,511 collected rows (CPU/clock/timers/RAM/dirty/scratch/DMA/SIO/CD/SPU/MDEC/GPU).
-Both source paths have positive native overlay calls, zero interpretation and
-zero dispatch/segment misses; worker lookup also has zero misses. This gate is
-still FAILED: two jobs remained unconsumed, producing zero extras, and shutdown
-terminated with a joinable worker. The present handoff and shutdown fixes are
-committed and rebuilding; repeat identity before quiet/loaded/cadence. Evidence:
-local `brief5-identity-off-v2`, `brief5-identity-on`, `brief5-native-compile-fixed.txt`.
-Fixture migration changes only host header IDs; the guest payload hash is
-unchanged and linked to the original counter save by the Stage 2 proof. No push.
-
-BRIEF-5 follow-up: corrected present handoff passes production identity: 4,511
-matching rows, 1,423 private draws, clean exit, zero interpreted/dirty execution
-or source/worker native misses. The first quiet gate fails (60.000 Hz,
-6 completion gaps >25 ms, 79.632 ms maximum, p99 busy 68.9%): local
-`brief5-worker-production/quiet-summary.json`. Loaded and cadence remain pending.
-Framework `fb28d7c0` retains temporal history storage across resolution reductions,
-permits unfinished jobs through their duplicate-VBlank deadline, and supplies
-persistent zeroed plugin publication storage. R4 versions its large private
-course-cache copies. Sampling and receipts: local `brief5-worker-production`;
-updated qualification: `brief5-worker-retained`. Windows/Mac plugin snapshot
-checks and Release runtime builds pass. Continuing qualification, no blocker,
-acceptance or push.
-
-BRIEF-5 rendering-cost checkpoint `56a8b24f`: composing-owner post-effect state
-tracking removes a sampled driver round trip. Private GPU backup/capture cost
-now enters dynamic-resolution timing, and a readiness-only fence bounds optional
-GPU work. Windows/Mac GL restoration/equivalence/dynres checks and Release builds
-pass. Per-cache R4 publication revisions retain 4,511 identical production rows
-with positive native execution and zero interpretation, dirty instructions or
-source/worker lookup misses. Latest quiet still fails: 59.802 Hz, 1 gap >25 ms
-(max 25.018), p99 busy 100%. Loaded/cadence are pending. Source-thread sampling
-now attributes remaining work primarily to cycle/PGXP execution, with only three
-samples in the R4 cache capture. Continuing cost fixes; no true blocker or push.
-Receipts: local `brief5-worker-admission` and `brief5-gpu-accounting-check`.
-
-BRIEF-5 source-cost checkpoint `8114565a`: read-only PGXP lookup tracking and
-publication epochs preserve identity (4,511 rows) and quiet now reaches 60.000 Hz
-with 0 gaps >25 ms (max 24.536 ms), but p99 busy remains 100%; still FAILED.
-Receipts: local `brief5-worker-readonly`. GPU admission/drop remains nonblocking.
-Visible-fullscreen sampling identifies cycle helpers; a small inline one-cycle
-path is now checked against the complete charge/interlock path across 65,536
-steps and scale/gate modes, with assertions enabled on Windows/Mac. Independent
-PGXP snapshot/validation and GTE corpus checks also pass on both. Release/native
-refresh and ordered qualification continue; no blocker, loaded/cadence or push.
-
-BRIEF-5 PC-only resume: Release/native refresh passes. Cycle candidate off/on
-fingerprints match all 4,511 rows in the same executable, with zero native
-misses or interpretation. The older build differs with interpolation off too;
-its receipt is not a cross-build equivalence proof. Quiet still FAILS: 60.000 Hz,
-0 gaps >25 ms (max 22.247), p99 busy 81.1%. Receipts: local
-`brief5-worker-fast-cycle`. Default/stock/high-rate menu choices are implemented
-locally but remain unqualified. Source sampling continues; loaded/cadence and
-push remain pending. No true blocker. Per the brief redirect, no further Mac
-builds or verification are used for this stage.
-
-BRIEF-5 timed-load checkpoint: same-build identity again matches all 4,511
-rows, with positive native calls and zero misses/interpretation. Forced full
-load inlining regresses quiet p99 to 92.1% (60.000 Hz, zero >25 ms gaps), so
-that expansion is removed. Keep the independently checked common base fastpath.
-Heavy-route profiling points to PGXP arithmetic; avoid copying non-aliased or
-unused operand shadows. PC PGXP in-place/repack, production, snapshot and
-word-shadow checks pass. Refresh/qualification continues at framework b1636f97.
-Receipts: local `brief5-worker-load-cycle`, `brief5-worker-fast-cycle/heavy-profile*`.
-Loaded/cadence remain pending; no true blocker or push.
+Prior implementation/checkpoint detail is archived in
+[the preceding status revision](https://github.com/tetrisgm/RidgeRacerType4Recomp/blob/02090f8/analysis/STATUS.md)
+(local commit until push). Framework reasons and focused receipts are linked
+from [pin history](../docs/framework_pin_history.md). Earlier Mac checks predate
+the PC-only redirect and are not being continued for this stage.
