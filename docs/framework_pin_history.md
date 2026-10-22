@@ -126,3 +126,8 @@ continues, no acceptance or push.
 full-helper ordering and cold fallback. PC equivalence matrix includes CPU
 mutations from event callbacks; scale/gate and event checks pass. Regeneration
 unchanged. Qualification continues; latest quiet still fails p99, no push.
+
+2026-10-21 BRIEF-5 checkpoint `41f3f647`: follow the evening 0/1 profile diff;
+remove unqualified general cycle/ALU experiments and target only RAM snapshot
+publication with cache-bypassing stores on SSE2. O0/O2 full-RAM concurrent/reuse
+checks and relevant PC cycle/PGXP checks pass. Regen unchanged; gates pending.

@@ -138,14 +138,21 @@ used. Host-only fixture header migrations preserve guest payload SHA-256
 The original production counter save is unchanged.
 
 Quiet still FAILS. Loaded and distinct cadence have not run while quiet fails.
-Sampling points to cycle and PGXP execution. Full-load forced inlining grew
-code from about 98 to 116 MiB and regressed cost, so it was removed. Current
-framework checkpoint `25f71809` keeps only the compact scaled-charge path
-inline, including the full helper's zero-whole-cycle return ordering. Independent 65,536-step full-charge
-comparisons (including service callbacks that mutate CPU pipeline fields),
-scale/gate and event-boundary checks pass on PC. PGXP in-place,
-repack, production, word-shadow and private snapshot checks pass. Production
-refresh and ordered qualification continue. Required final title ctest is pending.
+The latest evening direction stops general hot-path optimization. One source
+profile per setting over the same route window (~1500..2400) has identical
+native source calls. The setting-1-only stack is async snapshot publication
+(~1.8% of samples), primarily the full 8 MiB RAM copy. Sampled mean source CPU
+was 50.2% off / 44.2% on; sampled timing is not an acceptance result and does
+not establish the asserted 36-point added CPU workload. Receipts:
+`brief5-setting-profile-diff/{source,profile-analysis,leaf-diff,inclusive-diff}.json`.
+
+Framework checkpoint `41f3f647` removes the unqualified general cycle/ALU
+experiments, retains worker publication tracking, and uses streaming stores
+only for RAM snapshot publication on SSE2. Other targets retain memcpy. This
+avoids filling the source owner's caches with the worker image without adding
+guest-store tracking or changing the copied bytes. O0/O2 concurrent full-RAM
+and snapshot-reuse checks pass, as do relevant PC cycle/PGXP checks. Production
+refresh and ordered qualification continue. Final PC title ctest is pending.
 
 Prior implementation/checkpoint detail is archived in
 [the preceding status revision](https://github.com/tetrisgm/RidgeRacerType4Recomp/blob/02090f8/analysis/STATUS.md)
