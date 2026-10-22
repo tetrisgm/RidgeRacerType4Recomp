@@ -23,14 +23,14 @@ does not satisfy completion timing. No Stage 3 loaded run or push.
 Owner redirect #2 now supersedes that implementation direction: move the guest
 draw replay onto a worker with private snapshot state, leaving only snapshot
 publication on emulation, then quiet followed by loaded if quiet qualifies.
-BRIEF-5 worker integration is committed through framework `87270c7e`.
-R4 publishes owned endpoint images; a private native draw worker records an
-immutable GPU list and the render owner drops unfinished/stale extras without
-waiting. Plugin state and activation/stop lifetimes are isolated. Windows/Mac
-component checks pass. First production identity rows match, but zero consumed
-extras and shutdown failed; present-handoff/shutdown fixes are rebuilding.
-Repeat identity, then quiet, loaded and distinct-frame gates; no acceptance or
-push. [Current evidence](../analysis/STATUS.md), [brief](../analysis/BRIEF-5.md).
+BRIEF-5 worker integration is committed through framework `fb28d7c0`.
+Production identity passes all 4,511 rows with actual private draws and clean
+shutdown. First quiet timing fails (6 gaps, p99 busy 68.9%); loaded/cadence
+remain pending. Versioned private course-cache copies, retained temporal history
+storage and duplicate-VBlank admission fixes are built on Windows and Mac.
+Updated identity/quiet qualification is continuing in local
+`analysis/brief4/local/brief5-worker-retained`; no blocker, acceptance or push.
+[Current evidence](../analysis/STATUS.md), [brief](../analysis/BRIEF-5.md).
 Prior dirty work is preserved on
 `wip/draw-distance-old` in both repos. No PR, merge or release is authorized.
 

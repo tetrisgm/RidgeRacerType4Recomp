@@ -100,3 +100,5 @@ builds 14 modules; SDK binding checks pass on Windows/Mac. The first identity
 pair matches 4,511 rows with zero native misses but fails because no extras were
 consumed and exit did not join the worker. Those fixes are rebuilding. Regen
 unchanged. Repeat identity before timing/cadence; no acceptance or push.
+
+| 2026-10-21 | `fb28d7c0` (feat/render-60fps-v2) | unchanged | unchanged | unchanged | BRIEF-5 timing fixes: persistent private plugin images, retained temporal history capacity and duplicate-VBlank admission. Production identity passed before these performance fixes; quiet failed. Windows/Mac component checks and Release builds pass; updated ordered qualification continues, unaccepted and unpushed. |

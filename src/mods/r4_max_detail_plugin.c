@@ -120,6 +120,14 @@ static PSX_THREAD_LOCAL struct {
 static uint32_t rd32(uint32_t a) { return psx_mod_read_word(a); }
 static uint16_t rd16(uint32_t a) { return psx_mod_read_half(a); }
 
+/* Large course caches change only on insertion or timeline invalidation.
+ * Each publication owns its bytes; revisions avoid recopying unchanged caches. */
+static PSX_THREAD_LOCAL uint64_t s_cache_revision = 1;
+static PSX_THREAD_LOCAL int s_execution_worker;
+static void r4_cache_changed(void) {
+    if (s_execution_worker) s_cache_revision = 0;
+    else if (++s_cache_revision == 0) abort();
+}
 static PSX_THREAD_LOCAL R4PvsSnapshot s_visibility_lists;
 
 /* ---- course renderer entry --------------------------------------------- */
@@ -138,6 +146,7 @@ static const R4MdBounds *r4_md_cached_poly(uint32_t p, unsigned k, R4MdBounds *t
     for (unsigned probe = 0; probe < 8; probe++) {
         unsigned i = (h + probe) & (R4_MD_POLY_CACHE - 1u);
         if (!s_poly_bounds[i].polygon) {
+            r4_cache_changed();
             r4_md_poly_bounds(rd32, p, k, &s_poly_bounds[i].bounds);
             s_poly_bounds[i].polygon = p;
         }
@@ -200,6 +209,7 @@ static PSX_THREAD_LOCAL uint32_t s_visible_runs[R4_MD_POLY_KINDS][R4_MD_BLOCK_PO
 static uint32_t r4_md_build_cull_node(uint32_t table, uint32_t first, uint32_t count, unsigned k)
 {
     if (s_cull_nodes_used + 2u * count >= R4_MD_CULL_NODES) return 0;
+    r4_cache_changed();
     uint32_t index = ++s_cull_nodes_used;
     R4MdCullNode *node = &s_cull_nodes[index];
     node->first = first; node->count = count;
@@ -553,6 +563,7 @@ static void r4_md_pvs_merge_body(void)
      * change during this merge, so compute each visibility decision once. */
     if (++s_visibility_epoch == 0) {
         memset(s_bounds, 0, sizeof s_bounds);
+        r4_cache_changed();
         memset(s_poly_bounds, 0, sizeof s_poly_bounds);
         memset(s_cull_roots, 0, sizeof s_cull_roots);
         s_cull_nodes_used = 0;
@@ -561,6 +572,7 @@ static void r4_md_pvs_merge_body(void)
     if (!s_visibility_lists.valid || s_visibility_lists.nsec != nsec ||
         s_visibility_lists.table != rd32(R4_PVS_TABLE_PTR_ADDR) ||
         s_visibility_lists.blocks != rd32(R4_PVS_BLOCK_BASE_ADDR)) {
+        r4_cache_changed();
         r4_pvs_snapshot_build(&s_visibility_lists, rd32, rd16, nsec);
         if (pgxp_active() && pgxp_preserve_projection()) r4_md_prime_cull_tree();
     }
@@ -882,6 +894,7 @@ static void r4_md_savestate_loaded(void)
 {
     if (!s_enabled) return;
     memset(s_bounds, 0, sizeof s_bounds);
+    r4_cache_changed();
     memset(s_poly_bounds, 0, sizeof s_poly_bounds);
     memset(s_cull_roots, 0, sizeof s_cull_roots);
     s_cull_nodes_used = 0;
@@ -975,6 +988,7 @@ static void r4_md_vblank(void)
         s_previous_race = race;
         s_visibility_lists.valid = 0;
         memset(s_bounds, 0, sizeof s_bounds);
+        r4_cache_changed();
         memset(s_poly_bounds, 0, sizeof s_poly_bounds);
         memset(s_cull_roots, 0, sizeof s_cull_roots);
         s_cull_nodes_used = 0;
@@ -1155,6 +1169,7 @@ static void r4_max_detail_activate(void)
     s_visibility_lists.valid = 0;
     s_previous_race = -1;
     memset(s_bounds, 0, sizeof s_bounds);
+    r4_cache_changed();
     memset(s_poly_bounds, 0, sizeof s_poly_bounds);
     memset(s_cull_roots, 0, sizeof s_cull_roots);
     s_cull_nodes_used = 0;
@@ -1190,6 +1205,7 @@ static void r4_max_detail_activate(void)
     env = getenv("R4_MD_FAR_XFORM");
     s_far_xform_off = env && env[0] == '0';
     memset(s_bounds, 0, sizeof s_bounds);
+    r4_cache_changed();
     memset(s_poly_bounds, 0, sizeof s_poly_bounds);
     memset(s_cull_roots, 0, sizeof s_cull_roots);
     s_cull_nodes_used = 0;
@@ -1257,6 +1273,10 @@ PSX_MOD_CONSTRUCTOR(r4_register_max_detail)
  * or guest keys; no mutable host pointers cross the execution boundary. */
 static void r4_execution_capture(void *destination) {
     unsigned char *out = (unsigned char *)destination;
+    uint64_t previous;
+    memcpy(&previous, out, sizeof previous);
+    int changed = previous != s_cache_revision;
+    memcpy(out, &s_cache_revision, sizeof s_cache_revision); out += sizeof s_cache_revision;
     memcpy(out, &s_enabled, sizeof s_enabled); out += sizeof s_enabled;
     memcpy(out, &s_trace, sizeof s_trace); out += sizeof s_trace;
     memcpy(out, &s_sample_before_pace, sizeof s_sample_before_pace); out += sizeof s_sample_before_pace;
@@ -1275,11 +1295,11 @@ static void r4_execution_capture(void *destination) {
     memcpy(out, &s_env_wrote, sizeof s_env_wrote); out += sizeof s_env_wrote;
     memcpy(out, &s_pop, sizeof s_pop); out += sizeof s_pop;
     memcpy(out, &s_stat, sizeof s_stat); out += sizeof s_stat;
-    memcpy(out, &s_visibility_lists, sizeof s_visibility_lists); out += sizeof s_visibility_lists;
-    memcpy(out, &s_poly_bounds, sizeof s_poly_bounds); out += sizeof s_poly_bounds;
-    memcpy(out, &s_cull_nodes, sizeof s_cull_nodes); out += sizeof s_cull_nodes;
+    if (changed) memcpy(out, &s_visibility_lists, sizeof s_visibility_lists); out += sizeof s_visibility_lists;
+    if (changed) memcpy(out, &s_poly_bounds, sizeof s_poly_bounds); out += sizeof s_poly_bounds;
+    if (changed) memcpy(out, &s_cull_nodes, sizeof s_cull_nodes); out += sizeof s_cull_nodes;
     memcpy(out, &s_cull_nodes_used, sizeof s_cull_nodes_used); out += sizeof s_cull_nodes_used;
-    memcpy(out, &s_cull_roots, sizeof s_cull_roots); out += sizeof s_cull_roots;
+    if (changed) memcpy(out, &s_cull_roots, sizeof s_cull_roots); out += sizeof s_cull_roots;
     memcpy(out, &s_visible_runs, sizeof s_visible_runs); out += sizeof s_visible_runs;
     memcpy(out, &s_bounds, sizeof s_bounds); out += sizeof s_bounds;
     memcpy(out, &s_visibility_epoch, sizeof s_visibility_epoch); out += sizeof s_visibility_epoch;
@@ -1300,6 +1320,10 @@ static void r4_execution_capture(void *destination) {
 }
 static void r4_execution_bind(const void *image) {
     const unsigned char *in = (const unsigned char *)image;
+    uint64_t revision;
+    memcpy(&revision, in, sizeof revision); in += sizeof revision;
+    int changed = !s_execution_worker || revision != s_cache_revision;
+    s_execution_worker = 1;
     memcpy(&s_enabled, in, sizeof s_enabled); in += sizeof s_enabled;
     memcpy(&s_trace, in, sizeof s_trace); in += sizeof s_trace;
     memcpy(&s_sample_before_pace, in, sizeof s_sample_before_pace); in += sizeof s_sample_before_pace;
@@ -1318,11 +1342,11 @@ static void r4_execution_bind(const void *image) {
     memcpy(&s_env_wrote, in, sizeof s_env_wrote); in += sizeof s_env_wrote;
     memcpy(&s_pop, in, sizeof s_pop); in += sizeof s_pop;
     memcpy(&s_stat, in, sizeof s_stat); in += sizeof s_stat;
-    memcpy(&s_visibility_lists, in, sizeof s_visibility_lists); in += sizeof s_visibility_lists;
-    memcpy(&s_poly_bounds, in, sizeof s_poly_bounds); in += sizeof s_poly_bounds;
-    memcpy(&s_cull_nodes, in, sizeof s_cull_nodes); in += sizeof s_cull_nodes;
+    if (changed) memcpy(&s_visibility_lists, in, sizeof s_visibility_lists); in += sizeof s_visibility_lists;
+    if (changed) memcpy(&s_poly_bounds, in, sizeof s_poly_bounds); in += sizeof s_poly_bounds;
+    if (changed) memcpy(&s_cull_nodes, in, sizeof s_cull_nodes); in += sizeof s_cull_nodes;
     memcpy(&s_cull_nodes_used, in, sizeof s_cull_nodes_used); in += sizeof s_cull_nodes_used;
-    memcpy(&s_cull_roots, in, sizeof s_cull_roots); in += sizeof s_cull_roots;
+    if (changed) memcpy(&s_cull_roots, in, sizeof s_cull_roots); in += sizeof s_cull_roots;
     memcpy(&s_visible_runs, in, sizeof s_visible_runs); in += sizeof s_visible_runs;
     memcpy(&s_bounds, in, sizeof s_bounds); in += sizeof s_bounds;
     memcpy(&s_visibility_epoch, in, sizeof s_visibility_epoch); in += sizeof s_visibility_epoch;
@@ -1340,11 +1364,12 @@ static void r4_execution_bind(const void *image) {
     memcpy(&s_rand_guard_off, in, sizeof s_rand_guard_off); in += sizeof s_rand_guard_off;
     memcpy(&s_big_heap, in, sizeof s_big_heap); in += sizeof s_big_heap;
     memcpy(&s_big_heap_allowed, in, sizeof s_big_heap_allowed); in += sizeof s_big_heap_allowed;
+    s_cache_revision = revision;
 }
 static void r4_register_execution_state(void) {
     const PSXModExecutionState state = {
         sizeof(PSXModExecutionState), PLUGIN_ID,
-        sizeof s_enabled + sizeof s_trace + sizeof s_sample_before_pace + sizeof s_opt + sizeof s_clamp_available + sizeof s_car_restore_logged + sizeof s_sections_override + sizeof s_ahead_override + sizeof s_behind_override + sizeof s_far_xform_off + sizeof s_pvs + sizeof s_gov + sizeof s_frame + sizeof s_xf + sizeof s_mirror + sizeof s_env_wrote + sizeof s_pop + sizeof s_stat + sizeof s_visibility_lists + sizeof s_poly_bounds + sizeof s_cull_nodes + sizeof s_cull_nodes_used + sizeof s_cull_roots + sizeof s_visible_runs + sizeof s_bounds + sizeof s_visibility_epoch + sizeof s_previous_race + sizeof s_unculled_count + sizeof s_course_cull_pending + sizeof s_cone + sizeof s_frame_has_course + sizeof s_pace_anchor + sizeof s_pace_active + sizeof s_car + sizeof s_far_cars_override + sizeof s_rand + sizeof s_car_past_stock + sizeof s_rand_guard_off + sizeof s_big_heap + sizeof s_big_heap_allowed,
+        sizeof s_cache_revision + sizeof s_enabled + sizeof s_trace + sizeof s_sample_before_pace + sizeof s_opt + sizeof s_clamp_available + sizeof s_car_restore_logged + sizeof s_sections_override + sizeof s_ahead_override + sizeof s_behind_override + sizeof s_far_xform_off + sizeof s_pvs + sizeof s_gov + sizeof s_frame + sizeof s_xf + sizeof s_mirror + sizeof s_env_wrote + sizeof s_pop + sizeof s_stat + sizeof s_visibility_lists + sizeof s_poly_bounds + sizeof s_cull_nodes + sizeof s_cull_nodes_used + sizeof s_cull_roots + sizeof s_visible_runs + sizeof s_bounds + sizeof s_visibility_epoch + sizeof s_previous_race + sizeof s_unculled_count + sizeof s_course_cull_pending + sizeof s_cone + sizeof s_frame_has_course + sizeof s_pace_anchor + sizeof s_pace_active + sizeof s_car + sizeof s_far_cars_override + sizeof s_rand + sizeof s_car_past_stock + sizeof s_rand_guard_off + sizeof s_big_heap + sizeof s_big_heap_allowed,
         r4_execution_capture, r4_execution_bind
     };
     if (!psx_mod_register_execution_state(&state)) abort();

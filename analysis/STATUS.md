@@ -236,3 +236,16 @@ committed and rebuilding; repeat identity before quiet/loaded/cadence. Evidence:
 local `brief5-identity-off-v2`, `brief5-identity-on`, `brief5-native-compile-fixed.txt`.
 Fixture migration changes only host header IDs; the guest payload hash is
 unchanged and linked to the original counter save by the Stage 2 proof. No push.
+
+BRIEF-5 follow-up: corrected present handoff passes production identity: 4,511
+matching rows, 1,423 private draws, clean exit, zero interpreted/dirty execution
+or source/worker native misses. The first quiet gate fails (60.000 Hz,
+6 completion gaps >25 ms, 79.632 ms maximum, p99 busy 68.9%): local
+`brief5-worker-production/quiet-summary.json`. Loaded and cadence remain pending.
+Framework `fb28d7c0` retains temporal history storage across resolution reductions,
+permits unfinished jobs through their duplicate-VBlank deadline, and supplies
+persistent zeroed plugin publication storage. R4 versions its large private
+course-cache copies. Sampling and receipts: local `brief5-worker-production`;
+updated qualification: `brief5-worker-retained`. Windows/Mac plugin snapshot
+checks and Release runtime builds pass. Continuing qualification, no blocker,
+acceptance or push.
