@@ -286,7 +286,7 @@ never renders below 1080 lines.
 | 4K | 9× | 2880×2160 | |
 | 5K | 12× | 3840×2880 | |
 | 8K | 18× | 5760×4320 | Past a 16384 GPU texture limit (Apple GPUs) only the displayed frame is kept at 8K |
-| Match display | monitor height ÷ 240, at most 18× | | Your monitor's pixel height, capped at 8K |
+| Match display | monitor height ÷ 240, at most 9× | | Your monitor's pixel height, capped at 4K (pick 5K/8K by hand) |
 
 - The menus are 480-line screens, so they render at twice the target and are
   resolved down; movies are unchanged.

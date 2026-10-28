@@ -4,7 +4,7 @@
 R4 turns its enhancements on by default (README "On by default"):
   - r4.enhancement.widescreen: on, View = Fit to Window;
   - game.toml [video] internal_resolution = Match display, at the display's
-    full resolution (no match_display_max_lines cap; owner, 2026-10-01),
+    resolution, capped at 4K/9x (match_display_max_lines = 2160; owner 2026-10-28),
     supersample 1.5 and no post AA filter, with dynamic resolution on and
     floored at 1080p (owner, 2026-10-22; Ultra since 2026-10-08: Ultra by default, the dynamic
     systems are the safety net; "display" or another preset
@@ -121,8 +121,9 @@ def test_game_toml():
           'game.toml: internal_resolution = "display" (Match display)')
     # Owner, 2026-10-21: cap Match display at 8K/18x and drop SSAA on 4K/8K
     # displays (27x on an 8K panel forced the high-resolution-window path).
-    check(video.get('match_display_max_lines') == 4320,
-          'game.toml: Match display capped at 8K (match_display_max_lines = 4320)')
+    # Owner playtest, 2026-10-28: 18x on an 8K panel ran ~21 FPS; cap at 4K/9x.
+    check(video.get('match_display_max_lines') == 2160,
+          'game.toml: Match display capped at 4K (match_display_max_lines = 2160)')
     check(video.get('supersample_disable_at_lines') == 2160,
           'game.toml: no supersampling from 4K displays up (supersample_disable_at_lines = 2160)')
     check(video.get('dynamic_resolution') is False,

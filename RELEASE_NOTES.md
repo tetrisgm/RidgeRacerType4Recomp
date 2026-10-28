@@ -14,6 +14,8 @@ the extra race frames now come out steadier.
   at 30. The default rate is now **Auto**: 60 FPS, or the original 30 FPS
   at an 8K (18x) internal resolution, where the GPU cannot hold 60; pick
   **60 FPS** to force it.
+- **Match display capped at 4K.** The default internal resolution now stops
+  at 4K (9×) so an 8K panel holds 60 FPS; 5K and 8K stay in the list.
 - **Car Effects on by default** (exhaust flames, drift smoke, impact sparks;
   Mods → Display to turn off), **PGXP CPU-mode propagation on**, and FMV
   upscaled bicubic instead of nearest.
