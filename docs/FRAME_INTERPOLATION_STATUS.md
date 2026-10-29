@@ -1,64 +1,70 @@
-# Phase 4 topic status — not accepted
+# Phase 4 interpolation status: incomplete, not accepted
 
-Worktree: `r4-wt-interp`, branch `feat/frame-arch-4-interp`, based on
-`feat/frame-arch-5-rewind` at `21d2a50`. Framework topic branches from fork
-`origin/r4/main` at `d2185504`.
+Worktree: `C:/Users/Shokunin/dev/r4-wt-interp`. Both repositories remain on
+`feat/frame-arch-4-interp`. Main checkout and its build directory were untouched.
+No merges or R4 PRs were opened.
 
-The framework supplies an owned packet-pair sampler, PGXP projection/candidate
-provenance transport and an opt-in TCP audit. See
-[the framework status and evidence](../psxrecomp/docs/PACKET_INTERPOLATION.md).
+## Implemented continuation
 
-The match gate fails: a moving-race diagnostic found up to 332 unmatched and
-32 ambiguous primitives across 160 sampled packets. Caller/model coordinates
-do not uniquely identify repeated instances. No production FPS cutover,
-Car Effects metadata interpolation, legacy deletion or generic 8K60/120
-acceptance is claimed.
+- Original vertex RAM origins survive exact full-word copies through scratchpad;
+  partial writes invalidate the origin. Matrix RAM origin, transform fingerprint,
+  primitive type, texpage and CLUT accompany the existing PGXP provenance.
+- Equal-count duplicate groups pair k-th to k-th. Unequal groups use deterministic
+  gated minimum-cost assignment, with separate resolved-group counters.
+- Frozen packet-pair TCP inspection exposes model coordinates, origins, transform
+  fingerprints and view coordinates without accessing live guest/GL state.
+- The near-plane/projective draw path now participates in the audit. It was
+  omitted from the first pass. Its signed-depth inputs are covered by a fixture.
+- The runtime gate requires 45 distinct samples and rejects every unclassified
+  unmatched primitive. Candidate appearances are not accepted merely because
+  their keys are absent from the previous packet.
 
-The explicit runtime gate subsequently failed 18 of 45 samples (up to 652
-unmatched and 66 ambiguous), recorded in `analysis/interp-regression-gate.json`.
+## Results
 
-Validation: R4 build and 32/32 CTests; five focused framework CTests;
-hidden complete-frame GL fixture; hidden smoke through frame 9225 with zero
-dispatch/segment misses. PGXP stayed on. All game windows were hidden.
+| Gate | Result |
+| --- | --- |
+| R4 build with JOBS=4 | Passed |
+| R4 CTest | 32/32 passed |
+| Focused framework tests | 5/5 passed |
+| Regeneration | All 50 shards unchanged |
+| Hidden smoke/navigation | Zero dispatch and segment misses |
+| Ordinary-path-only moving census | Failed 35/45; max 448 unmatched, 0 ambiguous |
+| Inclusive projective census | Failed 45/45; max 1592 unmatched, 0 ambiguous, 1 invalid, 0 partial provenance |
 
-Local-only receipts are under `analysis/interp-smoke/`,
-`analysis/interp-candidate-audit.json`, and `analysis/interp-candidate-8k.json`.
-The latter records an 18x race with full PGXP, Rewind enabled and 329 actual
-Car Effects draws. It measures the old presenter, not the new sampler. No
-distinct-image rate or starved-sample count has been established for the new
-path. The temporary rate summary includes diagnostic-query overhead and is
-not an acceptance benchmark.
+The inclusive gate follows turbo boot navigation and includes its initial
+transition pairs. It is not a performance benchmark. Runtime receipts confirm
+18x/4320 lines, full PGXP, enabled Rewind and active Car Effects. Three frozen
+ordinary-path pairs had 30/32/16 missing keys and no equal ordered model-space
+triangle under a different key. That suggests changing visible geometry/topology;
+it does not prove genuine appearance/disappearance or no-pop behavior.
 
-Reproduce candidate checks on a running hidden race with:
+Local-only evidence:
+
+- `analysis/interp-strengthened-final-45.json`
+- `analysis/interp-inclusive-45.json`
+- `analysis/interp-inclusive-pair.json`
+- `analysis/interp-inclusive-configuration.json`
+- `analysis/interp-final-pair-{0,1,2}.json`
+- `analysis/interp-inclusive-race.png` and `interp-inclusive-preview.png`
+- `analysis/interp-final-smoke/`
+
+Reproduce after entering a hidden race with `PSX_PACKET_INTERPOLATION_AUDIT=1`:
 
 ```
-python tools/test_packet_interpolation_runtime.py --port 4804 --seconds 10 --out analysis/interp-audit.json
+python tools/test_packet_interpolation_runtime.py --port 4808 --seconds 30 --samples 45 --capture-pair --out analysis/interp-gate.json
 ```
 
-Start with `PSX_PACKET_INTERPOLATION_AUDIT=1`. The script fails on ambiguous
-or missing provenance. `--stationary` additionally fails on any unmatched
-geometry, for a scene known to have unchanged geometry. This cannot certify
-moving-scene visibility changes or output pixels.
+## Outstanding work
 
-The shared checkout and its build directory were not modified or used.
-Submodules and regeneration/build outputs belong to this worktree. The
-launcher remote lacked its pinned commit; the exact commit was fetched from
-the existing local repository into this worktree's submodule.
+The positive-depth sampler cannot yet handle all signed near-plane geometry.
+Stable model invocation/primitive ordinals and genuine visibility classification
+are still unproven. A zero-unmatched claim would currently conceal these gaps.
 
+Production presenter integration, no-pop transitions, packet-owned Car Effects
+interpolation, R4 FPS cutover, and deletion of guest re-execution/checkpoints/
+transactions/private workers remain undone. No generic 8K60/120 distinct-image,
+guest-VBlank or starved-sample measurements exist. Legacy interpolation remains.
 
-## Supervisor continuation
-
-Framework `398e6bc2` strengthens PGXP source provenance and resolves repeated
-primitive groups by occurrence (equal counts) or gated minimum-cost assignment
-(unequal counts). It adds frozen-pair TCP inspection. Unit tests cover original
-RAM provenance through scratchpad and distinct DMA buffers, and assignment
-cases where greedy nearest-neighbour selection would be wrong.
-
-The runtime gate now requires 45 distinct packet pairs and fails on all
-unclassified unmatched geometry; candidate appearances are not silently accepted.
-An initial normal-speed moving sample had no unresolved duplicate groups but
-up to 229 unmatched primitives. This is not the final 45-pair gate.
-
-Regeneration completed with zero generated shard changes. Focused sampler,
-stream and PGXP tests pass; R4 32/32 passes. Presenter cutover and legacy
-removal are still pending the identity/visibility gate.
+All game windows were hidden, PGXP stayed enabled, and all processes started
+for these runs were stopped. See the framework's
+[implementation notes](../psxrecomp/docs/PACKET_INTERPOLATION.md).

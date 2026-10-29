@@ -43,6 +43,31 @@ def audit(port, seconds, stationary=False, sample_limit=45):
             "max_ambiguous": max((r["ambiguous"] for r in rows), default=0)}
 
 
+def capture_pair(port):
+    """Freeze once, then page owned provenance without holding guest/render state."""
+    cmd({"cmd": "packet_interpolation", "capture": 1}, port=port)
+    deadline = time.monotonic() + 5
+    while True:
+        row = cmd({"cmd": "packet_interpolation", "detail": 1}, port=port)["interpolation"]
+        if not row["pending"]:
+            break
+        if time.monotonic() >= deadline:
+            raise RuntimeError("No new geometry packet arrived for the capture")
+        time.sleep(0.05)
+    pair = []
+    for older in (1, 0):
+        first = cmd({"cmd": "packet_interpolation", "detail": 1, "older": older}, port=port)["interpolation"]
+        records = first["primitives"]
+        for start in range(8, first["count"], 8):
+            page = cmd({"cmd": "packet_interpolation", "detail": 1,
+                        "older": older, "start": start}, port=port)["interpolation"]
+            if page["sequence"] != first["sequence"]:
+                raise RuntimeError("Another client replaced the frozen capture")
+            records.extend(page["primitives"])
+        pair.append({"sequence": first["sequence"], "primitives": records})
+    return pair
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--port", type=int, default=4804)
@@ -50,13 +75,16 @@ def main():
     parser.add_argument("--stationary", action="store_true")
     parser.add_argument("--samples", type=int, default=45)
     parser.add_argument("--out", type=Path, required=True)
+    parser.add_argument("--capture-pair", action="store_true", help="Save one frozen provenance pair after the timed gate")
     args = parser.parse_args()
     if args.seconds <= 0 or args.samples < 2:
         parser.error("--seconds must be positive and --samples at least two")
     result = audit(args.port, args.seconds, args.stationary, args.samples)
+    if args.capture_pair:
+        result["frozen_pair"] = capture_pair(args.port)
     args.out.parent.mkdir(parents=True, exist_ok=True)
     args.out.write_text(json.dumps(result, indent=2), encoding="utf-8")
-    print(json.dumps({k: v for k, v in result.items() if k not in ("samples", "errors")}))
+    print(json.dumps({k: v for k, v in result.items() if k not in ("samples", "errors", "frozen_pair")}))
     print(f"Failures: {len(result['errors'])}")
     return 1 if result["errors"] else 0
 

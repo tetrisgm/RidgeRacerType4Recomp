@@ -3,6 +3,15 @@
 The `psxrecomp` and `recomp-ui` submodule gitlinks are the pins. Bump them
 deliberately and record each bump here with the reason and what was verified.
 
+2026-10-29 phase-4 continuation topic pin: `cf8aadf2` (via `398e6bc2`).
+Adds original RAM provenance, deterministic duplicate assignment, frozen-pair
+TCP inspection and projective-path census coverage. R4 build/32 CTests and
+five focused framework tests pass; regeneration leaves 50 shards unchanged.
+The inclusive 45-sample race gate fails (max 1592 unclassified unmatched,
+zero ambiguous, one invalid depth). No production cutover, legacy deletion,
+merge or generic 8K60/120 performance claim. See
+[phase-4 status](FRAME_INTERPOLATION_STATUS.md).
+
 2026-10-29 phase-4 development topic pin: `cf4f8b69` (fork
 `feat/frame-arch-4-interp`, based on `r4/main` at `d2185504`). Adds a separate
 packet-pair sampler, validated PGXP projection provenance and an opt-in
