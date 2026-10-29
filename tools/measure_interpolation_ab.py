@@ -105,6 +105,7 @@ def main():
                     census.append(ask('packet_interpolation')['interpolation'])
                 end=time.perf_counter_ns()
                 after={k:ask(k) for k in ['frame','audio_stats','packet_interpolation','mod_counters','main_cadence','dispatch_stats']}
+                (out/(name+'-worst20.json')).write_text(json.dumps(after['main_cadence'].get('worst',[]),indent=2))
                 profile=subprocess.run([sys.executable,'psxrecomp/tools/host_profile.py','--port',str(args.port),
                     '--exe','build/r4-runtime.exe','--since',str(before['host_profile']['seq']),
                     '--callers','--top','60','--nm',r'C:\msys64\mingw64\bin\nm.exe'],cwd=ROOT,capture_output=True,text=True,check=True)

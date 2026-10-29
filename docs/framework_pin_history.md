@@ -3,6 +3,14 @@
 The `psxrecomp` and `recomp-ui` submodule gitlinks are the pins. Bump them
 deliberately and record each bump here with the reason and what was verified.
 
+2026-10-29 phase-4 wait-attribution pin: `8d412798`. Publication wakes the
+render owner without acquiring its mutex; immutable transform history uses
+fixed-step deferred retirement. Opt-in VBlank telemetry includes worst-20
+sleep/overshoot, publication, native enqueue/completion and history timings.
+JOBS=4 build and regeneration pass (generated output unchanged), 22 permitted
+R4 tests and seven focused framework checks pass. Final locked A/B results are
+recorded in [the phase-4 status](FRAME_INTERPOLATION_STATUS.md).
+
 2026-10-29 phase-4 validation pin: `bf2fb59e` (documentation-only above
 `2e39cbe6`). Records failed visual and 8K-rate acceptance after stock comparison;
 no production-readiness claim. Final regeneration changes no generated output.
