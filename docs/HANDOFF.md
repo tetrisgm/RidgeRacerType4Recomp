@@ -1,3 +1,37 @@
+## Phase 3 active continuation: event pacing and routed tiles (2026-10-29)
+
+Phase3 only; no promotion. Framework cadence commit6f0dabcc moves the existing
+wall-clock gate before guest FIELD/LCF, mod hooks and IRQ0. Event-order unit
+proves no guest cycles advance in the hook. Release30s:59.990Hz,17.768ms max,
+59.990 whole-image distinct/s. Release120s:59.990Hz,19.594ms max,zero intervals
+above20ms,zero starved samples,59.290 whole-image distinct/s (7200 receipts,
+7115 changed,zero missing),9.746ms inclusive GPU packet. Receipts are
+phase3-release-event-pace18 and phase3-release-event-pace-120s18. NOT10-minute
+acceptance: slot10 is GrandPrix with a time limit; use normal-input race setup
+for a representative ten-minute run. No guest-memory writes.
+
+Pushed framework WIP499a12ab surface work now includes disjoint canonical coverage, on-demand
+pool allocation/promotion/collection, uploads/fills, persistent batch upload
+once across target regions, depth-domain clears without new allocations,
+and block-ordered enhanced copy across overlap/wrap. New routed triangle test
+caught tile-sized clip volumes; projection now retains the full draw area and
+uses ownership scissors. Routed flat/textured triangles and depth clears pass
+1/4/9/18x:phase3-routed-depth/rth-nj1v3w_f. Wrapped overlap copy CPU-shadow and
+pixel comparison pass1/4/9/18x:phase3-routed-copy-wrap/rth-g75q0rrq. Pool mutation
+fixture passes phase3-pool-mutations/rth-9dram_io. Latest stencil-rebuild/fill
+shadow wiring still needs a rerun. Coverage and VBlank provenance units pass.
+
+Production pool remains UNINITIALIZED: full-VRAM HR allocation still exists.
+Direct-wide selection and presentation from two independent426x240 vertical
+bands now pass1/4/9/18x:phase3-wide-present/rth-f6s8yxu8. Latest uncommitted
+change adapts diagnostic wide readback to cropped source Y/height and removes
+its redundant glFinish. Remaining cutover: pool initialization/destruction,
+4:3 scanout, legacy feedback/pass consumers, dynamic resolution/snapshot
+lifecycle and obsolete wide arrays, then
+remove full-HR allocation and obsolete mirror paths. New copy path currently
+stages128x1 blocks; optimize independent copies after correctness. No current
+owned game processes. Do not work on3b/4/5; don't bump root gitlink or promote.
+
 ## Phase 3 active continuation: whole-image receipts (2026-10-29)
 
 Still phase3 ONLY; no promotion. Fork main d2185504 re-fetched and already

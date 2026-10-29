@@ -665,3 +665,22 @@ spans is not claimed as a surface optimization. The full-VRAM allocation still
 exists. The fence is polled with zero timeout; query results are fetched only
 once their completion is proven. Whole-image timed fixture passes in
 phase3-whole-image-timed-receipt/rth-re742o0t.
+
+
+### Phase 3 event pacing and region routing (2026-10-29; incomplete)
+
+All runs hidden, dummy audio,18x,fullPGXP,rewind,CarEffects,60FPS setting.
+
+| Receipt | VBlanks/s | Max interval ms | Starved samples | Whole-image distinct/s | GPU packet ms |
+|---|---:|---:|---:|---:|---:|
+| phase3-whole-image-fence18 (before event pacing) |60.001|33.822|0|58.166|9.730|
+| phase3-release-event-pace18 (30s) |59.990|17.768|not recorded|59.990|not recorded|
+| phase3-release-event-pace-120s18 |59.990|19.594|0|59.290|9.746|
+
+Pacing now precedes the actual guest VBlank event; an ordering test covers
+FIELD/LCF, hooks and IRQ0 without advancing guest cycles. No10-minute gate yet.
+These GPU spans are inclusive packet timings, not isolated active GPU work.
+Production still uses full-HR allocation. Pool components and actual routed
+flat/textured triangles, depth clears and two-axis wrapped overlapping copies
+pass hiddenGL at1/4/9/18x (routed-depth/rth-nj1v3w_f,
+routed-copy-wrap/rth-g75q0rrq). No phase3 promotion.
