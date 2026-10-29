@@ -1,3 +1,41 @@
+## Phase 3 active scope and latest evidence (2026-10-29)
+
+Supervisor scope: ONLY phase 3 and guest-stall/distinct-image gates. Phases 3b
+and 5 are already merged; phase 4 belongs to another agent. Do not redo them.
+Framework topic feat/frame-arch-3-surfaces merged fork r4/main d2185504 in
+87c415a5. Root pin remains accepted phase 2 until phase 3 passes.
+
+Current work removes production PGXP depth replay (unbiased depth in the
+colour pass), preserves the opt-in epsilon audit, and fixes masked fragments
+writing invisible depth. Hidden analytical/raster-origin/mask and cropped
+1x/4x/9x fixtures pass. Race visual/decal acceptance remains open.
+Present trace now uses eight fenced PBOs and a 32x18 image receipt without
+per-swap CPU readback waits. Changed hashes prove distinct images, while
+unchanged hashes cannot prove equality. The 30 s receipt counted 1800 changed
+samples with zero missing receipts (60/s lower bound).
+
+Native draw transport was regressed to per-command mutex/SetEvent by the
+imported checkpoint code. Restored SPSC parking with retained events, retaining
+checkpoint sequence ordering and borrowed upload lifetimes. Native pixel,
+cache and two-checkpoint tests pass 20 repetitions. Worst-interval submission
+cost fell from .533 to .245 ms, but overall worst return increased from21.198
+to22.330ms: NOT a demonstrated pacing fix. Zero misses/starved in both runs.
+
+Release build build-phase3-release completed (PSX_DEBUG_TOOLS=OFF). Hidden
+30-second slot10 benchmark:59.997Hz,entry max33.358ms,callback return18.519ms,
+zero return intervals over20ms and zero audio underruns. Worst entry includes
+14.931ms previous pacing plus17.862ms guest work. GetThreadTimes is quantized;
+its per-interval CPU field must not be treated as accurate off-CPU attribution.
+Release harness analysis/perf-20261028/release.py uses hidden owner-PID resize
+and graceful WM_CLOSE, always dummy audio. Raw held Cross does not establish
+analog driving; this is NOT the ten-minute moving-race gate.
+
+Full-VRAM HR allocation, canonical/wide duplication and scaled RTT surface
+cutover are STILL OPEN. No phase acceptance or merge into fork r4/main.
+R4 32/32 and cropped target parity pass after these changes. No live processes.
+Continue production surface migration and representative long-run gate without
+ending at this checkpoint. All runs must use SDL_AUDIODRIVER=dummy.
+
 ## Phase3 latest continuation (2026-10-29)
 
 Framework phase3 topic98f3a4ac and subsequent source-origin fixture pushed, not merged: native-input-only batch

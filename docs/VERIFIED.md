@@ -444,3 +444,49 @@ overlays. Dev build and R4 32/32 pass. Production allocation is still unchanged.
 `phase3-cross-target-both-origins/rth-o1wq5l4v` extends this to 144 mask/copy
 comparisons, covering both cropped destinations and translated cropped sources;
 all pass. Phase3 topic98f3a4ac plus its fixture follow-up is pushed, not merged.
+
+
+## Phase 3 continued integration, 2026-10-29 (not accepted)
+
+Imported completed PGXP audit/rewind from fork r4/main d2185504 into the
+phase-3 topic (87c415a5). No phase-4 edits. Production PGXP now writes colour
+and unbiased depth together; only explicitly enabled epsilon audit probes
+retain depth-only draws. Mask-rejected fragments no longer write depth.
+This removes the old asymmetric colour Z bias; race decal/seam visual
+acceptance remains open. Cropped-target parity:18 cases,1x/4x/9x, zero changed
+pixels (`phase3-onepass-cropped/rth-3kxocrtd`). Mask/analytic fixture:
+`phase3-onepass-mask/rth-a4pjkubf`; packet/history126checks:
+`phase3-merged-onepass-packet-fixed/rth-i0x5xiy8`. R4 CTest32/32 passes.
+
+| Receipt (30 s, forced18x, full PGXP, dummy audio) | VBlanks/s | Entry max ms | Return max ms | Starved samples | Distinct images/s | GPU packet ms |
+|---|---:|---:|---:|---:|---:|---:|
+| Earlier input batching |60.044|37.413|not measured|0|not measured|15.693|
+| phase3-merged-worst18 |60.001|25.646|not measured|0|not measured|15.161|
+| phase3-onepass-race18 |59.991|35.501|21.140|0|not measured|15.055|
+| phase3-distinct-async18 |59.996|26.111|20.714|0|60.0 lower bound|15.040|
+| phase3-native-mutex18 |60.003|29.607|21.198|0|receipt retained|see JSON|
+| phase3-native-spsc18 |60.007|32.388|22.330|0|receipt retained|see JSON|
+| phase3-release-baseline18 |59.997|33.358|18.519|0|receipt retained|17-18 in periodic windows|
+
+The distinct receipt uses zero-timeout fenced PBO reads of32x18 samples from
+the actual completed output.1800 changed samples in30.000512s, no missing
+receipts. Changed samples prove distinct images; equal samples do not prove
+full-resolution equality. Focused hidden GL40-receipt/20-change test passes:
+`phase3-async-distinct-pixels/rth-wasomq03`. Removed periodic trace flushes and
+synchronous per-swap readback. GPU packet timestamps include submission gaps;
+they are elapsed GPU timeline duration, not utilization.
+
+Worst entry decomposition: mutex29.607ms =18.370guest+.245frontend+.360packet+
+10.632pacing; native submission .533ms, sync .120ms inside that interval.
+SPSC32.388ms =21.048guest+.228frontend+.376packet+10.736pacing; native submission
+.245ms, sync .090ms. The change preserves the merged rewind mailbox and its
+ordered snapshots;20 repeated native pixel/cache/checkpoint tests pass.
+It reduces submission cost but has NOT demonstrated an overall pacing gain.
+
+Release uses a separate local build with PSX_DEBUG_TOOLS=OFF. Its worst entry
+included14.931ms pacing and17.862ms guest work. Callback-return max18.519ms
+is a separate metric, not a replacement claim for the requested VBlank gate.
+Per-interval GetThreadTimes data is quantized and unsuitable for precise
+scheduling attribution. No ten-minute acceptance: the saved scene/held-input
+runs do not establish continued on-track driving. Full-VRAM allocation and
+canonical/wide duplication remain. No phase-3 promotion or default changes.

@@ -330,3 +330,15 @@ textures, fills, uploads and copies. Production routing still uses full VRAM.
 CPU-only native input/HD-key replacement is not a GPU batch boundary; only an
 actual pending upload must consume those CPU bytes before replacement. Removing
 the false boundary reduces batches without changing texture mutation ordering.
+
+### Phase-3 single-pass depth implementation (2026-10-29, unaccepted)
+
+The colour pass now tests and writes the same unbiased geometric depth.
+The former asymmetric colour-only Z bias and unconditional depth replay
+are removed. This also prevents mask-rejected fragments from writing invisible
+depth. The opt-in PGXP epsilon audit still submits its diagnostic probes;
+normal rendering does not. Analytical projection, masked-depth and cropped
+target parity fixtures pass, but race decal/seam visual acceptance remains
+required. Full-VRAM allocation and canonical-plus-wide duplication are still
+being replaced; this is not phase-3 completion.
+
