@@ -154,3 +154,27 @@ fix it (never by turning PGXP or a sub-feature off as the answer):
 Target after phase 4: native 8K (18x), 60 FPS, Rewind, Car Effects, full
 PGXP, on a Release build, steady 60.0 VBlanks/s, zero starved samples,
 max VBlank interval under 20 ms, and 60 distinct images/s.
+
+## Implementation notes (phase 1 in progress)
+
+The native queue must receive data before the presentation facade. In the
+current parser, `gp0_exec_shaded_tri`/`gp0_exec_shaded_quad` truncate RGB888 to
+RGB555 and apply widescreen/HUD transforms before calling `gr_draw_*`.
+Duplicating those facade calls on a CPU thread would preserve transformed,
+already-quantized data rather than the exact native command. The capture point
+therefore needs to precede those operations. The existing software raster's
+missing dither input and colour interpolation limitations are also recorded in
+`psxrecomp/accuracy/axis5_gpu.md`; its current use for HD keys is not proof of
+full hardware pixel accuracy.
+
+Partial GP0(A0) payloads are independently observable before the full upload
+rectangle completes. The native queue now supports payload fragments with a
+pixel offset and mask state; snapshots can retain the exact received prefix,
+including wrapping and an odd final halfword. Tests cover taking and restoring
+a snapshot between fragments. Runtime routing is not switched yet.
+
+The phase-1 topic branch starts at fork `r4/main` (`ac65fcf5`). The earlier
+`fix/queued-vram-snapshot` commits remain preserved separately: their GL-owner
+completion mechanism is not being made the new authority. Phase 5 should use
+native CPU completion instead. No topic has passed its phase acceptance gate
+or been merged as part of this implementation yet.

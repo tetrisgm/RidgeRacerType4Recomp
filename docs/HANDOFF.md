@@ -1,5 +1,33 @@
 # Handoff
 
+## Current work: frame architecture, 2026-10-28 (phase 1 incomplete)
+
+Follow `docs/FRAME_ARCHITECTURE.md`, including owner amendment `b832af3`:
+phase 3b audits PGXP; phase 4 is generic packet interpolation, not private
+guest redraw workers. No phase has passed acceptance or been merged yet.
+
+Framework checkout/topic `feat/frame-arch-1-native-authority` is at
+`5ca01d0e`, pushed to `fork`, based on fork `r4/main` `ac65fcf5`. WIP
+`b56f4914` adds independent SW raster contexts and an ordered CPU-only native
+queue. Partial A0 fragments preserve masked destinations, wrapping, received
+prefixes and snapshot/resume between fragments. Tests and build/smoke results
+are in VERIFIED. Runtime does not yet call the native queue.
+
+Next integration boundary: capture native command inputs before GPU parser
+widescreen/HUD transforms and RGB555 truncation. A facade-level duplication
+would inherit those presentation changes. The existing software raster lacks
+dither state and uses reduced-precision Gouraud interpolation; the historical
+accuracy ledger already identifies this. A pinned local Beetle reference is
+at `analysis/perf-20261028/beetle-reference`, commit
+`53246dc2d00f3c00cc56baa1061902da7a6651e4`; no reference code was copied into
+the framework. Hardware pixel parity remains unverified.
+
+The earlier `fix/queued-vram-snapshot` commits `a1af76d0` and `1efd81f9`
+remain preserved, unmerged. Their render-owner completion should be replaced
+by native completion in the new design. R4's gitlink remains `ac65fcf5`;
+do not mistake the modified local submodule pointer for a promoted pin.
+No visible windows, display-mode changes, packaging, installation or PRs.
+
 ## Current work (2026-10-28, owner PC real-time performance)
 
 Final gates at framework `ac65fcf5`: regen unchanged, build, 32/32 ctest,

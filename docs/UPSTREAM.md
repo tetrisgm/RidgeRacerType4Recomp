@@ -4,6 +4,12 @@ R4 pins `tetrisgm/psxrecomp` `r4/main` (CLAUDE.md, fork model). Every change
 that fork carries over upstream master is listed here with its upstream PR.
 When this table is empty, re-pin to upstream master and archive the fork.
 
+Unmerged architecture work: `feat/frame-arch-1-native-authority` is pushed to
+`fork` at `5ca01d0e` (WIP base `b56f4914`). It provides independent software
+raster contexts and a CPU native queue with partial-upload fixtures, but is
+not the runtime authority yet. It is not part of `r4/main` or the R4 pin and
+has no PR. Acceptance status is in VERIFIED and FRAME_ARCHITECTURE.
+
 The latest full upstream-master sync is `d108e9a0` (2026-10-24). The current
 fork pin `e4efba40` (on `0bcc5a49`, below) additionally backports merged #761, #769–#772, #727's
 final pixel fixture, and #773's restore-scope repair. Full master sync was

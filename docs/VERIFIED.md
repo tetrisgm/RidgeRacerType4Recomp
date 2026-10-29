@@ -5,6 +5,36 @@ code has not moved since its row is not re-tested (CLAUDE.md, Verification
 scale). Update the row when its code changes or a new check is run.
 Evidence dirs are local (not tracked).
 
+## Frame architecture implementation, 2026-10-28 — phase 1 incomplete
+
+Framework topic `feat/frame-arch-1-native-authority`, WIP `b56f4914` plus
+`5ca01d0e`, is pushed to `fork` but not merged or pinned. Independent raster
+contexts and the native CPU command queue are implemented; runtime GP0 routing
+is not switched. The older deferred-Rewind branch is preserved separately.
+
+| Phase | Acceptance result | Verification so far |
+|---|---|---|
+| 1: native authority | **Open**: no runtime zero-GL-wait claim | Native worker fixture passes ordered writes, copied uploads, mask/CLUT/wrapping, concurrent context isolation, dirty masks, snapshot/restore and partial A0 upload resume. Existing hidden GL fixture passes all six modes with matching threaded/direct hashes. Dev build passes; R4 ctest 32/32; framework `native_raster_test`, `boot_state_handoff_test`, `gpu_sw_edges_test` pass. Hidden `tools/smoke.py` reaches race with 0 dispatch and 0 segment misses. |
+| 2: mailbox/audio | Not started | No GPU-slowdown acceptance result |
+| 3: surfaces | Not started | No new GPU-frame-time result |
+| 3b: PGXP audit | Not started | Owner amendment incorporated into the implementation plan |
+| 4: generic packet interpolation | Not started | No primitive-match-rate or 60/120-image result |
+| 5: rewind | Not started | No per-frame delta-snapshot or hold-to-rewind result |
+
+Receipts: `analysis/perf-20261028/native-context-gl-fixture/rth-e6vaorfh/`,
+`native-phase1-gates/`, and the native fixture target in
+`psxrecomp/build-prsync/`. The full dev build/32 tests/smoke were run after
+`b56f4914`; the subsequent dirty-tracker adapter/assertion adjustment was
+checked by rebuilding and running the native fixture. No architecture
+before/after performance row is reported: the native worker is not yet wired
+into the game, so timing the existing race path would not establish phase 1.
+
+Integration finding: existing `gr_draw_*` inputs can already contain
+widescreen/HUD transforms and RGB555 truncation. Exact native capture must
+precede those changes. The existing native SW implementation also has colour
+interpolation/dither limitations recorded in `psxrecomp/accuracy/axis5_gpu.md`.
+These remain correctness work, not a passed hardware-accuracy gate.
+
 ## Owner PC performance, 2026-10-28
 
 DESKTOP-BAKIEMJ, Ryzen 9800X3D / RTX 4080 SUPER, 7680x4320 60 Hz.
