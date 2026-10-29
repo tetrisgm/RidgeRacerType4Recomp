@@ -54,6 +54,25 @@ enhanced surfaces when frames are consecutive, and account for missed writes
 when a packet is replaced. Then run the slowed-GPU phase-2 acceptance gate
 and continue phases 3, 3b, 4, 5. No owner-only blocker is identified.
 
+2026-10-29 next continuation: native raster observers now track original GP0
+draws, masked/fragmented uploads and copies, with write bounds independent of
+rewind dirty rows. Main binds the native HD tracker at startup; configuration
+prepares both trackers before commit. Native sampling marks Duck uploads used
+even when presentation is dropped, preventing erroneous adjacent-upload
+coalescing. Dump observations belong to the native tracker. Immutable packet
+tracking shares immutable source pixels and excludes authoring history.
+Direct packet seed reservation avoids an intermediate full VRAM copy.
+The presentation owner now has a bounded, durable async request queue, tested
+with a stalled consumer, replacement, owned arguments and timeline reset.
+It remains a component: GL still uses the old ring. Exact native texture inputs
+at each draw (including write-then-sample in one frame) remain a cutover
+dependency; a frame-start snapshot alone is insufficient.
+Dev build, R4 32/32, focused tests and the registered hidden HD GL fixture pass.
+Hidden smoke reaches race with zero misses; live/paused diagnostics retain zero
+context acquisitions/releases. Owned PID 46044 was stopped. Receipts:
+`analysis/perf-20261028/phase2-native-provenance-runtime/`. No performance gate,
+phase-2 merge or pin change yet.
+
 Framework phase-1 topic through `464bc104` is merged/pushed to fork r4/main
 at `4f893c1a`. Original GP0/native pixel and snapshot fixtures pass. The race
 records zero GL context acquisitions, but render-queue backpressure remains:

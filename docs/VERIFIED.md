@@ -18,6 +18,9 @@ No new race throughput claim is made for these component changes.
 | Native packet seed | Newest packet reproduces exact native pixels after 62 pending packets are replaced; observation leaves rewind dirty rows intact | `native_raster_test` |
 | Presentation-owner worker | 10000 publications complete while consumer callback is blocked; only startup/shutdown context transfers; timed work continues without new guest packets | `frame_mailbox_test` |
 | Producer draw-state mirror | Six hidden GL modes retain matching pixels; extra-pass state is restored before the next real frame | `analysis/perf-20261028/phase2-state-pass-gl/rth-rk999nru/receipt.json` |
+| Native HD provenance ownership | Original GP0 write observation, masked partial upload/copy keys, dropped-frame sample usage and shared immutable pixel snapshots pass; production binding makes native authoring independent of presentation | `gpu_hd_context_test`, `duckstation_texture_pack_test`, `native_raster_test` |
+| Durable owner requests | 64 owned requests survive 9998 frame replacements while consumer stalls; load invalidation completes stale requests; idle queries complete without guest frames | `frame_mailbox_test` |
+| Native provenance integration | Dev build, 32/32 R4 tests and hidden HD GL fixture pass; smoke has zero dispatch/segment misses, live/paused diagnostics zero context acquisitions; owned PID 46044 stopped | `analysis/perf-20261028/phase2-native-provenance-runtime/` |
 | R4 integration | Dev build and 32/32 tests pass; hidden smoke reaches race with zero dispatch/segment misses; live/paused diagnostic queries retain zero context acquisitions | `analysis/perf-20261028/phase2-state-runtime/` |
 
 Remaining phase-2 integration: independently seeded GL packets, durable
