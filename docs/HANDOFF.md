@@ -1,3 +1,23 @@
+## Phase3 latest continuation (2026-10-29)
+
+Framework phase3 topic98f3a4ac and subsequent source-origin fixture pushed, not merged: native-input-only batch
+flushes removed, cropped target projection/upload/fill/copy parity groundwork.
+Subsequent cross-target copy source and translucent-wide-overlay projection
+fixes pass hidden fixture phase3-cross-target-overlay/rth-68qop30w:18 full/crop
+colour/depth/wide comparisons and72 mask-copy combinations at1x/4x/9x.
+Dev build and R4 32/32 passed. Same slot10 forced18x all-on receipt
+phase3-input-batch-slot10-18:60.044Hz,max37.413ms,zero starved,60swaps/s,
+GPU packet15.693ms (8.994present),7.3batches vs69.7,render169.79ms/s.
+Swaps are NOT distinct images. No phase3 promotion or final target claim.
+No live game/build/test. Continue phase3 production surface pool/direct-wide,
+scaled RTT and one-pass depth, then3b/4/5; no owner-only blocker.
+Do not simply enable HIW: it disables transactions/extra draws/live scaling
+and still duplicates native plus scaled column-window draws. Cropped-target
+helpers are tested but production still full VRAM. CPU native-input helper
+updates HD keys/coherence only; it does not upload immutable tiles to raw GPU
+texture. Preserve actual texture mutation flushes. Cross-target copy helper
+currently assumes source/destination equal scale. Phase4 remains100% match.
+
 ## Phase3 continuation (2026-10-29)
 
 Current framework branch `feat/frame-arch-3-surfaces`, based on accepted phase2

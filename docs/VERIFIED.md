@@ -408,3 +408,39 @@ elapsed intervals for776 consumed packets, not utilization; they may include
 submission bubbles inside a packet. No telemetry capacity drops. Distinct
 image rate is not established. Final performance and phase3 acceptance remain
 unmet; continue the surface redesign before phases3b/4/5.
+
+
+Phase-3 continuation: CPU-only native input replacement no longer flushes GL
+geometry batches. Pending actual uploads still flush before their source bytes
+change; GPU texture mutations retain their ordering boundaries. The packet
+fixture now exercises this production helper (82 checks). Cropped render-target
+projection, fill, upload and copy groundwork gives byte-identical colour and
+depth to full-surface rectangles at 1x/4x/9x across three VRAM pages (18 cases,
+`phase3-cropped-depth/rth-zdc21mij`). Full-PGXP texture-bank endpoint parity
+passes all four cases (`phase3-input-batch-bank/fg-76l4u8om`). R4 32/32 pass.
+Production full-VRAM allocation is unchanged; this is not phase acceptance.
+
+| Same slot10, 18x all-on | VBlanks/s | Max interval ms | Starved samples | Swaps/s (not distinct) | GPU packet ms | Presentation ms | Batches/packet | Render CPU ms/s |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| phase3-stream-clear-slot10-18 | 60.044 | 41.345 | 0 | 51.20 | 18.948 | 12.509 | 69.7 | 296.87 |
+| phase3-input-batch-slot10-18 | 60.044 | 37.413 | 0 | 60.00 | 15.693 | 8.994 | 7.3 | 169.79 |
+
+Both runs use the same slot10 fixture, active Car Effects, full PGXP and forced
+18x. Zero guest queue/context waits and dispatch misses. GPU values are timeline
+elapsed time, including submission bubbles, not hardware utilization. Distinct
+images remain unverified and maximum VBlank interval still fails the target.
+
+Cropped-to-wide projection transition now also passes all18 cases with exact
+wide colour parity (`phase3-cropped-wide-transition-fixed/rth-0bxahjtf`). The
+wide draw bracket explicitly selects its own projection height and restores
+the cropped height afterwards. The initial receipt without `-fixed` ran the
+older fixture after an edit-script error and is not evidence for this check.
+
+Cross-allocation copies now take an explicit source FBO and native origin.
+`phase3-cross-target-overlay/rth-68qop30w` passes all 18 colour/depth/wide
+comparisons and 72 copy/mask combinations, including translucent full-width
+overlays. Dev build and R4 32/32 pass. Production allocation is still unchanged.
+
+`phase3-cross-target-both-origins/rth-o1wq5l4v` extends this to 144 mask/copy
+comparisons, covering both cropped destinations and translated cropped sources;
+all pass. Phase3 topic98f3a4ac plus its fixture follow-up is pushed, not merged.

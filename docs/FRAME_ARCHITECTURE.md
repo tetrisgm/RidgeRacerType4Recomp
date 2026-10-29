@@ -321,3 +321,12 @@ a fresh boot-to-race smoke created a separate slot 10. New results must identify
 that fixture change rather than imply an exact same-state comparison.
 Phase 3 is not accepted: direct wide surfaces, on-demand render-target tiles
 and one-pass primitive depth remain to implement.
+
+
+Cropped-surface groundwork preserves draw-local PGXP coordinates and translates
+the viewport into the physical target; rebasing vertices before clipping was
+incorrect. Colour and depth parity now cover horizontal/vertical page moves,
+textures, fills, uploads and copies. Production routing still uses full VRAM.
+CPU-only native input/HD-key replacement is not a GPU batch boundary; only an
+actual pending upload must consume those CPU bytes before replacement. Removing
+the false boundary reduces batches without changing texture mutation ordering.
