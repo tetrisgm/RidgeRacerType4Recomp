@@ -205,3 +205,5 @@ transform storage and direct immutable-history leases; R4 FPS still uses generic
 packets. Regeneration unchanged; focused framework and R4 tests pass. Exclusive
 60-second A/B tests fail timing/throughput acceptance; see FRAME_INTERPOLATION_STATUS.md.
 This pin is a topic delivery, not a promotion into r4/main.
+
+2026-10-29: G1 pins fork r4/main 3d7fedc8 (fix/guest-hotpath merged after the Part 2 gate): fresh grid 60.04 VBlanks/s, 0 starved, 0 packet allocation events; CTest 23/23, native/GL fixtures and verified 40-step hidden smoke pass. tools/regen.sh completed with all 50 generated shards unchanged. Final CPU budget remains G4 work.
