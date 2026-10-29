@@ -85,8 +85,11 @@ extra frames, canonical plus wide double drawing, separate depth passes).
      interpolated the same way, so they never force a serial path.
    - Generic across titles. The R4 interp mod, its field list, the render-pass
      checkpoint/transaction machinery and the private draw workers are
-     deleted once the generic path matches or beats them (measure the
-     match rate: at least 95% of 3D primitives in a race should be matched).
+     deleted once the generic path matches or beats them. Match bar: **100%**
+     of 3D primitives that exist in both packets are matched; a miss there
+     is a test failure. Only primitives that truly appear or disappear
+     between ticks go unmatched, and those must not visibly pop (verified
+     on screen captures and by a per-frame unmatched counter).
 7. **Snapshots are native-only and cheap.** Snapshot = CPU + RAM + devices +
    native VRAM, all CPU memory, taken at a frame boundary with dirty-page
    deltas. This is cheap enough for every frame, which is what Forza-style
@@ -124,7 +127,7 @@ packets.
 | 2 | Mailbox presentation, bounded packet queue, lock-free audio ring, MMCSS | backpressure into guest time | Guest holds 60.0 VBlanks/s and 0 starved samples even with the GPU artificially slowed |
 | 3 | Surfaces: direct wide target, on-demand RT tiles, one-pass PGXP depth, scissored clears, persistent buffers | 1.3 GB HR VRAM, double submission, depth replay | 8K60 GPU frame time well under 16.7 ms with all features on |
 | 3b | PGXP correctness audit (below) | shimmer, flicker, depth fighting | All PGXP stability tests pass; owner-visible shimmer and flicker gone |
-| 4 | Generic frame-packet interpolation (principle 6); delete r4_interp guest re-execution, transactions and workers | checkpoints, backup and restore, serial path, title-specific camera hack | 60 (and 120) distinct images/s at 8K with Car Effects on; at least 95% primitive match rate in races |
+| 4 | Generic frame-packet interpolation (principle 6); delete r4_interp guest re-execution, transactions and workers | checkpoints, backup and restore, serial path, title-specific camera hack | 60 (and 120) distinct images/s at 8K with Car Effects on; 100% match of primitives present in both packets, no visible pops |
 | 5 | Per-frame native delta snapshots, then Forza-style hold-to-rewind (reverse playback, release to resume) | Rewind snapshot cost | Rewind on costs < 0.5 ms per frame; hold rewinds smoothly |
 
 ## PGXP correctness audit (phase 3b)
