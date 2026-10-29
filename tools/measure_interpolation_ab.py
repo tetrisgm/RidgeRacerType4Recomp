@@ -75,7 +75,7 @@ def main():
                     '--disc',str(ROOT/'disc/R4 - Ridge Racer Type 4 (USA).cue'),'--no-launcher',
                     '--hidden-window','--debug-port',str(args.port)],cwd=ROOT,env=env,
                     stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL,creationflags=FLAGS)
-                deadline=time.monotonic()+90
+                deadline=time.monotonic()+240
                 while True:
                     if process.poll() is not None: raise RuntimeError('Runtime exited')
                     try:

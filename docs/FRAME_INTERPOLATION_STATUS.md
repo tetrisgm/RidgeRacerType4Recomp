@@ -1,4 +1,45 @@
-# Exclusive performance follow-up ? acceptance FAILED (2026-10-29)
+# Phase 4 wait-parity follow-up — ready for supervisor integration (2026-10-29)
+
+The generic presenter now passes the **B≈A guest-wait gate at 60 Hz** within the
+large same-build baseline variance. The latest locked, interference-free 60-second
+pair measured 56.163 guest VBlanks/s and 173,740 starved samples with FPS off (A),
+versus 56.359 VBlanks/s and 159,957 starved samples with generic interpolation
+on (B). B produced 49.23 distinct images/s (8x8-hash lower bound), with zero
+unmatched primitives or storage misses across 1,441 audited pairs. Guest CPU
+time was 43.14 s in A and 44.55 s in B, so this is not a claim that interpolation
+has no CPU cost.
+
+The pre-fix locked pair had B 2.080 VBlanks/s slower and 102,393 more starved
+samples than A. Three clean post-fix 60 Hz pairs had B−A cadence differences
+of +0.043, −1.722, and +0.196 VBlanks/s, and starvation differences of
++8,454, +78,962, and −13,783. The middle pair shows the residual variability:
+its A arm itself fell from 59.142 to 56.239 VBlanks/s and rose from 25,516 to
+167,452 starved samples. Median post-fix B−A is +0.043 VBlanks/s and +8,454
+starved samples, against A's 142,000-sample range. This supports parity within
+noise, not a guarantee that every individual run is faster.
+
+Per-VBlank worst-20 telemetry records pacer sleep and overshoot, publication,
+native raster lock/space/completion waits, history release, and guest CPU time.
+In the latest clean B arm, native queue-full waits were 0 ms throughout its
+worst 20 intervals; history release peaked at 0.0016 ms, publication at
+0.6485 ms, native completion at 0.3481 ms, and sleep overshoot at 0.4719 ms.
+The packet wake no longer takes the render worker's mutex. The presentation
+mailbox remains latest-wins, and the guest returns history through a fixed-step
+deferred queue while a worker reclaims blocks. The render consumer cannot retain
+a history lease that makes the guest wait for reclamation.
+
+The locked 120 Hz A arm was clean (56.820 VBlanks/s, 145,049 starved samples),
+but a separate runtime overlapped 53 seconds of the 120 Hz B arm; the harness
+rejected that pair and it is **not** used for a performance claim. Earlier
+clean 120 Hz results reached 94.02 distinct images/s with zero unmatched
+primitives across the full four-arm run. Full 8K throughput remains limited
+by the FPS-off baseline stall owned by phase 3. Raw local receipts are in
+`analysis/interp-waits-*`; the committed compact evidence includes all clean
+and rejected arms plus worst-20 intervals in
+[frame-interpolation-wait-parity-20261029.json](evidence/frame-interpolation-wait-parity-20261029.json).
+The old failed acceptance report follows as historical context.
+
+# Exclusive performance follow-up — acceptance FAILED (earlier pass, 2026-10-29)
 
 Framework code `014e2cb5` (including `045d53e0`), isolated topic/worktree.
 No main checkout, surface implementation, merge or PR was touched.
