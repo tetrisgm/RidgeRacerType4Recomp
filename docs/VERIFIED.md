@@ -618,3 +618,50 @@ Packet timer now retains the inclusive GPU span and additionally records
 present-slot server-fence wait time, rather than silently calling that render
 work;914 packet/history/telemetry checks pass
 (`phase3-slot-wait-timer/rth-a54ztt2_`). Race measurement of this new field pending.
+
+Present-slot fence probe (`phase3-slot-wait18`) rules out that server wait as
+the packet span's cause: mean0.000589ms, zero missing wait queries, inclusive
+GPU16.641ms and present8.475ms. Guest59.997Hz, entry33.609ms, return30.283ms,
+zero starved/misses,35.566distinct images/s. Do not subtract unexplained time
+or call the existing16.6ms span GPU-active time without further attribution.
+
+On-demand copy preparation now retains native pre-copy source tiles in packet
+inputs. Native tests pass wrapped X/Y, tile boundaries, zero-encoded full-VRAM
+size and overlapping destinations without changing native execution. GPU
+copy staging can seed missing regions directly from native and overlay resident
+enhanced regions; cropped fixture passes through18x in
+`phase3-sparse-copy-seed/rth-cdr48agl`. Production surface pool is still pending.
+
+
+Phase 3 continuation, whole-image receipts (2026-10-29): the 32x18 sampling
+receipt was only a lower bound. The new asynchronous receipt hashes every
+RGBA8 output pixel in 16x16 blocks, then folds the block hashes and dimensions
+on the presenter. A one-pixel change at the far corner and a resize to321x241
+pass40-swap/20-change tests (phase3-whole-image-odd-receipt/rth-fagaudii).
+This remains a finite hash, not a mathematical collision-free identity proof.
+At8K it stages518400 bytes per image in an eight-slot ring; GPU hash draw
+averages0.411ms in phase3-whole-image18. All1753 receipts in the30s window
+completed,1490 changed:49.667distinct/s, compared with58.49swaps/s. Cadence
+60.023Hz,entry35.250ms,return24.623ms,zero starved and dispatch/segment misses.
+Packet timestamp queries stopped retiring in this run and the repeat, so no
+GPU packet-frame number from either run is accepted. A completion-fence probe
+is being checked; no GL query error reported. Do not claim a phase3 gate.
+
+Native copy-input run before whole-image hashing (phase3-native-copy18):
+59.999Hz,entry34.335ms,return25.515ms,zero starved/misses,36.099sampled changed
+images/s (old lower-bound receipt),GPU packet16.902ms/present8.506ms.
+Separating gathered copy sources from destination application passes cropped
+1/4/9/18x in phase3-copy-apply/rth-zaiyd4ug. Root32/32 passed after copy inputs;
+tools/smoke.py passed zero misses on the whole-image build in
+phase3-whole-image-gates (owned PID42972 exited). Full-HR production allocation
+and the10-minute cadence gate remain unfinished.
+
+Completion-fenced GPU timestamps now retire normally in
+phase3-whole-image-fence18:1804 packet samples,zero dropped queries,packet
+9.730ms/present1.431ms,whole-image hash0.410ms,58.166distinct/s with no missing
+receipts. Guest60.001Hz,entry33.822ms,return23.175ms,zero starved/misses.
+This diagnostic changes presentation work; the9.730ms versus earlier inclusive
+spans is not claimed as a surface optimization. The full-VRAM allocation still
+exists. The fence is polled with zero timeout; query results are fetched only
+once their completion is proven. Whole-image timed fixture passes in
+phase3-whole-image-timed-receipt/rth-re742o0t.

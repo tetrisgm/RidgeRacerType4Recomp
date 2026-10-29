@@ -1,3 +1,24 @@
+## Phase 3 active continuation: whole-image receipts (2026-10-29)
+
+Still phase3 ONLY; no promotion. Fork main d2185504 re-fetched and already
+ancestor of the topic. Framework WIP033c2a09 is pushed. Native copy-source packet retention and
+separate gather/apply fixtures pass through18x. Root32/32 and smoke zero misses
+passed (phase3-whole-image-gates; owned PID42972 exited).
+
+Distinct-image receipts now hash EVERY RGBA8 output pixel in16x16 blocks,
+using an asynchronous eight-PBO ring. Single-pixel corner changes and odd321x241
+resize pass40swaps/20changes. At8K staged bytes518400/image, GPU hash~0.410ms.
+A timestamp-query availability stall appeared with presentation hashing;
+post-timestamp completion fences resolve it without a GPU wait. Query results
+are read only after availability or a zero-timeout signalled completion fence.
+Delayed-availability regression passes915checks in phase3-query-fence-regression/rth-t_zwrgfl.
+Latest race phase3-whole-image-fence18:60.001Hz,entry33.822ms,return23.175ms,
+zero starved/misses,58.166 whole-image distinct/s,packet9.730ms,present1.431ms,
+zero dropped queries/missing receipts. Not a surface optimization or gate:
+production STILL allocates full-VRAM HR, pool/selection/direct-wide cutover
+remains open, and no10-minute cadence acceptance. All owned race PIDs exited.
+Do not work on3b/4/5; do not promote or bump root gitlink until phase3 passes.
+
 ## Phase 3 active continuation: native texture and region uploads (2026-10-29)
 
 ONLY phase3, cadence and distinct-image gates. Fork main d2185504 already
