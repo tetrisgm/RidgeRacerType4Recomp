@@ -342,3 +342,11 @@ target parity fixtures pass, but race decal/seam visual acceptance remains
 required. Full-VRAM allocation and canonical-plus-wide duplication are still
 being replaced; this is not phase-3 completion.
 
+
+Direct-wide raster note (phase 3 WIP): keep projection/texture interpolation
+in triangle-local coordinates until the final target translation. The
+composed-reference fixture is byte-exact for textured draws through 18x;
+fixed-function Gouraud interpolation permits one RGB code of rounding when
+the viewport width changes. Mask/alpha and page-position invariance remain
+exact. This does not relax guest-native pixel parity. Production region
+selection and removal of full-VRAM HR allocations remain unfinished.

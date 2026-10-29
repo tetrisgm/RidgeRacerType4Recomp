@@ -490,3 +490,131 @@ Per-interval GetThreadTimes data is quantized and unsuitable for precise
 scheduling attribution. No ten-minute acceptance: the saved scene/held-input
 runs do not establish continued on-track driving. Full-VRAM allocation and
 canonical/wide duplication remain. No phase-3 promotion or default changes.
+
+### Direct output migration evidence (2026-10-29, still WIP)
+
+The cropped/direct-wide fixture now covers 1x, 4x, 9x and 18x, including
+ordinary and explicitly stretched-backdrop geometry, textured primitives,
+lines, uploads, fills, enhanced cross-target copies, mask bits, translucent
+overlays, diagnostic captures and transaction coordinate translation.
+Receipt: `analysis/perf-20261028/phase3-direct-wide-18x/rth-nq_cv7nr`.
+Textured output is byte-exact against the composed reference. Ordinary
+fixed-function Gouraud output differs by at most one RGB code (362 pixels
+at 18x); alpha/mask and output across framebuffer pages are exact. This is
+a declared raster rounding tolerance, not a full byte-parity claim.
+The reference and new path both keep all PGXP features enabled.
+
+Production still allocates full-VRAM HR targets. These passing component
+tests do not constitute the phase-3 surface cutover or performance gate.
+The corresponding dev build and all 32 R4 tests pass.
+Windows WPR refused the attempted scheduler trace with `0xc5585011` (policy
+to profile system performance could not be enabled); no recording started.
+No ten-minute max-interval acceptance is claimed.
+
+### Phase-3 continued diagnostics (2026-10-29; acceptance still open)
+
+| Receipt | VBlanks/s | Entry max ms | Callback-return max ms | Starved samples | Distinct sampled images/s | GPU packet ms |
+|---|---:|---:|---:|---:|---:|---:|
+| phase3-sampler-on18 | 60.023 | 35.536 | 26.918 | 0 | 43.366 | 15.808 |
+| phase3-sampler-off18 | 59.989 | 34.862 | 25.839 | 0 | 42.800 | 15.747 |
+| phase3-allocation-timing18 | 59.991 | 35.670 | 23.913 | 0 | 31.766 | 16.513 |
+
+All use hidden18x/full-PGXP/Rewind/active-Car-Effects/60setting and dummy audio,
+with zero dispatch/segment misses. Distinct numbers count changed32x18samples
+from completed presents within the timed30second window, not swaps; all have
+zero missing receipts. They are lower bounds, not full-resolution image
+comparisons or proof of interpolated car motion. A separate non-owned runtime
+was observed during the sampler pair, left untouched, and later exited; those
+rows cannot establish isolated performance or a sampler-caused stall.
+
+Worst-interval packet allocation .079ms plus attachment cleanup .036ms does
+not explain the20.176ms guest work or14.934ms previous pacer wait. Native
+submission/sync took .217/.276ms. No ten-minute max-under20ms claim.
+
+Region allocation now shares exact requested dimensions, error handling and
+colour/depth/stencil initialization. Enhanced copies gather adjacent source
+tiles before writing destinations, without native downsampling. Hidden
+`phase3-region-allocation-18x/rth-9_kedxl7` passes all1x/4x/9x/18x checks.
+Production region selection and full-VRAM allocation removal remain open.
+
+Further phase-3 WIP at framework aad0c71f: native texture-coherence uploads
+now use bounded persistent/fixed-storage rings on all GL platforms. Removed
+the per-upload PBO orphaning/client-memory choice and its environment switch.
+The lifetime/stride fixture passes4626checks in persistent and portable modes
+(`phase3-native-upload-stream/rth-fo1q54gz`); packet/history replay passes126
+checks (`phase3-region-upload-packet/rth-g3pdsnqg`). Region-copy coverage now
+separates valid guest VRAM from wide reveal margins; hidden1x/4x/9x/18x fixture
+`phase3-wide-copy-coverage/rth-vyyoz6kq` passes.
+
+The exact worst-frame sample in `phase3-upload-worst18` contains24samples:
+4PGXP ALU,3debug write-trace,4outside executable, and the rest cycle/memory/
+GTE/guest work. No recorded loader/file/mod span coincides. This short sample
+is evidence about that interval, not proof that all OS scheduling is harmless.
+The run measured60.019Hz,entry35.113ms,callback-return29.285ms,zero starved,
+33.966distinct sampled images/s,16.581GPUms. No performance improvement claim.
+
+Release `PSX_DEBUG_TOOLS=OFF`, `phase3-release-connected18`:59.996Hz,
+entry33.946ms,callback-return20.160ms(one over20ms),zero reported starved.
+The owned-process read-only monitor confirms race phase2, paused0, nonzero
+throttle and movement. The previous `phase3-release-upload18` did not drive
+(throttle/speed zero) and is not a driving-race result. Explicit held-pad input
+now connects P1 as well as P2; optional `PSX_HOLD_NEGCON=I,II,L` supplies analog
+button pressures without changing the selected controller type. The local
+Release harness checks actual driving and only reads its own started PID.
+No ten-minute gate, full-surface deletion, phase acceptance or main merge.
+
+### Phase 3 native texture routing (2026-10-29, diagnostic)
+
+Full framework build passed after integrating native snapshot API test doubles.
+The non-hardware suite ran301 enabled entries (three platform/external skips,
+two additional disabled entries). Its sole failure was a stale source guard
+requiring an order for two equivalent rewind safety predicates; corrected and
+rerun passed. R4 dev32/32 and hidden `tools/smoke.py` passed, zero dispatch and
+segment misses (`phase3-copy-gates`). Dummy audio throughout.
+
+Cropped copy staging now clips to the destination before allocating scratch;
+source coordinates move with destination clipping. Hidden1/4/9/18x checks pass
+in `phase3-copy-clip18/rth-nwrp_hgz`, including canonical coverage excluding
+wide reveal margins. No production surface cutover is claimed.
+
+Packet playback still packed enhanced framebuffer pixels back into texture
+VRAM unless HD replacement mode was active. It now uses captured native texture
+inputs independent of that mode. The packet fixture no longer injects synthetic
+texture-page framebuffer uploads; it checks actual enhanced output and zero GPU
+pack draws through dropped packets and history replay (900 checks).
+
+The first race measurement revealed excessive refreshes, so it is diagnostic,
+not accepted: `phase3-native-texture18`, 59.998Hz, entry max39.234ms, return
+max34.500ms, zero starved/misses, 29.800 changed image receipts/s, no missing
+receipts, GPU packet20.681ms/present3.956ms. There were117025 native uploads,
+102766251028 staged bytes, and zero GPU pack draws in30s. Native tile versions
+were repeatedly copied and enhanced draw dirt unnecessarily dirtied native
+sampling. Per-packet version reuse plus separate draw/texture dirt now passes
+909 fixture checks (`phase3-native-input-versions/rth-9nq19c8a`); race remeasurement
+is pending. Full HR allocation and ten-minute cadence acceptance remain open.
+
+Native version cache race remeasurement: `phase3-native-versions18` held60.020Hz,
+zero starved samples and misses; entry max35.958ms, return max27.627ms,
+29.999distinct receipts/s. GPU packet16.567ms, present span12.216ms;9531 native
+uploads,4530237824 staged bytes, zero GPU pack draws. Upload count fell91.9%
+and staged bytes95.6% against the first native-route diagnostic. These spans
+include the present path and do not establish GPU-active time alone. No phase
+gate passes. Dense row staging subsequently passes4628 persistent/portable
+checks (`phase3-dense-native-stream-wrap/rth-uzx6dh8c`); the test was extended
+to16384 narrow uploads because eliminating row padding made the old256-update
+stress no longer wrap the upload ring.
+
+Latest native seeding diagnostic `phase3-native-seed18`:60.019Hz, entry
+max37.227ms, return max34.424ms, zero starved/misses,29.998 changed receipts/s,
+no missing receipts. GPU packet16.628ms/present10.840ms;9536 native uploads,
+1441751040 staged bytes, zero GPU pack draws. The upload counters now include
+guest uploads through the same persistent stream. No measured cadence or GPU
+span improvement is claimed from this run. Cropped native seed parity passes
+through18x (`phase3-native-region-seed/rth-94m_pwqm`); bank+PGXP real-frame hashes
+match with generation on/off in both VRAM/wide modes
+(`phase3-native-seed-banks/fg-8hgfj1yw`). Odd-width/dense/persistent/portable
+upload stress passes4630checks (`phase3-native-upload-odd/rth-9i8qw6lv`).
+Packet timer now retains the inclusive GPU span and additionally records
+present-slot server-fence wait time, rather than silently calling that render
+work;914 packet/history/telemetry checks pass
+(`phase3-slot-wait-timer/rth-a54ztt2_`). Race measurement of this new field pending.

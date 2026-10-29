@@ -1,3 +1,73 @@
+## Phase 3 active continuation: native texture and region uploads (2026-10-29)
+
+ONLY phase3, cadence and distinct-image gates. Fork main d2185504 already
+merged in87c415a5; fetched again, unchanged. Phase4 separate topic nowbf2fb59e
+records failed acceptance; do not work on it or phases3b/5. No phase3 promotion.
+Current framework topic pushed WIPd30171b2. No mainline promotion.
+
+Production packet texture coherence now uses captured native inputs without
+GPU-to-native packing, independent of HD replacement mode. Per-packet native
+tile versions avoid repeated copies/uploads; enhanced draw dirt no longer
+dirties native sampling. Packet fixture now checks enhanced output without
+synthetic texture-page uploads, plus version reuse:909checks pass.
+Diagnostic native-route run first exposed117025 uploads/102.77GB in30s;
+version reuse reduced to9531/4.53GB. GPU packet20.681->16.567ms, zero pack draws,
+starved and misses, ~30distinct/s. Still fails cadence:entry35.958/return27.627ms.
+
+Further changes: densely packed native PBO uploads shared with guest uploads;
+removed CPU1555->RGBA conversion, full native RGBA staging texture and upload
+vertex batches. GPU native R16UI seeds enhanced targets directly. Surface
+handles/bounds now grouped inGlRasterSurface. Direct-wide valid copy coverage
+excludes reveal margins; copies clip staging to destination bounds.
+Hidden cropped1/4/9/18x, packet/history, bank+PGXP fixtures pass. Persistent and
+portable upload stress including odd-width rows passed4630checks. Production still allocates full-VRAM HR: pool/selection/direct
+wide output cutover remains the main unfinished work. No ten-minute gate.
+
+Full framework build passed after repairing native snapshot fixture doubles.
+Non-hardware ctest:301 enabled entries, three external/platform skips, two
+additional disabled entries; one stale safety-expression source guard fixed
+and rerun passed. Root dev32/32 and tools/smoke.py zero misses passed before
+latest native-upload changes; latest dev32/32 also passed. Native seed race
+60.019Hz,entry37.227/return34.424ms,29.998distinct/s,GPU16.628ms,zero starved/misses.
+Present-slot server-fence GPU timer added,914 fixture checks pass; dev build
+for its race remeasurement is now running. All runs
+dummy audio, hidden only; all prior owned processes exited. Receipts and exact
+rows in docs/VERIFIED.md and analysis/perf-20261028. Continue; no owner-only
+blocker and no final acceptance claim.
+
+## Phase 3 continuation: direct regions and hitch attribution (2026-10-29)
+
+Still phase 3 ONLY. Topic `feat/frame-arch-3-surfaces` has pushed WIP
+`99d4f612`; no promotion, root pin still accepted phase 2. Fork main remains
+`d2185504`. Do not do 3b, 4 or 5. All runs use dummy audio and hidden windows.
+
+Direct-wide/cropped fixtures now pass through18x: ordinary/backdrop flat and
+textured geometry, lines, overlays, uploads, fills, masks, cross-target copies,
+display extraction, captures and transaction coordinates. Texture output is
+byte exact; ordinary fixed-function Gouraud permits one RGB code (362pixels
+at18x); mask/alpha and all page positions are exact. Receipt
+`phase3-direct-wide-18x/rth-nq_cv7nr`. Dev build and R4 32/32 passed.
+Subsequent uncommitted region allocator consolidation and multi-tile copy gather
+pass `phase3-region-allocation-18x/rth-9_kedxl7`; production STILL allocates
+full-VRAM HR. Surface pool/selection/direct-wide cutover remains the main work.
+
+Packet vector growth no longer zeroes bytes that the producer immediately
+overwrites. Opt-in allocation/attachment cleanup timings identify their cost
+in the worst cadence interval; frame mailbox tests pass. Latest short receipt
+`phase3-allocation-timing18`:59.991Hz,entry35.670ms,return23.913ms,zero starved,
+GPU16.513ms,953changed32x18samples/30s=31.766distinct/s,zero missing receipts.
+Worst allocation .079ms, cleanup .036ms, native submit .217ms/sync .276ms,
+guest20.176ms and previous pacer14.934ms. This is NOT a pacing fix or gate.
+
+Diagnostic sampler on/off experiment did not explain stalls: return26.918/
+25.839ms. Another non-owned runtime PID41464 was discovered during the pair;
+left untouched, subsequently exited. Those runs are not isolated GPU proof.
+WPR was denied OS profile-policy permission (0xc5585011), no trace started.
+Existing host span/frame rings plus absolute-frame sampler windows are being
+used instead. New worst_frame marker and host_profile --frame-lo/--frame-hi
+connect the worst interval to those existing probes. Continue the production
+surface migration and ten-minute gate; no owner-only blocker, no final claim.
+
 ## Phase 3 active scope and latest evidence (2026-10-29)
 
 Supervisor scope: ONLY phase 3 and guest-stall/distinct-image gates. Phases 3b
