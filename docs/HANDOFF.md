@@ -1,5 +1,48 @@
 # Handoff
 
+## Current work (2026-10-28, owner PC real-time performance)
+
+Final gates at framework `ac65fcf5`: regen unchanged, build, 32/32 ctest,
+hidden boot-to-race smoke with zero dispatch/segment misses. Fresh defaults
+resolve to 9x internal at an actual 7680x4320 drawable. Clean 25-second
+recheck: 59.977 main callbacks/s, zero audio starvation, zero whole-period
+pacing debt entries and 30.00 presents/s with zero presentation hitches.
+The separate image-traced run confirms 30.00 distinct images/s; readback
+perturbed its pacing, documented in VERIFIED. Default and optional-worker
+composed screenshots were inspected. Receipts are under `final-gates/` and
+`acceptance-defaults*` in the evidence directory below.
+
+Performance defaults: retain PGXP including CPU propagation, Car Effects,
+borderless fullscreen, fixed resolution and the existing 4K/9x Match display
+cap. Rewind and the Race frame rate enhancement become opt-in. The owner's
+8K output now uses original 30 FPS race images at full emulation speed;
+60 FPS enhancement performance is **not restored**. Same-save hidden GL
+25-second comparison: 18x old defaults 50.898 main callbacks/s, 171184
+starved audio samples, 25.48 distinct images/s; new 9x/original-frame
+defaults 60.049 callbacks/s, zero starved samples, zero pacing entries a
+whole period late, 30.04 distinct images/s. Full table and measurement
+semantics are in `docs/VERIFIED.md`. All measured runs had zero misses.
+
+Rewind synchronously reads back VRAM during machine snapshots. Extra race
+draws overload this 8K configuration even after enabling private workers
+by disabling Car Effects. CPU mode, seams, bloom and presenter slot count
+did not solve that. Controller enumeration is event-driven; the closed
+overlay is not doing frame rendering. The optional worker scheduler now
+uses exact indexed rational boundaries after stalls/lead skips, preventing
+spurious near-one redraws; regressions use the actual framework planner.
+
+Ghidra setup is complete at `C:/Users/Shokunin/dev/ghidra-mcp`: official
+Ghidra 12.1.4, Temurin JDK 21, Python 3.12 venv/pyghidra-mcp, analyzed
+OpenBIOS at BFC00000 and SLUS_007.97 text at 80010000. `ghidra` is registered
+in the owner's Codex config. MCP stdio verification lists 1460 game functions;
+setup and receipt are local `README.md` and `stdio-verification.json` there.
+
+Local performance harness/evidence: `analysis/perf-20261028/`. Slot 9 is a
+fresh GP grid save. Debug performance runs must disable DISPLAY_RING,
+PRESENT_IMAGE_RING, GL_PERF and ASYNC_GPU timer/ops unless profiling them;
+the debug defaults are not representative of the release renderer. No
+visible game windows were opened and the display mode was never changed.
+
 ## Current work (2026-10-27, PGXP seam strips)
 
 The owner's "pgxp was buggy" on the 0.2.1 candidate (8K/18x) was seam

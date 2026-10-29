@@ -8,6 +8,7 @@
 #include "psx_sdl.h"
 #include "psx_video_timing.h"
 #include "r4_draw_mods.h"
+#include "r4_output_window.h"
 
 typedef struct R4DrawFrame {
     unsigned refs; /* created and released only on main */
@@ -27,7 +28,8 @@ static struct {
     DrawWorkerPool *pool;
     PsxExecCtx *contexts[PSX_CTX_MAX];
     unsigned count, pending;
-    uint64_t session, next_window, window_remainder;
+    uint64_t session, window_epoch;
+    R4OutputWindow window;
     uint64_t submitted, admitted, dropped, failures, elapsed_ns, executed;
     uint64_t captures, capture_ns;
     int64_t lead_min_ns, lead_max_ns;
@@ -143,7 +145,7 @@ static int r4_worker_finish(void *user) {
 static void r4_workers_poll(void *unused) {
     (void)unused;
     if (!workers.pool || g_psx_guest_time_frozen) return;
-    if (r4_optional_draw_hooks_active() && workers.next_window) r4_workers_reset();
+    if (r4_optional_draw_hooks_active() && workers.window.denominator) r4_workers_reset();
     DrawWorkerResult result;
     while (draw_worker_poll(workers.pool, &result)) {
         R4DrawJob *job = result.job.payload;
@@ -202,7 +204,7 @@ static void r4_workers_shutdown(void) {
             (unsigned long long)workers.extras_hist[2], (unsigned long long)workers.extras_hist[3]);
 }
 static void r4_workers_reset(void) {
-    workers.next_window = workers.window_remainder = 0;
+    workers.window = (R4OutputWindow){0};
     if (++workers.session == 0) ++workers.session;
     if (workers.pool) {
         draw_worker_set_epoch(workers.pool, workers.session);
@@ -240,7 +242,7 @@ static int r4_workers_init(void) {
 static int r4_workers_submit(CPUState *cpu, const R4Blend *blend, const PSXModRenderPass *rect) {
     if (!r4_workers_init()) return 0;
     if (psx_mod_render_pass_status() != PSX_MOD_RENDER_PASS_READY) {
-        if (workers.next_window) r4_workers_reset();
+        if (workers.window.denominator) r4_workers_reset();
         return 0;
     }
     r4_workers_poll(NULL);
@@ -248,16 +250,18 @@ static int r4_workers_submit(CPUState *cpu, const R4Blend *blend, const PSXModRe
     /* Main reaches the same point once per simulation tick. The output grid
      * remains continuous across ticks; output rate never changes this span. */
     uint64_t now = pt_clock_ns();
-    uint64_t duration = (uint64_t)g_psx_vblank_cycles * 2000000000ull;
-    duration += workers.window_remainder;
-    workers.window_remainder = duration % 33868800u;
-    duration /= 33868800u;
-    if (!workers.next_window) workers.next_window = now + duration;
-    else if (workers.next_window < now) {
-        /* Drop elapsed windows without shifting the existing output grid. */
-        uint64_t skipped = (now - workers.next_window) / duration + 1u;
-        workers.next_window += skipped * duration;
+    if (workers.window.denominator &&
+        (workers.window_epoch != gl_renderer_present_epoch() ||
+         workers.window.numerator != (uint64_t)g_psx_vblank_cycles * 2000000000ull))
+        r4_workers_reset();
+    if (!workers.window.denominator) {
+        r4_output_start(&workers.window, now, g_psx_vblank_cycles);
+        workers.window_epoch = gl_renderer_present_epoch();
     }
+    r4_output_skip_elapsed(&workers.window, now);
+    const uint64_t begin = r4_output_boundary(&workers.window, workers.window.index);
+    const uint64_t end = r4_output_boundary(&workers.window, workers.window.index + 1);
+    const uint64_t duration = end - begin;
     if (workers.lead_max_windows < 0) {
         const char *lm = getenv("R4_OUTPUT_LEAD_MAX");
         workers.lead_max_windows = lm && *lm ? atoi(lm) : 2;
@@ -272,12 +276,10 @@ static int r4_workers_submit(CPUState *cpu, const R4Blend *blend, const PSXModRe
      * the outputs already reserved cover the coming windows, the grid stays
      * aligned with the output timeline, and the lead shrinks by one window
      * per skipped tick. */
-    if (workers.lead_max_windows > 0 && workers.next_window > now &&
-        workers.next_window - now > duration * (uint64_t)workers.lead_max_windows) {
+    if (r4_output_lead_excess(&workers.window, now, workers.lead_max_windows)) {
         workers.reanchors++;
         return 1;
     }
-    uint64_t begin = workers.next_window;
     int64_t lead = (int64_t)begin - (int64_t)now;
     if (!workers.submitted || lead < workers.lead_min_ns) workers.lead_min_ns = lead;
     if (!workers.submitted || lead > workers.lead_max_ns) workers.lead_max_ns = lead;
@@ -285,9 +287,9 @@ static int r4_workers_submit(CPUState *cpu, const R4Blend *blend, const PSXModRe
         int64_t w = lead > 0 ? lead / (int64_t)duration : 0;
         workers.lead_hist[w > 7 ? 7 : w]++;
     }
-    workers.next_window += duration;
+    workers.window.index++;
     RenderPassAsyncToken tokens[R4_MAX_PASSES];
-    unsigned n = render_pass_async_reserve(2, begin, workers.next_window,
+    unsigned n = render_pass_async_reserve(2, begin, end,
         rect->x, rect->y, rect->w, rect->h, tokens, R4_MAX_PASSES);
     unsigned extras = 0;
     for (unsigned i = 0; i < n; i++) extras += tokens[i].output.alpha_q16 != 0;

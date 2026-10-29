@@ -5,6 +5,79 @@ code has not moved since its row is not re-tested (CLAUDE.md, Verification
 scale). Update the row when its code changes or a new check is run.
 Evidence dirs are local (not tracked).
 
+## Owner PC performance, 2026-10-28
+
+DESKTOP-BAKIEMJ, Ryzen 9800X3D / RTX 4080 SUPER, 7680x4320 60 Hz.
+Hidden real-GL window with an asserted 7680x4320 client, same GP grid save
+(slot 9), Modern RT throttle, turbo off, 25 seconds per row. PGXP geometry,
+perspective, CPU propagation, depth, colour and fine seams all remain on.
+Car Effects is on in every row below. Dynamic resolution is off.
+
+| Configuration | Main VBlank callbacks/s | Max callback interval, ms | Pacer debt >= one period, entries | Starved audio samples | Distinct presents/s |
+|---|---:|---:|---:|---:|---:|
+| Previous defaults: 18x internal, Rewind on, Auto (30 FPS) | 50.898 | 105.680 | 853 | 171184 | 25.48 |
+| Same, only Rewind off | 56.738 | 44.896 | 409 | 68502 | 28.40 |
+| 9x internal, Rewind off, optional Auto (60 FPS) | 53.049 | 60.156 | 949 | 124948 | 26.72 |
+| New defaults: 9x internal, Rewind off, original race frames | 60.049 | 41.599 | 0 | 0 | 30.04 |
+
+Evidence: local `analysis/perf-20261028/{acceptance18-before,acceptance18-no-rewind,final30-effects,final30-effects-verified}.{json,present.csv}`.
+The `final30-effects` filename predates checking its activation log: it is
+the **60 FPS** row, confirmed by `r4.framerate: auto -> 60 FPS`; the
+`-verified` run explicitly disables the frame-rate feature. No dispatch or
+segment misses in any row. Distinct images use changed 8x8 presenter sample
+hashes within the timed window, a lower bound rather than a physical-display
+capture. Audio counts are missing source **samples**, not underrun episodes.
+Main callback intervals include work and pacing; pacing debt is not a count
+of lost guest IRQs. The final run had no entry a full VBlank period late.
+
+Debug captures/timers that do not ship are off: `PSX_DISPLAY_RING=0`,
+`PSX_PRESENT_IMAGE_RING=0`, `PSX_GL_PERF=0`,
+`PSX_GL_ASYNC_GPU_TIMER=0`, `PSX_GL_ASYNC_GPU_OPS=0`.
+`PSX_PRESENT_TRACE` alone is enabled for the distinct-image receipt.
+Earlier exploratory runs with those diagnostics enabled are not acceptance
+measurements. No visible game window or display-mode change was used.
+
+Causes: Rewind performs synchronous full-machine/VRAM snapshots on the
+emulation thread; 18x rendering also exceeds real-time capacity. At the
+existing 9x Match display cap, extra race draws still overload 8K output.
+Car Effects requires serial extra draws; disabling it restores workers but
+only reached roughly 44-48 presents/s at 8K output. Original frames reached
+stable 30 FPS with Car Effects retained. Rewind and the frame-rate enhancement
+are therefore opt-in. This is **not** a claim that 60 FPS has been restored.
+CPU-mode-off and seam-off probes did not cure the remaining slowdown;
+controller enumeration is event-driven, and closed overlay/capture handling
+was not the cause. PGXP and its subfeatures keep their shipped defaults.
+
+The optional worker path also fixes a reproducible rational-clock bug:
+elapsed-window and excessive-lead skips previously drifted its boundaries
+by nanoseconds, requesting near-one duplicate draws. Exact indexed endpoints
+are tested against the framework output planner at 60/90/100/120/144 Hz,
+after stalls and lead skips, over a long skipped span, and with PAL timing.
+
+Final pin `ac65fcf5`: regeneration succeeded with all 50 shards, the
+2994-entry dispatch table and 618 draw-context clones unchanged. Build and
+32/32 tests passed. One hidden smoke reached race frame 8494, all 40 steps
+with zero dispatch/segment misses. Receipts: `analysis/perf-20261028/final-gates/`.
+Four obsolete auxiliary CMake caches referencing a removed toolchain were
+reversibly renamed `CMakeCache.stale-20261028.txt`; the shared `build/` remains
+configured. The debug command's Release guard was corrected after smoke;
+its preprocessed debug implementation is identical, and build/ctest reran.
+
+Fresh shipped-default recheck (no settings or feature overrides),
+`acceptance-defaults`: actual drawable 7680x4320, effective internal scale 9,
+dynamic resolution off, PGXP/CPU/depth/seams on. 60.037 main callbacks/s,
+38.710 ms maximum interval, zero starved audio samples and 30.00 distinct
+presents/s. This image-traced repeat had 128 over-period pacing entries
+(49.449 ms maximum debt), so the earlier zero-lateness run is not a promise
+that debug readback cannot perturb scheduling. Clean repeat with the image
+trace disabled, `acceptance-defaults-no-trace`: 59.977 callbacks/s,
+41.630 ms maximum interval, **zero** starved samples, **zero** over-period
+pacing entries (maximum debt 9.380 ms), 30.00 presents/s and zero presentation
+hitches. Composed screenshots of defaults and optional workers were inspected
+(`acceptance-defaults.preview.png`, `worker-visual-check.preview.png`);
+the race scene and HD HUD render correctly. The worker visual check is not
+a performance acceptance run.
+
 | Feature | Verified at (R4 / psxrecomp) | Evidence |
 |---|---|---|
 | Modern controls: analog gas/brake/steer, digital fallback, rumble | 12ba3f4 / ab9d181d | `tools/test_modern_controls_runtime.py` 8/8; `C:/Users/Shokunin/dev/r4-vinput/run` |

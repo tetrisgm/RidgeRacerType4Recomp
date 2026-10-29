@@ -3,6 +3,13 @@
 The `psxrecomp` and `recomp-ui` submodule gitlinks are the pins. Bump them
 deliberately and record each bump here with the reason and what was verified.
 
+2026-10-28 performance pin: `ac65fcf5` (fork `fix/race-cadence-metrics`,
+to `r4/main`) adds opt-in `main_cadence` debug telemetry for host VBlank
+intervals and pre-wait pacing debt; no guest timing changes. It carries
+the existing `a7122c59` display and `487ec042` Steam-pad selection fixes.
+Launcher remains `c6ac60c` (to its `r4/main`). Game regeneration is required
+for this pin; acceptance and release gates are recorded in `docs/VERIFIED.md`.
+
 | Date | psxrecomp | recomp-ui | recomp-net (nested) | rbengine (nested) | Why / verified |
 |---|---|---|---|---|---|
 | 2026-09-25 | `19b5a65f` (master) | `b688ca7` (master) | `c2338c6` (psxrecomp's pin) | `a7b9850` (psxrecomp's pin) | Initial bring-up on latest masters (not MMX6's pins). Verified on macOS arm64: OpenBIOS HLE-boot and full LLE boot to the intro movie, menus, Grand Prix race, audio (SPU + XA), 0 dispatch misses, native overlay shards, rollback self-check 7/7 PASS, two-instance netplay (delay-sync and rollback) VS race with 0 digest mismatches. |

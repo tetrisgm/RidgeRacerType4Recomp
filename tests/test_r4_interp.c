@@ -4,6 +4,8 @@
 #include <string.h>
 
 #include "r4_interp_math.h"
+#include "r4_output_window.h"
+#include "render_pass_plan.h"
 
 static int failures;
 #define CHECK(c, m) do { if (!(c)) { fprintf(stderr, "FAIL: %s\n", m); failures++; } } while (0)
@@ -110,7 +112,77 @@ static void test_field_table(void) {
           "scratchpad camera: position + three angles");
 }
 
+static void test_output_windows(void) {
+    const uint32_t rates[] = {60, 90, 100, 120, 144};
+    for (unsigned r = 0; r < sizeof rates / sizeof rates[0]; ++r) {
+        R4OutputWindow w;
+        RenderPassOutputTimeline timeline;
+        RenderPassOutput outputs[16];
+        r4_output_start(&w, 1000000000ull, 564480);
+        CHECK(render_pass_output_init(&timeline, 1000000000u, rates[r], 1,
+                                      w.origin, 1), "start window/output clocks together");
+        uint64_t total = 0;
+        for (unsigned tick = 0; tick < 300; ++tick) {
+            uint64_t begin = r4_output_boundary(&w, w.index);
+            uint64_t end = r4_output_boundary(&w, w.index + 1);
+            CHECK(begin == w.origin + w.index * 1000000000ull / 30,
+                  "producer uses exact rational boundary");
+            int n = render_pass_output_plan(&timeline, begin, end, begin, tick + 1, outputs, 16);
+            CHECK(n > 0, "live window has outputs");
+            if (rates[r] == 60) {
+                CHECK(n == 2 && outputs[0].alpha_q16 == 0 &&
+                      outputs[1].alpha_q16 >= 32767 && outputs[1].alpha_q16 <= 32768,
+                      "60Hz window has real frame and exactly one midpoint");
+            }
+            for (int i = 0; i < n; ++i) {
+                CHECK(outputs[i].index == total++, "noninteger ratios keep every output index");
+                CHECK(outputs[i].deadline >= begin && outputs[i].deadline < end,
+                      "outputs stay inside half-open window");
+            }
+            ++w.index;
+        }
+        CHECK(total == rates[r] * 10u, "ten seconds contains requested output count");
+    }
+    R4OutputWindow w;
+    RenderPassOutputTimeline timeline;
+    RenderPassOutput outputs[16];
+    r4_output_start(&w, 1000000000ull, 564480);
+    render_pass_output_init(&timeline, 1000000000u, 60, 1, w.origin, 1);
+    /* Reproduce the old failure: skip the third window while its duration
+     * rounds upward, then alternate catch-up lead skips and elapsed skips. */
+    for (unsigned tick = 0; tick < 600; ++tick) {
+        uint64_t begin = r4_output_boundary(&w, w.index);
+        if (tick % 3 == 2) {
+            r4_output_skip_elapsed(&w, begin + 1);
+            begin = r4_output_boundary(&w, w.index);
+        }
+        if (tick % 5 == 0) {
+            R4OutputWindow saved = w;
+            for (int j = 0; j < 7; ++j)
+                CHECK(r4_output_lead_excess(&w, begin - 100000000u, 2),
+                      "catch-up tick skips excessive lead");
+            CHECK(saved.origin == w.origin && saved.index == w.index &&
+                  saved.numerator == w.numerator && saved.denominator == w.denominator,
+                  "lead skips leave rational clock unchanged");
+        }
+        uint64_t end = r4_output_boundary(&w, w.index + 1);
+        int n = render_pass_output_plan(&timeline, begin, end, begin, tick + 1, outputs, 16);
+        CHECK(n == 2 && outputs[0].alpha_q16 == 0 &&
+              outputs[1].alpha_q16 >= 32767 && outputs[1].alpha_q16 <= 32768,
+              "stall/lead skips cannot manufacture near-one extra draw");
+        ++w.index;
+    }
+    r4_output_skip_elapsed(&w, w.origin + 3600000000000ull + 1);
+    CHECK(w.index == 108001 && r4_output_boundary(&w, w.index) ==
+          w.origin + 108001ull * 1000000000ull / 30,
+          "long stall skips directly to exact indexed boundary");
+    r4_output_start(&w, 123456789, 677376); /* PAL: 25 simulation ticks/s. */
+    CHECK(r4_output_boundary(&w, 1000) - w.origin == 40000000000ull,
+          "video standard reset establishes correct rational period");
+}
+
 int main(void) {
+    test_output_windows();
     test_lerp_and_wrap();
     test_kmh();
     test_classify();

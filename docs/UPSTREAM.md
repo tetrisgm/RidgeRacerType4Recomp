@@ -15,6 +15,9 @@ targeted pin; generated game C is unchanged. The fork-only changes below remain.
 
 | Change | Topic branch | Upstream PR | State |
 |---|---|---|---|
+| Opt-in main VBlank wall cadence and pre-wait pacing debt (`main_cadence`) | `fix/race-cadence-metrics` | none yet | `ac65fcf5`; live hidden-window diagnosis, no guest timing changes |
+| Live internal resolution, Windows borderless popup, pixel labels | `fix/display-playtest-20261028` | none yet | `a7122c59`; existing display playtest fixes carried by the performance pin |
+| Prefer Steam's active virtual pad over a silent physical Valve pad | `fix/prefer-steam-virtual-pad` | none yet | `487ec042`; carried by the performance pin |
 | Keyboard seat adopts a pad; Steam desktop-layout echo guard for physical Valve pads | `fix/steam-controller-outside-steam` | none yet | local (`80b058e6`), not pushed; needs hands-on Steam Controller check |
 | Avoid postfx GL texture-size driver queries for known renderer surfaces | `fix/postfx-known-dims` | none yet | in `r4/main` (`8a3bf9f1`); exact GL pixels on Windows and Mac |
 | Avoid composition-context GL framebuffer-binding queries per queued output | `fix/presenter-fbo-bindings` | none yet | in `r4/main` (`e1f2e457`); exact present-thread pixels on Windows and Mac |

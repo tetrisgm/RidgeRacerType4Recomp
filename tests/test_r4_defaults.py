@@ -83,8 +83,8 @@ def test_manifests():
           'widescreen: Fit is a declared choice')
 
     fr = manifest('r4.enhancement.frame-rate')
-    check(feature(fr, 'frame-rate').get('default_enabled') is True,
-          'frame rate: draw-only interpolation is on by default')
+    check(feature(fr, 'frame-rate').get('default_enabled') is False,
+          'frame rate: extra race draws opt-in to preserve real-time audio at 8K output')
     check(option_default(fr, 'frame-rate', 'rate') == 'auto',
           'frame rate: Auto by default (60 FPS; original 30 at 18x/8K; owner 2026-10-27)')
     check(set(option_values(fr, 'frame-rate', 'rate')) == {'auto', '30', '60', '90', '100', '120', '144', 'display'},
@@ -139,7 +139,7 @@ def test_game_toml():
     check(video.get('supersample') == 1.5, 'game.toml: supersample = 1.5')
     check(video.get('antialiasing_mode') == 'off',
           'game.toml: no post-process AA filter (antialiasing_mode = "off")')
-    check(video.get('rewind') is True, 'game.toml: Rewind on by default (owner 2026-10-28)')
+    check(video.get('rewind') is False, 'game.toml: synchronous Rewind snapshots opt-in for real-time audio')
     pg = manifest('psx.enhancement.pgxp')
     check(option_default(pg, 'pgxp', 'cpu_mode') == 'true',
           'PGXP: CPU-mode propagation on by default (owner 2026-10-27)')
