@@ -247,10 +247,12 @@ accompanies this topic.
 
 ### Phase-4 topic disposition (2026-10-29)
 
-The packet presenter, opaque interpolated Car Effects metadata and R4 FPS cutover
-are implemented on `feat/frame-arch-4-interp`. The topic also removes the legacy
-R4 guest redraw implementation. This is **not accepted for integration**: the
-45-pair source census passes with zero unexplained uses, but hidden full-PGXP
-captures show interpolation-only geometry gaps and 8K output remains about
-26 distinct images/s at both requested 60 and 120 Hz. Legacy-removal equivalence
-has not been established. See [measurements and remaining gates](FRAME_INTERPOLATION_STATUS.md).
+The packet presenter, interpolated Car Effects metadata and R4 FPS cutover are
+implemented on `feat/frame-arch-4-interp`, with legacy R4 guest redraw removed.
+The exclusive profiling follow-up moves transform allocation/reclamation off the
+guest and removes render-side history copying. It is **not accepted**: 2,982 timed
+pairs have zero match failures, but same-build FPS-off baselines are below 60
+VBlanks/s and interpolation still adds starvation. Final 8K distinct-image lower
+bounds are 51.34 / 94.02 at requested 60 / 120. Narrow frozen-pair captures have
+stable endpoints and no added clear-colour gaps; full visual equivalence remains
+unestablished. See [A/B profiles and remaining gates](FRAME_INTERPOLATION_STATUS.md).

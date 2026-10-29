@@ -43,6 +43,7 @@ def main():
     ap.add_argument('--out',type=Path,required=True)
     ap.add_argument('--port',type=int,default=4822)
     ap.add_argument('--rates',type=int,nargs='+',default=[60,120])
+    ap.add_argument('--capture',action='store_true',help='Capture a frozen endpoint/midpoint pair after final timing')
     args=ap.parse_args();out=args.out.resolve();out.mkdir(parents=True,exist_ok=True)
     while True:
         if not runtimes():
@@ -121,6 +122,33 @@ def main():
                     'interpolation':after['packet_interpolation']}
                 (out/(name+'.json')).write_text(json.dumps(dict(summary=summary,config=config,before=before,after=after,census=census),indent=2))
                 results.append(summary);print(json.dumps(summary),flush=True)
+                if args.capture and enabled and rate==args.rates[-1] and not interference:
+                    from PIL import Image
+                    import hashlib
+                    ask('savestate',op='load',slot=9);time.sleep(2)
+                    assert ask('savestate_status').get('last_ok')
+                    ask('set_input',buttons='0xBFFF');time.sleep(4)
+                    ask('host_pause',on=1);time.sleep(.2)
+                    captures=[]
+                    try:
+                        for index,phase in enumerate((0,500,1000,0,1000)):
+                            count=ask('packet_interpolation')['presenter']['sampled_requests']
+                            ask('packet_interpolation',sample_milli=phase)
+                            deadline=time.monotonic()+10
+                            while ask('packet_interpolation')['presenter']['sampled_requests']==count:
+                                if time.monotonic()>deadline:raise RuntimeError('Sample timeout')
+                                time.sleep(.02)
+                            path=out/f'capture-{index}-{phase}.png'
+                            receipt=ask('screenshot',path=str(path),packet=1)
+                            assert receipt.get('ok'),receipt
+                            im=Image.open(path);size=im.size
+                            digest=hashlib.sha256(im.tobytes()).hexdigest()
+                            im.thumbnail((1280,720));im.save(out/f'capture-{index}-{phase}-thumb.png')
+                            captures.append(dict(phase=phase,sha256=digest,size=size,receipt=receipt))
+                        assert captures[0]['sha256']==captures[3]['sha256']
+                        assert captures[2]['sha256']==captures[4]['sha256']
+                        (out/'captures.json').write_text(json.dumps(captures,indent=2))
+                    finally:ask('host_pause',on=0)
                 process.terminate();process.wait(timeout=20);process=None
                 (out/'summary.json').write_text(json.dumps(results,indent=2))
                 if interference:raise RuntimeError('A/B pair rejected: another runtime overlapped; see receipt')

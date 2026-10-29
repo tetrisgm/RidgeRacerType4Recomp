@@ -1,24 +1,102 @@
-# Exclusive performance follow-up (2026-10-29)
+# Exclusive performance follow-up ? acceptance FAILED (2026-10-29)
 
-Framework `045d53e0` moves transform attachment allocation and reclamation to
-a CPU worker and groups primitive provenance with draw setup. Guest capture,
-seal, release and reset perform no allocations (64 retained-attachment fixture).
-Cumulative failed-pair, peak-unmatched and storage-admission counters prevent
-sparse polling from hiding failures. Five focused framework tests and 22 R4
-tests pass; the PGXP-off boot fixture remains excluded.
+Framework code `014e2cb5` (including `045d53e0`), isolated topic/worktree.
+No main checkout, surface implementation, merge or PR was touched.
 
-`tools/measure_interpolation_ab.py` obtains `../perf.lock` after Get-Process
-reports no runtime, starts only hidden owned processes, and runs FPS-off/on
-60-second pairs from slot 9. It preserves the local mod state, keeps full PGXP,
-18x, Car Effects and Rewind, collects guest profiles and checks for interference
-once per second. Distinct-image counts use the existing 8x8 presenter trace and
-are explicitly lower bounds, not full-image or physical-scanout measurements.
+## Changes
 
-Measurement is in progress. The initial follow-up pair was rejected because
-another hidden phase-3 release runtime started while our lock was held. Its
-PID and overlapping seconds are retained in `analysis/interp-exclusive-after`.
-No other agent's process was stopped. Valid exclusive results will replace this
-paragraph before delivery. This phase remains unaccepted.
+- A CPU worker prepares/reclaims transform blocks and attachment tables. Guest
+  append, seal, release and reset do not allocate, including when Rewind retains
+  64 attachments (allocation-counted regression fixture). The prepared queue is
+  bounded; exhaustion rejects optional publication and increments `storage_misses`.
+  Pool storage is retained at its high-water mark, not returned after every tick.
+  The 128 spare blocks reserve about 448 MiB of uninitialized host capacity;
+  retained history can raise that high-water mark. This is a memory tradeoff,
+  not a claim that CPU memory use decreased.
+- Primitive provenance shares the following draw's transport group instead of
+  forcing another submission. Grouped input is copied to aligned storage on replay.
+- The render consumer leases immutable history blocks instead of copying all nine
+  ticks every packet. Source tables, matching, departing geometry and texture-input
+  restoration stay on render/native workers. Car Effects stays packet-owned.
+- Cumulative `audited_pairs`, `failed_pairs`, `peak_unmatched` and `storage_misses`
+  expose failures between polls. The moving audit checks cumulative deltas too.
+
+## Final exclusive A/B measurement
+
+Release with debug tools for telemetry, JOBS=4, hidden port 4822, 18x/full PGXP,
+Car Effects and Rewind on. A disables the FPS feature; B enables it at the named
+output rate. Each arm starts a fresh process, loads slot 9 and drives for three
+seconds before its 60-second measurement. The same executable is used throughout.
+The presented image ring is off; the existing 8x8 hash trace is on in every arm.
+Distinct counts are **lower bounds**, not full-image or physical-scanout counts.
+Even present completions are below 60/120, so the throughput gate fails regardless
+of thumbnail collisions. The internal captured target is 7668 x 4320.
+
+`tools/measure_interpolation_ab.py` checks Get-Process before admission/each arm,
+creates `../perf.lock`, checks for other runtimes once per second, and releases
+only its own processes and lock. All four final arms observed no other runtime.
+An earlier attempt was rejected after another hidden phase-3 release runtime
+started despite our lock; its overlap is preserved in the local rejected receipt.
+No competing process was stopped.
+
+| Output / arm | Distinct images/s (lower bound) | Present completions/s | Guest VBlanks/s | Starved samples | Max VBlank ms | Unmatched |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| 60-A | 29.54 | 29.54 | 59.093 | 35,092 | 53.338 | 0 |
+| 60-B | 51.34 | 52.92 | 57.768 | 98,416 | 57.629 | 0 |
+| 120-A | 29.08 | 29.08 | 58.168 | 79,276 | 55.382 | 0 |
+| 120-B | 94.02 | 95.93 | 58.129 | 86,642 | 54.573 | 0 |
+
+**FAIL:** B adds 63,324 starved samples at 60 output and 7,366 at 120 compared with
+its adjacent A. Guest cadence falls by 1.325 and 0.039 VBlanks/s respectively.
+The allocation/transport changes do not establish performance parity. Earlier
+exclusive runs also varied; no reliable throughput improvement is claimed.
+
+**Separate baseline regression:** same-build FPS-off A itself reaches only
+59.093 / 58.168 VBlanks/s with 35,092 / 79,276 starved samples. This is the
+requested disabled-feature control, not an independent build of current r4/main.
+Its complete guest profiles are in the evidence JSON. At 60 output, the main
+named samples are host pacing sleep 29.4%, performance-counter calls 4.9%, native
+raster enqueue 2.7%, PGXP loads 2.3%, ALU 1.8%, debug write checks 1.8%, and packet
+record vector growth about 1.1%. At 120 the same groups dominate (native enqueue
+3.0%, PGXP load/ALU 2.2/2.0%). These are sampled locations, not additive critical-
+path timings; normal pacer sleep is not proof of the cause of a missed deadline.
+
+B's profiles contain bounded projection lookup/transform append (about 0.1% each)
+and common packet-buffer growth (1.3% at 60 / 1.2% at 120). The prior shared-pointer
+history-array destruction hotspot is absent from the reported top addresses.
+The zero-allocation fixture proves the collector's guest allocation removal;
+profiles alone cannot prove that all scheduling/cache contention is eliminated.
+The remaining timing deficit is unresolved, including the baseline deficit.
+
+## Correctness, captures and verification
+
+- 2,982 geometry packet pairs audited during the two B timing windows (1,525 /
+  1,457); cumulative pair failures, peak unmatched and storage misses all zero.
+  No dispatch or segment misses in any arm. Car Effects draw counts increase
+  in both A and B, so an inactive effects path is not the explanation.
+- After timing, frozen t=0 / 0.5 / 1 captures and repeated endpoints are
+  7668 x 4320. Repeated endpoints are byte-identical. All five have 22,680 exact
+  RGB(48,48,48) pixels in the lower 45%; midpoint adds zero clear-colour gaps.
+  Visual inspection of the midpoint shows continuous road/walls in this sample.
+  This narrow check does not establish every roof/visibility transition, an
+  independent old-renderer comparison, or live cut/respawn acceptance.
+- Five focused framework tests pass (stream, sampler, presenter, HD context,
+  hidden GL packet replay). After the direct-lease change, stream and hidden GL
+  replay pass again. The lifetime fixture releases producer history and source
+  attachment before consumer matching. R4's 22 permitted CTests pass; the PGXP-off
+  boot test is excluded. JOBS=4 regeneration leaves generated/ unchanged; build passes.
+- All owned runtimes stopped, local mod state restored, perf.lock removed.
+
+Reproduce: `python tools/measure_interpolation_ab.py --out analysis/interp-ab --capture`.
+Raw final receipts/profiles/captures: `analysis/interp-exclusive-final/` (local).
+Committed numerical proof: [A/B evidence](evidence/frame-interpolation-ab-20261029.json).
+Rejected overlap: `analysis/interp-exclusive-after/`; preceding clean iteration:
+`analysis/interp-exclusive-clean/`. Central Beads tracking was unavailable because
+`F:/Software/beads/issues` does not exist in this environment.
+
+**Do not integrate this as a completed phase 4.** Guest timing parity, zero
+starvation and 60/120 distinct outputs remain unmet. Existing legacy redraw removal
+still lacks the required full equivalence acceptance. No main merge or PR was made.
 
 ---
 

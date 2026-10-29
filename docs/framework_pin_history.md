@@ -190,3 +190,9 @@ its own.
 | 2026-10-28 | `a7122c59` (fork branch `fix/display-playtest-20261028` on `fix/prefer-steam-virtual-pad` `487ec042`; not pushed) | `c6ac60c` (recomp-launcher `fix/display-playtest-20261028`; not pushed) | | | Owner playtest display fixes: Internal resolution applies live from the in-game menu (no false "Applies after restart"), Windows Borderless is a borderless popup one row taller than the monitor (no fullscreen-flip promotion, instant Alt-Tab), Internal resolution rows show real pixels ("4K · 3840×2160 (9×)" at 16:9). Match display capped at 4K/9x by default (`match_display_max_lines = 2160`). Runtime only; no regen. Verified: ctest 32/32, headless smoke 0 dispatch misses, hidden-window menu change Match display -> 1440p applied live (hr_scale 9 -> 6, same PID). Borderless Alt-Tab needs the owner's eyes. |
 
 2026-10-29: Phase-4 topic pins 657876f2 for pre-cull transform attachments, source-table sampling and signed-depth clipping fixtures. Audit remains unaccepted (unverified new sources); production interpolation remains legacy.
+
+2026-10-29 interpolation profiling topic: framework code `014e2cb5` adds CPU-worker
+transform storage and direct immutable-history leases; R4 FPS still uses generic
+packets. Regeneration unchanged; focused framework and R4 tests pass. Exclusive
+60-second A/B tests fail timing/throughput acceptance; see FRAME_INTERPOLATION_STATUS.md.
+This pin is a topic delivery, not a promotion into r4/main.
