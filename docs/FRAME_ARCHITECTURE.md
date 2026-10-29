@@ -154,6 +154,37 @@ fix it (never by turning PGXP or a sub-feature off as the answer):
 - Include Car Effects (particles, lighting) in the flicker checks.
 - Keep the checks as regression tests or debug-server counters.
 
+### Phase 3b audit evidence (2026-10-29, in progress)
+
+The isolated `feat/frame-arch-3b-pgxp-audit` worktree adds `pgxp_frame`
+guest-frame precision and w counters, an over-one-native-pixel counter, and
+`tools/pgxp_static_audit.py` for hidden-window image and triangle-stream
+comparison. Reapplying the already-enabled GTE geometry correction no longer
+invalidates its generation and precision cache. The Race HUD session reset
+restores the shared draw callback cleared by plugin activation; live
+`r4.effects.draw` rose to 265 after loading a race savestate.
+
+The static race probe had ten samples: all native 320x240 images matched and
+all four drawn PGXP streams matched after normalizing R4's alternating VRAM
+page Y and packet addresses. Each drawn frame had 509 triangles, 1527
+precision lookups, 58 integer fallbacks, 31 value mismatches, 279 accepted
+vertices more than one native pixel from the integer projection, and 1284/1284
+valid w lookups. The enhanced presented image alternated between two hashes;
+one pair differed at 3379 output pixels. The mismatch persisted with seam
+snapping, PGXP depth, color correction, texture correction, or geometry
+correction individually disabled for diagnosis; normal PGXP settings were
+restored. The static-image requirement therefore remains open. Far-world
+saturated integer projections can legitimately differ by over one pixel from
+unclamped PGXP coordinates, so the counter needs classification by clipping
+and saturation before it can be an accuracy gate.
+
+Two loads of the same race savestate yielded identical first four drawn-frame
+precision counters. The full presented-image replay comparison, per-primitive
+seam decision changes, per-frame depth reset and near-epsilon depth-fail
+counters, rewind and upload lifecycle checks, and a paused Car Effects image
+comparison remain open. An active-race Car Effects probe exercised the restored
+callback, but its scene was moving and cannot serve as a static image check.
+
 Target after phase 4: native 8K (18x), 60 FPS, Rewind, Car Effects, full
 PGXP, on a Release build, steady 60.0 VBlanks/s, zero starved samples,
 max VBlank interval under 20 ms, and 60 distinct images/s.

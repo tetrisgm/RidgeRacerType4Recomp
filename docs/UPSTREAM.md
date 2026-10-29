@@ -10,6 +10,10 @@ opened. Native-authority verification and the remaining ownership/packet work
 are recorded in VERIFIED and FRAME_ARCHITECTURE. The old queued-VRAM-snapshot
 branch remains unmerged; native CPU snapshots supersede its authority path.
 
+Phase-3b topic `feat/frame-arch-3b-pgxp-audit` at `cc5638e8` is based on
+`r4/main` `4f893c1a` and is pinned only by the isolated R4 topic worktree.
+It has no upstream PR and has not been merged into fork `r4/main`.
+
 The latest full upstream-master sync is `d108e9a0` (2026-10-24). The current
 fork pin `e4efba40` (on `0bcc5a49`, below) additionally backports merged #761, #769–#772, #727's
 final pixel fixture, and #773's restore-scope repair. Full master sync was

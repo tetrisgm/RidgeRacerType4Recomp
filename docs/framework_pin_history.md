@@ -3,6 +3,15 @@
 The `psxrecomp` and `recomp-ui` submodule gitlinks are the pins. Bump them
 deliberately and record each bump here with the reason and what was verified.
 
+2026-10-29 PGXP audit topic pin: `cc5638e8` (fork
+`feat/frame-arch-3b-pgxp-audit`, based on `r4/main` `4f893c1a`) preserves the
+GTE precision-cache generation on repeated enable and adds guest-frame PGXP
+precision and w counters. Four focused framework tests and the R4 Windows
+build pass. A hidden race smoke has zero dispatch misses. The static native
+image and normalized PGXP stream match, while enhanced presentation still
+alternates between two hashes; see FRAME_ARCHITECTURE. This topic is for
+supervisor integration and has not been merged to `r4/main`.
+
 2026-10-28 native-authority phase pin: `4f893c1a` (fork `r4/main`, merge of
 `feat/frame-arch-1-native-authority` through `464bc104`). Original GP0 executes
 on a CPU-native raster worker; guest VRAM reads, snapshots and scanout no
