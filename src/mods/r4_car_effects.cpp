@@ -981,7 +981,10 @@ void r4_car_effects_draw(ImDrawList *dl, int W, int H, bool split_screen) {
     }
 }
 
-static void r4_car_effects_activate(void) { s_enabled.store(true, std::memory_order_relaxed); }
+static void r4_car_effects_activate(void) {
+    r4_race_layer_activate();
+    s_enabled.store(true, std::memory_order_relaxed);
+}
 
 /* Host-only: a plan without this plugin (or a netplay match) starts with the
  * effects off and the lighting chain's live values neutral. */

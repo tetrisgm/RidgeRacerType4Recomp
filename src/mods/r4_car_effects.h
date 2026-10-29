@@ -5,6 +5,10 @@
 
 struct ImDrawList;
 
+/* Register the shared render layer after session callback reset. Both plugins
+ * call this during activation; registration is idempotent. */
+void r4_race_layer_activate();
+
 /* 1 while the r4.car-effects plugin is active in the running plan. */
 bool r4_car_effects_active();
 
