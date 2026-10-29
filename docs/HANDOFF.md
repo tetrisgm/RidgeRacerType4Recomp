@@ -7,11 +7,14 @@ phase 3b audits PGXP; phase 4 is generic packet interpolation, not private
 guest redraw workers. No phase has passed acceptance or been merged yet.
 
 Framework checkout/topic `feat/frame-arch-1-native-authority` is at
-`5ca01d0e`, pushed to `fork`, based on fork `r4/main` `ac65fcf5`. WIP
+`643af69d`, pushed to `fork`, based on fork `r4/main` `ac65fcf5`. WIP
 `b56f4914` adds independent SW raster contexts and an ordered CPU-only native
 queue. Partial A0 fragments preserve masked destinations, wrapping, received
 prefixes and snapshot/resume between fragments. Tests and build/smoke results
-are in VERIFIED. Runtime does not yet call the native queue.
+are in VERIFIED. Runtime does not yet call the native queue. `643af69d` additionally adds a
+native-only RGB888 polygon path with integer attribute planes and dithering;
+hand-known gradient/dither fixtures pass, but full oracle parity and original
+GP0 capture/routing remain outstanding.
 
 Next integration boundary: capture native command inputs before GPU parser
 widescreen/HUD transforms and RGB555 truncation. A facade-level duplication

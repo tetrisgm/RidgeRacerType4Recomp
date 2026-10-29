@@ -178,3 +178,9 @@ The phase-1 topic branch starts at fork `r4/main` (`ac65fcf5`). The earlier
 completion mechanism is not being made the new authority. Phase 5 should use
 native CPU completion instead. No topic has passed its phase acceptance gate
 or been merged as part of this implementation yet.
+
+Native polygon groundwork (`643af69d`) now retains RGB888 and applies integer
+attribute interpolation and guest dithering in a separate native-only entry
+point. The existing presentation raster is unchanged. Hand-known gradient and
+dither fixtures pass; production routing and full reference parity are still
+required before calling phase 1 complete.

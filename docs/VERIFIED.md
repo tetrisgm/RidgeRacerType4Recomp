@@ -8,7 +8,7 @@ Evidence dirs are local (not tracked).
 ## Frame architecture implementation, 2026-10-28 — phase 1 incomplete
 
 Framework topic `feat/frame-arch-1-native-authority`, WIP `b56f4914` plus
-`5ca01d0e`, is pushed to `fork` but not merged or pinned. Independent raster
+`5ca01d0e` and native-polygon WIP `643af69d`, is pushed to `fork` but not merged or pinned. Independent raster
 contexts and the native CPU command queue are implemented; runtime GP0 routing
 is not switched. The older deferred-Rewind branch is preserved separately.
 
@@ -34,6 +34,14 @@ widescreen/HUD transforms and RGB555 truncation. Exact native capture must
 precede those changes. The existing native SW implementation also has colour
 interpolation/dither limitations recorded in `psxrecomp/accuracy/axis5_gpu.md`.
 These remain correctness work, not a passed hardware-accuracy gate.
+
+`643af69d` adds a separate native-only RGB888 triangle input, integer attribute
+planes and native dithering. Its gradient and all 16 dither-position assertions
+pass in `native_raster_test`; `gpu_sw_edges_test` also passes after removing
+undefined signed shifts for negative edge coordinates. This new path is not
+yet wired into runtime GP0 decoding, and has not passed full oracle parity.
+The earlier dev-build/smoke results do not constitute validation of that
+integration.
 
 ## Owner PC performance, 2026-10-28
 

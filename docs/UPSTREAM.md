@@ -5,7 +5,7 @@ that fork carries over upstream master is listed here with its upstream PR.
 When this table is empty, re-pin to upstream master and archive the fork.
 
 Unmerged architecture work: `feat/frame-arch-1-native-authority` is pushed to
-`fork` at `5ca01d0e` (WIP base `b56f4914`). It provides independent software
+`fork` at `643af69d` (WIP base `b56f4914`). It provides independent software
 raster contexts and a CPU native queue with partial-upload fixtures, but is
 not the runtime authority yet. It is not part of `r4/main` or the R4 pin and
 has no PR. Acceptance status is in VERIFIED and FRAME_ARCHITECTURE.
