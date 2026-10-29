@@ -61,13 +61,32 @@ extra frames, canonical plus wide double drawing, separate depth passes).
    (vertex depth, a single depth test), not a depth-only replay. Depth and
    threshold clears are scissored `glClear`, not geometry. Batches use a
    persistent-mapped ring buffer; no per-batch `glBufferData`.
-6. **Extra frames are packets, not transactions.** 60 FPS in-between images:
-   a worker runs the interpolated guest draw recipe on a copy-on-write
-   context and emits a frame packet, and the render thread draws it into its
-   own presentation target. Because presentation targets are never canonical,
-   no GPU backup, capture or restore and no main-thread checkpoint are
-   needed. Car Effects metadata travels per packet, so it no longer forces
-   the serial path.
+6. **Higher frame rates come from the presentation world, not from re-running
+   the game.** Today R4 re-executes the game's own drawing code with car and
+   camera fields moved part-way (`src/mods/r4_interp.c`, with a hand-mapped
+   field list). That's a title-specific hack of the PS1 camera, and it puts
+   checkpoints and GPU backup/restore on the guest path. Replace it with
+   **generic frame-packet interpolation** on the render side:
+   - Each packet carries, per 3D primitive, a stable **identity** (PGXP
+     provenance: GTE source and ordering-table position, or whatever key the
+     code shows is stable across double-buffered packets) and its
+     **view-space vertices** (the GTE's pre-projection coordinates PGXP
+     already tracks), plus the projection constants (H, OFX, OFY).
+   - For an in-between image at fraction t, the presentation world matches
+     primitives between packet N-1 and N, interpolates view-space positions,
+     and projects them. That's correct perspective motion for cars, track
+     and camera, with no knowledge of the camera.
+   - Unmatched primitives, 2D/HUD primitives, colours and UVs take packet N.
+     Large deltas (cuts, respawns) snap, so there's no interpolation that frame.
+   - Latency is the same as today (interpolating the last two ticks). Runs at
+     any rate (60/90/120/144) on the render thread or a worker that builds
+     vertex buffers; the guest thread does nothing extra.
+   - Car Effects and other title metadata ride in the packet and are
+     interpolated the same way, so they never force a serial path.
+   - Generic across titles. The R4 interp mod, its field list, the render-pass
+     checkpoint/transaction machinery and the private draw workers are
+     deleted once the generic path matches or beats them (measure the
+     match rate: at least 95% of 3D primitives in a race should be matched).
 7. **Snapshots are native-only and cheap.** Snapshot = CPU + RAM + devices +
    native VRAM, all CPU memory, taken at a frame boundary with dirty-page
    deltas. This is cheap enough for every frame, which is what Forza-style
@@ -104,8 +123,33 @@ packets.
 | 1 | Native authority everywhere: native raster thread; all guest reads from native; delete guest-path GL syncs, readbacks and context moves | rt_drain, rt_acquire, context switching, pack path | No guest-path GL wait in a race (counter = 0); pixel-exact GPUREAD and savestate tests pass |
 | 2 | Mailbox presentation, bounded packet queue, lock-free audio ring, MMCSS | backpressure into guest time | Guest holds 60.0 VBlanks/s and 0 starved samples even with the GPU artificially slowed |
 | 3 | Surfaces: direct wide target, on-demand RT tiles, one-pass PGXP depth, scissored clears, persistent buffers | 1.3 GB HR VRAM, double submission, depth replay | 8K60 GPU frame time well under 16.7 ms with all features on |
-| 4 | Extra frames as worker packets with per-packet Car Effects metadata | checkpoints, backup and restore, serial path | 60 distinct images/s at 8K with Car Effects on |
+| 3b | PGXP correctness audit (below) | shimmer, flicker, depth fighting | All PGXP stability tests pass; owner-visible shimmer and flicker gone |
+| 4 | Generic frame-packet interpolation (principle 6); delete r4_interp guest re-execution, transactions and workers | checkpoints, backup and restore, serial path, title-specific camera hack | 60 (and 120) distinct images/s at 8K with Car Effects on; at least 95% primitive match rate in races |
 | 5 | Per-frame native delta snapshots, then Forza-style hold-to-rewind (reverse playback, release to resume) | Rewind snapshot cost | Rewind on costs < 0.5 ms per frame; hold rewinds smoothly |
+
+## PGXP correctness audit (phase 3b)
+
+The owner sees shimmering and flickering. PGXP must be verified correct on
+every front, not assumed. Build measurable checks, find each root cause and
+fix it (never by turning PGXP or a sub-feature off as the answer):
+
+- **Determinism:** the same savestate replayed twice must give byte-identical
+  presented images and identical PGXP vertex streams.
+- **Temporal stability:** with the game paused, or on a static scene,
+  consecutive images must be identical. Any pixel change there is a bug: a
+  cache miss flipping a vertex between precise and integer, seam snapping
+  toggling, depth threshold clears changing domains, or z-fighting.
+- **Per-frame counters:** vertices that fall back to integer (precision cache
+  misses or invalidations), seam-snap decisions that change from frame to frame
+  for the same primitive, depth-domain resets, and pixels failing the depth
+  test by less than epsilon (z-fighting).
+- **Accuracy:** projected PGXP vertices must agree with the integer GTE
+  result to within 1 native pixel. Check perspective texturing (w) for
+  sanity on every primitive kind, and colour correction.
+- **Lifecycle:** the precision cache stays correct across savestate loads,
+  rewind, extra frames and VRAM uploads.
+- Include Car Effects (particles, lighting) in the flicker checks.
+- Keep the checks as regression tests or debug-server counters.
 
 Target after phase 4: native 8K (18x), 60 FPS, Rewind, Car Effects, full
 PGXP, on a Release build, steady 60.0 VBlanks/s, zero starved samples,
