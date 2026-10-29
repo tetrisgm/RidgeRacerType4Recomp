@@ -3,6 +3,22 @@
 The `psxrecomp` and `recomp-ui` submodule gitlinks are the pins. Bump them
 deliberately and record each bump here with the reason and what was verified.
 
+2026-10-29 phase-5 latency follow-up pin: `6cb8b57d` (fork
+`feat/frame-arch-5-rewind`). Preallocated reverse-page pool, immutable capture
+buffer, CPU delta/eviction worker and ordered native checkpoint mailbox.
+Retained worker events avoid Windows condition-variable contention/polling;
+emulation-thread above-normal priority is scoped to configured rewind.
+R4 also reattaches the shared HUD/Effects callback during plugin activation.
+Regeneration: 50 shards unchanged. Release build, 31 permitted R4 tests and
+native/serializer/delta/worker/hold fixtures pass. Hidden 600-second 18x race:
+35,994 captures, zero frame gap/failures/dispatch misses; mean 0.185991 ms,
+p50 0.178 ms, p99 0.298 ms, maximum 0.5175 ms. PGXP fully on; Effects draws
+verified. Mapped Y restores 151 byte-exact states; debug hold restores 154;
+release resumes and all menu probes stay closed. Enhanced reverse presentation
+is still missing, and composed-output artifacts remain: this is not full
+phase-5 acceptance. No renderer-plumbing edits, PR or merge into `r4/main`.
+See [complete evidence and remaining integration](REWIND_PHASE5.md).
+
 2026-10-29 phase-5 topic pin: `6e47aa80` (fork
 `feat/frame-arch-5-rewind`, based on `4f893c1a`). Adds generic native-only
 per-frame reverse-page snapshots and held rewind with muted audio and native

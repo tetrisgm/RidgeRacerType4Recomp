@@ -15,6 +15,7 @@ def main():
     ap.add_argument('--port', type=int, default=4798)
     ap.add_argument('--seconds', type=float, default=10)
     ap.add_argument('--out', type=Path, required=True)
+    ap.add_argument('--host', action='store_true', help='Use mapped host Y instead of debug hold')
     a = ap.parse_args()
     def status(**kw):
         return cmd({'cmd': 'rewind_status', **kw}, port=a.port)
@@ -26,20 +27,27 @@ def main():
     assert count > 30, captured
     mean = (captured['capture_ms'] - before['capture_ms']) / count
     samples = []
-    status(verify=1, hold=1)
+    status(verify=1, hold=0 if a.host else 1)
+    if a.host:
+        cmd({'cmd':'set_input','layer':'host','buttons':'0xEFFF'},port=a.port)
+    menus=[]
     try:
         for _ in range(40):
             time.sleep(.05)
             samples.append(status())
+            menus.append(cmd({'cmd':'runtime_menu'},port=a.port))
     finally:
+        if a.host:
+            cmd({'cmd':'set_input','layer':'host','buttons':'0xFFFF'},port=a.port)
         released = status(hold=0, verify=0)
     time.sleep(.5)
     resumed = status()
     report = dict(capture_frames=count, mean_capture_ms=mean,
                   before=before, captured=captured, reverse_samples=samples,
-                  released=released, resumed=resumed)
+                  released=released, resumed=resumed,host_input=a.host,menus=menus)
     a.out.parent.mkdir(parents=True, exist_ok=True)
     a.out.write_text(json.dumps(report, indent=2) + '\n')
+    assert all(m.get('ok') and not m['open'] for m in menus), menus
     active = [s for s in samples if s['open']]
     assert len(active) >= 30, samples
     assert all(y['frame'] <= x['frame'] for x, y in zip(active, active[1:]))
