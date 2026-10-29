@@ -44,3 +44,21 @@ The shared checkout and its build directory were not modified or used.
 Submodules and regeneration/build outputs belong to this worktree. The
 launcher remote lacked its pinned commit; the exact commit was fetched from
 the existing local repository into this worktree's submodule.
+
+
+## Supervisor continuation
+
+Framework `398e6bc2` strengthens PGXP source provenance and resolves repeated
+primitive groups by occurrence (equal counts) or gated minimum-cost assignment
+(unequal counts). It adds frozen-pair TCP inspection. Unit tests cover original
+RAM provenance through scratchpad and distinct DMA buffers, and assignment
+cases where greedy nearest-neighbour selection would be wrong.
+
+The runtime gate now requires 45 distinct packet pairs and fails on all
+unclassified unmatched geometry; candidate appearances are not silently accepted.
+An initial normal-speed moving sample had no unresolved duplicate groups but
+up to 229 unmatched primitives. This is not the final 45-pair gate.
+
+Regeneration completed with zero generated shard changes. Focused sampler,
+stream and PGXP tests pass; R4 32/32 passes. Presenter cutover and legacy
+removal are still pending the identity/visibility gate.
