@@ -3,7 +3,24 @@
 ## Latest: native authority promoted; continue phase 2
 
 Phase-2 topic is `feat/frame-arch-2-mailbox`, based on `4f893c1a`.
-WIPs through `f51378a2` are committed and pushed to fork; phase 2 is not merged or pinned.
+WIPs through `50ff71f9` are committed on the topic; phase 2 is not merged or pinned.
+
+Latest continuation adds a real hidden-GL complete-packet gate: the new owner
+replays actual RTH commands with full draw-state seeds and per-draw native
+texture inputs, replacing 62 pending frames while stalled and retaining inputs
+after native-worker destruction. 71 checks pass, with GL context transfers only
+at startup/shutdown. The owner also cancels old-timeline tick deadlines before
+reset work; 20 repeated concurrent runs pass. Optional private record batches
+append atomically, and cancellation preserves the last complete pending frame.
+Native facade binding exposes a CPU upload-flush boundary. Dev build, R4 32/32,
+hidden smoke (frame 8496, zero dispatch/segment misses), and 12 live plus 12 paused
+diagnostic requests pass with zero context acquisitions/releases. Owned PID
+24552 stopped. Receipts: `phase2-packet-replay-gl-final/rth-grkmih5g` and
+`phase2-packet-owner-runtime` under `analysis/perf-20261028/`.
+
+The production GL transport is still the old ring. The new fixture validates
+the consumer boundary, not production integration or phase-2 performance.
+Continue the actual packet cutover; no owner-only blocker is identified.
 The audio callback now exclusively owns the resampler, fed by an SPSC PCM
 transport; main/callback register Games/Pro Audio MMCSS. The old push-audio
 diagnostic switch is removed. Load/rewind requests discard old-timeline PCM

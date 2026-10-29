@@ -264,3 +264,25 @@ Framework WIP `cb0dde2d` is pushed on the phase-2 topic, unmerged/unpinned.
 Registered `gl_hd_texture_pack_test` also passes (both hidden HD modes plus
 its native-texture baseline, PGXP renderer features enabled for all three).
 Native-context tests cover both Beetle and Duck formats.
+
+## Complete-packet GL gate, 2026-10-29 (phase 2 WIP)
+
+Framework topic `feat/frame-arch-2-mailbox`, WIP `50ff71f9`, remains unmerged
+and unpinned. The registered `gl_frame_packet_test` uses a hidden real 3x GL
+context with PGXP depth, colour perspective and seams enabled. It replays actual
+RTH records through the new owner, restores complete producer draw state,
+replaces 62 pending packets while the consumer is stalled, and consumes retained
+texture versions after the native worker is destroyed. All 71 checks pass;
+context transfers occur only at startup/shutdown. This is a synthetic ownership
+and pixel test, not a race throughput measurement.
+
+| Gate | Result | Evidence |
+|---|---|---|
+| Complete packet GL replay | 71/71; two consumed frames, 62 replacements | `analysis/perf-20261028/phase2-packet-replay-gl-final/rth-grkmih5g/receipt.json` |
+| Timeline reset / optional batches / concurrent owner | Pass, 20 repeated runs | `frame_mailbox_test` |
+| Parser binding and history guard | 2/2 pass | `gpu_render_pass_provenance_test`, `gpu_gp0_history_guard_test` |
+| Dev build and R4 tests | Pass; 32/32 | `ninja -C build -j2`, CTest |
+| Hidden runtime smoke and diagnostics | Zero dispatch/segment misses; 12 live + 12 paused queries; zero context acquisitions/releases | `analysis/perf-20261028/phase2-packet-owner-runtime/`; owned PID 24552 stopped |
+
+The production GL path still uses the incremental ring. No phase-2 acceptance,
+performance improvement, framework promotion or R4 pin bump is claimed.
