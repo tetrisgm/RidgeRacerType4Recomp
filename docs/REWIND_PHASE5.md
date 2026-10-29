@@ -2,12 +2,116 @@
 
 Implementation on `feat/frame-arch-5-rewind`, based on native-authority
 `4f893c1a`. Framework code is title-independent. The supervisor integrates;
-this topic does not merge phases 2-4 or change `gpu_gl_renderer.c`.
+this topic incorporates the packet-presenter branch through `27d6d167`.
+
+## Enhanced reverse playback and restore repair (2026-10-29)
+
+The earlier native-only presentation limitation below is superseded. Immutable
+frame packets, including owned native texture provenance, are now retained and
+associated with native capture ticks. Holding rewind restores each machine state
+and submits its original packet through the normal enhanced presenter. The next
+restore waits for presentation completion. At the common packet/snapshot history
+boundary it holds the oldest available image; release discards the future,
+reseeds forward presentation and resumes play. Audio stays muted while held and
+its timeline resets on release. No selection menu or launcher change is needed.
+
+### Cause and repair
+
+The duplicated HUD was a composite ownership error: after native reseeding, the
+fast widescreen center splice treated the native 4:3 center as equivalent to the
+enhanced wide image. This copied centered native HUD pixels over repositioned
+enhanced HUD pixels. Restore now invalidates this equivalence for the renderer
+session and uses full mirroring. It also invalidates presentation backup/pass
+generations, depth, seam, hold/interpolation and HD texture caches. GPU restore
+reapplies texture-window, draw-offset and mask state; successful machine restore
+invalidates PGXP shadow metadata without disabling any PGXP feature.
+
+The renderer change is limited to restore invalidation and its fast-path guard;
+the packet presenter implementation is inherited from the main agent. A hidden
+GL regression deliberately creates different native/enhanced centers, proves
+the old splice corrupts the center, and verifies restore preserves the enhanced
+center and all PGXP settings. Its packet-history test replays owned texture
+provenance after destroying the original native producer.
+
+### Memory and integration seam
+
+The retained packet ring has a 512 MiB accounted byte cap, including allocated
+seed/record vector capacity and attachment payloads, plus small container and
+shared-pointer allocation overhead. This cap is unchanged at 8K: history stores
+CPU draw records and native texture provenance, never 8K framebuffers or GL
+readbacks. Native snapshot storage separately reserves about 368 MiB. Existing
+live mailbox slots and presenter GPU allocations are additional: up to three
+leased/pending/producer packets can survive history eviction (128 MiB seed and
+attachment limit, 32 MiB record limit per packet, with vector capacity overhead).
+The 512 MiB number is a history budget, not total process or GPU memory.
+
+`frame_packet_history_*` owns retention, byte eviction and shared storage
+lifetimes. `rt_history_mark(tick)` records the packet published at a capture;
+`rt_history_available/ready/present` enforce aligned replay and completion;
+`rt_history_branch(tick)` drops the future. Restore-only draw records stay private
+and are discarded during reverse playback. Replay uses a fresh epoch/sequence
+with immutable original packet storage. Evicted but leased storage remains live.
+Oversize packets may present normally but cannot be rewound past the common
+history boundary. No redraw preroll is needed.
+
+Merged `origin/feat/frame-arch-2-mailbox` through `27d6d167` (including the phase-3
+owned-input work). Native-raster merge conflicts retain phase-5's fixed draw queue
+and ordered checkpoint mailbox, adding the packet branch's texture observers.
+The supervisor should preserve that checkpoint protocol during subsequent queue
+integration. Owner defaults remain Rewind, 60 FPS, Car Effects and PGXP fully on.
+
+### Final validation
+
+Release build and 31 applicable CTests pass. The legacy PGXP-off boot reference
+test is excluded under the owner's instruction. Regeneration leaves all 50
+shards unchanged. The final hidden-GL packet/restore fixture passes 111 checks.
+The central Beads path `F:/Software/beads/issues` is unavailable on this PC;
+no replacement local database was created.
+
+Native ordering/texture-input, immutable mailbox/history, hold controller and
+portable snapshot handoff fixtures also pass. Snapshot checks include compressed
+and raw images, rejected-input atomicity, and PGXP-shadow invalidation on success.
+Fresh hidden boot-to-race smoke completes all 40 steps through frame 9,759 with
+zero dispatch/segment misses; captures are in `build/rewind-packet-final-smoke`.
+
+Fixed 8K test on Ryzen 7 9800X3D / RTX 4080 SUPER, hidden window and dummy audio:
+120 seconds, 7,200 captures, zero frame gap/failures/dispatch or segment misses.
+Mean emulation-thread capture cost **0.200516 ms**, p50 **0.196 ms**, p99
+**0.316 ms**, maximum **0.7186 ms**. Worker cost totals 2,464.3093 ms across the
+run (0.3423 ms/capture on its separate CPU thread), maximum 0.8625 ms. The mean
+meets 0.5 ms, but this run does not establish a strict sub-0.5 ms worst-case
+guarantee. No outliers were discarded. All PGXP features and Car Effects remain
+on; the Effects counter advances 7,202 times. Resolution was pinned via
+`dynres_force scale=18`: `internal_lines=4320`, `hr_scale=18`, FBO 18432x9216,
+hidden drawable 5120x2880. A preceding unpinned run also passed (mean 0.197645 ms,
+max 0.4733 ms), but is not the fixed-8K timing proof.
+
+Mapped host Y: **94 restores, 94 byte-exact verifications, 94 enhanced packet
+replays**, zero misses, closed menus, successful forward resume. Debug hold:
+**272 restores/verifications/replays**, zero misses; a 12-second hold reaches
+the packet budget boundary and the last 30 samples hold the same frame, then
+release resumes. Observed packet history peaks at **511.8862 MiB**. Screenshots
+capture the actual enhanced presentation owner, not native scanout.
+
+Local ignored evidence (game images are not committed):
+
+- `build/rewind-packet-fixed8k-120s.json`: complete timing/counters/settings.
+- `build/rewind-packet-final-host.json` and `build/rewind-packet-final-debug.json`:
+  per-sample machine state, byte verification counts, menu probes and capture
+  completion receipts. Reproduce with `tools/rewind_demo.py --port 4798 --host
+  --visual build/rewind-demo --out build/rewind-demo.json`; omit `--host` and add
+  `--hold-seconds 12` for the debug-held history-boundary check.
+- `build/packet-held-small.png`: before-fix doubled rank, record, map and tach.
+  `build/rewind-packet-final-host/held-8-small.png` and `released-small.png`:
+  clean single HUD during hold and after release; full-resolution originals
+  accompany these inspection thumbnails. Forward and second held captures are
+  also preserved in both demo directories.
+- `build/rewind-packet-gl/rth-om51menb/receipt.json`: hidden GL fixture, 111 checks.
 
 ## Follow-up: latency and enhanced reverse acceptance
 
-This follow-up is **not phase-5 acceptance**. Enhanced reverse presentation is
-still missing; the native-scanout reverse path below remains in use. The earlier
+Historical follow-up: this was **not phase-5 acceptance**. Enhanced reverse
+presentation was missing; the native-scanout reverse path below was in use. The earlier
 implementation and measurements are retained below as historical evidence.
 
 ### Allocation and capture ownership

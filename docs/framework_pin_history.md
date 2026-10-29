@@ -3,6 +3,19 @@
 The `psxrecomp` and `recomp-ui` submodule gitlinks are the pins. Bump them
 deliberately and record each bump here with the reason and what was verified.
 
+2026-10-29 phase-5 enhanced reverse pin: `c544b04a` (fork
+`feat/frame-arch-5-rewind`). Integrates packet presenter through `27d6d167`, adds
+512 MiB immutable packet history aligned with native capture ticks, waits for
+each replay before stepping again, and branches forward on release. Repairs
+the duplicated HUD by invalidating native/enhanced center-splice equivalence
+and derived caches after restore; PGXP remains fully enabled. Hidden GL fixture:
+111 checks; Release build, 31 permitted CTests, native/mailbox/hold/serializer
+fixtures pass; regeneration leaves 50 shards unchanged. Fixed 18x/4320-line
+120-second run: 7,200 captures, zero gaps/failures/dispatch misses, mean
+0.200516 ms, p99 0.316 ms, maximum 0.7186 ms. Mapped Y: 94 exact restores and
+enhanced replays; debug hold: 272, reaching the bounded history edge and resuming.
+No R4 PR or merge into `r4/main`. See [evidence and hand-off](REWIND_PHASE5.md).
+
 2026-10-29 phase-5 latency follow-up pin: `6cb8b57d` (fork
 `feat/frame-arch-5-rewind`). Preallocated reverse-page pool, immutable capture
 buffer, CPU delta/eviction worker and ordered native checkpoint mailbox.
