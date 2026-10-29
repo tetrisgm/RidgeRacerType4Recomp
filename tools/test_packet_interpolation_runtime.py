@@ -32,13 +32,20 @@ def audit(port, seconds, stationary=False, sample_limit=45):
         errors.append(f"Expected {sample_limit} live packet pairs, observed {len(rows)}")
     if not any(row["matched"] for row in rows):
         errors.append("No matched 3D geometry was observed")
+    if not stationary and any(r.get("mode") == "vertex_source_audit" for r in rows):
+        if not any(r.get("source_moving", 0) for r in rows):
+            errors.append("No moving source geometry was observed; paused samples cannot pass the driving gate")
     for row in rows:
         if row["failed"] or row["ambiguous"] or row["invalid"] or row["partial_provenance"]:
             errors.append(f"Packet {row['sequence']} has ambiguous or missing provenance")
+        if row.get("new_source", 0):
+            errors.append(f"Packet {row['sequence']} has {row['new_source']} unverified new-source vertices")
         if row["unmatched"]:
             errors.append(f"Packet {row['sequence']} has unclassified unmatched geometry")
     return {"mode": "candidate_audit_not_presenter_acceptance", "samples": rows,
             "sample_count": len(rows), "errors": errors,
+            "max_new_source": max((r.get("new_source", 0) for r in rows), default=0),
+            "max_source_moving": max((r.get("source_moving", 0) for r in rows), default=0),
             "max_unmatched": max((r["unmatched"] for r in rows), default=0),
             "max_ambiguous": max((r["ambiguous"] for r in rows), default=0)}
 
@@ -81,7 +88,10 @@ def main():
         parser.error("--seconds must be positive and --samples at least two")
     result = audit(args.port, args.seconds, args.stationary, args.samples)
     if args.capture_pair:
-        result["frozen_pair"] = capture_pair(args.port)
+        try:
+            result["frozen_pair"] = capture_pair(args.port)
+        except (RuntimeError, OSError) as exc:
+            result["errors"].append(f"Capture failed: {exc}")
     args.out.parent.mkdir(parents=True, exist_ok=True)
     args.out.write_text(json.dumps(result, indent=2), encoding="utf-8")
     print(json.dumps({k: v for k, v in result.items() if k not in ("samples", "errors", "frozen_pair")}))
