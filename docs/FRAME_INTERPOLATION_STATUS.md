@@ -28,26 +28,48 @@ Worktree: `C:/Users/Shokunin/dev/r4-wt-interp`; both repositories use
 ## Validation
 
 R4 Release build with JOBS=4 and 23/23 remaining CTests pass. Fresh sampler,
-stream, presenter/metadata and mailbox/lease fixtures pass. Cross-caller staging
-and repaired hidden GL ownership fixtures are being rerun on the final revision.
+stream, presenter/metadata and mailbox/lease fixtures pass, including cross-caller
+staging. Hidden real-GL complete-frame ownership fixture: 111 checks, 0 failures.
 
-The previous 10-second 8K race (18x, full PGXP, Car Effects and Rewind enabled):
+Ten-second hidden 8K races (18x, full PGXP, Car Effects and Rewind enabled),
+compact observer layout at framework `2e39cbe6`:
 
 | Requested output | Distinct images/s | Guest VBlanks/s | Starved samples | Max guest interval | Max output interval |
 | --- | ---: | ---: | ---: | ---: | ---: |
-| 60 | 22.1 | 48.1 | 87750 | 60.701 ms | 123.783 ms |
-| 120 | 18.9 | 43.4 | 121289 | 61.962 ms | 374.202 ms |
+| 60 | 25.6 | 46.5 | 97296 | 60.282 ms | 130.216 ms |
+| 120 | 26.1 | 47.2 | 92910 | 57.104 ms | 103.041 ms |
+| Stock (generic rate 0) | 24.6 | 49.2 | 79172 | 52.923 ms | 100.539 ms |
 
-45-pair census before and after rewind: zero unexplained/unmatched/ambiguous;
-204/204 appearances verified in the initial census. Rewind restored 57 snapshots
-with zero failures/misses, reset the interpolation sequence, and resumed cleanly.
-Car Effects draws increased 221/190; dispatch misses were zero.
+45-pair census: zero unexplained/unmatched/ambiguous. Car Effects draw counts
+increased 257/261 in the 60/120 runs. Dispatch misses were zero. Compact-layout
+rewind restored 49 snapshots with zero failures/misses, cleared interpolation to
+sequence 0, and passed a fresh 45-pair census after resuming.
 
-These numbers predate compact observer metadata and cross-caller staging.
-Their 120-Hz captures still contain intermittent world seams, so they DO NOT
-close visual/no-pop acceptance. Fresh final-revision race validation is underway.
-The 60/120 distinct-images-per-second performance gate is not met.
+Visual comparison FAILS at `2e39cbe6`: all 262 120-Hz images were inspected;
+intermittent side-wall sky gaps and cyan roof strips remain. All 247 stock images
+were inspected; corresponding walls and roof stay closed. Therefore these gaps
+are an interpolation regression, not merely the stock renderer's throughput
+problem. The 60/120 distinct-images-per-second performance gate is also not met.
 
-Evidence is local-only under `analysis/interp-final/`; final follow-up receipts
-will be under `analysis/interp-compact/`. Census counters alone are never claimed
-as proof of smooth output or correct visibility transitions.
+Offline captured pairs identify ordinary near-camera motion triggering per-vertex
+cut masks (79 candidate sources in the compact pair). An experimental whole-model
+extent gate passed its focused fixture but made the live geometry worse: dark
+missing-road regions and intermittent sky holes. The experiment was reverted;
+it is not included in the final topic commits. This rules out accepting a simple
+cut-threshold change as the fix. Exact incorrect correspondence/topology handling
+remains unresolved; endpoint versus in-between attribution was not recorded.
+
+## Integration disposition
+
+Phase 4 is NOT accepted. The topic contains the presenter/FPS cutover and legacy
+removal, but the prerequisite that generic output match or beat the old path has
+not been established. Do not integrate this as a completed replacement. Remaining
+work is to fix interpolation-only geometry gaps, verify true appearance and
+disappearance transitions in captures, verify cuts/respawns with Car Effects,
+and reach the requested 60/120 distinct-image rates without audio starvation.
+Shared framework transaction APIs still serve netplay/stereo/VR; their wholesale
+removal was not performed by this topic.
+
+Evidence is local-only under `analysis/interp-compact/`,
+`analysis/interp-stock-reference/` and `analysis/interp-model-cuts/`.
+Census counters alone are never proof of correct visibility transitions.

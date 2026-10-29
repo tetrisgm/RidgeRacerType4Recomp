@@ -3,6 +3,12 @@
 The `psxrecomp` and `recomp-ui` submodule gitlinks are the pins. Bump them
 deliberately and record each bump here with the reason and what was verified.
 
+2026-10-29 phase-4 validation pin: `bf2fb59e` (documentation-only above
+`2e39cbe6`). Records failed visual and 8K-rate acceptance after stock comparison;
+no production-readiness claim. Final regeneration changes no generated output.
+Compact-layout rewind restores 49 snapshots without failures and resumes a
+clean 45-pair census. See [final evidence](FRAME_INTERPOLATION_STATUS.md).
+
 2026-10-29 phase-4 presenter topic pin: `2e39cbe6` (includes `9ead2f08`).
 Adds retained packet sampling, source-model appearance classification, streamed
 vertex identity, projection interpolation and opaque Car Effects metadata.
