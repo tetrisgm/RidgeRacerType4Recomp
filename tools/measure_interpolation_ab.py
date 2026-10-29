@@ -12,7 +12,7 @@ FLAGS=subprocess.CREATE_NO_WINDOW if os.name=='nt' else 0
 
 def runtimes():
     p=subprocess.run(['powershell','-NoProfile','-Command',
-        '(Get-Process r4-runtime -ErrorAction SilentlyContinue).Id'],capture_output=True,text=True,creationflags=FLAGS)
+        '(Get-Process r4-runtime,clang,clang++,ninja,cc1,cc1plus,lld,ld.lld -ErrorAction SilentlyContinue).Id'],capture_output=True,text=True,creationflags=FLAGS)
     return p.stdout.strip()
 
 def live_runtime_ids():
@@ -33,7 +33,7 @@ def live_runtime_ids():
     try:
         ok=kernel.Process32FirstW(handle,ctypes.byref(entry))
         while ok:
-            if entry.exe.lower()=='r4-runtime.exe':found.append(entry.pid)
+            if entry.exe.lower() in {'r4-runtime.exe','clang.exe','clang++.exe','ninja.exe','cc1.exe','cc1plus.exe','lld.exe','ld.lld.exe'}:found.append(entry.pid)
             ok=kernel.Process32NextW(handle,ctypes.byref(entry))
     finally:kernel.CloseHandle(handle)
     return found
@@ -61,7 +61,7 @@ def main():
         for rate in args.rates:
             for enabled in (False,True):
                 while runtimes():
-                    print('Waiting for other runtime before next A/B arm',flush=True);time.sleep(5)
+                    print('Waiting for other runtime/build before next A/B arm',flush=True);time.sleep(5)
                 name=f'{rate}-'+('B' if enabled else 'A');trace=out/(name+'.csv')
                 if saved is None: state.unlink(missing_ok=True)
                 else: state.write_bytes(saved)
@@ -117,7 +117,7 @@ def main():
                 summary={'name':name,'seconds':duration,'guest_vblanks_s':(after['frame']['frame']-before['frame']['frame'])/duration,
                     'starved_samples':after['audio_stats']['out']['underruns']-before['audio_stats']['out']['underruns'],
                     'distinct_lower_bound_s':sum(int(r['changed']) for r in rows)/duration,'presented_s':len(rows)/duration,
-                    'max_interval_ms':after['main_cadence']['max_ms'],'interference':interference,
+                    'max_interval_ms':after['main_cadence']['max_ms'],'guest_cpu_ms':after['main_cadence'].get('cpu_ms',0),'interference':interference,
                     'max_unmatched':max(r['unmatched'] for r in census),'max_storage_misses':max(r.get('storage_misses',0) for r in census),
                     'failed_pairs_delta':after['packet_interpolation']['interpolation'].get('failed_pairs',0)-config['packet_interpolation']['interpolation'].get('failed_pairs',0),
                     'interpolation':after['packet_interpolation']}
@@ -152,7 +152,7 @@ def main():
                     finally:ask('host_pause',on=0)
                 process.terminate();process.wait(timeout=20);process=None
                 (out/'summary.json').write_text(json.dumps(results,indent=2))
-                if interference:raise RuntimeError('A/B pair rejected: another runtime overlapped; see receipt')
+                if interference:raise RuntimeError('A/B pair rejected: another runtime/build overlapped; see receipt')
     finally:
         if process is not None and process.poll() is None:process.terminate();process.wait(timeout=20)
         if saved is None:state.unlink(missing_ok=True)
