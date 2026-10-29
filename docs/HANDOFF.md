@@ -3,7 +3,7 @@
 ## Latest: native authority promoted; continue phase 2
 
 Phase-2 topic is `feat/frame-arch-2-mailbox`, based on `4f893c1a`.
-WIPs through `cb0dde2d` are committed and pushed to fork; phase 2 is not merged or pinned.
+WIPs through `f51378a2` are committed and pushed to fork; phase 2 is not merged or pinned.
 The audio callback now exclusively owns the resampler, fed by an SPSC PCM
 transport; main/callback register Games/Pro Audio MMCSS. The old push-audio
 diagnostic switch is removed. Load/rewind requests discard old-timeline PCM
@@ -72,6 +72,32 @@ Hidden smoke reaches race with zero misses; live/paused diagnostics retain zero
 context acquisitions/releases. Owned PID 46044 was stopped. Receipts:
 `analysis/perf-20261028/phase2-native-provenance-runtime/`. No performance gate,
 phase-2 merge or pin change yet.
+
+Further WIP: `NativeRasterInputs` now owns per-original-GP0 sampled pages and
+CLUTs in shared/versioned 64x64 native tiles, captured before the draw. HD
+provenance is retained at the same point, shared until its generation changes.
+The collector is bounded (64 MiB logical); overflow drops the collection, not
+native guest work. Tests cover write-then-sample, wrapping, restore/lifetime,
+overflow recovery and exact inputs after 62 mailbox replacements. Production
+does not enable/seal these collections yet. Original GP0 IDs now travel through
+the producer facade into RTH_NATIVE_SOURCE records; they identify per-packet
+inputs, not cross-tick interpolation identities. Host-only work uses zero.
+Texture-bank selection resolves immutable CPU assets on the producer and
+queues their GL creation/selection without taking the context. Bank state is
+included in legacy generated-list capture/replay/restore. Six hidden GL parity
+modes pass (`phase2-native-input-source-gl/rth-pq5xrw76`); full-PGXP bank
+frame-generation tests pass both present paths with identical real digests
+(`phase2-bank-framegen/receipt.json`). The generation fixture now awaits queued
+controls before asserting their applied state; its former assertion failed
+identically without banks (`without-bank.json`). Native/parser focused 12 tests
+and GP0 history test pass. Production still uses the blocking ring: next is the
+actual complete-packet/owner integration, not phase promotion.
+Latest dev build and R4 32/32 pass. Hidden smoke/live+paused queries pass with
+zero misses and zero context acquisitions; owned PID 39400 stopped. Receipts
+are `analysis/perf-20261028/phase2-native-input-runtime/`. The bank replay test
+is now registered as `gl_frame_gen_bank_test` and passes. Owner controls now
+run before their named frame (or a replacing newer frame), diagnostics after;
+an idle control cannot be stranded waiting for another guest frame.
 
 Framework phase-1 topic through `464bc104` is merged/pushed to fork r4/main
 at `4f893c1a`. Original GP0/native pixel and snapshot fixtures pass. The race

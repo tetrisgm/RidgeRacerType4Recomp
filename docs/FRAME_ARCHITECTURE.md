@@ -226,3 +226,25 @@ ownership; transaction APIs themselves remain until their specified phase-4
 replacement. No fallback has been added. HD presentation tracking still uses
 its ordered presentation mirror; independent packets must carry exact native
 texture inputs rather than promote that mirror back to guest authority.
+
+### Phase-2 native input ownership detail (2026-10-29, WIP)
+
+A frame-start VRAM seed alone cannot supply exact inputs for a texture written
+and then sampled during the frame. Native raster collection therefore retains
+the sampled page and CLUT **before each original textured GP0 executes**.
+Unchanged 64x64 native tiles are shared; writes invalidate future versions,
+without changing held packets. Each source command has a monotonic host ID,
+which its enhanced primitives can reference. This ID identifies inputs within
+a packet, not the cross-tick primitive identity required by phase 4.
+HD provenance is captured at the same point and shared until tracking changes.
+The collection has a 64 MiB logical budget; overflow invalidates presentation
+as a whole while all native guest commands continue. Unit tests cover wrapping,
+write-then-sample, restore, held lifetime, shared metadata and overflow recovery.
+The collector is not yet enabled by production frame publication; GL still
+uses the incremental ring. This implements the immutable-input principle, not
+a phase acceptance claim or a replacement for scaled render-to-texture tiles.
+
+Texture-bank selection now queues immutable process-lifetime assets for GL
+creation/selection instead of moving the context. Title resolvers run on the
+producer. The hidden GL parity fixture verifies exact uploaded bytes and no
+context acquisition for either normal or live-CLUT bank selection.
