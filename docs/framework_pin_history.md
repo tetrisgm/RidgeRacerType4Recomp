@@ -3,6 +3,17 @@
 The `psxrecomp` and `recomp-ui` submodule gitlinks are the pins. Bump them
 deliberately and record each bump here with the reason and what was verified.
 
+2026-10-29 phase-4 development topic pin: `cf4f8b69` (fork
+`feat/frame-arch-4-interp`, based on `r4/main` at `d2185504`). Adds a separate
+packet-pair sampler, validated PGXP projection provenance and an opt-in
+presenter audit. This is not a production FPS cutover: repeated-instance
+identity still fails the runtime gate (18/45 samples flagged, up to 66
+ambiguous candidates). R4 build and 32/32 tests, five focused framework tests
+and hidden complete-frame GL fixture pass. Hidden smoke has zero dispatch or
+segment misses. Regeneration leaves all 50 shards unchanged. No legacy path
+deletion, merge, PR or 8K60/120 acceptance. See
+[phase-4 status](FRAME_INTERPOLATION_STATUS.md).
+
 2026-10-29 phase-5 enhanced reverse pin: `c544b04a` (fork
 `feat/frame-arch-5-rewind`). Integrates packet presenter through `27d6d167`, adds
 512 MiB immutable packet history aligned with native capture ticks, waits for
