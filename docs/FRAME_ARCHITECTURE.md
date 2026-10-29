@@ -154,36 +154,45 @@ fix it (never by turning PGXP or a sub-feature off as the answer):
 - Include Car Effects (particles, lighting) in the flicker checks.
 - Keep the checks as regression tests or debug-server counters.
 
-### Phase 3b audit evidence (2026-10-29, in progress)
+### Phase 3b audit evidence (2026-10-29)
 
-The isolated `feat/frame-arch-3b-pgxp-audit` worktree adds `pgxp_frame`
-guest-frame precision and w counters, an over-one-native-pixel counter, and
-`tools/pgxp_static_audit.py` for hidden-window image and triangle-stream
-comparison. Reapplying the already-enabled GTE geometry correction no longer
-invalidates its generation and precision cache. The Race HUD session reset
-restores the shared draw callback cleared by plugin activation; live
-`r4.effects.draw` rose to 265 after loading a race savestate.
+The static A/B shimmer is fixed without disabling PGXP or its corrections.
+A matched paused-race replay using the previous renderer (`cc5638e8`) changed
+**3,452 presented pixels** and **264 high-resolution source pixels** between
+VRAM pages. With the fix, 32 consecutive presents across two loads, plus eight
+presents before and eight after rewind, have one byte-identical image hash.
+Native images and all sampled nonempty PGXP streams match too. Car Effects
+remained enabled and its draw counter advanced 565 times during the replay test.
 
-The static race probe had ten samples: all native 320x240 images matched and
-all four drawn PGXP streams matched after normalizing R4's alternating VRAM
-page Y and packet addresses. Each drawn frame had 509 triangles, 1527
-precision lookups, 58 integer fallbacks, 31 value mismatches, 279 accepted
-vertices more than one native pixel from the integer projection, and 1284/1284
-valid w lookups. The enhanced presented image alternated between two hashes;
-one pair differed at 3379 output pixels. The mismatch persisted with seam
-snapping, PGXP depth, color correction, texture correction, or geometry
-correction individually disabled for diagnosis; normal PGXP settings were
-restored. The static-image requirement therefore remains open. Far-world
-saturated integer projections can legitimately differ by over one pixel from
-unclamped PGXP coordinates, so the counter needs classification by clipping
-and saturation before it can be an accuracy gate.
+The causes were absolute-coordinate float rounding in precision/seam arithmetic,
+hardware interpolation at different framebuffer origins, and normalized texture
+sampling of translated presentation sources. The framework now retains 16.16
+precision until coordinates are local, makes seam decisions local, interpolates
+textured attributes in triangle-local coordinates with reciprocal depth weights,
+and resolves presentation samples relative to an integer texel origin. It does
+not reuse the previous image or change presentation queue ownership.
 
-Two loads of the same race savestate yielded identical first four drawn-frame
-precision counters. The full presented-image replay comparison, per-primitive
-seam decision changes, per-frame depth reset and near-epsilon depth-fail
-counters, rewind and upload lifecycle checks, and a paused Car Effects image
-comparison remain open. An active-race Car Effects probe exercised the restored
-callback, but its scene was moving and cannot serve as a static image check.
+`pgxp_frame` exposes fallback, invalidation, w and classified accuracy counters.
+`pgxp_raster` adds actual shader-pipeline validation, normalized raster-stream
+comparison, seam decision changes, depth reset reasons and an opt-in calibrated
+near-epsilon depth-failure probe. The live probe recorded zero changed seam
+decisions out of 536 matches, two threshold resets per drawn frame, zero invalid
+w/depth inputs, and zero near-epsilon failures out of 625 failed depth samples.
+See [the full audit and reproduction notes](PGXP_AUDIT.md) and the framework's
+[generic diagnostic contract](../psxrecomp/docs/PGXP_AUDIT.md).
+
+The literal **one-native-pixel accuracy gate is not satisfied** by the existing
+preserve-projection feature: this scene has 842 such accepted lookups (324
+unclamped, 518 preserved projections). An analytical regression demonstrates why
+recovering discarded MAC fractions can legitimately move a vertex almost two
+pixels from integer SXY. The audit reports these cases instead of clamping away
+precision or claiming that gate passed. This numerical requirement needs to be
+reconciled with preserved projection before phase 3b can be called fully closed.
+A forced Car Effects backfire also continues to animate during game pause: 32
+presents produced 15 hashes while native images and PGXP streams remained
+identical. Its changes are confined to the particle region. This is a separate
+title-effect update issue, outside this task's permitted PGXP/GTE/depth/seam scope,
+and is preserved as a failing `--particle-car 0` audit check.
 
 Target after phase 4: native 8K (18x), 60 FPS, Rewind, Car Effects, full
 PGXP, on a Release build, steady 60.0 VBlanks/s, zero starved samples,
