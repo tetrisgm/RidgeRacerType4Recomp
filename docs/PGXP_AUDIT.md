@@ -9,10 +9,13 @@ work. `gpu_gl_renderer.c` is touched, including a small local-coordinate samplin
 change in `present_target_quad`; presentation queues, threading and frame
 scheduling are not restructured.
 
-Two acceptance conditions remain open: paused forced-particle animation in the
-title effect code, and the strict one-native-pixel distance gate. The latter is
-a documented exception, not a claimed pass: preserved projection intentionally recovers information discarded
-by integer GTE arithmetic. See the accuracy section below.
+The two remaining acceptance conditions are now closed: Car Effects freezes
+while paused/static/rewinding, and all 842 >1-pixel projections have producer-
+verified explanations. The one-pixel gate excludes only qualified exact
+projections recovering hardware saturation or discarded fractions; unknown,
+derived, near-plane/divide-overflow and screen-saturation differences still fail.
+No PGXP feature is disabled. This continuation does not touch
+`gpu_gl_renderer.c` or presentation plumbing.
 
 ## Matched before/after evidence
 
@@ -89,48 +92,90 @@ frozen extra-frame contexts and generation changes. The GL fixture uploads a
 white texture and a U-gradient texture, then verifies actual perspective colour
 and UV values, so a matching black image cannot pass as texture correctness.
 
-## Forced particles: separate pause failure
+## Car Effects pause and lifecycle closure
 
-A separate paused test triggers the existing `r4.effects flame 0 1` debug command.
-The backfire counter advances once, and 32 consecutive presents have **15 image
-hashes**. Native images and normalized PGXP streams remain identical. All changes
-are confined to x=1748..3165, y=2236..2879 in the 5120x2880 output, around the
-car's particle region; 566,784 pixels change in the union. The surrounding scene
-is byte-identical. This is actual particle animation/expiry, not the fixed
-alternation of the two display buffers.
+Root causes: R4's draw-frame counter continues during the pause menu, and
+ambient-light smoothing/readback ran on every host presentation. The mod now
+publishes the guest pause flag and speedometer with its race snapshot. A tested
+clock advances particles, event emission and ambient sampling only for forward
+guest frames with changed physical scene state, outside pause and rewind.
+Sampler-owned event ages are excluded from scene comparison. Frozen frames
+rebase the time origin, so resume never catches up elapsed pause time. Lighting
+uses the copied speedometer rather than reading live guest RAM on the renderer.
 
-`r4_car_effects.cpp` advances particles from its game-frame/VBlank sample and
-currently has no pause guard around `game_events` / `advance`. That title-effect
-source is outside the explicitly permitted PGXP/GTE/precision-cache/depth/seam
-scope, so it was not changed or masked with a renderer workaround. The strict
-paused-image requirement with live particles therefore remains **failed**. The
-normal paused test above keeps Car Effects and lighting enabled, but does not
-force an active particle burst.
+A savestate callback requests a render-thread reset of disposable particles,
+velocity/event history, ambient-readback history and RNG, retaining GL resources.
+This also handles accepted rewind and makes a repeated forced burst deterministic.
+The clock regression covers repeated presentations, paused draw frames, static
+scenes, rewind, backward/large time jumps and forward resume.
 
-Reproduce this negative check by adding `--particle-car 0` to the audit command.
-It requires a real backfire-counter increment and fails if the captures change.
-The report records this separately from the passing no-burst stability/replay
-checks. Full phase 3b closure requires the supervisor to address this title-effect
-pause behavior as well as reconcile the accuracy criterion below.
+| Forced-particle measurement | Before | After |
+|---|---:|---:|
+| Consecutive presented images in two-load replay | 32 | 32 |
+| Distinct image hashes | 15 (one-load original test) | 1 |
+| Changed pixels across the original paused burst | 566,784 | 0 |
+| Simulation updates during paused replay | unguarded | 0 |
+| Draw callbacks in final lifecycle replay | n/a | 612 |
+| Verified forced backfires | 1 | 2 |
 
-## Accuracy: explicit unresolved criterion
+A further eight presents after accepting rewind and retriggering the burst match
+the same image and vertex stream. Simulation stays frozen while rewind is open;
+unpausing then advances it 60 times over 120 observed VBlanks. Dispatch misses
+remain zero. Native images and normalized PGXP streams match their original
+pre-continuation hashes above.
 
-The audit detects 842 accepted vertices more than one native pixel from integer
-GTE results: 324 unclamped projections and 518 preserved projections, zero derived
-coordinate cases. These are stable across replay. The raw normalized ring also
-includes wide/unclamped coordinates, so it is not interchangeable with the
-pre-transform lookup counter.
+## Accuracy: all 842 differences classified
 
-A minimal analytical example: MAC1=4095, MAC3=151*4096, H=300, OFX=0. Integer
-IR1 truncates to zero, hence SXY.x=0. Preserving the MAC fraction gives x approximately 1.98627.
-There is no way to keep that exact projection and simultaneously enforce a
-one-pixel distance from zero. A regression verifies the exact result. No clipping
-or sub-feature disable was added to hide these counters. The literal one-pixel
-acceptance criterion therefore remains open; the temporal-stability criterion
-passes. This is not a claim that every moving-race visual artifact is eliminated.
+Counts below are mutually exclusive per accepted lookup, observed identically in
+four drawn samples (2,580 lookups each). Tags are attached at the GTE producer,
+travel only with the intact value-validated word, and are cleared by partial
+writes or mismatched values. They never change geometry or acceptance decisions.
+
+| Class | Count | Decision / reason |
+|---|---:|---|
+| Exact projection recovering IR1/IR2 saturation | 324 | PGXP is correct for enhanced geometry: integer IR clamps at -32768/+32767; the qualified unwrapped MAC retains the actual coordinate. Exclude from the integer-distance gate. |
+| Exact unsaturated projection preserving MAC fractions and true division | 518 | PGXP is correct: integer IR/SZ discard 12 fractional bits and UNR approximates division. Their error can exceed one screen pixel. Exclude only with exact producer provenance. |
+| SZ saturation alone / together with IR | 0 / 0 | Qualified exact projection is likewise correct when recovering depth above 65535; regression covers both, and counters remain explicit. |
+| Near-plane / divide overflow | 0 | Not excluded. Exact projection rejects H >= 2*Z; ordinary IR projection must still agree. Any accepted >1-pixel case fails the audit. |
+| SXY screen clamp without qualified exact recovery | 0 | Not excluded; any such difference fails. |
+| Derived / unexplained | 0 / 0 | Not excluded; loss of provenance cannot silently grant an exception. |
+
+Analytical regression: MAC1=4095, MAC3=151*4096, H=300, OFX=0 gives
+integer IR1=0 and SXY.x=0; the exact position is approximately 1.98627.
+The new actual-RTPS regression verifies that this reaches the fractional class.
+Far-world fixtures verify `(40000,-35000,60000)` projects to `(360,-55)` with
+OF=(160,120), H=300, while integer IR saturation gives different coordinates.
+Another fixture covers combined IR/SZ saturation at Z=100000. Wrapped MACs,
+lm sign clamps, stale words and partial writes retain their rejection tests.
+
+The harness now requires all >1-pixel counts to equal the sum of the four
+qualified exact classes, with zero unexplained/divide/screen cases. It also
+requires zero simulation advances during a forced paused burst and verifies
+that injecting the burst actually changes the image. Raw 842 remains visible;
+it has not been clamped away or hidden.
+
+### Matched-fixture compatibility
+
+Execution-profile identity hashes include PGXP sources and headers, so adding
+counters invalidates the original fixture's profile cookie even though guest
+state, wire layouts and projection values are unchanged. Production validation
+was retained. For this controlled comparison only, an isolated copy of slot 1
+had its 4-byte profile cookie updated; all bytes after the 36-byte header are
+unchanged (SHA-256 `6f7e6b04713bf16b19b3c9cc662c45992056e632ac4eb5ec13262173443b91af`).
+The original profile cookie `586579a5` was reconstructed from committed source;
+mod-memory layout `d94f80f6` was independently decoded from the save. The
+original file was untouched. Local `fixture-migration.json` records the receipt.
+Successful loads still pass every remaining loader check, and matching original
+native/vertex hashes validate that the fixture represents the same scene.
+This is local audit fixture preparation, not a save migration shipped to users.
+
+Forced-burst PNG SHA-256: `2f206fe75de862f86dfbbdfa21330aea3a2e1fd25ab39c4be0a9498d8462860c`.
 
 ## Tests and reproduction
 
+- The fresh hidden boot-to-race smoke reaches frame 8,721 with 3,676,439
+  static dispatch hits and zero misses. Regeneration updates zero shards.
+- `r4_effects_clock` builds and passes through CTest.
 - Five CPU suites pass: PGXP, word-shadow, seam snap, seam batch, GTE register
   access. The new seam test requires bit-identical decisions across translations.
 - Hidden real-GL regression: 2,000 seeded triangles of each of four kinds at
@@ -147,7 +192,7 @@ Start the runtime hidden with dummy audio and `PSX_PRESENT_SHOT_BURST=8`. Load
 an isolated paused race slot, then run:
 
 ```powershell
-python tools/pgxp_static_audit.py analysis/pgxp-audit/recheck --port 4898 --samples 2 --expected-burst 8 --replay-slot 1 --replays 2 --require-effects
+python tools/pgxp_static_audit.py analysis/pgxp-audit/recheck --port 4898 --samples 2 --expected-burst 8 --replay-slot 1 --replays 2 --require-effects --particle-car 0
 ```
 
 The harness checks the real GL interpolation stage, requires nonempty drawn

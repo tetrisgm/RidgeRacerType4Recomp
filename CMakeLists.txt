@@ -286,6 +286,7 @@ if(R4_BUILD_TESTS AND BUILD_TESTING)
         add_test(NAME ${name} COMMAND test_${name})
         set_tests_properties(${name} PROPERTIES DEPENDS ${name}_build)
     endfunction()
+    r4_plugin_test(r4_effects_clock "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_r4_effects_clock.cpp")
     r4_plugin_test(r4_interp "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_r4_interp.c"
         "${PSXRECOMP_ROOT}/runtime/src/render_pass_plan.c")
     if(NOT MSVC)

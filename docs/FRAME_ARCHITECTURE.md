@@ -181,18 +181,15 @@ w/depth inputs, and zero near-epsilon failures out of 625 failed depth samples.
 See [the full audit and reproduction notes](PGXP_AUDIT.md) and the framework's
 [generic diagnostic contract](../psxrecomp/docs/PGXP_AUDIT.md).
 
-The literal **one-native-pixel accuracy gate is not satisfied** by the existing
-preserve-projection feature: this scene has 842 such accepted lookups (324
-unclamped, 518 preserved projections). An analytical regression demonstrates why
-recovering discarded MAC fractions can legitimately move a vertex almost two
-pixels from integer SXY. The audit reports these cases instead of clamping away
-precision or claiming that gate passed. This numerical requirement needs to be
-reconciled with preserved projection before phase 3b can be called fully closed.
-A forced Car Effects backfire also continues to animate during game pause: 32
-presents produced 15 hashes while native images and PGXP streams remained
-identical. Its changes are confined to the particle region. This is a separate
-title-effect update issue, outside this task's permitted PGXP/GTE/depth/seam scope,
-and is preserved as a failing `--particle-car 0` audit check.
+Phase 3b's remaining conditions are closed. The 842 differences are now
+producer-classified: 324 recover IR saturation and 518 preserve fractional MAC
+projection/true division. These qualified exact projections are excluded from
+the integer-distance gate with the analytical reasons in PGXP_AUDIT; all other
+classes must remain within one pixel. There are zero unexplained differences.
+Car Effects now gates particle/event/ambient updates on forward changed guest
+scenes, freezes in pause/static scenes/rewind, and resets disposable state on
+loads. Forced bursts produce one hash across 32 presents/two loads, with zero
+simulation updates; eight more after rewind match. Resume advances normally.
 
 Target after phase 4: native 8K (18x), 60 FPS, Rewind, Car Effects, full
 PGXP, on a Release build, steady 60.0 VBlanks/s, zero starved samples,

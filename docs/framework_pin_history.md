@@ -3,6 +3,16 @@
 The `psxrecomp` and `recomp-ui` submodule gitlinks are the pins. Bump them
 deliberately and record each bump here with the reason and what was verified.
 
+2026-10-29 PGXP audit closure topic pin: `a39e54a7` (fork
+`feat/frame-arch-3b-pgxp-audit`) adds producer-validated accuracy classes:
+324 IR saturation recoveries + 518 fractional exact projections, zero
+unexplained. Five focused framework CPU suites pass. R4's effects clock test,
+hidden forced-particle replay/rewind/resume check and fresh race smoke pass;
+32 forced-burst presents plus eight after rewind share one image hash, zero
+paused simulation updates, and zero dispatch misses. Regeneration changes
+zero shards. `gpu_gl_renderer.c` is untouched in this continuation; the earlier
+A/B fix remains. No merge or R4 PR; supervisor integrates. See PGXP_AUDIT.md.
+
 2026-10-29 PGXP audit topic pin: `cc5638e8` (fork
 `feat/frame-arch-3b-pgxp-audit`, based on `r4/main` `4f893c1a`) preserves the
 GTE precision-cache generation on repeated enable and adds guest-frame PGXP

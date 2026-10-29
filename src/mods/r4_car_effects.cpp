@@ -32,6 +32,8 @@
 #include <vector>
 
 #include "imgui.h"
+#include "r4_effects_clock.h"
+#include "psx_rewind.h"
 
 extern "C" {
 #include "host_overlay.h"
@@ -132,6 +134,9 @@ std::atomic<int> g_lab_smoke{0};         /* car + 1; smoke forced while non-zero
 std::atomic<int> g_lab_everywhere{0};    /* 1: effects seen from anywhere (no "from behind" filter) */
 std::atomic<int> g_lab_debug{-1}, g_lab_delay{-1}, g_lab_active{-1};
 std::atomic<unsigned> g_last_vblanks{0};  /* VBlanks of the last game frame (lab) */
+
+R4EffectsClock g_clock;
+std::atomic<bool> g_restore{false};
 
 uint32_t g_rng = 0x9E3779B9u;
 float rnd() {   /* xorshift: fast, no state shared with rand() */
@@ -858,7 +863,7 @@ void lighting(const R4RaceState &c, bool split_screen) {
     float d[3] = {c.light_dir[0], c.light_dir[1], c.light_dir[2]};
     if (d[1] > 0.f) { d[0] = -d[0]; d[1] = -d[1]; d[2] = -d[2]; }
     const float distant = 4.0e6f;
-    float sx, sy, depth;
+    float sx = 0, sy = 0, depth = 0;
     const int in_front = (d[0] != 0.f || d[1] != 0.f || d[2] != 0.f) &&
                          r4_race_project(&c, 0, k.eye[0] + d[0] * distant, k.eye[1] + d[1] * distant,
                                          k.eye[2] + d[2] * distant, &sx, &sy, &depth);
@@ -867,7 +872,7 @@ void lighting(const R4RaceState &c, bool split_screen) {
     if (in_front && su > -0.6f && su < 1.6f && sv > -0.6f && sv < 1.6f)
         psx_host_set_post_uniform("u_sun", su, sv, 1.f, 1.f);
     else psx_host_set_post_uniform("u_sun", 0.5f, 1.5f, 0.f, 0.f);
-    const float kmh = (float)(int16_t)psx_mod_read_half(0x800AC0B0u + 0x296u);   /* player's speedometer */
+    const float kmh = (float)c.speedometer;   /* player's speedometer */
     psx_host_set_post_uniform("u_race", std::fmin(1.f, kmh / 300.f), ((float)k.ofx + m) / lw,
                               1.f - (float)k.ofy / 240.f, 1.f);
     body_reflections(c, d, lw, m);
@@ -949,18 +954,38 @@ void r4_car_effects_draw(ImDrawList *dl, int W, int H, bool split_screen) {
         return;
     }
     if (!textures_ready()) return;
+    if (g_restore.exchange(false)) {
+        /* Host simulation is disposable on timeline changes. GL resources
+         * remain owned by this render thread; no guest-thread GL calls. */
+        State fresh;
+        fresh.env_read = g.env_read; fresh.active = g.active; fresh.debug = g.debug;
+        fresh.textures_tried = g.textures_tried; fresh.delay = g.delay;
+        std::copy(std::begin(g.tex_smoke), std::end(g.tex_smoke), fresh.tex_smoke);
+        fresh.tex_fire = g.tex_fire;
+        fresh.pbo[0] = g.pbo[0]; fresh.pbo[1] = g.pbo[1]; fresh.pbo_w = g.pbo_w;
+        g = std::move(fresh);
+        g_clock = R4EffectsClock{};
+        g_rng = 0x9E3779B9u;
+        psx_mod_counter_add("r4.effects.restore", 1);
+    }
 
-    measure_ambient(W, H);
+    const bool simulate = g_clock.step(c, psx_rewind_is_open() != 0);
     /* Particles advance at the game's pace, like the cars and the camera they
      * are drawn with (the state of one game frame, held for two presented
      * frames). Advanced on every presented frame, those moving at the car's
      * speed got up to a game frame ahead of it (2.5 m at full speed): flames
      * and embers crept onto the boot instead of leaving the tailpipes. */
-    if (c.frame != g.frame) {
+    if (simulate) {
+        measure_ambient(W, H);
+        psx_mod_counter_add("r4.effects.simulation", 1);
         const float dt_game = game_events(c);
         g.frame = c.frame;
         emit_continuous(c, dt_game);
         advance(dt_game);
+    } else {
+        /* Rebase time during pause/static/rewind; resume has no catch-up. */
+        g.frame = c.frame;
+        g.vblank = c.vblank;
     }
     if (const int f = g_lab_flame.exchange(0)) {   /* after the advance: from the car on screen */
         const int i = (f & 0xFF) - 1;
@@ -981,17 +1006,21 @@ void r4_car_effects_draw(ImDrawList *dl, int W, int H, bool split_screen) {
     }
 }
 
+static void r4_car_effects_restore(void) { g_restore.store(true); }
+
 static void r4_car_effects_activate(void) { s_enabled.store(true, std::memory_order_relaxed); }
 
 /* Host-only: a plan without this plugin (or a netplay match) starts with the
  * effects off and the lighting chain's live values neutral. */
 static void r4_car_effects_session_reset(void) {
+    g_restore.store(true);
     s_enabled.store(false, std::memory_order_relaxed);
     r4_car_effects_off_race();
 }
 
 PSX_MOD_CONSTRUCTOR(r4_register_car_effects) {
     (void)psx_mod_register_activation_plugin(PLUGIN_ID, r4_car_effects_activate);
+    (void)psx_mod_register_savestate_plugin(PLUGIN_ID, r4_car_effects_restore);
     (void)psx_mod_register_session_reset_plugin(PLUGIN_ID, r4_car_effects_session_reset);
     (void)psx_mod_register_command("r4.effects", effects_command);
 }

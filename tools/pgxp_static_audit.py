@@ -105,6 +105,7 @@ def main():
         raise RuntimeError(f"PGXP GL interpolation pipeline unavailable: {pipeline}")
     effects_before = request({"cmd": "mod_counters"}, args.port)
     samples = []
+    particle_baselines = []
     for replay in range(args.replays if args.replay_slot is not None else 1):
         if args.replay_slot is not None:
             request({"cmd": "savestate", "op": "load", "slot": args.replay_slot}, args.port)
@@ -113,6 +114,7 @@ def main():
             if state["pending"] or not state["last_ok"] or state["last_op"] != "load":
                 raise RuntimeError(f"savestate load failed: {state}")
         if args.particle_car is not None:
+            particle_baselines.append(capture(f"baseline-r{replay}", args.out_dir, args.port, args.expected_burst))
             request({"cmd": "mod_cmd", "name": "r4.effects",
                      "args": f"flame {args.particle_car} 1"}, args.port)
         for i in range(args.samples):
@@ -121,21 +123,30 @@ def main():
     def effects_count(snapshot, name="r4.effects.draw"):
         return sum(c["count"] for c in snapshot["counters"] if c["name"] == name)
     effects_draws = effects_count(effects_after) - effects_count(effects_before)
+    simulations = effects_count(effects_after, "r4.effects.simulation") - effects_count(effects_before, "r4.effects.simulation")
     backfires = effects_count(effects_after, "r4.effects.backfire") - effects_count(effects_before, "r4.effects.backfire")
     drawn = [s for s in samples if s["triangles"]]
     report = {"samples": samples, "pgxp_settings": pgxp, "particle_car": args.particle_car,
+              "particles_visible": args.particle_car is None or all(
+                  b["image_sha256"] != samples[i * args.samples]["image_sha256"]
+                  for i, b in enumerate(particle_baselines)),
+              "accuracy_explained": all(s["pgxp"].get("over_one_unexplained", -1) == 0 and
+                  s["pgxp"].get("over_one_divide", -1) == 0 and
+                  s["pgxp"].get("over_one_sxy", -1) == 0 and
+                  s["pgxp"]["over_one_pixel"] == sum(s["pgxp"].get("over_one_" + k, 0)
+                      for k in ("ir_sz", "ir", "sz", "fraction")) for s in samples),
               "images_identical": len({p["sha256"] for s in samples for p in s["presents"]}) == 1,
               "native_images_identical": len({s["native_sha256"] for s in samples}) == 1,
-              "drawn_samples": len(drawn), "effects_draws": effects_draws, "effects_backfires": backfires,
+              "drawn_samples": len(drawn), "effects_draws": effects_draws, "effects_backfires": backfires, "effects_simulations": simulations,
               "vertex_streams_identical": len(drawn) == len(samples) and
                   len({s["stream_sha256"] for s in drawn}) == 1}
     (args.out_dir / "pgxp-static-audit.json").write_text(
         json.dumps(report, indent=2) + "\n", encoding="utf-8")
     print(json.dumps({k:v for k,v in report.items() if k != "samples"}, indent=2))
-    return 0 if (report["images_identical"] and report["native_images_identical"] and
+    return 0 if (report["particles_visible"] and report["accuracy_explained"] and report["images_identical"] and report["native_images_identical"] and
                  report["vertex_streams_identical"] and
                  (not args.require_effects or effects_draws > 0) and
-                 (args.particle_car is None or backfires > 0)) else 1
+                 (args.particle_car is None or (backfires > 0 and simulations == 0))) else 1
 
 
 if __name__ == "__main__":

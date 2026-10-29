@@ -1,6 +1,6 @@
 {
-  "framework_commit": "4abefe28",
-  "phase_fully_closed": false,
+  "framework_commit": "a39e54a7",
+  "phase_fully_closed": true,
   "baseline_renderer": "cc5638e8",
   "baseline_difference": {
     "present-*.png": {
@@ -1233,8 +1233,712 @@
     "render_thread_frames": 80,
     "render_thread_configurations": 6
   },
-  "open_criteria": [
-    "Strict distance <=1 native pixel conflicts with preserved fractional/unclamped projection; 842 accepted vertices exceed it.",
-    "Forced Car Effects particles advance while paused in title effect code outside the permitted edit scope."
-  ]
+  "open_criteria": [],
+  "closure": {
+    "report": {
+      "samples": [
+        {
+          "frame": 1044,
+          "image_sha256": "2f206fe75de862f86dfbbdfa21330aea3a2e1fd25ab39c4be0a9498d8462860c",
+          "presents": [
+            {
+              "file": "present-r0-0.png_00_r_f0.png",
+              "sha256": "2f206fe75de862f86dfbbdfa21330aea3a2e1fd25ab39c4be0a9498d8462860c"
+            },
+            {
+              "file": "present-r0-0.png_01_r_f0.png",
+              "sha256": "2f206fe75de862f86dfbbdfa21330aea3a2e1fd25ab39c4be0a9498d8462860c"
+            },
+            {
+              "file": "present-r0-0.png_02_r_f0.png",
+              "sha256": "2f206fe75de862f86dfbbdfa21330aea3a2e1fd25ab39c4be0a9498d8462860c"
+            },
+            {
+              "file": "present-r0-0.png_03_r_f0.png",
+              "sha256": "2f206fe75de862f86dfbbdfa21330aea3a2e1fd25ab39c4be0a9498d8462860c"
+            },
+            {
+              "file": "present-r0-0.png_04_r_f0.png",
+              "sha256": "2f206fe75de862f86dfbbdfa21330aea3a2e1fd25ab39c4be0a9498d8462860c"
+            },
+            {
+              "file": "present-r0-0.png_05_r_f0.png",
+              "sha256": "2f206fe75de862f86dfbbdfa21330aea3a2e1fd25ab39c4be0a9498d8462860c"
+            },
+            {
+              "file": "present-r0-0.png_06_r_f0.png",
+              "sha256": "2f206fe75de862f86dfbbdfa21330aea3a2e1fd25ab39c4be0a9498d8462860c"
+            },
+            {
+              "file": "present-r0-0.png_07_r_f0.png",
+              "sha256": "2f206fe75de862f86dfbbdfa21330aea3a2e1fd25ab39c4be0a9498d8462860c"
+            }
+          ],
+          "native_sha256": "7c786392ab8d0343f9bf24162f198855715e9f5579e2ce89d36cfeacf87668fb",
+          "triangles": 860,
+          "stream_sha256": "bf09f4f4006a2807584995cecc48f2387a489373190b5a44837250a596ccaaf8",
+          "pgxp": {
+            "id": 0,
+            "ok": true,
+            "frame": 1044,
+            "lookups": 2580,
+            "integer_fallback": 58,
+            "value_mismatch": 31,
+            "trunc_reject": 0,
+            "tolerance_reject": 0,
+            "depth_only": 0,
+            "over_one_pixel": 842,
+            "over_one_unclamped": 324,
+            "over_one_derived": 0,
+            "over_one_ir_sz": 0,
+            "over_one_ir": 324,
+            "over_one_sz": 0,
+            "over_one_fraction": 518,
+            "over_one_divide": 0,
+            "over_one_sxy": 0,
+            "over_one_unexplained": 0,
+            "over_one_projected": 518,
+            "invalidations": 0,
+            "w": {
+              "lookups": 2220,
+              "valid": 2220,
+              "untracked": 0,
+              "mismatch": 0,
+              "partial": 0,
+              "no_z": 0
+            }
+          },
+          "coordinate_errors": {
+            "max_abs_x": 282.59413146972656,
+            "max_abs_y": 1.32513427734375,
+            "over_one": 844,
+            "onscreen_over_one": 380
+          },
+          "opcodes": {
+            "0x30": 50,
+            "0x34": 8,
+            "0x2C": 320,
+            "0x3C": 408,
+            "0x38": 52,
+            "0x2E": 4,
+            "0x22": 18
+          },
+          "raster": {
+            "id": 0,
+            "ok": true,
+            "pipeline_ready": 1,
+            "textured_geometry_vertices": 3,
+            "sequence": 220,
+            "floats": 62190,
+            "changed": 0,
+            "first": 0,
+            "a": 0,
+            "b": 0,
+            "overflow": 0,
+            "render_frame": 1022,
+            "depth_resets": [
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "seam_matched": 0,
+            "seam_changed": 0,
+            "depth_probe": 0,
+            "epsilon": 9.5367431640625e-07,
+            "depth_failed_samples": 0,
+            "depth_near_samples": 0,
+            "invalid_w": 0,
+            "invalid_z": 0,
+            "invalid_w_total": 0,
+            "invalid_z_total": 0
+          }
+        },
+        {
+          "frame": 1084,
+          "image_sha256": "2f206fe75de862f86dfbbdfa21330aea3a2e1fd25ab39c4be0a9498d8462860c",
+          "presents": [
+            {
+              "file": "present-r0-1.png_00_r_f0.png",
+              "sha256": "2f206fe75de862f86dfbbdfa21330aea3a2e1fd25ab39c4be0a9498d8462860c"
+            },
+            {
+              "file": "present-r0-1.png_01_r_f0.png",
+              "sha256": "2f206fe75de862f86dfbbdfa21330aea3a2e1fd25ab39c4be0a9498d8462860c"
+            },
+            {
+              "file": "present-r0-1.png_02_r_f0.png",
+              "sha256": "2f206fe75de862f86dfbbdfa21330aea3a2e1fd25ab39c4be0a9498d8462860c"
+            },
+            {
+              "file": "present-r0-1.png_03_r_f0.png",
+              "sha256": "2f206fe75de862f86dfbbdfa21330aea3a2e1fd25ab39c4be0a9498d8462860c"
+            },
+            {
+              "file": "present-r0-1.png_04_r_f0.png",
+              "sha256": "2f206fe75de862f86dfbbdfa21330aea3a2e1fd25ab39c4be0a9498d8462860c"
+            },
+            {
+              "file": "present-r0-1.png_05_r_f0.png",
+              "sha256": "2f206fe75de862f86dfbbdfa21330aea3a2e1fd25ab39c4be0a9498d8462860c"
+            },
+            {
+              "file": "present-r0-1.png_06_r_f0.png",
+              "sha256": "2f206fe75de862f86dfbbdfa21330aea3a2e1fd25ab39c4be0a9498d8462860c"
+            },
+            {
+              "file": "present-r0-1.png_07_r_f0.png",
+              "sha256": "2f206fe75de862f86dfbbdfa21330aea3a2e1fd25ab39c4be0a9498d8462860c"
+            }
+          ],
+          "native_sha256": "7c786392ab8d0343f9bf24162f198855715e9f5579e2ce89d36cfeacf87668fb",
+          "triangles": 860,
+          "stream_sha256": "bf09f4f4006a2807584995cecc48f2387a489373190b5a44837250a596ccaaf8",
+          "pgxp": {
+            "id": 0,
+            "ok": true,
+            "frame": 1084,
+            "lookups": 2580,
+            "integer_fallback": 58,
+            "value_mismatch": 31,
+            "trunc_reject": 0,
+            "tolerance_reject": 0,
+            "depth_only": 0,
+            "over_one_pixel": 842,
+            "over_one_unclamped": 324,
+            "over_one_derived": 0,
+            "over_one_ir_sz": 0,
+            "over_one_ir": 324,
+            "over_one_sz": 0,
+            "over_one_fraction": 518,
+            "over_one_divide": 0,
+            "over_one_sxy": 0,
+            "over_one_unexplained": 0,
+            "over_one_projected": 518,
+            "invalidations": 0,
+            "w": {
+              "lookups": 2220,
+              "valid": 2220,
+              "untracked": 0,
+              "mismatch": 0,
+              "partial": 0,
+              "no_z": 0
+            }
+          },
+          "coordinate_errors": {
+            "max_abs_x": 282.59413146972656,
+            "max_abs_y": 1.32513427734375,
+            "over_one": 844,
+            "onscreen_over_one": 380
+          },
+          "opcodes": {
+            "0x30": 50,
+            "0x34": 8,
+            "0x2C": 320,
+            "0x3C": 408,
+            "0x38": 52,
+            "0x2E": 4,
+            "0x22": 18
+          },
+          "raster": {
+            "id": 0,
+            "ok": true,
+            "pipeline_ready": 1,
+            "textured_geometry_vertices": 3,
+            "sequence": 241,
+            "floats": 62190,
+            "changed": 0,
+            "first": 0,
+            "a": 0,
+            "b": 0,
+            "overflow": 0,
+            "render_frame": 1064,
+            "depth_resets": [
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "seam_matched": 0,
+            "seam_changed": 0,
+            "depth_probe": 0,
+            "epsilon": 9.5367431640625e-07,
+            "depth_failed_samples": 0,
+            "depth_near_samples": 0,
+            "invalid_w": 0,
+            "invalid_z": 0,
+            "invalid_w_total": 0,
+            "invalid_z_total": 0
+          }
+        },
+        {
+          "frame": 1538,
+          "image_sha256": "2f206fe75de862f86dfbbdfa21330aea3a2e1fd25ab39c4be0a9498d8462860c",
+          "presents": [
+            {
+              "file": "present-r1-0.png_00_r_f0.png",
+              "sha256": "2f206fe75de862f86dfbbdfa21330aea3a2e1fd25ab39c4be0a9498d8462860c"
+            },
+            {
+              "file": "present-r1-0.png_01_r_f0.png",
+              "sha256": "2f206fe75de862f86dfbbdfa21330aea3a2e1fd25ab39c4be0a9498d8462860c"
+            },
+            {
+              "file": "present-r1-0.png_02_r_f0.png",
+              "sha256": "2f206fe75de862f86dfbbdfa21330aea3a2e1fd25ab39c4be0a9498d8462860c"
+            },
+            {
+              "file": "present-r1-0.png_03_r_f0.png",
+              "sha256": "2f206fe75de862f86dfbbdfa21330aea3a2e1fd25ab39c4be0a9498d8462860c"
+            },
+            {
+              "file": "present-r1-0.png_04_r_f0.png",
+              "sha256": "2f206fe75de862f86dfbbdfa21330aea3a2e1fd25ab39c4be0a9498d8462860c"
+            },
+            {
+              "file": "present-r1-0.png_05_r_f0.png",
+              "sha256": "2f206fe75de862f86dfbbdfa21330aea3a2e1fd25ab39c4be0a9498d8462860c"
+            },
+            {
+              "file": "present-r1-0.png_06_r_f0.png",
+              "sha256": "2f206fe75de862f86dfbbdfa21330aea3a2e1fd25ab39c4be0a9498d8462860c"
+            },
+            {
+              "file": "present-r1-0.png_07_r_f0.png",
+              "sha256": "2f206fe75de862f86dfbbdfa21330aea3a2e1fd25ab39c4be0a9498d8462860c"
+            }
+          ],
+          "native_sha256": "7c786392ab8d0343f9bf24162f198855715e9f5579e2ce89d36cfeacf87668fb",
+          "triangles": 860,
+          "stream_sha256": "bf09f4f4006a2807584995cecc48f2387a489373190b5a44837250a596ccaaf8",
+          "pgxp": {
+            "id": 0,
+            "ok": true,
+            "frame": 1538,
+            "lookups": 2580,
+            "integer_fallback": 58,
+            "value_mismatch": 31,
+            "trunc_reject": 0,
+            "tolerance_reject": 0,
+            "depth_only": 0,
+            "over_one_pixel": 842,
+            "over_one_unclamped": 324,
+            "over_one_derived": 0,
+            "over_one_ir_sz": 0,
+            "over_one_ir": 324,
+            "over_one_sz": 0,
+            "over_one_fraction": 518,
+            "over_one_divide": 0,
+            "over_one_sxy": 0,
+            "over_one_unexplained": 0,
+            "over_one_projected": 518,
+            "invalidations": 0,
+            "w": {
+              "lookups": 2220,
+              "valid": 2220,
+              "untracked": 0,
+              "mismatch": 0,
+              "partial": 0,
+              "no_z": 0
+            }
+          },
+          "coordinate_errors": {
+            "max_abs_x": 282.59413146972656,
+            "max_abs_y": 1.32513427734375,
+            "over_one": 844,
+            "onscreen_over_one": 380
+          },
+          "opcodes": {
+            "0x30": 50,
+            "0x34": 8,
+            "0x2C": 320,
+            "0x3C": 408,
+            "0x38": 52,
+            "0x2E": 4,
+            "0x22": 18
+          },
+          "raster": {
+            "id": 0,
+            "ok": true,
+            "pipeline_ready": 1,
+            "textured_geometry_vertices": 3,
+            "sequence": 471,
+            "floats": 62190,
+            "changed": 0,
+            "first": 0,
+            "a": 0,
+            "b": 0,
+            "overflow": 0,
+            "render_frame": 1526,
+            "depth_resets": [
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "seam_matched": 0,
+            "seam_changed": 0,
+            "depth_probe": 0,
+            "epsilon": 9.5367431640625e-07,
+            "depth_failed_samples": 0,
+            "depth_near_samples": 0,
+            "invalid_w": 0,
+            "invalid_z": 0,
+            "invalid_w_total": 0,
+            "invalid_z_total": 0
+          }
+        },
+        {
+          "frame": 1586,
+          "image_sha256": "2f206fe75de862f86dfbbdfa21330aea3a2e1fd25ab39c4be0a9498d8462860c",
+          "presents": [
+            {
+              "file": "present-r1-1.png_00_r_f0.png",
+              "sha256": "2f206fe75de862f86dfbbdfa21330aea3a2e1fd25ab39c4be0a9498d8462860c"
+            },
+            {
+              "file": "present-r1-1.png_01_r_f0.png",
+              "sha256": "2f206fe75de862f86dfbbdfa21330aea3a2e1fd25ab39c4be0a9498d8462860c"
+            },
+            {
+              "file": "present-r1-1.png_02_r_f0.png",
+              "sha256": "2f206fe75de862f86dfbbdfa21330aea3a2e1fd25ab39c4be0a9498d8462860c"
+            },
+            {
+              "file": "present-r1-1.png_03_r_f0.png",
+              "sha256": "2f206fe75de862f86dfbbdfa21330aea3a2e1fd25ab39c4be0a9498d8462860c"
+            },
+            {
+              "file": "present-r1-1.png_04_r_f0.png",
+              "sha256": "2f206fe75de862f86dfbbdfa21330aea3a2e1fd25ab39c4be0a9498d8462860c"
+            },
+            {
+              "file": "present-r1-1.png_05_r_f0.png",
+              "sha256": "2f206fe75de862f86dfbbdfa21330aea3a2e1fd25ab39c4be0a9498d8462860c"
+            },
+            {
+              "file": "present-r1-1.png_06_r_f0.png",
+              "sha256": "2f206fe75de862f86dfbbdfa21330aea3a2e1fd25ab39c4be0a9498d8462860c"
+            },
+            {
+              "file": "present-r1-1.png_07_r_f0.png",
+              "sha256": "2f206fe75de862f86dfbbdfa21330aea3a2e1fd25ab39c4be0a9498d8462860c"
+            }
+          ],
+          "native_sha256": "7c786392ab8d0343f9bf24162f198855715e9f5579e2ce89d36cfeacf87668fb",
+          "triangles": 860,
+          "stream_sha256": "bf09f4f4006a2807584995cecc48f2387a489373190b5a44837250a596ccaaf8",
+          "pgxp": {
+            "id": 0,
+            "ok": true,
+            "frame": 1586,
+            "lookups": 2580,
+            "integer_fallback": 58,
+            "value_mismatch": 31,
+            "trunc_reject": 0,
+            "tolerance_reject": 0,
+            "depth_only": 0,
+            "over_one_pixel": 842,
+            "over_one_unclamped": 324,
+            "over_one_derived": 0,
+            "over_one_ir_sz": 0,
+            "over_one_ir": 324,
+            "over_one_sz": 0,
+            "over_one_fraction": 518,
+            "over_one_divide": 0,
+            "over_one_sxy": 0,
+            "over_one_unexplained": 0,
+            "over_one_projected": 518,
+            "invalidations": 0,
+            "w": {
+              "lookups": 2220,
+              "valid": 2220,
+              "untracked": 0,
+              "mismatch": 0,
+              "partial": 0,
+              "no_z": 0
+            }
+          },
+          "coordinate_errors": {
+            "max_abs_x": 282.59413146972656,
+            "max_abs_y": 1.32513427734375,
+            "over_one": 844,
+            "onscreen_over_one": 380
+          },
+          "opcodes": {
+            "0x30": 50,
+            "0x34": 8,
+            "0x2C": 320,
+            "0x3C": 408,
+            "0x38": 52,
+            "0x2E": 4,
+            "0x22": 18
+          },
+          "raster": {
+            "id": 0,
+            "ok": true,
+            "pipeline_ready": 1,
+            "textured_geometry_vertices": 3,
+            "sequence": 492,
+            "floats": 62190,
+            "changed": 0,
+            "first": 0,
+            "a": 0,
+            "b": 0,
+            "overflow": 0,
+            "render_frame": 1568,
+            "depth_resets": [
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "seam_matched": 0,
+            "seam_changed": 0,
+            "depth_probe": 0,
+            "epsilon": 9.5367431640625e-07,
+            "depth_failed_samples": 0,
+            "depth_near_samples": 0,
+            "invalid_w": 0,
+            "invalid_z": 0,
+            "invalid_w_total": 0,
+            "invalid_z_total": 0
+          }
+        }
+      ],
+      "pgxp_settings": {
+        "id": 0,
+        "ok": true,
+        "enabled": 1,
+        "cpu_mode": 1,
+        "tolerance": -1.0,
+        "position_fallback": 0,
+        "preserve_projection": 1,
+        "culling": 1,
+        "suppress": 0,
+        "active": 1,
+        "depth_buffer": 1,
+        "depth_tris": 152644,
+        "depth_clears": 578,
+        "seam_tris": 150628,
+        "depth_clear_reasons": {
+          "config": 1,
+          "area": 0,
+          "fill": 0,
+          "threshold": 577,
+          "present": 0
+        },
+        "snap": {
+          "active": 1,
+          "tris": 152644,
+          "snapped_tris": 8954,
+          "snapped_edges": 12419,
+          "strip_tris": 3171,
+          "us": 98633
+        }
+      },
+      "particle_car": 0,
+      "particles_visible": true,
+      "accuracy_explained": true,
+      "images_identical": true,
+      "native_images_identical": true,
+      "drawn_samples": 4,
+      "effects_draws": 612,
+      "effects_backfires": 2,
+      "effects_simulations": 0,
+      "vertex_streams_identical": true
+    },
+    "rewind": {
+      "before_rewind": {
+        "startup.disc_hash": 1,
+        "r4.race.view": 785,
+        "r4.effects.draw": 954,
+        "r4.effects.restore": 3,
+        "r4.effects.backfire": 2
+      },
+      "during_rewind": {
+        "startup.disc_hash": 1,
+        "r4.race.view": 785,
+        "r4.effects.draw": 1280,
+        "r4.effects.restore": 3,
+        "r4.effects.backfire": 2
+      },
+      "restored": {
+        "startup.disc_hash": 1,
+        "r4.race.view": 972,
+        "r4.effects.draw": 1577,
+        "r4.effects.restore": 4,
+        "r4.effects.backfire": 2
+      },
+      "frozen": {
+        "startup.disc_hash": 1,
+        "r4.race.view": 995,
+        "r4.effects.draw": 1600,
+        "r4.effects.restore": 4,
+        "r4.effects.backfire": 3
+      },
+      "resumed": {
+        "startup.disc_hash": 1,
+        "r4.race.view": 1062,
+        "r4.effects.draw": 1667,
+        "r4.effects.restore": 4,
+        "r4.effects.backfire": 3,
+        "r4.effects.simulation": 60
+      },
+      "after_rewind": {
+        "frame": 2002,
+        "image_sha256": "2f206fe75de862f86dfbbdfa21330aea3a2e1fd25ab39c4be0a9498d8462860c",
+        "presents": [
+          {
+            "file": "present-after-rewind.png_00_r_f0.png",
+            "sha256": "2f206fe75de862f86dfbbdfa21330aea3a2e1fd25ab39c4be0a9498d8462860c"
+          },
+          {
+            "file": "present-after-rewind.png_01_r_f0.png",
+            "sha256": "2f206fe75de862f86dfbbdfa21330aea3a2e1fd25ab39c4be0a9498d8462860c"
+          },
+          {
+            "file": "present-after-rewind.png_02_r_f0.png",
+            "sha256": "2f206fe75de862f86dfbbdfa21330aea3a2e1fd25ab39c4be0a9498d8462860c"
+          },
+          {
+            "file": "present-after-rewind.png_03_r_f0.png",
+            "sha256": "2f206fe75de862f86dfbbdfa21330aea3a2e1fd25ab39c4be0a9498d8462860c"
+          },
+          {
+            "file": "present-after-rewind.png_04_r_f0.png",
+            "sha256": "2f206fe75de862f86dfbbdfa21330aea3a2e1fd25ab39c4be0a9498d8462860c"
+          },
+          {
+            "file": "present-after-rewind.png_05_r_f0.png",
+            "sha256": "2f206fe75de862f86dfbbdfa21330aea3a2e1fd25ab39c4be0a9498d8462860c"
+          },
+          {
+            "file": "present-after-rewind.png_06_r_f0.png",
+            "sha256": "2f206fe75de862f86dfbbdfa21330aea3a2e1fd25ab39c4be0a9498d8462860c"
+          },
+          {
+            "file": "present-after-rewind.png_07_r_f0.png",
+            "sha256": "2f206fe75de862f86dfbbdfa21330aea3a2e1fd25ab39c4be0a9498d8462860c"
+          }
+        ],
+        "native_sha256": "7c786392ab8d0343f9bf24162f198855715e9f5579e2ce89d36cfeacf87668fb",
+        "triangles": 860,
+        "stream_sha256": "bf09f4f4006a2807584995cecc48f2387a489373190b5a44837250a596ccaaf8",
+        "pgxp": {
+          "id": 0,
+          "ok": true,
+          "frame": 2002,
+          "lookups": 2580,
+          "integer_fallback": 58,
+          "value_mismatch": 31,
+          "trunc_reject": 0,
+          "tolerance_reject": 0,
+          "depth_only": 0,
+          "over_one_pixel": 842,
+          "over_one_unclamped": 324,
+          "over_one_derived": 0,
+          "over_one_ir_sz": 0,
+          "over_one_ir": 324,
+          "over_one_sz": 0,
+          "over_one_fraction": 518,
+          "over_one_divide": 0,
+          "over_one_sxy": 0,
+          "over_one_unexplained": 0,
+          "over_one_projected": 518,
+          "invalidations": 0,
+          "w": {
+            "lookups": 2220,
+            "valid": 2220,
+            "untracked": 0,
+            "mismatch": 0,
+            "partial": 0,
+            "no_z": 0
+          }
+        },
+        "coordinate_errors": {
+          "max_abs_x": 282.59413146972656,
+          "max_abs_y": 1.32513427734375,
+          "over_one": 844,
+          "onscreen_over_one": 380
+        },
+        "opcodes": {
+          "0x30": 50,
+          "0x34": 8,
+          "0x2C": 320,
+          "0x3C": 408,
+          "0x38": 52,
+          "0x2E": 4,
+          "0x22": 18
+        },
+        "raster": {
+          "id": 0,
+          "ok": true,
+          "pipeline_ready": 1,
+          "textured_geometry_vertices": 3,
+          "sequence": 702,
+          "floats": 62190,
+          "changed": 0,
+          "first": 0,
+          "a": 0,
+          "b": 0,
+          "overflow": 0,
+          "render_frame": 1987,
+          "depth_resets": [
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "seam_matched": 0,
+          "seam_changed": 0,
+          "depth_probe": 0,
+          "epsilon": 9.5367431640625e-07,
+          "depth_failed_samples": 0,
+          "depth_near_samples": 0,
+          "invalid_w": 0,
+          "invalid_z": 0,
+          "invalid_w_total": 0,
+          "invalid_z_total": 0
+        }
+      },
+      "dispatch": {
+        "id": 0,
+        "ok": true,
+        "static_hits": 582673,
+        "miss_total": 0,
+        "miss_unique": 0,
+        "segment_miss_total": 0,
+        "segment_miss_unique": 0
+      }
+    },
+    "fixture_migration": {
+      "original_cookie": "0x812af953",
+      "original_profile_cookie": "0x586579a5",
+      "layout_cookie": "0xd94f80f6",
+      "current_profile": "c3745900035d8ccbbdbf8d3e71041b8e7f8e0fdad647bca8a1a108b9444e8f7f",
+      "new_cookie": "0x1a3bd9f6",
+      "payload_sha256": "6f7e6b04713bf16b19b3c9cc662c45992056e632ac4eb5ec13262173443b91af"
+    },
+    "fresh_smoke": {
+      "id": 0,
+      "ok": true,
+      "static_hits": 3676439,
+      "miss_total": 0,
+      "miss_unique": 0,
+      "segment_miss_total": 0,
+      "segment_miss_unique": 0
+    },
+    "tests": {
+      "framework_cpu_suites": 5,
+      "effects_clock_ctest": true,
+      "regen_updated_shards": 0
+    },
+    "note": "Earlier forced_particle entries record the pre-fix failure, retained as baseline evidence."
+  }
 }
