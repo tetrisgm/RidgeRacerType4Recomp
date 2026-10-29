@@ -11,13 +11,13 @@
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT"
-# Emitters in the project's build-recompiler/ (gitignored): the tree the
-# framework CLI prefers and the one tools/run_r4.sh compiles overlays with.
-# Always (re)built incrementally, so a pin bump never generates with emitters
-# from the previous pin.
-bash psxrecomp/tools/ci/build_emitters.sh --framework psxrecomp \
-    --build-dir build-recompiler --jobs "${JOBS:-8}" >/dev/null
-python3 psxrecomp/psxrecomp_cli.py generate --config game.toml --project-root . \
+# Keep the CLI's emitter build under the requested job limit.
+JOBS="${JOBS:-2}"
+export CMAKE_BUILD_PARALLEL_LEVEL="$JOBS"
+# Generate already rebuilds build-recompiler/ incrementally when sources are
+# present. A second shell build used a differently formatted toolchain stamp
+# on Windows and made the CLI discard and rebuild those same objects.
+"${PYTHON:-python3}" psxrecomp/psxrecomp_cli.py generate --config game.toml --project-root . \
     --no-toolchain-download "$@"
 # GEN_FULL_GLOB is evaluated at configure time, so re-configure existing build
 # trees in case the shard count changed.

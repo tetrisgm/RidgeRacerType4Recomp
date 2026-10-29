@@ -3,6 +3,16 @@
 The `psxrecomp` and `recomp-ui` submodule gitlinks are the pins. Bump them
 deliberately and record each bump here with the reason and what was verified.
 
+2026-10-28 native-authority phase pin: `4f893c1a` (fork `r4/main`, merge of
+`feat/frame-arch-1-native-authority` through `464bc104`). Original GP0 executes
+on a CPU-native raster worker; guest VRAM reads, snapshots and scanout no
+longer depend on GL. Renderer controls/diagnostics and CPU images are queued;
+native display history replaces continuous debug VRAM readback. Native pixel
+oracle and save fixtures pass, framework unit gate/R4 32 tests/hidden GL and
+race smoke pass, and the same-save all-on race has zero context acquisitions.
+Queue backpressure, legacy ownership APIs and the remaining rollout are open;
+53.075 VBlanks/s is not the performance target. No recompiler changes.
+
 2026-10-28 performance pin: `ac65fcf5` (fork `fix/race-cadence-metrics`,
 to `r4/main`) adds opt-in `main_cadence` debug telemetry for host VBlank
 intervals and pre-wait pacing debt; no guest timing changes. It carries

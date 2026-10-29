@@ -5,7 +5,83 @@ code has not moved since its row is not re-tested (CLAUDE.md, Verification
 scale). Update the row when its code changes or a new check is run.
 Evidence dirs are local (not tracked).
 
-## Frame architecture implementation, 2026-10-28 — phase 1 incomplete
+## Native-authority phase gate, 2026-10-28
+
+Framework `464bc104`: native GP0/GPUREAD/snapshot fixtures pass; the all-on
+18x race records **zero context acquisitions/releases**. Queue backpressure
+is still present and belongs to phase 2. This is not real-time acceptance.
+Legacy non-race ownership APIs and transaction deletion remain, as recorded
+in FRAME_ARCHITECTURE's sequencing note.
+
+| Change | VBlanks/s | Max interval ms | Starved samples | Swap completions/s | Scene / present GPU ms |
+|---|---:|---:|---:|---:|---:|
+| Native history + queued diagnostics (`native-phase1-history18`) | 53.075 | 67.360 | 79173 | 53.16 | 3.670 / 12.813 |
+
+15 seconds, hidden 7680x4320,18x,60 FPS requested,Rewind/Car Effects/full
+PGXP on. Distinct images/s is not established by swap counts. Total GPU
+rolling average16.523ms; aggregate emulation CPU13.421ms is not per-thread
+attribution. Cumulative render-queue backpressure10604.621ms; no context moves.
+
+Full standalone framework build passed. Non-hardware CTest:297 listed,
+2 disabled,3 skipped,292 passed after repairing stale fixture links and
+three stale source/fixture guards. The external-runtime diagnostic test then
+passed live and paused against an owned hidden process (12 queries including
+FBO readback/diff and native display history), with zero acquisitions.
+Dev build/R4 CTest32/32 passed. Six hidden GL fixture modes match all direct/
+threaded pixel hashes, including Release configuration publication and an
+immutable image exceeding half the transport ring. Hidden tools/smoke.py
+reached race frame8767 with zero dispatch/segment misses; the race screenshot
+was inspected. Native history was enabled for this smoke.
+
+Receipts:local analysis/perf-20261028/framework-unit-results.txt (initial
+run plus passing targeted rerun),native-history-gl-gate/rth-oybouali/,
+native-native-history-gate/,native-phase1-history18.json. All owned processes
+were stopped. No visible window or display-mode change occurred.
+
+## Frame architecture native integration, 2026-10-28 — phase 1 open
+
+Production original-GP0 capture, native reads/scanout and cache-preserving GPU
+snapshot wire are integrated on the phase-1 topic. Dev build and R4 ctest
+32/32 pass. Ten focused framework parser/native/scanout fixtures pass, as does
+actual-parser debug/production parity with partial-A0 save/load. Hidden
+boot-to-race smoke has zero dispatch and segment misses. Separate pinned GPU
+oracle: 10000 mixed draws, 10000 coordinate cases, 2000 interlaced draws and
+2000 fill/copies match every native halfword; PGXP remains enabled.
+
+Same-save hidden 18x, 60 FPS requested, Rewind/Car Effects/full PGXP on:
+
+| Build/change | VBlanks/s | Max interval ms | Starved samples | Swap completions/s | Scene / present GPU ms |
+|---|---:|---:|---:|---:|---:|
+| Earlier all-on baseline (`fundamentals-60-18`) | 27.309 | 143.778 | 362296 | 26.04 | not recorded here |
+| Queued snapshot copy (`fundamentals-copy18`) | 40.043 | 124.752 | 220180 | 40.07 | not recorded here |
+| Native authority integrated (`native-authority-integrated-18`) | 39.716 | 77.948 | 224724 | 39.69 | 6.312 / 14.502 |
+| Queued controls / private presentation mirror (`native-owner-18`) | 9.643 | 251.139 | 566583 | 10.15 | 15.418 / 75.359 |
+| Repeat with GPU telemetry, 10 s (`native-owner-memory18`) | 43.031 | 123.660 | 128764 | 43.85 | 9.300 / 12.022 |
+| Large-record transport and ownership handshake (`native-owner-final18`, `1f5f6e1a`) | 53.353 | 64.265 | 78556 | 53.33 | 3.720 / 12.625 |
+
+These are 15-second diagnostic runs, not Release acceptance. Swap completions
+are **not** distinct-image counts. GPU figures are the renderer's rolling
+256-sample averages. Native integration removes guest GPU readback dependency;
+it does not yet remove queue backpressure or the old presentation passes.
+Phase 1's zero-GL-wait gate remains open; no phase has been promoted.
+The three owner-queue runs recorded zero context acquisitions/releases over
+the whole run, but still incurred render/present queue backpressure. Their
+large variance is unresolved; these moving-race samples are not sufficient
+to attribute the entire cadence change to a code change. The 10-second repeat
+used about 11040 MiB total GPU memory (including other desktop use), with
+2790 MHz graphics clock and up to 98% GPU utilization.
+
+`1f5f6e1a` is pushed as WIP, not merged or pinned. Build and 32/32 R4 tests
+pass; the six hidden GL modes match direct/threaded hashes, including an
+immutable CPU image larger than half the 32 MiB command ring. The transport
+fixture passes five repeats of 8860 checks after fixing a stale ownership
+acknowledgement. Hidden `tools/smoke.py` reaches race with zero dispatch and
+segment misses (`native-owner-final-gates/`). Additional diagnostic ownership
+work remains uncommitted and is not covered by that measurement.
+Receipts are local `analysis/perf-20261028/native-integrated-gates/`,
+`native-field-gate/`, `native-transfer-gate/`, and the named JSON files.
+
+## Earlier component checkpoint, 2026-10-28 — phase 1 incomplete
 
 Framework topic `feat/frame-arch-1-native-authority`, WIP `b56f4914` plus
 `5ca01d0e` and native-polygon WIP `643af69d`, is pushed to `fork` but not merged or pinned. Independent raster

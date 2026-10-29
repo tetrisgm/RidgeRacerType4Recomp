@@ -1,6 +1,74 @@
 # Handoff
 
-## Current work: frame architecture, 2026-10-28 (phase 1 incomplete)
+## Latest: native authority promoted; continue phase 2
+
+Framework phase-1 topic through `464bc104` is merged/pushed to fork r4/main
+at `4f893c1a`. Original GP0/native pixel and snapshot fixtures pass. The race
+records zero GL context acquisitions, but render-queue backpressure remains:
+53.075 VBlanks/s,max67.360ms,79173starved,53.16swap completions/s at18x/all-on.
+Native display history and pure-render diagnostics have no GL drain/context
+move. Full framework build/unit gate, R4 32 tests, six hidden GL modes and
+hidden smoke frame8767 pass; live/paused renderer queries pass. All owned
+processes are stopped. Phase-1 gate is specifically native authority/race
+context ownership; non-race legacy ownership APIs migrate with phase2 packet
+controls and transactions disappear in phase4. Exact native HD texture inputs
+must travel with independent packets. See FRAME_ARCHITECTURE sequencing note.
+
+Continue phases2,3,3b,4,5 without ending at a checkpoint. Phase4 match bar is
+100%. No R4 PRs, packaging, visible windows or display changes.
+
+The following records are historical and superseded where they conflict.
+
+## Current work: native authority integrated, phase 1 still open
+
+Latest framework WIP is `1f5f6e1a`, pushed on the phase-1 topic, unmerged.
+It queues renderer controls and immutable CPU/depth24/blank/hold images,
+publishes diagnostic snapshots, removes handoff VRAM publication, and carries
+oversized records through bounded transport fragments instead of GL migration.
+All six hidden GL modes, transport tests, build/32 R4 tests, and hidden smoke
+pass. Latest same-save all-on 18x run: 53.353 VBlanks/s, 64.265 ms maximum,
+78556 starved samples, 53.33 swap completions/s, zero context acquisitions.
+Earlier repeats varied substantially (9.643 and 43.031 VBlanks/s); do not claim
+causal performance acceptance. Details and receipts are in VERIFIED.
+
+Work after that commit: thread-safe completed-thumbnail publication removes
+present-image-ring GL drains. Its concurrent Windows writer/reader test passes.
+An asynchronous render-owner diagnostic callback is being integrated into the
+TCP server for pure-renderer handlers (coherency ring, present ring, post-AA).
+It uses IO_EXEC ownership and thread-local response append ownership so the
+emulation thread continues while the renderer produces a response. Dev build,
+32 R4 tests, hidden smoke (zero misses), six GL fixture modes and live/paused
+TCP queries pass. Additional pure-renderer queries (shader, bloom, batch sites,
+interpolation) are covered too. These changes remain uncommitted. The full
+framework unit tree in `psxrecomp/build-prsync` is currently rebuilding; it is
+Release/debug-tools-off, but is not the final R4 Release performance build.
+Do not merge/pin until remaining phase-1 ownership paths and gates are resolved.
+
+Continue the full rollout through 2, 3, 3b, 4 and 5 without stopping at a
+checkpoint. Phase 4 requires **100%** matching of primitives present in both
+packets (owner commit `26b54a3`). No phase has passed acceptance or merged.
+
+On `feat/frame-arch-1-native-authority`, original GP0 inputs now reach the
+native worker before widescreen transforms and RGB555 conversion. GPUREAD,
+native scanout, savestates and rewind VRAM read native CPU memory. Snapshot
+wire preserves texture/palette cache state and partial uploads. Reference
+coverage: 10000 mixed draws, 10000 coordinate cases, 2000 interlaced draws,
+2000 fill/copies; all exact. Fixed interlaced fills and odd GPUREAD high halves;
+write-invalidated row caching removes per-halfword worker round trips.
+
+Dev build, R4 32/32, ten parser/native/scanout framework fixtures, actual-parser
+debug/production parity and hidden boot-to-race smoke pass (zero misses).
+Latest integrated measurement `native-authority-integrated-18.json` is still
+39.716 VBlanks/s, max 77.948 ms, 224724 starved samples. Remaining phase-1 work:
+renderer controls/diagnostics still migrate GL context; old transaction and
+backend publication paths remain. Mailbox must use independent native inputs,
+not drop incremental GL records that future frames depend on. No active game
+process remains from that measurement. R4 gitlink remains `ac65fcf5` deliberately.
+
+The following section records the earlier component-only checkpoint; its
+"not integrated" statements are superseded by the status above.
+
+## Previous checkpoint: frame architecture, 2026-10-28 (phase 1 incomplete)
 
 Follow `docs/FRAME_ARCHITECTURE.md`, including owner amendment `b832af3`:
 phase 3b audits PGXP; phase 4 is generic packet interpolation, not private

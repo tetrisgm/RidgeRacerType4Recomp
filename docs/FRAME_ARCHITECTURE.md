@@ -174,7 +174,10 @@ Partial GP0(A0) payloads are independently observable before the full upload
 rectangle completes. The native queue now supports payload fragments with a
 pixel offset and mask state; snapshots can retain the exact received prefix,
 including wrapping and an odd final halfword. Tests cover taking and restoring
-a snapshot between fragments. Runtime routing is not switched yet.
+a snapshot between fragments. Runtime routing now captures original GP0
+packets before presentation transforms and RGB555 truncation. GPUREAD, native
+scanout, snapshots and restore use the native worker. GPU snapshots include
+texture/palette cache contents, including intentionally stale valid entries.
 
 The phase-1 topic branch starts at fork `r4/main` (`ac65fcf5`). The earlier
 `fix/queued-vram-snapshot` commits remain preserved separately: their GL-owner
@@ -185,5 +188,41 @@ or been merged as part of this implementation yet.
 Native polygon groundwork (`643af69d`) now retains RGB888 and applies integer
 attribute interpolation and guest dithering in a separate native-only entry
 point. The existing presentation raster is unchanged. Hand-known gradient and
-dither fixtures pass; production routing and full reference parity are still
-required before calling phase 1 complete.
+dither fixtures pass. Subsequent work integrated production routing and compared
+10000 mixed draw cases, 10000 signed-coordinate cases, 2000 interlaced draw cases
+and 2000 fill/copy cases against a pinned separate Beetle GPU oracle. This is
+tested coverage, not a claim of exhaustive hardware equivalence. Native GPUREAD
+also retains the adjacent high halfword of an odd transfer. A write-invalidated
+CPU row cache avoids a worker wake per halfword.
+
+Phase 1 is not accepted yet: configuration and diagnostic GL context handoffs
+remain, as do presentation transactions. The phase-2 queue work must retain
+native upload/copy effects when dropping a presentation packet; dropping
+records from the existing incremental ring without independent packet inputs
+would corrupt subsequent images. Component test success is not phase acceptance.
+
+WIP `1f5f6e1a` queues frequently used controls and CPU presentation images,
+including immutable overlays/display configuration. Diagnostic snapshots avoid
+context moves for frequently polled counters. Large transport records are
+fragmented and assembled on the render owner; no oversized-image fallback
+runs GL on the guest thread. This transport still has backpressure, explicitly
+left for phase 2. Three hidden all-on runs recorded zero context acquisitions,
+but legacy control/diagnostic/transaction APIs still require migration or
+deletion before the ownership audit is complete.
+
+### Phase-1 integration boundary (2026-10-28)
+
+The native-authority acceptance fixtures and race context-migration counter
+now pass at framework `464bc104`: original GP0, partial uploads, native
+GPUREAD/scanout, cache-preserving snapshots, and zero acquisitions/releases
+through the all-on 18x race. Native display history no longer performs GPU
+readback; pure-render diagnostics run as copied requests on the render owner.
+
+Sequencing detail: the existing incremental presentation ring still blocks
+at its two-frame limit. Removing that wait is phase 2, not a claim of this
+phase. Legacy non-race ownership APIs (live allocation, texture banks, XR and
+transaction diagnostics) remain to migrate with independent packet/control
+ownership; transaction APIs themselves remain until their specified phase-4
+replacement. No fallback has been added. HD presentation tracking still uses
+its ordered presentation mirror; independent packets must carry exact native
+texture inputs rather than promote that mirror back to guest authority.
