@@ -2,6 +2,32 @@
 
 ## Latest: native authority promoted; continue phase 2
 
+Phase-2 topic is `feat/frame-arch-2-mailbox`, based on `4f893c1a`.
+WIP `3b2fd278` is committed and pushed to fork; it is not merged or pinned.
+The audio callback now exclusively owns the resampler, fed by an SPSC PCM
+transport; main/callback register Games/Pro Audio MMCSS. The old push-audio
+diagnostic switch is removed. Load/rewind requests discard old-timeline PCM
+on the callback without discarding subsequently produced samples. Exact
+resampler parity, concurrent wrap/fill and timeline-reset tests pass.
+
+The bounded three-slot frame packet transport is implemented and tested but
+**not yet wired into the GL command path**. Tests cover a stalled consumer,
+owned 1 MiB seeds, command order/alignment, whole-packet overflow rejection,
+timeline invalidation, and native pixel equality after skipping 62 pending
+packets. Presentation seeds can observe native VRAM/cache without consuming
+the dirty rows needed by rewind. Dev build and R4 32/32 pass; focused native,
+mailbox and audio tests pass. No phase-2 race acceptance claim or merge yet.
+
+Next: replace the incremental GL ring with independently seeded packets,
+including full persistent render state, durable controls and exact native HD
+texture inputs. Capture the seed before the first native GP0 of its packet;
+capturing lazily at the first presentation call would already include that
+draw and double-apply semi-transparency. Do not drop the existing incremental
+records or silently discard HD upload/copy provenance. Preserve retained
+enhanced surfaces when frames are consecutive, and account for missed writes
+when a packet is replaced. Then run the slowed-GPU phase-2 acceptance gate
+and continue phases 3, 3b, 4, 5. No owner-only blocker is identified.
+
 Framework phase-1 topic through `464bc104` is merged/pushed to fork r4/main
 at `4f893c1a`. Original GP0/native pixel and snapshot fixtures pass. The race
 records zero GL context acquisitions, but render-queue backpressure remains:
