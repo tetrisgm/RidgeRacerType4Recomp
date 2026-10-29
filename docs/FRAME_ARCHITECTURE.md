@@ -248,3 +248,45 @@ Texture-bank selection now queues immutable process-lifetime assets for GL
 creation/selection instead of moving the context. Title resolvers run on the
 producer. The hidden GL parity fixture verifies exact uploaded bytes and no
 context acquisition for either normal or live-CLUT bank selection.
+
+### Phase-2 production cutover (2026-10-29, not accepted)
+
+Framework topic WIP `1d14aef6` replaces the incremental ring with complete
+native-seeded packets. A packet owns its draw-state seed, original-GP0 texture
+inputs and HD provenance; replacing it cannot discard native guest work.
+Host controls are durable requests applied before a complete packet (or while
+idle), rather than records inside a droppable packet. This boundary is a design
+refinement: controls must survive dropped images and work while the guest is
+paused. Diagnostics have their own after-publication completion requests.
+
+The present-slot handoff also refuses immediately when full, retaining the
+producer's surface and ready fence; the caller deletes an unsubmitted fence.
+The old timed admission-wait knob is deleted. Permanent-owner lifecycle and
+native texture/version fixtures pass, including exact full-PGXP bank endpoint
+pixels. Remaining legacy synchronous host APIs are migration guards that abort;
+they are not a shipping fallback. Phase 2 is not accepted or promoted until
+those callers and the slowed-consumer timing gate are resolved.
+
+Live allocation keeps its completion semantics asynchronously: the menu saves
+requested values immediately, while applied values change only after the GL
+owner reports success. Rapid edits coalesce while allocation is pending. The
+guest polls completion during regular and paused service; it does not wait for
+GL. Wide diagnostics copy guest display parameters before queueing, and allocate
+readback storage using the owner's actual surface size. Missing-wide presentation
+fallback is likewise resolved on the owner, eliminating a GPU->CPU->GPU trip.
+
+### Phase-2 acceptance and fork integration (2026-10-29)
+
+Topic27d6d167 passes the slowed-consumer gate with active Car Effects:
+50ms injected owner delay,60.093VBlanks/s,zero starved samples,zero guest
+context/queue waits. Normal18x is59.983VBlanks/s with zero starved samples.
+This is phase-2 cadence/audio acceptance; maximum intervals and distinct-image
+throughput have not reached the final target. The incremental blocking ring,
+push-audio path and blocking present admission are deleted. Optional legacy
+redraws may run only when their measured cost fits the current guest deadline;
+they cannot spend stale idle credit while emulation is late. Phase4 deletes
+that guest redraw and its admission machinery altogether.
+
+The fork advanced independently with PGXP audit0e97c44d while phase2 was being
+verified. Its changes are preserved in integration. Revalidate them after the
+phase3 surface conversion; their presence does not waive the phase3b checks.

@@ -1,9 +1,107 @@
+## Current rollout boundary: phase 3 (2026-10-29)
+
+Phase2 accepted and promoted: framework topic27d6d167, merged with independently
+landed fork PGXP audit0e97c44d at a8a62e54, pushed to fork r4/main. R4 pin update
+includes required regeneration (no generated changes). Normal18x active-effects:
+59.983Hz,max43.919ms,zero starved,55.07swaps/s; owner delayed50ms:60.093Hz,
+max41.906ms,zero starved,16.37swaps/s. Distinct images not yet measured; these
+are swap completions. Full framework295unit tests plus R4 32 pass. Imported
+PGXP CPU5tests and hidden raster-origin1x/4x/9x pass. Hidden smoke, live/paused
+queries, async resolution/native parity and capture-mark completion pass.
+All started game PIDs stopped. No owner-only blocker. Continue phases3,3b,4,5.
+Legacy transaction/XR APIs and old GL fixture assumptions still need migration
+or deletion with their replacements, never reintroduce context borrowing.
+Old all-on receipts did not execute Car Effects; new harness requires draws.
+The current deadline check fixed starvation without lowering guest fidelity.
+
+## Latest continuation (2026-10-29)
+
+Phase-2 slowed-consumer gate now passes: `packet-deadline-stalled18`, 60.093
+VBlanks/s, max41.906ms, zero starved,16.37swap completions/s, zero misses and
+context/queue waits. Optional guest redraw admission checks current remaining
+pacer deadline against measured cost; tests prove late refusal and recovery.
+The earlier Car Effects-enabled receipts did NOT execute effects: session
+activation erased the constructor-registered HUD callback. Both R4 plugins now
+re-register their shared layer on activation. Active-effects normal run before
+deadline fix:59.359Hz,max53.539ms,7630starved,44.76swaps/s.
+New runtime regression `tools/test_car_effects_runtime.py`; perf harness now
+asserts effects draw count increases. The 32 project and six focused framework
+tests pass. High-resolution screenshot commands now queue immutable display
+inputs to the owner, and wide captures allocate the actual owned dimensions.
+Current hidden smoke/live-scale/effects gate is still in progress. No phase-2
+merge or pin yet; continue without stopping, no owner-only blocker.
+
 # Handoff
 
 ## Latest: native authority promoted; continue phase 2
 
+**Latest continuation after `1d14aef6` (uncommitted):** native command queue
+uses a bounded 4096-slot SPSC handoff with condition variables only for parking.
+Native oracle/pixel tests passed 20 repetitions; a new full-queue wrap/order
+fixture also passes. A deque batch experiment showed no benefit and was reverted.
+Packet pending state is now exposed: old extra-draw admission incorrectly tested
+a two-frame FIFO threshold, impossible for a one-pending-slot mailbox. Pending
+admission is tested, but the 50 ms stalled-owner gate still fails:
+`packet-pending-admission-stalled18` 58.645 VBlanks/s, max 46.863 ms, 10648
+starved; all queue/context waits and dispatch misses zero. Do not accept phase 2.
+
+Root 32/32 passed. Two smoke attempts exposed legacy `render_wide_display`
+readbacks. Normal missing-wide presentation now decides its canonical fallback
+on the GL owner. The actual screenshot command also needed migration: it now
+copies guest display parameters and runs the readback/PNG on the owner, with
+allocation sized from the current owned surface. Third smoke passed through
+frame ~9862, zero dispatch/segment misses; 12 live plus 12 paused diagnostics
+pass with zero acquisitions/releases. Evidence `phase2-cutover-capture-runtime`,
+owned PID 9212 stopped. Earlier failed receipts are preserved in
+`phase2-cutover-runtime` (PID 34720) and `phase2-cutover-wide-runtime` (43916).
+
+Live resolution and startup ownership now pass a hidden runtime gate:
+`phase2-startup-live-scale-runtime`, owned PID 31012 stopped. Full smoke plus
+live/paused diagnostics has zero misses/acquisitions; paused 720p -> 1440p ->
+8K allocations complete asynchronously and preserve byte-identical native PNGs.
+Owner startup precedes all guest execution; PSX_RENDER_THREAD opt-out removed.
+The full-PGXP bank fixture also exercises 1x -> 3x owner allocations, all four
+cases pass (495/515 checks), exact on/off endpoint digests:
+`phase2-owner-scale-fg-bank/fg-v4akfmyc`.
+
+No framework merge, no pin, no phase 3 work. Continue all phases; no owner-only
+blocker. Remaining legacy GL fixtures/host APIs, timing gate and performance
+instrumentation still need work.
+
+**Production cutover WIP committed/pushed as `1d14aef6`:** the blocking ring is
+replaced by FrameOwner complete packets with owned native seeds, per-draw inputs
+and producer draw state. Controls and diagnostics are durable owner requests.
+Native worker now registers Games MMCSS. No phase-2 acceptance or merge yet.
+
+- `packet-cutover-timers18.*`: 60.124 VBlanks/s, max 41.642 ms, zero starved,
+  51.23 swap completions/s (not distinct). Seed 0.171 ms/frame including
+  disposal 0.076, seal 0.033. Owned PID 25708 stopped.
+- `packet-cutover-stalled18.*`: explicit 50 ms owner delay, 57.653 VBlanks/s,
+  max 50.350 ms, 11869 starved, 14.14 swaps/s. Zero context/queue waits,
+  zero misses; **fails phase-2 slowed-consumer gate**. Main CPU ~914 ms/s.
+  Owned PID 34680 stopped. Do not claim GPU independence implies headroom.
+- New owner/mailbox unit tests pass, including fresh-frame-before-tick and
+  test-only paused control acknowledgement. Hidden real-GL complete-packet
+  fixture passes 71 checks (`phase2-cutover-packet-gl/rth-69hl3f1d`).
+- Migrated FG bank fixture binds native authority, acknowledges each real
+  endpoint (test only), and inspects after owner shutdown instead of context
+  borrowing. All four full-PGXP cases pass, exact on/off real-image digests:
+  `phase2-cutover-fg-bank-ack/fg-h9bvoh1y` (489/509 checks each).
+- Present slot admission is now nonblocking for both untimed and timed
+  outputs. Full slots refuse without surrendering surface/fence ownership;
+  GL disposes the unsubmitted fence. Old admission-wait configuration removed.
+  Updated present_thread_test passes. New JSON refused counter.
+- CPU-dual/HD-mode/dynamic-resolution controls now queue on the owner.
+  Current dev build is being refreshed after these changes.
+
+Remaining: stalled-consumer timing, legacy GL fixture migration (especially
+HD), reachable GL_RT_SYNC APIs/live allocation/XR, startup ownership, full
+acceptance. Old synchronous API now aborts rather than borrowing GL; do not
+ship reachable host-feature failures. Phase 3+ not started. Continue work;
+there is no owner-only decision blocker.
+
 Phase-2 topic is `feat/frame-arch-2-mailbox`, based on `4f893c1a`.
-WIPs through `50ff71f9` are committed on the topic; phase 2 is not merged or pinned.
+WIPs through `1d14aef6` are committed on the topic; phase 2 is not merged or pinned.
 
 Latest continuation adds a real hidden-GL complete-packet gate: the new owner
 replays actual RTH commands with full draw-state seeds and per-draw native

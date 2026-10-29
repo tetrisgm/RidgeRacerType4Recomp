@@ -5,11 +5,10 @@ code has not moved since its row is not re-tested (CLAUDE.md, Verification
 scale). Update the row when its code changes or a new check is run.
 Evidence dirs are local (not tracked).
 
-## Frame architecture phase 2 work in progress, 2026-10-28
+## Frame architecture phase 2 component history, 2026-10-28
 
-Phase 2 is **not accepted**. Its mailbox and presentation-owner components
-are tested, but the GL backend still uses the incremental blocking ring.
-No new race throughput claim is made for these component changes.
+This historical checkpoint predates the production cutover and acceptance
+measurements below. At that point only the components were integrated.
 
 | Component | Result | Evidence |
 |---|---|---|
@@ -286,3 +285,88 @@ and pixel test, not a race throughput measurement.
 
 The production GL path still uses the incremental ring. No phase-2 acceptance,
 performance improvement, framework promotion or R4 pin bump is claimed.
+
+## Frame architecture production packet cutover, 2026-10-29 (WIP)
+
+Framework `feat/frame-arch-2-mailbox` at `1d14aef6`; not merged to r4/main,
+R4 gitlink unchanged. Every race below uses a hidden 7680x4320 window, 18x,
+60 FPS race setting, Rewind and Car Effects enabled, full PGXP. Swap completion
+is not evidence of distinct images. No dispatch or segment misses in these runs.
+
+| Change / evidence prefix | VBlanks/s | Maximum ms | Starved samples | Swap completions/s | Verdict |
+|---|---:|---:|---:|---:|---|
+| Phase-1 `native-phase1-history18` | 53.075 | 67.360 | 79173 | 53.16 | Blocking presentation ring |
+| Packet cutover `packet-cutover-timers18` | 60.124 | 41.642 | 0 | 51.23 | Guest average real time; final target unmet |
+| 50 ms owner stall `packet-cutover-stalled18` | 57.653 | 50.350 | 11869 | 14.14 | Phase-2 stress gate fails |
+| Nonblocking present `packet-nonblocking-present-stalled18` | 58.871 | 50.307 | 9643 | 14.57 | Gate still fails |
+| Native batch experiment `packet-native-batch-stalled18` | 58.697 | 52.430 | 12493 | 15.09 | No demonstrated benefit; reverted |
+
+Evidence is under `analysis/perf-20261028/`. Render queue/context waits are
+zero in packet runs; remaining CPU cost still matters. Native batch experiment
+was not retained. The later SPSC native submission experiment is not included
+in `1d14aef6` and requires its own result.
+
+Component correctness: `render_thread_test`, `frame_mailbox_test`, and the
+updated nonblocking `present_thread_test` pass. Complete-packet hidden GL:
+`phase2-cutover-packet-gl/rth-69hl3f1d`, 71 checks. Full-PGXP bank interpolation
+endpoint parity: `phase2-cutover-fg-bank-ack/fg-h9bvoh1y`, four cases at 3x,
+489/509 checks per case, identical real-image digests with generation on/off.
+The latter explicitly acknowledges real endpoints in the test so intentional
+mailbox replacement cannot erase comparison samples; drop correctness remains
+covered by the independent complete-packet fixture.
+
+Further phase-2 WIP gates (not phase acceptance): native SPSC queue preserves
+all oracle/pixel fixtures over 20 repeated tests and passes an explicit blocked
+consumer/full-queue wrap/order test. Pending-mailbox admission now sheds obsolete
+optional guest redraws; the 50 ms stall run still fails real time (58.645 Hz,
+46.863 ms maximum, 10648 starved; `packet-pending-admission-stalled18`).
+
+R4 32/32 passes. Hidden smoke exposed and then verified removal of two guest
+GL-readback paths: missing-wide presentation fallback and widescreen screenshots.
+`phase2-cutover-capture-runtime` passes smoke and live/paused diagnostics with
+zero misses/acquisitions. `phase2-startup-live-scale-runtime` also verifies owner
+startup before guest execution and paused live allocation through 720p, 1440p,
+and 8K, preserving byte-identical native screenshots. Owned PIDs 9212 and 31012
+were stopped. Full-PGXP GL bank endpoint parity and owner-allocation callback
+checks pass in `phase2-owner-scale-fg-bank/fg-v4akfmyc` (495/515 checks per case).
+
+### Frame architecture phase 2: active-effects and stalled-owner correction (2026-10-29)
+
+Earlier phase-2 race receipts enabled Car Effects in the mod plan but did not
+execute its draw callback. Session activation clears the host HUD callback;
+R4 registered the shared HUD/effects layer only in a process constructor.
+Both plugins now register it during activation. Prior all-on descriptions are
+configuration records, not proof that effects ran. The harness now rejects a
+measurement unless `r4.effects.draw` increases; `tools/test_car_effects_runtime.py`
+checks both draws and consumed race metadata.
+
+| Change / receipt | VBlanks/s | Max interval ms | Starved samples | Swap completions/s |
+|---|---:|---:|---:|---:|
+| Effects activation repaired (`packet-effects-active18`) | 59.359 | 53.539 | 7630 | 44.76 |
+| Current-deadline optional-work admission, normal (`packet-deadline-normal18`) | 59.983 | 43.919 | 0 | 55.07 |
+| Current-deadline optional-work admission, owner delayed 50 ms (`packet-deadline-stalled18`) | 60.093 | 41.906 | 0 | 16.37 |
+
+Both runs: hidden 7680x4320 window, 18x, configured 60 FPS/Rewind/Car Effects,
+full PGXP, zero dispatch/segment misses and zero context acquisitions/queue
+waits. The slowed-owner run passes the phase-2 cadence/audio condition, not the
+final distinct-image or maximum-interval target. Swap counts are not distinct
+image counts. The old optional guest redraw remains until phase 4; admission
+now refuses when its measured cost cannot fit the current guest deadline,
+instead of spending historical idle credit while the guest is already late.
+R4 32/32 and six focused native/queue/present/pass tests pass.
+
+Phase-2 acceptance receipts also include `phase2-deadline-effects-runtime`
+(hidden smoke through frame9728,12 live and12 paused diagnostic queries,
+720/1440/4320 live allocations with identical native PNGs) and
+`phase2-capture-mark-runtime` (two asynchronous paused marks,120 effect draws
+in the two-second check). All had zero dispatch/segment misses. Full framework
+build passed; non-hardware CTest:300 listed,295 passed,2 disabled,3 skipped.
+Framework topic27d6d167 passed the phase-2 cadence/audio gate and was merged
+locally. Fork integration also imports the independently landed PGXP audit
+0e97c44d; its combined build/GL checks are in progress before the pin is pushed.
+The phase-3 surface conversion and phase-4 transaction deletion remain open.
+
+Integrated fork pin `a8a62e54`: imported PGXP CPU regressions5/5 pass,
+`phase2-merged-pgxp-origin/rth-whf7lxvs` passes real-GL translated-page tests
+at1x/4x/9x with all corrections on, R4 32/32 passes. Required regeneration
+completed with no generated changes. No BIOS/recompiler regeneration needed.

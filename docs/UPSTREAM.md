@@ -4,6 +4,12 @@ R4 pins `tetrisgm/psxrecomp` `r4/main` (CLAUDE.md, fork model). Every change
 that fork carries over upstream master is listed here with its upstream PR.
 When this table is empty, re-pin to upstream master and archive the fork.
 
+Architecture phase-2 topic `feat/frame-arch-2-mailbox` through `27d6d167`
+is merged and pushed to fork `r4/main`, integrated pin `a8a62e54`. The remote
+had independently advanced with PGXP audit `0e97c44d`; those changes are retained.
+No upstream or R4 PR was opened or merged. Phase3b acceptance will be rechecked
+after the surface conversion, rather than inferred from the imported audit.
+
 Architecture phase-1 topic `feat/frame-arch-1-native-authority` through
 `464bc104` is merged to fork `r4/main` at `4f893c1a`. No upstream or R4 PR was
 opened. Native-authority verification and the remaining ownership/packet work
@@ -21,6 +27,8 @@ targeted pin; generated game C is unchanged. The fork-only changes below remain.
 
 | Change | Topic branch | Upstream PR | State |
 |---|---|---|---|
+| Complete-frame mailbox, immutable native inputs, SPSC audio/MMCSS, nonblocking presentation and async controls/captures | `feat/frame-arch-2-mailbox` | none | in fork `r4/main` via `a8a62e54`; phase-2 slowed-owner cadence/audio gate passes |
+| Translation-stable PGXP raster/attributes, precision provenance and audit counters | independently landed fork audit | none | retained from `0e97c44d`; revalidate after phase3 |
 | Native authoritative VRAM, original GP0 capture, queued renderer controls and diagnostics | `feat/frame-arch-1-native-authority` | none | in fork `r4/main` via `4f893c1a`; phase-2 backpressure remains |
 | Opt-in main VBlank wall cadence and pre-wait pacing debt (`main_cadence`) | `fix/race-cadence-metrics` | none yet | `ac65fcf5`; live hidden-window diagnosis, no guest timing changes |
 | Live internal resolution, Windows borderless popup, pixel labels | `fix/display-playtest-20261028` | none yet | `a7122c59`; existing display playtest fixes carried by the performance pin |

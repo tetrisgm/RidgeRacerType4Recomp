@@ -3,6 +3,20 @@
 The `psxrecomp` and `recomp-ui` submodule gitlinks are the pins. Bump them
 deliberately and record each bump here with the reason and what was verified.
 
+2026-10-29 mailbox phase pin: `a8a62e54` (fork `r4/main`, phase-2 topic
+`feat/frame-arch-2-mailbox` through `27d6d167`, integrated with the independently
+landed PGXP audit `0e97c44d`). Complete immutable native-seeded packets replace
+the blocking render ring; present-slot admission refuses immediately; audio
+uses callback-owned resampling and SPSC PCM. GL owner starts before guest
+execution; live allocation and captures complete asynchronously. Current
+deadline admission protects guest cadence from optional legacy redraws.
+18x active-effects runs: normal59.983Hz/zero starved,50ms-stalled owner60.093Hz/
+zero starved. Max intervals and distinct images remain below final acceptance.
+Full framework build/non-hardware unit suite295passed,R4 32/32, hidden smoke,
+packet/bank GL fixtures and live-control/capture tests pass. Integrated PGXP
+CPU tests5/5 and hidden1x/4x/9x translated-raster tests pass. `tools/regen.sh`
+completed with no generated changes; no recompiler source changes.
+
 2026-10-28 native-authority phase pin: `4f893c1a` (fork `r4/main`, merge of
 `feat/frame-arch-1-native-authority` through `464bc104`). Original GP0 executes
 on a CPU-native raster worker; guest VRAM reads, snapshots and scanout no
