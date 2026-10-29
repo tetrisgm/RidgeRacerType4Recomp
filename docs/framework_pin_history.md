@@ -211,3 +211,5 @@ This pin is a topic delivery, not a promotion into r4/main.
 ### 2026-10-29: G2 static timing
 
 Pin psxrecomp 69751f42942aea5061dc311779faeccb192c4b28 (fork r4/main merge of fix/static-block-timing e268240e). Both emitters compose cached ALU timing segments and inline cache-hit tests; exact grid fingerprints, timing/cache/overlay checks, 23 CTests and hidden 40-step smoke pass. Regenerated game and OpenBIOS; stamp current. Supervisor grid: 10.050 ms guest CPU/VBlank (G1 11.903), zero starved and packet allocations, cadence 60.048, harness 59.94, max wall 37.381 ms. Final performance budget remains outstanding for G3/G4. Evidence: psxrecomp/docs/internal/GUEST_EXECUTION.md.
+
+2026-10-29 G3 pins fork r4/main 1ae4b9f5 (fix/inline-memory 95f99dca). Compiled RAM/scratch/BIOS access bypasses callbacks; exact timing/store differential tests and 120 grid fingerprints, 23 root CTests, native fixtures and 40-step smoke pass. Regenerated OpenBIOS and R4. Final grid 60.01/0 starved/0 packet allocations, mean CPU11.792ms (G2 10.050), maxwall36.667ms. CPU regression recorded; final G4 budget remains unmet.

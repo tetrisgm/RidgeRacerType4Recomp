@@ -91,7 +91,7 @@ block_8002FA98:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0xA0000000u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 24; g_debug_last_store_pc = 0x8002FAA4u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 24, cpu->gpr[31]);
+    { uint32_t _pgxa = cpu->gpr[29] + 24; g_debug_last_store_pc = 0x8002FAA4u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 24, cpu->gpr[31]);
     PGXP_STORE(0xAFBF0018u, _pgxa, cpu->gpr[31]); }  /* 0x8002FAA4: 0xAFBF0018 */
 #ifdef PSX_COSIM
     cosim_instr(0x8002FAA4u);
@@ -99,7 +99,7 @@ block_8002FA98:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20020000u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 20; g_debug_last_store_pc = 0x8002FAA8u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 20, cpu->gpr[17]);
+    { uint32_t _pgxa = cpu->gpr[29] + 20; g_debug_last_store_pc = 0x8002FAA8u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 20, cpu->gpr[17]);
     PGXP_STORE(0xAFB10014u, _pgxa, cpu->gpr[17]); }  /* 0x8002FAA8: 0xAFB10014 */
 #ifdef PSX_COSIM
     cosim_instr(0x8002FAA8u);
@@ -107,7 +107,7 @@ block_8002FA98:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20010000u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 16; g_debug_last_store_pc = 0x8002FAACu; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 16, cpu->gpr[16]);
+    { uint32_t _pgxa = cpu->gpr[29] + 16; g_debug_last_store_pc = 0x8002FAACu; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 16, cpu->gpr[16]);
     PGXP_STORE(0xAFB00010u, _pgxa, cpu->gpr[16]); }  /* 0x8002FAAC: 0xAFB00010 */
 #ifdef PSX_COSIM
     cosim_instr(0x8002FAACu);
@@ -413,7 +413,7 @@ block_8002FB08:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x24u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[5] + 23; g_debug_last_store_pc = 0x8002FB08u; psx_store_cycle_barrier(); cpu->write_byte(cpu->gpr[5] + 23, (uint8_t)cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[5] + 23; g_debug_last_store_pc = 0x8002FB08u; psx_store_cycle_barrier(); psx_mem_write_byte(cpu, cpu->gpr[5] + 23, (uint8_t)cpu->gpr[2]);
     PGXP_STORE(0xA0A20017u, _pgxa, cpu->gpr[2]); }  /* 0x8002FB08: 0xA0A20017 */
 #ifdef PSX_COSIM
     cosim_instr(0x8002FB08u);
@@ -607,7 +607,7 @@ block_8002FB38:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x10008u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[16] + 6; g_debug_last_store_pc = 0x8002FB38u; psx_store_cycle_barrier(); cpu->write_byte(cpu->gpr[16] + 6, (uint8_t)cpu->gpr[3]);
+    { uint32_t _pgxa = cpu->gpr[16] + 6; g_debug_last_store_pc = 0x8002FB38u; psx_store_cycle_barrier(); psx_mem_write_byte(cpu, cpu->gpr[16] + 6, (uint8_t)cpu->gpr[3]);
     PGXP_STORE(0xA2030006u, _pgxa, cpu->gpr[3]); }  /* 0x8002FB38: 0xA2030006 */
 #ifdef PSX_COSIM
     cosim_instr(0x8002FB38u);
@@ -615,7 +615,7 @@ block_8002FB38:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x10008u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[16] + 4; g_debug_last_store_pc = 0x8002FB3Cu; psx_store_cycle_barrier(); cpu->write_half(cpu->gpr[16] + 4, (uint16_t)cpu->gpr[3]);
+    { uint32_t _pgxa = cpu->gpr[16] + 4; g_debug_last_store_pc = 0x8002FB3Cu; psx_store_cycle_barrier(); psx_mem_write_half(cpu, cpu->gpr[16] + 4, (uint16_t)cpu->gpr[3]);
     PGXP_STORE(0xA6030004u, _pgxa, cpu->gpr[3]); }  /* 0x8002FB3C: 0xA6030004 */
 #ifdef PSX_COSIM
     cosim_instr(0x8002FB3Cu);
@@ -940,7 +940,7 @@ block_8002FB74:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x5u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[2] + -16256; g_debug_last_store_pc = 0x8002FBA0u; psx_store_cycle_barrier(); cpu->write_half(cpu->gpr[2] + -16256, (uint16_t)cpu->gpr[0]);
+    { uint32_t _pgxa = cpu->gpr[2] + -16256; g_debug_last_store_pc = 0x8002FBA0u; psx_store_cycle_barrier(); psx_mem_write_half(cpu, cpu->gpr[2] + -16256, (uint16_t)cpu->gpr[0]);
     PGXP_STORE(0xA440C080u, _pgxa, cpu->gpr[0]); }  /* 0x8002FBA0: 0xA440C080 */
 #ifdef PSX_COSIM
     cosim_instr(0x8002FBA0u);
@@ -979,7 +979,7 @@ block_8002FBA8:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x44u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[2]; g_debug_last_store_pc = 0x8002FBACu; psx_store_cycle_barrier(); cpu->write_byte(cpu->gpr[2], (uint8_t)cpu->gpr[6]);
+    { uint32_t _pgxa = cpu->gpr[2]; g_debug_last_store_pc = 0x8002FBACu; psx_store_cycle_barrier(); psx_mem_write_byte(cpu, cpu->gpr[2], (uint8_t)cpu->gpr[6]);
     PGXP_STORE(0xA0460000u, _pgxa, cpu->gpr[6]); }  /* 0x8002FBAC: 0xA0460000 */
 #ifdef PSX_COSIM
     cosim_instr(0x8002FBACu);
@@ -990,7 +990,7 @@ block_8002FBA8:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x24u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[2] + 8; g_debug_last_store_pc = 0x8002FBB0u; psx_store_cycle_barrier(); cpu->write_byte(cpu->gpr[2] + 8, (uint8_t)cpu->gpr[5]);
+    { uint32_t _pgxa = cpu->gpr[2] + 8; g_debug_last_store_pc = 0x8002FBB0u; psx_store_cycle_barrier(); psx_mem_write_byte(cpu, cpu->gpr[2] + 8, (uint8_t)cpu->gpr[5]);
     PGXP_STORE(0xA0450008u, _pgxa, cpu->gpr[5]); }  /* 0x8002FBB0: 0xA0450008 */
 #ifdef PSX_COSIM
     cosim_instr(0x8002FBB0u);
@@ -1067,7 +1067,7 @@ block_8002FBC0:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0xCu);
 #endif
-    { uint32_t _pgxa = cpu->gpr[2] + -10584; g_debug_last_store_pc = 0x8002FBCCu; psx_store_cycle_barrier(); cpu->write_byte(cpu->gpr[2] + -10584, (uint8_t)cpu->gpr[3]);
+    { uint32_t _pgxa = cpu->gpr[2] + -10584; g_debug_last_store_pc = 0x8002FBCCu; psx_store_cycle_barrier(); psx_mem_write_byte(cpu, cpu->gpr[2] + -10584, (uint8_t)cpu->gpr[3]);
     PGXP_STORE(0xA043D6A8u, _pgxa, cpu->gpr[3]); }  /* 0x8002FBCC: 0xA043D6A8 */
 #ifdef PSX_COSIM
     cosim_instr(0x8002FBCCu);
@@ -1151,7 +1151,7 @@ block_8002FBD4:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x24u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[5] + 21; g_debug_last_store_pc = 0x8002FBE8u; psx_store_cycle_barrier(); cpu->write_byte(cpu->gpr[5] + 21, (uint8_t)cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[5] + 21; g_debug_last_store_pc = 0x8002FBE8u; psx_store_cycle_barrier(); psx_mem_write_byte(cpu, cpu->gpr[5] + 21, (uint8_t)cpu->gpr[2]);
     PGXP_STORE(0xA0A20015u, _pgxa, cpu->gpr[2]); }  /* 0x8002FBE8: 0xA0A20015 */
 #ifdef PSX_COSIM
     cosim_instr(0x8002FBE8u);
@@ -1229,7 +1229,7 @@ block_8002FBFC:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x24u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[5] + 21; g_debug_last_store_pc = 0x8002FC00u; psx_store_cycle_barrier(); cpu->write_byte(cpu->gpr[5] + 21, (uint8_t)cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[5] + 21; g_debug_last_store_pc = 0x8002FC00u; psx_store_cycle_barrier(); psx_mem_write_byte(cpu, cpu->gpr[5] + 21, (uint8_t)cpu->gpr[2]);
     PGXP_STORE(0xA0A20015u, _pgxa, cpu->gpr[2]); }  /* 0x8002FC00: 0xA0A20015 */
 #ifdef PSX_COSIM
     cosim_instr(0x8002FC00u);
@@ -1341,7 +1341,7 @@ block_8002FC04:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x10010u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[16] + -14336; g_debug_last_store_pc = 0x8002FC2Cu; psx_store_cycle_barrier(); cpu->write_half(cpu->gpr[16] + -14336, (uint16_t)cpu->gpr[4]);
+    { uint32_t _pgxa = cpu->gpr[16] + -14336; g_debug_last_store_pc = 0x8002FC2Cu; psx_store_cycle_barrier(); psx_mem_write_half(cpu, cpu->gpr[16] + -14336, (uint16_t)cpu->gpr[4]);
     PGXP_STORE(0xA604C800u, _pgxa, cpu->gpr[4]); }  /* 0x8002FC2C: 0xA604C800 */
 #ifdef PSX_COSIM
     cosim_instr(0x8002FC2Cu);
@@ -1352,7 +1352,7 @@ block_8002FC04:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x24u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[2] + -10536; g_debug_last_store_pc = 0x8002FC30u; psx_store_cycle_barrier(); cpu->write_half(cpu->gpr[2] + -10536, (uint16_t)cpu->gpr[5]);
+    { uint32_t _pgxa = cpu->gpr[2] + -10536; g_debug_last_store_pc = 0x8002FC30u; psx_store_cycle_barrier(); psx_mem_write_half(cpu, cpu->gpr[2] + -10536, (uint16_t)cpu->gpr[5]);
     PGXP_STORE(0xA445D6D8u, _pgxa, cpu->gpr[5]); }  /* 0x8002FC30: 0xA445D6D8 */
 #ifdef PSX_COSIM
     cosim_instr(0x8002FC30u);
@@ -1373,7 +1373,7 @@ block_8002FC04:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0xCu);
 #endif
-    { uint32_t _pgxa = cpu->gpr[2] + 14806; g_debug_last_store_pc = 0x8002FC3Cu; psx_store_cycle_barrier(); cpu->write_half(cpu->gpr[2] + 14806, (uint16_t)cpu->gpr[3]);
+    { uint32_t _pgxa = cpu->gpr[2] + 14806; g_debug_last_store_pc = 0x8002FC3Cu; psx_store_cycle_barrier(); psx_mem_write_half(cpu, cpu->gpr[2] + 14806, (uint16_t)cpu->gpr[3]);
     PGXP_STORE(0xA44339D6u, _pgxa, cpu->gpr[3]); }  /* 0x8002FC3C: 0xA44339D6 */
 #ifdef PSX_COSIM
     cosim_instr(0x8002FC3Cu);
@@ -1402,7 +1402,7 @@ block_8002FC04:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0xCu);
 #endif
-    { uint32_t _pgxa = cpu->gpr[2] + 19928; g_debug_last_store_pc = 0x8002FC4Cu; psx_store_cycle_barrier(); cpu->write_half(cpu->gpr[2] + 19928, (uint16_t)cpu->gpr[3]);
+    { uint32_t _pgxa = cpu->gpr[2] + 19928; g_debug_last_store_pc = 0x8002FC4Cu; psx_store_cycle_barrier(); psx_mem_write_half(cpu, cpu->gpr[2] + 19928, (uint16_t)cpu->gpr[3]);
     PGXP_STORE(0xA4434DD8u, _pgxa, cpu->gpr[3]); }  /* 0x8002FC4C: 0xA4434DD8 */
 #ifdef PSX_COSIM
     cosim_instr(0x8002FC4Cu);
@@ -1479,7 +1479,7 @@ block_8002FC50:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0xCu);
 #endif
-    { uint32_t _pgxa = cpu->gpr[3] + 15044; g_debug_last_store_pc = 0x8002FC60u; psx_store_cycle_barrier(); cpu->write_half(cpu->gpr[3] + 15044, (uint16_t)cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[3] + 15044; g_debug_last_store_pc = 0x8002FC60u; psx_store_cycle_barrier(); psx_mem_write_half(cpu, cpu->gpr[3] + 15044, (uint16_t)cpu->gpr[2]);
     PGXP_STORE(0xA4623AC4u, _pgxa, cpu->gpr[2]); }  /* 0x8002FC60: 0xA4623AC4 */
 #ifdef PSX_COSIM
     cosim_instr(0x8002FC60u);
@@ -1500,7 +1500,7 @@ block_8002FC50:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x41u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[6] + -16256; g_debug_last_store_pc = 0x8002FC6Cu; psx_store_cycle_barrier(); cpu->write_half(cpu->gpr[6] + -16256, (uint16_t)cpu->gpr[0]);
+    { uint32_t _pgxa = cpu->gpr[6] + -16256; g_debug_last_store_pc = 0x8002FC6Cu; psx_store_cycle_barrier(); psx_mem_write_half(cpu, cpu->gpr[6] + -16256, (uint16_t)cpu->gpr[0]);
     PGXP_STORE(0xA4C0C080u, _pgxa, cpu->gpr[0]); }  /* 0x8002FC6C: 0xA4C0C080 */
 #ifdef PSX_COSIM
     cosim_instr(0x8002FC6Cu);
@@ -1540,7 +1540,7 @@ block_8002FC50:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x14u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[4] + 12; g_debug_last_store_pc = 0x8002FC80u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[4] + 12, cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[4] + 12; g_debug_last_store_pc = 0x8002FC80u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[4] + 12, cpu->gpr[2]);
     PGXP_STORE(0xAC82000Cu, _pgxa, cpu->gpr[2]); }  /* 0x8002FC80: 0xAC82000C */
 #ifdef PSX_COSIM
     cosim_instr(0x8002FC80u);
@@ -1745,7 +1745,7 @@ block_8002FC90:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x50u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[6] + -16256; g_debug_last_store_pc = 0x8002FCC4u; psx_store_cycle_barrier(); cpu->write_half(cpu->gpr[6] + -16256, (uint16_t)cpu->gpr[4]);
+    { uint32_t _pgxa = cpu->gpr[6] + -16256; g_debug_last_store_pc = 0x8002FCC4u; psx_store_cycle_barrier(); psx_mem_write_half(cpu, cpu->gpr[6] + -16256, (uint16_t)cpu->gpr[4]);
     PGXP_STORE(0xA4C4C080u, _pgxa, cpu->gpr[4]); }  /* 0x8002FCC4: 0xA4C4C080 */
 #ifdef PSX_COSIM
     cosim_instr(0x8002FCC4u);
@@ -1840,7 +1840,7 @@ block_8002FCD0:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x44u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[6] + -16256; g_debug_last_store_pc = 0x8002FCDCu; psx_store_cycle_barrier(); cpu->write_half(cpu->gpr[6] + -16256, (uint16_t)cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[6] + -16256; g_debug_last_store_pc = 0x8002FCDCu; psx_store_cycle_barrier(); psx_mem_write_half(cpu, cpu->gpr[6] + -16256, (uint16_t)cpu->gpr[2]);
     PGXP_STORE(0xA4C2C080u, _pgxa, cpu->gpr[2]); }  /* 0x8002FCDC: 0xA4C2C080 */
 #ifdef PSX_COSIM
     cosim_instr(0x8002FCDCu);
@@ -2475,7 +2475,7 @@ block_8002FD68:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0xA0000000u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 60; g_debug_last_store_pc = 0x8002FD6Cu; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 60, cpu->gpr[31]);
+    { uint32_t _pgxa = cpu->gpr[29] + 60; g_debug_last_store_pc = 0x8002FD6Cu; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 60, cpu->gpr[31]);
     PGXP_STORE(0xAFBF003Cu, _pgxa, cpu->gpr[31]); }  /* 0x8002FD6C: 0xAFBF003C */
 #ifdef PSX_COSIM
     cosim_instr(0x8002FD6Cu);
@@ -2486,7 +2486,7 @@ block_8002FD68:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x60000000u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 56; g_debug_last_store_pc = 0x8002FD70u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 56, cpu->gpr[30]);
+    { uint32_t _pgxa = cpu->gpr[29] + 56; g_debug_last_store_pc = 0x8002FD70u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 56, cpu->gpr[30]);
     PGXP_STORE(0xAFBE0038u, _pgxa, cpu->gpr[30]); }  /* 0x8002FD70: 0xAFBE0038 */
 #ifdef PSX_COSIM
     cosim_instr(0x8002FD70u);
@@ -2494,7 +2494,7 @@ block_8002FD68:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20800000u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 52; g_debug_last_store_pc = 0x8002FD74u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 52, cpu->gpr[23]);
+    { uint32_t _pgxa = cpu->gpr[29] + 52; g_debug_last_store_pc = 0x8002FD74u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 52, cpu->gpr[23]);
     PGXP_STORE(0xAFB70034u, _pgxa, cpu->gpr[23]); }  /* 0x8002FD74: 0xAFB70034 */
 #ifdef PSX_COSIM
     cosim_instr(0x8002FD74u);
@@ -2502,7 +2502,7 @@ block_8002FD68:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20400000u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 48; g_debug_last_store_pc = 0x8002FD78u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 48, cpu->gpr[22]);
+    { uint32_t _pgxa = cpu->gpr[29] + 48; g_debug_last_store_pc = 0x8002FD78u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 48, cpu->gpr[22]);
     PGXP_STORE(0xAFB60030u, _pgxa, cpu->gpr[22]); }  /* 0x8002FD78: 0xAFB60030 */
 #ifdef PSX_COSIM
     cosim_instr(0x8002FD78u);
@@ -2510,7 +2510,7 @@ block_8002FD68:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20200000u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 44; g_debug_last_store_pc = 0x8002FD7Cu; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 44, cpu->gpr[21]);
+    { uint32_t _pgxa = cpu->gpr[29] + 44; g_debug_last_store_pc = 0x8002FD7Cu; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 44, cpu->gpr[21]);
     PGXP_STORE(0xAFB5002Cu, _pgxa, cpu->gpr[21]); }  /* 0x8002FD7C: 0xAFB5002C */
 #ifdef PSX_COSIM
     cosim_instr(0x8002FD7Cu);
@@ -2521,7 +2521,7 @@ block_8002FD68:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20100000u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 40; g_debug_last_store_pc = 0x8002FD80u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 40, cpu->gpr[20]);
+    { uint32_t _pgxa = cpu->gpr[29] + 40; g_debug_last_store_pc = 0x8002FD80u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 40, cpu->gpr[20]);
     PGXP_STORE(0xAFB40028u, _pgxa, cpu->gpr[20]); }  /* 0x8002FD80: 0xAFB40028 */
 #ifdef PSX_COSIM
     cosim_instr(0x8002FD80u);
@@ -2529,7 +2529,7 @@ block_8002FD68:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20080000u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 36; g_debug_last_store_pc = 0x8002FD84u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 36, cpu->gpr[19]);
+    { uint32_t _pgxa = cpu->gpr[29] + 36; g_debug_last_store_pc = 0x8002FD84u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 36, cpu->gpr[19]);
     PGXP_STORE(0xAFB30024u, _pgxa, cpu->gpr[19]); }  /* 0x8002FD84: 0xAFB30024 */
 #ifdef PSX_COSIM
     cosim_instr(0x8002FD84u);
@@ -2537,7 +2537,7 @@ block_8002FD68:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20040000u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 32; g_debug_last_store_pc = 0x8002FD88u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 32, cpu->gpr[18]);
+    { uint32_t _pgxa = cpu->gpr[29] + 32; g_debug_last_store_pc = 0x8002FD88u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 32, cpu->gpr[18]);
     PGXP_STORE(0xAFB20020u, _pgxa, cpu->gpr[18]); }  /* 0x8002FD88: 0xAFB20020 */
 #ifdef PSX_COSIM
     cosim_instr(0x8002FD88u);
@@ -2545,7 +2545,7 @@ block_8002FD68:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20020000u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 28; g_debug_last_store_pc = 0x8002FD8Cu; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 28, cpu->gpr[17]);
+    { uint32_t _pgxa = cpu->gpr[29] + 28; g_debug_last_store_pc = 0x8002FD8Cu; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 28, cpu->gpr[17]);
     PGXP_STORE(0xAFB1001Cu, _pgxa, cpu->gpr[17]); }  /* 0x8002FD8C: 0xAFB1001C */
 #ifdef PSX_COSIM
     cosim_instr(0x8002FD8Cu);
@@ -2561,7 +2561,7 @@ block_8002FD68:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20010000u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 24; g_debug_last_store_pc = 0x8002FD94u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 24, cpu->gpr[16]);
+    { uint32_t _pgxa = cpu->gpr[29] + 24; g_debug_last_store_pc = 0x8002FD94u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 24, cpu->gpr[16]);
     PGXP_STORE(0xAFB00018u, _pgxa, cpu->gpr[16]); }  /* 0x8002FD94: 0xAFB00018 */
 #ifdef PSX_COSIM
     cosim_instr(0x8002FD94u);
@@ -2826,7 +2826,7 @@ block_8002FD98:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0xCu);
 #endif
-    { uint32_t _pgxa = cpu->gpr[3] + 16; g_debug_last_store_pc = 0x8002FDECu; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[3] + 16, cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[3] + 16; g_debug_last_store_pc = 0x8002FDECu; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[3] + 16, cpu->gpr[2]);
     PGXP_STORE(0xAC620010u, _pgxa, cpu->gpr[2]); }  /* 0x8002FDEC: 0xAC620010 */
 #ifdef PSX_COSIM
     cosim_instr(0x8002FDECu);
@@ -2999,7 +2999,7 @@ block_8002FE04:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x18u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[4] + 16; g_debug_last_store_pc = 0x8002FE30u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[4] + 16, cpu->gpr[3]);
+    { uint32_t _pgxa = cpu->gpr[4] + 16; g_debug_last_store_pc = 0x8002FE30u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[4] + 16, cpu->gpr[3]);
     PGXP_STORE(0xAC830010u, _pgxa, cpu->gpr[3]); }  /* 0x8002FE30: 0xAC830010 */
 #ifdef PSX_COSIM
     cosim_instr(0x8002FE30u);
@@ -3224,7 +3224,7 @@ block_8002FE6C:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0xCu);
 #endif
-    { uint32_t _pgxa = cpu->gpr[3] + 19856; g_debug_last_store_pc = 0x8002FE78u; psx_store_cycle_barrier(); cpu->write_half(cpu->gpr[3] + 19856, (uint16_t)cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[3] + 19856; g_debug_last_store_pc = 0x8002FE78u; psx_store_cycle_barrier(); psx_mem_write_half(cpu, cpu->gpr[3] + 19856, (uint16_t)cpu->gpr[2]);
     PGXP_STORE(0xA4624D90u, _pgxa, cpu->gpr[2]); }  /* 0x8002FE78: 0xA4624D90 */
 #ifdef PSX_COSIM
     cosim_instr(0x8002FE78u);
@@ -3901,7 +3901,7 @@ block_8002FF08:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20000020u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 18; g_debug_last_store_pc = 0x8002FF38u; psx_store_cycle_barrier(); cpu->write_byte(cpu->gpr[29] + 18, (uint8_t)cpu->gpr[5]);
+    { uint32_t _pgxa = cpu->gpr[29] + 18; g_debug_last_store_pc = 0x8002FF38u; psx_store_cycle_barrier(); psx_mem_write_byte(cpu, cpu->gpr[29] + 18, (uint8_t)cpu->gpr[5]);
     PGXP_STORE(0xA3A50012u, _pgxa, cpu->gpr[5]); }  /* 0x8002FF38: 0xA3A50012 */
 #ifdef PSX_COSIM
     cosim_instr(0x8002FF38u);
@@ -4058,7 +4058,7 @@ block_8002FF58:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0xC0000u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[19] + 36; g_debug_last_store_pc = 0x8002FF58u; psx_store_cycle_barrier(); cpu->write_half(cpu->gpr[19] + 36, (uint16_t)cpu->gpr[18]);
+    { uint32_t _pgxa = cpu->gpr[19] + 36; g_debug_last_store_pc = 0x8002FF58u; psx_store_cycle_barrier(); psx_mem_write_half(cpu, cpu->gpr[19] + 36, (uint16_t)cpu->gpr[18]);
     PGXP_STORE(0xA6720024u, _pgxa, cpu->gpr[18]); }  /* 0x8002FF58: 0xA6720024 */
 #ifdef PSX_COSIM
     cosim_instr(0x8002FF58u);
@@ -4066,7 +4066,7 @@ block_8002FF58:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x80001u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[19] + 38; g_debug_last_store_pc = 0x8002FF5Cu; psx_store_cycle_barrier(); cpu->write_byte(cpu->gpr[19] + 38, (uint8_t)cpu->gpr[0]);
+    { uint32_t _pgxa = cpu->gpr[19] + 38; g_debug_last_store_pc = 0x8002FF5Cu; psx_store_cycle_barrier(); psx_mem_write_byte(cpu, cpu->gpr[19] + 38, (uint8_t)cpu->gpr[0]);
     PGXP_STORE(0xA2600026u, _pgxa, cpu->gpr[0]); }  /* 0x8002FF5C: 0xA2600026 */
 #ifdef PSX_COSIM
     cosim_instr(0x8002FF5Cu);
@@ -4081,7 +4081,7 @@ block_8002FF58:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x80001u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[19] + 39; g_debug_last_store_pc = 0x8002FF64u; psx_store_cycle_barrier(); cpu->write_byte(cpu->gpr[19] + 39, (uint8_t)cpu->gpr[0]);
+    { uint32_t _pgxa = cpu->gpr[19] + 39; g_debug_last_store_pc = 0x8002FF64u; psx_store_cycle_barrier(); psx_mem_write_byte(cpu, cpu->gpr[19] + 39, (uint8_t)cpu->gpr[0]);
     PGXP_STORE(0xA2600027u, _pgxa, cpu->gpr[0]); }  /* 0x8002FF64: 0xA2600027 */
 #ifdef PSX_COSIM
     cosim_instr(0x8002FF64u);
@@ -4386,7 +4386,7 @@ block_8002FFA8:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x44u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[2] + 96; g_debug_last_store_pc = 0x8002FFB4u; psx_store_cycle_barrier(); cpu->write_byte(cpu->gpr[2] + 96, (uint8_t)cpu->gpr[6]);
+    { uint32_t _pgxa = cpu->gpr[2] + 96; g_debug_last_store_pc = 0x8002FFB4u; psx_store_cycle_barrier(); psx_mem_write_byte(cpu, cpu->gpr[2] + 96, (uint8_t)cpu->gpr[6]);
     PGXP_STORE(0xA0460060u, _pgxa, cpu->gpr[6]); }  /* 0x8002FFB4: 0xA0460060 */
 #ifdef PSX_COSIM
     cosim_instr(0x8002FFB4u);
@@ -4415,7 +4415,7 @@ block_8002FFA8:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0xCu);
 #endif
-    { uint32_t _pgxa = cpu->gpr[3] + 12; g_debug_last_store_pc = 0x8002FFC4u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[3] + 12, cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[3] + 12; g_debug_last_store_pc = 0x8002FFC4u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[3] + 12, cpu->gpr[2]);
     PGXP_STORE(0xAC62000Cu, _pgxa, cpu->gpr[2]); }  /* 0x8002FFC4: 0xAC62000C */
 #ifdef PSX_COSIM
     cosim_instr(0x8002FFC4u);
@@ -4439,7 +4439,7 @@ block_8002FFA8:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0xCu);
 #endif
-    { uint32_t _pgxa = cpu->gpr[3] + 84; g_debug_last_store_pc = 0x8002FFD0u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[3] + 84, cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[3] + 84; g_debug_last_store_pc = 0x8002FFD0u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[3] + 84, cpu->gpr[2]);
     PGXP_STORE(0xAC620054u, _pgxa, cpu->gpr[2]); }  /* 0x8002FFD0: 0xAC620054 */
 #ifdef PSX_COSIM
     cosim_instr(0x8002FFD0u);
@@ -4505,7 +4505,7 @@ block_8002FFD4:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0xCu);
 #endif
-    { uint32_t _pgxa = cpu->gpr[3] + 19856; g_debug_last_store_pc = 0x8002FFE4u; psx_store_cycle_barrier(); cpu->write_half(cpu->gpr[3] + 19856, (uint16_t)cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[3] + 19856; g_debug_last_store_pc = 0x8002FFE4u; psx_store_cycle_barrier(); psx_mem_write_half(cpu, cpu->gpr[3] + 19856, (uint16_t)cpu->gpr[2]);
     PGXP_STORE(0xA4624D90u, _pgxa, cpu->gpr[2]); }  /* 0x8002FFE4: 0xA4624D90 */
 #ifdef PSX_COSIM
     cosim_instr(0x8002FFE4u);
@@ -5055,7 +5055,7 @@ block_80030068:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0xCu);
 #endif
-    { uint32_t _pgxa = cpu->gpr[3] + 88; g_debug_last_store_pc = 0x8003007Cu; psx_store_cycle_barrier(); cpu->write_byte(cpu->gpr[3] + 88, (uint8_t)cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[3] + 88; g_debug_last_store_pc = 0x8003007Cu; psx_store_cycle_barrier(); psx_mem_write_byte(cpu, cpu->gpr[3] + 88, (uint8_t)cpu->gpr[2]);
     PGXP_STORE(0xA0620058u, _pgxa, cpu->gpr[2]); }  /* 0x8003007C: 0xA0620058 */
 #ifdef PSX_COSIM
     cosim_instr(0x8003007Cu);
@@ -5349,7 +5349,7 @@ block_800300BC:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0xCu);
 #endif
-    { uint32_t _pgxa = cpu->gpr[3] + 19856; g_debug_last_store_pc = 0x800300C8u; psx_store_cycle_barrier(); cpu->write_half(cpu->gpr[3] + 19856, (uint16_t)cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[3] + 19856; g_debug_last_store_pc = 0x800300C8u; psx_store_cycle_barrier(); psx_mem_write_half(cpu, cpu->gpr[3] + 19856, (uint16_t)cpu->gpr[2]);
     PGXP_STORE(0xA4624D90u, _pgxa, cpu->gpr[2]); }  /* 0x800300C8: 0xA4624D90 */
 #ifdef PSX_COSIM
     cosim_instr(0x800300C8u);
@@ -5515,7 +5515,7 @@ block_800300FC:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0xA0000000u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 48; g_debug_last_store_pc = 0x80030104u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 48, cpu->gpr[31]);
+    { uint32_t _pgxa = cpu->gpr[29] + 48; g_debug_last_store_pc = 0x80030104u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 48, cpu->gpr[31]);
     PGXP_STORE(0xAFBF0030u, _pgxa, cpu->gpr[31]); }  /* 0x80030104: 0xAFBF0030 */
 #ifdef PSX_COSIM
     cosim_instr(0x80030104u);
@@ -5523,7 +5523,7 @@ block_800300FC:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20020000u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 44; g_debug_last_store_pc = 0x80030108u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 44, cpu->gpr[17]);
+    { uint32_t _pgxa = cpu->gpr[29] + 44; g_debug_last_store_pc = 0x80030108u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 44, cpu->gpr[17]);
     PGXP_STORE(0xAFB1002Cu, _pgxa, cpu->gpr[17]); }  /* 0x80030108: 0xAFB1002C */
 #ifdef PSX_COSIM
     cosim_instr(0x80030108u);
@@ -5539,7 +5539,7 @@ block_800300FC:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20010000u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 40; g_debug_last_store_pc = 0x80030110u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 40, cpu->gpr[16]);
+    { uint32_t _pgxa = cpu->gpr[29] + 40; g_debug_last_store_pc = 0x80030110u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 40, cpu->gpr[16]);
     PGXP_STORE(0xAFB00028u, _pgxa, cpu->gpr[16]); }  /* 0x80030110: 0xAFB00028 */
 #ifdef PSX_COSIM
     cosim_instr(0x80030110u);
@@ -5646,7 +5646,7 @@ block_80030128:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x5u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[2] + 12180; g_debug_last_store_pc = 0x8003012Cu; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[2] + 12180, cpu->gpr[0]);
+    { uint32_t _pgxa = cpu->gpr[2] + 12180; g_debug_last_store_pc = 0x8003012Cu; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[2] + 12180, cpu->gpr[0]);
     PGXP_STORE(0xAC402F94u, _pgxa, cpu->gpr[0]); }  /* 0x8003012C: 0xAC402F94 */
 #ifdef PSX_COSIM
     cosim_instr(0x8003012Cu);
@@ -5665,7 +5665,7 @@ block_80030128:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x5u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[2] + -16280; g_debug_last_store_pc = 0x80030134u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[2] + -16280, cpu->gpr[0]);
+    { uint32_t _pgxa = cpu->gpr[2] + -16280; g_debug_last_store_pc = 0x80030134u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[2] + -16280, cpu->gpr[0]);
     PGXP_STORE(0xAC40C068u, _pgxa, cpu->gpr[0]); }  /* 0x80030134: 0xAC40C068 */
 #ifdef PSX_COSIM
     cosim_instr(0x80030134u);
@@ -5703,7 +5703,7 @@ block_80030128:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x5u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[2] + -14456; g_debug_last_store_pc = 0x80030140u; psx_store_cycle_barrier(); cpu->write_half(cpu->gpr[2] + -14456, (uint16_t)cpu->gpr[0]);
+    { uint32_t _pgxa = cpu->gpr[2] + -14456; g_debug_last_store_pc = 0x80030140u; psx_store_cycle_barrier(); psx_mem_write_half(cpu, cpu->gpr[2] + -14456, (uint16_t)cpu->gpr[0]);
     PGXP_STORE(0xA440C788u, _pgxa, cpu->gpr[0]); }  /* 0x80030140: 0xA440C788 */
 #ifdef PSX_COSIM
     cosim_instr(0x80030140u);
@@ -5719,7 +5719,7 @@ block_80030128:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0xCu);
 #endif
-    { uint32_t _pgxa = cpu->gpr[3] + -14334; g_debug_last_store_pc = 0x80030148u; psx_store_cycle_barrier(); cpu->write_half(cpu->gpr[3] + -14334, (uint16_t)cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[3] + -14334; g_debug_last_store_pc = 0x80030148u; psx_store_cycle_barrier(); psx_mem_write_half(cpu, cpu->gpr[3] + -14334, (uint16_t)cpu->gpr[2]);
     PGXP_STORE(0xA462C802u, _pgxa, cpu->gpr[2]); }  /* 0x80030148: 0xA462C802 */
 #ifdef PSX_COSIM
     cosim_instr(0x80030148u);
@@ -5746,7 +5746,7 @@ block_80030128:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0xCu);
 #endif
-    { uint32_t _pgxa = cpu->gpr[3] + -14444; g_debug_last_store_pc = 0x80030154u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[3] + -14444, cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[3] + -14444; g_debug_last_store_pc = 0x80030154u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[3] + -14444, cpu->gpr[2]);
     PGXP_STORE(0xAC62C794u, _pgxa, cpu->gpr[2]); }  /* 0x80030154: 0xAC62C794 */
 #ifdef PSX_COSIM
     cosim_instr(0x80030154u);
@@ -5792,7 +5792,7 @@ block_80030128:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0xCu);
 #endif
-    { uint32_t _pgxa = cpu->gpr[2] + 23; g_debug_last_store_pc = 0x80030164u; psx_store_cycle_barrier(); cpu->write_byte(cpu->gpr[2] + 23, (uint8_t)cpu->gpr[3]);
+    { uint32_t _pgxa = cpu->gpr[2] + 23; g_debug_last_store_pc = 0x80030164u; psx_store_cycle_barrier(); psx_mem_write_byte(cpu, cpu->gpr[2] + 23, (uint8_t)cpu->gpr[3]);
     PGXP_STORE(0xA0430017u, _pgxa, cpu->gpr[3]); }  /* 0x80030164: 0xA0430017 */
 #ifdef PSX_COSIM
     cosim_instr(0x80030164u);
@@ -5816,7 +5816,7 @@ block_80030128:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0xCu);
 #endif
-    { uint32_t _pgxa = cpu->gpr[2] + 25; g_debug_last_store_pc = 0x80030170u; psx_store_cycle_barrier(); cpu->write_byte(cpu->gpr[2] + 25, (uint8_t)cpu->gpr[3]);
+    { uint32_t _pgxa = cpu->gpr[2] + 25; g_debug_last_store_pc = 0x80030170u; psx_store_cycle_barrier(); psx_mem_write_byte(cpu, cpu->gpr[2] + 25, (uint8_t)cpu->gpr[3]);
     PGXP_STORE(0xA0430019u, _pgxa, cpu->gpr[3]); }  /* 0x80030170: 0xA0430019 */
 #ifdef PSX_COSIM
     cosim_instr(0x80030170u);
@@ -6144,7 +6144,7 @@ block_800301B8:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x5u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[2] + 19994; g_debug_last_store_pc = 0x800301C0u; psx_store_cycle_barrier(); cpu->write_half(cpu->gpr[2] + 19994, (uint16_t)cpu->gpr[0]);
+    { uint32_t _pgxa = cpu->gpr[2] + 19994; g_debug_last_store_pc = 0x800301C0u; psx_store_cycle_barrier(); psx_mem_write_half(cpu, cpu->gpr[2] + 19994, (uint16_t)cpu->gpr[0]);
     PGXP_STORE(0xA4404E1Au, _pgxa, cpu->gpr[0]); }  /* 0x800301C0: 0xA4404E1A */
 #ifdef PSX_COSIM
     cosim_instr(0x800301C0u);
@@ -6294,7 +6294,7 @@ block_800301D4:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20010000u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 16; g_debug_last_store_pc = 0x800301ECu; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 16, cpu->gpr[16]);
+    { uint32_t _pgxa = cpu->gpr[29] + 16; g_debug_last_store_pc = 0x800301ECu; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 16, cpu->gpr[16]);
     PGXP_STORE(0xAFB00010u, _pgxa, cpu->gpr[16]); }  /* 0x800301EC: 0xAFB00010 */
 #ifdef PSX_COSIM
     cosim_instr(0x800301ECu);
@@ -6305,7 +6305,7 @@ block_800301D4:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20000001u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 20; g_debug_last_store_pc = 0x800301F0u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 20, cpu->gpr[0]);
+    { uint32_t _pgxa = cpu->gpr[29] + 20; g_debug_last_store_pc = 0x800301F0u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 20, cpu->gpr[0]);
     PGXP_STORE(0xAFA00014u, _pgxa, cpu->gpr[0]); }  /* 0x800301F0: 0xAFA00014 */
 #ifdef PSX_COSIM
     cosim_instr(0x800301F0u);
@@ -6313,7 +6313,7 @@ block_800301D4:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20000001u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 24; g_debug_last_store_pc = 0x800301F4u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 24, cpu->gpr[0]);
+    { uint32_t _pgxa = cpu->gpr[29] + 24; g_debug_last_store_pc = 0x800301F4u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 24, cpu->gpr[0]);
     PGXP_STORE(0xAFA00018u, _pgxa, cpu->gpr[0]); }  /* 0x800301F4: 0xAFA00018 */
 #ifdef PSX_COSIM
     cosim_instr(0x800301F4u);
@@ -6321,7 +6321,7 @@ block_800301D4:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20020000u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 28; g_debug_last_store_pc = 0x800301F8u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 28, cpu->gpr[17]);
+    { uint32_t _pgxa = cpu->gpr[29] + 28; g_debug_last_store_pc = 0x800301F8u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 28, cpu->gpr[17]);
     PGXP_STORE(0xAFB1001Cu, _pgxa, cpu->gpr[17]); }  /* 0x800301F8: 0xAFB1001C */
 #ifdef PSX_COSIM
     cosim_instr(0x800301F8u);
@@ -6329,7 +6329,7 @@ block_800301D4:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20000001u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 32; g_debug_last_store_pc = 0x800301FCu; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 32, cpu->gpr[0]);
+    { uint32_t _pgxa = cpu->gpr[29] + 32; g_debug_last_store_pc = 0x800301FCu; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 32, cpu->gpr[0]);
     PGXP_STORE(0xAFA00020u, _pgxa, cpu->gpr[0]); }  /* 0x800301FC: 0xAFA00020 */
 #ifdef PSX_COSIM
     cosim_instr(0x800301FCu);
@@ -6345,7 +6345,7 @@ block_800301D4:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20000004u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 36; g_debug_last_store_pc = 0x80030204u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 36, cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[29] + 36; g_debug_last_store_pc = 0x80030204u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 36, cpu->gpr[2]);
     PGXP_STORE(0xAFA20024u, _pgxa, cpu->gpr[2]); }  /* 0x80030204: 0xAFA20024 */
 #ifdef PSX_COSIM
     cosim_instr(0x80030204u);
@@ -6439,7 +6439,7 @@ block_80030208:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20010000u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 16; g_debug_last_store_pc = 0x8003021Cu; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 16, cpu->gpr[16]);
+    { uint32_t _pgxa = cpu->gpr[29] + 16; g_debug_last_store_pc = 0x8003021Cu; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 16, cpu->gpr[16]);
     PGXP_STORE(0xAFB00010u, _pgxa, cpu->gpr[16]); }  /* 0x8003021C: 0xAFB00010 */
 #ifdef PSX_COSIM
     cosim_instr(0x8003021Cu);
@@ -6450,7 +6450,7 @@ block_80030208:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20000001u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 20; g_debug_last_store_pc = 0x80030220u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 20, cpu->gpr[0]);
+    { uint32_t _pgxa = cpu->gpr[29] + 20; g_debug_last_store_pc = 0x80030220u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 20, cpu->gpr[0]);
     PGXP_STORE(0xAFA00014u, _pgxa, cpu->gpr[0]); }  /* 0x80030220: 0xAFA00014 */
 #ifdef PSX_COSIM
     cosim_instr(0x80030220u);
@@ -6458,7 +6458,7 @@ block_80030208:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20000001u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 24; g_debug_last_store_pc = 0x80030224u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 24, cpu->gpr[0]);
+    { uint32_t _pgxa = cpu->gpr[29] + 24; g_debug_last_store_pc = 0x80030224u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 24, cpu->gpr[0]);
     PGXP_STORE(0xAFA00018u, _pgxa, cpu->gpr[0]); }  /* 0x80030224: 0xAFA00018 */
 #ifdef PSX_COSIM
     cosim_instr(0x80030224u);
@@ -6466,7 +6466,7 @@ block_80030208:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20020000u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 28; g_debug_last_store_pc = 0x80030228u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 28, cpu->gpr[17]);
+    { uint32_t _pgxa = cpu->gpr[29] + 28; g_debug_last_store_pc = 0x80030228u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 28, cpu->gpr[17]);
     PGXP_STORE(0xAFB1001Cu, _pgxa, cpu->gpr[17]); }  /* 0x80030228: 0xAFB1001C */
 #ifdef PSX_COSIM
     cosim_instr(0x80030228u);
@@ -6474,7 +6474,7 @@ block_80030208:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20000001u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 32; g_debug_last_store_pc = 0x8003022Cu; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 32, cpu->gpr[0]);
+    { uint32_t _pgxa = cpu->gpr[29] + 32; g_debug_last_store_pc = 0x8003022Cu; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 32, cpu->gpr[0]);
     PGXP_STORE(0xAFA00020u, _pgxa, cpu->gpr[0]); }  /* 0x8003022C: 0xAFA00020 */
 #ifdef PSX_COSIM
     cosim_instr(0x8003022Cu);
@@ -6490,7 +6490,7 @@ block_80030208:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20000004u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 36; g_debug_last_store_pc = 0x80030234u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 36, cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[29] + 36; g_debug_last_store_pc = 0x80030234u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 36, cpu->gpr[2]);
     PGXP_STORE(0xAFA20024u, _pgxa, cpu->gpr[2]); }  /* 0x80030234: 0xAFA20024 */
 #ifdef PSX_COSIM
     cosim_instr(0x80030234u);
@@ -6584,7 +6584,7 @@ block_80030238:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20010000u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 16; g_debug_last_store_pc = 0x8003024Cu; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 16, cpu->gpr[16]);
+    { uint32_t _pgxa = cpu->gpr[29] + 16; g_debug_last_store_pc = 0x8003024Cu; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 16, cpu->gpr[16]);
     PGXP_STORE(0xAFB00010u, _pgxa, cpu->gpr[16]); }  /* 0x8003024C: 0xAFB00010 */
 #ifdef PSX_COSIM
     cosim_instr(0x8003024Cu);
@@ -6595,7 +6595,7 @@ block_80030238:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20000001u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 20; g_debug_last_store_pc = 0x80030250u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 20, cpu->gpr[0]);
+    { uint32_t _pgxa = cpu->gpr[29] + 20; g_debug_last_store_pc = 0x80030250u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 20, cpu->gpr[0]);
     PGXP_STORE(0xAFA00014u, _pgxa, cpu->gpr[0]); }  /* 0x80030250: 0xAFA00014 */
 #ifdef PSX_COSIM
     cosim_instr(0x80030250u);
@@ -6603,7 +6603,7 @@ block_80030238:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20000001u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 24; g_debug_last_store_pc = 0x80030254u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 24, cpu->gpr[0]);
+    { uint32_t _pgxa = cpu->gpr[29] + 24; g_debug_last_store_pc = 0x80030254u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 24, cpu->gpr[0]);
     PGXP_STORE(0xAFA00018u, _pgxa, cpu->gpr[0]); }  /* 0x80030254: 0xAFA00018 */
 #ifdef PSX_COSIM
     cosim_instr(0x80030254u);
@@ -6611,7 +6611,7 @@ block_80030238:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20020000u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 28; g_debug_last_store_pc = 0x80030258u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 28, cpu->gpr[17]);
+    { uint32_t _pgxa = cpu->gpr[29] + 28; g_debug_last_store_pc = 0x80030258u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 28, cpu->gpr[17]);
     PGXP_STORE(0xAFB1001Cu, _pgxa, cpu->gpr[17]); }  /* 0x80030258: 0xAFB1001C */
 #ifdef PSX_COSIM
     cosim_instr(0x80030258u);
@@ -6619,7 +6619,7 @@ block_80030238:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20000001u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 32; g_debug_last_store_pc = 0x8003025Cu; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 32, cpu->gpr[0]);
+    { uint32_t _pgxa = cpu->gpr[29] + 32; g_debug_last_store_pc = 0x8003025Cu; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 32, cpu->gpr[0]);
     PGXP_STORE(0xAFA00020u, _pgxa, cpu->gpr[0]); }  /* 0x8003025C: 0xAFA00020 */
 #ifdef PSX_COSIM
     cosim_instr(0x8003025Cu);
@@ -6635,7 +6635,7 @@ block_80030238:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20000004u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 36; g_debug_last_store_pc = 0x80030264u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 36, cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[29] + 36; g_debug_last_store_pc = 0x80030264u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 36, cpu->gpr[2]);
     PGXP_STORE(0xAFA20024u, _pgxa, cpu->gpr[2]); }  /* 0x80030264: 0xAFA20024 */
 #ifdef PSX_COSIM
     cosim_instr(0x80030264u);
@@ -6754,7 +6754,7 @@ block_80030278:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20004u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[2] + 19994; g_debug_last_store_pc = 0x80030280u; psx_store_cycle_barrier(); cpu->write_half(cpu->gpr[2] + 19994, (uint16_t)cpu->gpr[17]);
+    { uint32_t _pgxa = cpu->gpr[2] + 19994; g_debug_last_store_pc = 0x80030280u; psx_store_cycle_barrier(); psx_mem_write_half(cpu, cpu->gpr[2] + 19994, (uint16_t)cpu->gpr[17]);
     PGXP_STORE(0xA4514E1Au, _pgxa, cpu->gpr[17]); }  /* 0x80030280: 0xA4514E1A */
 #ifdef PSX_COSIM
     cosim_instr(0x80030280u);
@@ -6785,7 +6785,7 @@ block_80030288:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0xCu);
 #endif
-    { uint32_t _pgxa = cpu->gpr[3] + 15318; g_debug_last_store_pc = 0x80030288u; psx_store_cycle_barrier(); cpu->write_half(cpu->gpr[3] + 15318, (uint16_t)cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[3] + 15318; g_debug_last_store_pc = 0x80030288u; psx_store_cycle_barrier(); psx_mem_write_half(cpu, cpu->gpr[3] + 15318, (uint16_t)cpu->gpr[2]);
     PGXP_STORE(0xA4623BD6u, _pgxa, cpu->gpr[2]); }  /* 0x80030288: 0xA4623BD6 */
 #ifdef PSX_COSIM
     cosim_instr(0x80030288u);
@@ -6804,7 +6804,7 @@ block_80030288:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x5u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[2] + 20282; g_debug_last_store_pc = 0x80030290u; psx_store_cycle_barrier(); cpu->write_half(cpu->gpr[2] + 20282, (uint16_t)cpu->gpr[0]);
+    { uint32_t _pgxa = cpu->gpr[2] + 20282; g_debug_last_store_pc = 0x80030290u; psx_store_cycle_barrier(); psx_mem_write_half(cpu, cpu->gpr[2] + 20282, (uint16_t)cpu->gpr[0]);
     PGXP_STORE(0xA4404F3Au, _pgxa, cpu->gpr[0]); }  /* 0x80030290: 0xA4404F3A */
 #ifdef PSX_COSIM
     cosim_instr(0x80030290u);
@@ -6890,7 +6890,7 @@ block_800302A8:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0xA0000000u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 16; g_debug_last_store_pc = 0x800302ACu; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 16, cpu->gpr[31]);
+    { uint32_t _pgxa = cpu->gpr[29] + 16; g_debug_last_store_pc = 0x800302ACu; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 16, cpu->gpr[31]);
     PGXP_STORE(0xAFBF0010u, _pgxa, cpu->gpr[31]); }  /* 0x800302AC: 0xAFBF0010 */
 #ifdef PSX_COSIM
     cosim_instr(0x800302ACu);
@@ -7081,7 +7081,7 @@ block_800302DC:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0xA0000000u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 16; g_debug_last_store_pc = 0x800302E0u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 16, cpu->gpr[31]);
+    { uint32_t _pgxa = cpu->gpr[29] + 16; g_debug_last_store_pc = 0x800302E0u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 16, cpu->gpr[31]);
     PGXP_STORE(0xAFBF0010u, _pgxa, cpu->gpr[31]); }  /* 0x800302E0: 0xAFBF0010 */
 #ifdef PSX_COSIM
     cosim_instr(0x800302E0u);
@@ -7292,7 +7292,7 @@ block_8003030C:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20080000u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 36; g_debug_last_store_pc = 0x80030310u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 36, cpu->gpr[19]);
+    { uint32_t _pgxa = cpu->gpr[29] + 36; g_debug_last_store_pc = 0x80030310u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 36, cpu->gpr[19]);
     PGXP_STORE(0xAFB30024u, _pgxa, cpu->gpr[19]); }  /* 0x80030310: 0xAFB30024 */
 #ifdef PSX_COSIM
     cosim_instr(0x80030310u);
@@ -7308,7 +7308,7 @@ block_8003030C:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20020000u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 28; g_debug_last_store_pc = 0x80030318u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 28, cpu->gpr[17]);
+    { uint32_t _pgxa = cpu->gpr[29] + 28; g_debug_last_store_pc = 0x80030318u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 28, cpu->gpr[17]);
     PGXP_STORE(0xAFB1001Cu, _pgxa, cpu->gpr[17]); }  /* 0x80030318: 0xAFB1001C */
 #ifdef PSX_COSIM
     cosim_instr(0x80030318u);
@@ -7324,7 +7324,7 @@ block_8003030C:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0xA0000000u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 40; g_debug_last_store_pc = 0x80030320u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 40, cpu->gpr[31]);
+    { uint32_t _pgxa = cpu->gpr[29] + 40; g_debug_last_store_pc = 0x80030320u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 40, cpu->gpr[31]);
     PGXP_STORE(0xAFBF0028u, _pgxa, cpu->gpr[31]); }  /* 0x80030320: 0xAFBF0028 */
 #ifdef PSX_COSIM
     cosim_instr(0x80030320u);
@@ -7332,7 +7332,7 @@ block_8003030C:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20040000u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 32; g_debug_last_store_pc = 0x80030324u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 32, cpu->gpr[18]);
+    { uint32_t _pgxa = cpu->gpr[29] + 32; g_debug_last_store_pc = 0x80030324u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 32, cpu->gpr[18]);
     PGXP_STORE(0xAFB20020u, _pgxa, cpu->gpr[18]); }  /* 0x80030324: 0xAFB20020 */
 #ifdef PSX_COSIM
     cosim_instr(0x80030324u);
@@ -7345,7 +7345,7 @@ block_8003030C:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20010000u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 24; g_debug_last_store_pc = 0x8003032Cu; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 24, cpu->gpr[16]);
+    { uint32_t _pgxa = cpu->gpr[29] + 24; g_debug_last_store_pc = 0x8003032Cu; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 24, cpu->gpr[16]);
     PGXP_STORE(0xAFB00018u, _pgxa, cpu->gpr[16]); }  /* 0x8003032C: 0xAFB00018 */
 #ifdef PSX_COSIM
     cosim_instr(0x8003032Cu);
@@ -7516,7 +7516,7 @@ block_80030330:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x5u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[2] + 12; g_debug_last_store_pc = 0x80030360u; psx_store_cycle_barrier(); cpu->write_byte(cpu->gpr[2] + 12, (uint8_t)cpu->gpr[0]);
+    { uint32_t _pgxa = cpu->gpr[2] + 12; g_debug_last_store_pc = 0x80030360u; psx_store_cycle_barrier(); psx_mem_write_byte(cpu, cpu->gpr[2] + 12, (uint8_t)cpu->gpr[0]);
     PGXP_STORE(0xA040000Cu, _pgxa, cpu->gpr[0]); }  /* 0x80030360: 0xA040000C */
 #ifdef PSX_COSIM
     cosim_instr(0x80030360u);
@@ -7529,7 +7529,7 @@ block_80030330:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20000001u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 16; g_debug_last_store_pc = 0x80030368u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 16, cpu->gpr[0]);
+    { uint32_t _pgxa = cpu->gpr[29] + 16; g_debug_last_store_pc = 0x80030368u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 16, cpu->gpr[0]);
     PGXP_STORE(0xAFA00010u, _pgxa, cpu->gpr[0]); }  /* 0x80030368: 0xAFA00010 */
 #ifdef PSX_COSIM
     cosim_instr(0x80030368u);
@@ -7643,7 +7643,7 @@ block_8003036C:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0xCu);
 #endif
-    { uint32_t _pgxa = cpu->gpr[2] + 12; g_debug_last_store_pc = 0x8003038Cu; psx_store_cycle_barrier(); cpu->write_byte(cpu->gpr[2] + 12, (uint8_t)cpu->gpr[3]);
+    { uint32_t _pgxa = cpu->gpr[2] + 12; g_debug_last_store_pc = 0x8003038Cu; psx_store_cycle_barrier(); psx_mem_write_byte(cpu, cpu->gpr[2] + 12, (uint8_t)cpu->gpr[3]);
     PGXP_STORE(0xA043000Cu, _pgxa, cpu->gpr[3]); }  /* 0x8003038C: 0xA043000C */
 #ifdef PSX_COSIM
     cosim_instr(0x8003038Cu);
@@ -7964,7 +7964,7 @@ block_800303D4:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0xCu);
 #endif
-    { uint32_t _pgxa = cpu->gpr[2] + 12; g_debug_last_store_pc = 0x800303F4u; psx_store_cycle_barrier(); cpu->write_byte(cpu->gpr[2] + 12, (uint8_t)cpu->gpr[3]);
+    { uint32_t _pgxa = cpu->gpr[2] + 12; g_debug_last_store_pc = 0x800303F4u; psx_store_cycle_barrier(); psx_mem_write_byte(cpu, cpu->gpr[2] + 12, (uint8_t)cpu->gpr[3]);
     PGXP_STORE(0xA043000Cu, _pgxa, cpu->gpr[3]); }  /* 0x800303F4: 0xA043000C */
 #ifdef PSX_COSIM
     cosim_instr(0x800303F4u);
@@ -8067,7 +8067,7 @@ block_80030410:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0xCu);
 #endif
-    { uint32_t _pgxa = cpu->gpr[2] + 20; g_debug_last_store_pc = 0x80030418u; psx_store_cycle_barrier(); cpu->write_byte(cpu->gpr[2] + 20, (uint8_t)cpu->gpr[3]);
+    { uint32_t _pgxa = cpu->gpr[2] + 20; g_debug_last_store_pc = 0x80030418u; psx_store_cycle_barrier(); psx_mem_write_byte(cpu, cpu->gpr[2] + 20, (uint8_t)cpu->gpr[3]);
     PGXP_STORE(0xA0430014u, _pgxa, cpu->gpr[3]); }  /* 0x80030418: 0xA0430014 */
 #ifdef PSX_COSIM
     cosim_instr(0x80030418u);
@@ -8196,7 +8196,7 @@ block_80030434:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x60000u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[18] + -14334; g_debug_last_store_pc = 0x8003043Cu; psx_store_cycle_barrier(); cpu->write_half(cpu->gpr[18] + -14334, (uint16_t)cpu->gpr[17]);
+    { uint32_t _pgxa = cpu->gpr[18] + -14334; g_debug_last_store_pc = 0x8003043Cu; psx_store_cycle_barrier(); psx_mem_write_half(cpu, cpu->gpr[18] + -14334, (uint16_t)cpu->gpr[17]);
     PGXP_STORE(0xA651C802u, _pgxa, cpu->gpr[17]); }  /* 0x8003043C: 0xA651C802 */
 #ifdef PSX_COSIM
     cosim_instr(0x8003043Cu);
@@ -8207,7 +8207,7 @@ block_80030434:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0xCu);
 #endif
-    { uint32_t _pgxa = cpu->gpr[2] + 20; g_debug_last_store_pc = 0x80030440u; psx_store_cycle_barrier(); cpu->write_byte(cpu->gpr[2] + 20, (uint8_t)cpu->gpr[3]);
+    { uint32_t _pgxa = cpu->gpr[2] + 20; g_debug_last_store_pc = 0x80030440u; psx_store_cycle_barrier(); psx_mem_write_byte(cpu, cpu->gpr[2] + 20, (uint8_t)cpu->gpr[3]);
     PGXP_STORE(0xA0430014u, _pgxa, cpu->gpr[3]); }  /* 0x80030440: 0xA0430014 */
 #ifdef PSX_COSIM
     cosim_instr(0x80030440u);
@@ -8242,7 +8242,7 @@ block_80030444:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0xCu);
 #endif
-    { uint32_t _pgxa = cpu->gpr[2] + 56; g_debug_last_store_pc = 0x8003044Cu; psx_store_cycle_barrier(); cpu->write_byte(cpu->gpr[2] + 56, (uint8_t)cpu->gpr[3]);
+    { uint32_t _pgxa = cpu->gpr[2] + 56; g_debug_last_store_pc = 0x8003044Cu; psx_store_cycle_barrier(); psx_mem_write_byte(cpu, cpu->gpr[2] + 56, (uint8_t)cpu->gpr[3]);
     PGXP_STORE(0xA0430038u, _pgxa, cpu->gpr[3]); }  /* 0x8003044C: 0xA0430038 */
 #ifdef PSX_COSIM
     cosim_instr(0x8003044Cu);
@@ -8265,7 +8265,7 @@ block_80030444:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0xCu);
 #endif
-    { uint32_t _pgxa = cpu->gpr[2] + 92; g_debug_last_store_pc = 0x80030458u; psx_store_cycle_barrier(); cpu->write_byte(cpu->gpr[2] + 92, (uint8_t)cpu->gpr[3]);
+    { uint32_t _pgxa = cpu->gpr[2] + 92; g_debug_last_store_pc = 0x80030458u; psx_store_cycle_barrier(); psx_mem_write_byte(cpu, cpu->gpr[2] + 92, (uint8_t)cpu->gpr[3]);
     PGXP_STORE(0xA043005Cu, _pgxa, cpu->gpr[3]); }  /* 0x80030458: 0xA043005C */
 #ifdef PSX_COSIM
     cosim_instr(0x80030458u);
@@ -8292,7 +8292,7 @@ block_80030444:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0xCu);
 #endif
-    { uint32_t _pgxa = cpu->gpr[3] + -14456; g_debug_last_store_pc = 0x80030464u; psx_store_cycle_barrier(); cpu->write_half(cpu->gpr[3] + -14456, (uint16_t)cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[3] + -14456; g_debug_last_store_pc = 0x80030464u; psx_store_cycle_barrier(); psx_mem_write_half(cpu, cpu->gpr[3] + -14456, (uint16_t)cpu->gpr[2]);
     PGXP_STORE(0xA462C788u, _pgxa, cpu->gpr[2]); }  /* 0x80030464: 0xA462C788 */
 #ifdef PSX_COSIM
     cosim_instr(0x80030464u);
@@ -8315,7 +8315,7 @@ block_80030444:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x80004u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[19] + 20282; g_debug_last_store_pc = 0x80030470u; psx_store_cycle_barrier(); cpu->write_half(cpu->gpr[19] + 20282, (uint16_t)cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[19] + 20282; g_debug_last_store_pc = 0x80030470u; psx_store_cycle_barrier(); psx_mem_write_half(cpu, cpu->gpr[19] + 20282, (uint16_t)cpu->gpr[2]);
     PGXP_STORE(0xA6624F3Au, _pgxa, cpu->gpr[2]); }  /* 0x80030470: 0xA6624F3A */
 #ifdef PSX_COSIM
     cosim_instr(0x80030470u);
@@ -8576,7 +8576,7 @@ block_8003048C:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x10008u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[16] + -14456; g_debug_last_store_pc = 0x800304C0u; psx_store_cycle_barrier(); cpu->write_half(cpu->gpr[16] + -14456, (uint16_t)cpu->gpr[3]);
+    { uint32_t _pgxa = cpu->gpr[16] + -14456; g_debug_last_store_pc = 0x800304C0u; psx_store_cycle_barrier(); psx_mem_write_half(cpu, cpu->gpr[16] + -14456, (uint16_t)cpu->gpr[3]);
     PGXP_STORE(0xA603C788u, _pgxa, cpu->gpr[3]); }  /* 0x800304C0: 0xA603C788 */
 #ifdef PSX_COSIM
     cosim_instr(0x800304C0u);
@@ -8952,7 +8952,7 @@ block_8003051C:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x5u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[2] + 19994; g_debug_last_store_pc = 0x80030520u; psx_store_cycle_barrier(); cpu->write_half(cpu->gpr[2] + 19994, (uint16_t)cpu->gpr[0]);
+    { uint32_t _pgxa = cpu->gpr[2] + 19994; g_debug_last_store_pc = 0x80030520u; psx_store_cycle_barrier(); psx_mem_write_half(cpu, cpu->gpr[2] + 19994, (uint16_t)cpu->gpr[0]);
     PGXP_STORE(0xA4404E1Au, _pgxa, cpu->gpr[0]); }  /* 0x80030520: 0xA4404E1A */
 #ifdef PSX_COSIM
     cosim_instr(0x80030520u);
@@ -8972,7 +8972,7 @@ block_8003051C:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20004u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[2] + 15318; g_debug_last_store_pc = 0x8003052Cu; psx_store_cycle_barrier(); cpu->write_half(cpu->gpr[2] + 15318, (uint16_t)cpu->gpr[17]);
+    { uint32_t _pgxa = cpu->gpr[2] + 15318; g_debug_last_store_pc = 0x8003052Cu; psx_store_cycle_barrier(); psx_mem_write_half(cpu, cpu->gpr[2] + 15318, (uint16_t)cpu->gpr[17]);
     PGXP_STORE(0xA4513BD6u, _pgxa, cpu->gpr[17]); }  /* 0x8003052C: 0xA4513BD6 */
 #ifdef PSX_COSIM
     cosim_instr(0x8003052Cu);
@@ -9007,7 +9007,7 @@ block_80030530:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0xCu);
 #endif
-    { uint32_t _pgxa = cpu->gpr[3] + -568; g_debug_last_store_pc = 0x80030534u; psx_store_cycle_barrier(); cpu->write_half(cpu->gpr[3] + -568, (uint16_t)cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[3] + -568; g_debug_last_store_pc = 0x80030534u; psx_store_cycle_barrier(); psx_mem_write_half(cpu, cpu->gpr[3] + -568, (uint16_t)cpu->gpr[2]);
     PGXP_STORE(0xA462FDC8u, _pgxa, cpu->gpr[2]); }  /* 0x80030534: 0xA462FDC8 */
 #ifdef PSX_COSIM
     cosim_instr(0x80030534u);
@@ -9045,7 +9045,7 @@ block_80030530:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20004u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[2] + 19994; g_debug_last_store_pc = 0x80030540u; psx_store_cycle_barrier(); cpu->write_half(cpu->gpr[2] + 19994, (uint16_t)cpu->gpr[17]);
+    { uint32_t _pgxa = cpu->gpr[2] + 19994; g_debug_last_store_pc = 0x80030540u; psx_store_cycle_barrier(); psx_mem_write_half(cpu, cpu->gpr[2] + 19994, (uint16_t)cpu->gpr[17]);
     PGXP_STORE(0xA4514E1Au, _pgxa, cpu->gpr[17]); }  /* 0x80030540: 0xA4514E1A */
 #ifdef PSX_COSIM
     cosim_instr(0x80030540u);
@@ -9095,7 +9095,7 @@ block_8003054C:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20004u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[2] + 19994; g_debug_last_store_pc = 0x80030550u; psx_store_cycle_barrier(); cpu->write_half(cpu->gpr[2] + 19994, (uint16_t)cpu->gpr[17]);
+    { uint32_t _pgxa = cpu->gpr[2] + 19994; g_debug_last_store_pc = 0x80030550u; psx_store_cycle_barrier(); psx_mem_write_half(cpu, cpu->gpr[2] + 19994, (uint16_t)cpu->gpr[17]);
     PGXP_STORE(0xA4514E1Au, _pgxa, cpu->gpr[17]); }  /* 0x80030550: 0xA4514E1A */
 #ifdef PSX_COSIM
     cosim_instr(0x80030550u);
@@ -9126,7 +9126,7 @@ block_80030558:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0xCu);
 #endif
-    { uint32_t _pgxa = cpu->gpr[3] + 15318; g_debug_last_store_pc = 0x80030558u; psx_store_cycle_barrier(); cpu->write_half(cpu->gpr[3] + 15318, (uint16_t)cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[3] + 15318; g_debug_last_store_pc = 0x80030558u; psx_store_cycle_barrier(); psx_mem_write_half(cpu, cpu->gpr[3] + 15318, (uint16_t)cpu->gpr[2]);
     PGXP_STORE(0xA4623BD6u, _pgxa, cpu->gpr[2]); }  /* 0x80030558: 0xA4623BD6 */
 #ifdef PSX_COSIM
     cosim_instr(0x80030558u);
@@ -9149,7 +9149,7 @@ block_8003055C:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x80001u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[19] + 20282; g_debug_last_store_pc = 0x8003055Cu; psx_store_cycle_barrier(); cpu->write_half(cpu->gpr[19] + 20282, (uint16_t)cpu->gpr[0]);
+    { uint32_t _pgxa = cpu->gpr[19] + 20282; g_debug_last_store_pc = 0x8003055Cu; psx_store_cycle_barrier(); psx_mem_write_half(cpu, cpu->gpr[19] + 20282, (uint16_t)cpu->gpr[0]);
     PGXP_STORE(0xA6604F3Au, _pgxa, cpu->gpr[0]); }  /* 0x8003055C: 0xA6604F3A */
 #ifdef PSX_COSIM
     cosim_instr(0x8003055Cu);
@@ -9308,7 +9308,7 @@ block_8003057C:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0xA0000000u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 44; g_debug_last_store_pc = 0x8003058Cu; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 44, cpu->gpr[31]);
+    { uint32_t _pgxa = cpu->gpr[29] + 44; g_debug_last_store_pc = 0x8003058Cu; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 44, cpu->gpr[31]);
     PGXP_STORE(0xAFBF002Cu, _pgxa, cpu->gpr[31]); }  /* 0x8003058C: 0xAFBF002C */
 #ifdef PSX_COSIM
     cosim_instr(0x8003058Cu);
@@ -9324,7 +9324,7 @@ block_8003057C:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20010000u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 40; g_debug_last_store_pc = 0x80030594u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 40, cpu->gpr[16]);
+    { uint32_t _pgxa = cpu->gpr[29] + 40; g_debug_last_store_pc = 0x80030594u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 40, cpu->gpr[16]);
     PGXP_STORE(0xAFB00028u, _pgxa, cpu->gpr[16]); }  /* 0x80030594: 0xAFB00028 */
 #ifdef PSX_COSIM
     cosim_instr(0x80030594u);
@@ -9426,7 +9426,7 @@ block_80030598:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20000004u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 16; g_debug_last_store_pc = 0x800305B0u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 16, cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[29] + 16; g_debug_last_store_pc = 0x800305B0u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 16, cpu->gpr[2]);
     PGXP_STORE(0xAFA20010u, _pgxa, cpu->gpr[2]); }  /* 0x800305B0: 0xAFA20010 */
 #ifdef PSX_COSIM
     cosim_instr(0x800305B0u);
@@ -9547,7 +9547,7 @@ block_800305C4:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0xCu);
 #endif
-    { uint32_t _pgxa = cpu->gpr[3] + 28; g_debug_last_store_pc = 0x800305D4u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[3] + 28, cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[3] + 28; g_debug_last_store_pc = 0x800305D4u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[3] + 28, cpu->gpr[2]);
     PGXP_STORE(0xAC62001Cu, _pgxa, cpu->gpr[2]); }  /* 0x800305D4: 0xAC62001C */
 #ifdef PSX_COSIM
     cosim_instr(0x800305D4u);
@@ -9563,7 +9563,7 @@ block_800305C4:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0xCu);
 #endif
-    { uint32_t _pgxa = cpu->gpr[3] + 32; g_debug_last_store_pc = 0x800305DCu; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[3] + 32, cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[3] + 32; g_debug_last_store_pc = 0x800305DCu; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[3] + 32, cpu->gpr[2]);
     PGXP_STORE(0xAC620020u, _pgxa, cpu->gpr[2]); }  /* 0x800305DC: 0xAC620020 */
 #ifdef PSX_COSIM
     cosim_instr(0x800305DCu);
@@ -9582,7 +9582,7 @@ block_800305C4:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0xCu);
 #endif
-    { uint32_t _pgxa = cpu->gpr[3] + 36; g_debug_last_store_pc = 0x800305E4u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[3] + 36, cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[3] + 36; g_debug_last_store_pc = 0x800305E4u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[3] + 36, cpu->gpr[2]);
     PGXP_STORE(0xAC620024u, _pgxa, cpu->gpr[2]); }  /* 0x800305E4: 0xAC620024 */
 #ifdef PSX_COSIM
     cosim_instr(0x800305E4u);
@@ -9598,7 +9598,7 @@ block_800305C4:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0xCu);
 #endif
-    { uint32_t _pgxa = cpu->gpr[3] + 20; g_debug_last_store_pc = 0x800305ECu; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[3] + 20, cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[3] + 20; g_debug_last_store_pc = 0x800305ECu; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[3] + 20, cpu->gpr[2]);
     PGXP_STORE(0xAC620014u, _pgxa, cpu->gpr[2]); }  /* 0x800305EC: 0xAC620014 */
 #ifdef PSX_COSIM
     cosim_instr(0x800305ECu);
@@ -9622,7 +9622,7 @@ block_800305C4:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x10004u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[16] + 24; g_debug_last_store_pc = 0x800305F8u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[16] + 24, cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[16] + 24; g_debug_last_store_pc = 0x800305F8u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[16] + 24, cpu->gpr[2]);
     PGXP_STORE(0xAE020018u, _pgxa, cpu->gpr[2]); }  /* 0x800305F8: 0xAE020018 */
 #ifdef PSX_COSIM
     cosim_instr(0x800305F8u);
@@ -9660,7 +9660,7 @@ block_800305FC:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x5u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[2] + 12180; g_debug_last_store_pc = 0x80030600u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[2] + 12180, cpu->gpr[0]);
+    { uint32_t _pgxa = cpu->gpr[2] + 12180; g_debug_last_store_pc = 0x80030600u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[2] + 12180, cpu->gpr[0]);
     PGXP_STORE(0xAC402F94u, _pgxa, cpu->gpr[0]); }  /* 0x80030600: 0xAC402F94 */
 #ifdef PSX_COSIM
     cosim_instr(0x80030600u);
@@ -9695,7 +9695,7 @@ block_800305FC:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x5u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[2] + -16280; g_debug_last_store_pc = 0x8003060Cu; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[2] + -16280, cpu->gpr[0]);
+    { uint32_t _pgxa = cpu->gpr[2] + -16280; g_debug_last_store_pc = 0x8003060Cu; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[2] + -16280, cpu->gpr[0]);
     PGXP_STORE(0xAC40C068u, _pgxa, cpu->gpr[0]); }  /* 0x8003060C: 0xAC40C068 */
 #ifdef PSX_COSIM
     cosim_instr(0x8003060Cu);
@@ -9719,7 +9719,7 @@ block_800305FC:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0xCu);
 #endif
-    { uint32_t _pgxa = cpu->gpr[3] + -14444; g_debug_last_store_pc = 0x80030618u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[3] + -14444, cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[3] + -14444; g_debug_last_store_pc = 0x80030618u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[3] + -14444, cpu->gpr[2]);
     PGXP_STORE(0xAC62C794u, _pgxa, cpu->gpr[2]); }  /* 0x80030618: 0xAC62C794 */
 #ifdef PSX_COSIM
     cosim_instr(0x80030618u);
@@ -9927,7 +9927,7 @@ block_80030648:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0xCu);
 #endif
-    { uint32_t _pgxa = cpu->gpr[2] + -12848; g_debug_last_store_pc = 0x80030654u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[2] + -12848, cpu->gpr[3]);
+    { uint32_t _pgxa = cpu->gpr[2] + -12848; g_debug_last_store_pc = 0x80030654u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[2] + -12848, cpu->gpr[3]);
     PGXP_STORE(0xAC43CDD0u, _pgxa, cpu->gpr[3]); }  /* 0x80030654: 0xAC43CDD0 */
 #ifdef PSX_COSIM
     cosim_instr(0x80030654u);
@@ -9982,7 +9982,7 @@ block_8003065C:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x5u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[2] + 20064; g_debug_last_store_pc = 0x80030668u; psx_store_cycle_barrier(); cpu->write_half(cpu->gpr[2] + 20064, (uint16_t)cpu->gpr[0]);
+    { uint32_t _pgxa = cpu->gpr[2] + 20064; g_debug_last_store_pc = 0x80030668u; psx_store_cycle_barrier(); psx_mem_write_half(cpu, cpu->gpr[2] + 20064, (uint16_t)cpu->gpr[0]);
     PGXP_STORE(0xA4404E60u, _pgxa, cpu->gpr[0]); }  /* 0x80030668: 0xA4404E60 */
 #ifdef PSX_COSIM
     cosim_instr(0x80030668u);
@@ -10001,7 +10001,7 @@ block_8003065C:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20000004u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 16; g_debug_last_store_pc = 0x80030670u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 16, cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[29] + 16; g_debug_last_store_pc = 0x80030670u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 16, cpu->gpr[2]);
     PGXP_STORE(0xAFA20010u, _pgxa, cpu->gpr[2]); }  /* 0x80030670: 0xAFA20010 */
 #ifdef PSX_COSIM
     cosim_instr(0x80030670u);
@@ -10017,7 +10017,7 @@ block_8003065C:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20000004u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 20; g_debug_last_store_pc = 0x80030678u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 20, cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[29] + 20; g_debug_last_store_pc = 0x80030678u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 20, cpu->gpr[2]);
     PGXP_STORE(0xAFA20014u, _pgxa, cpu->gpr[2]); }  /* 0x80030678: 0xAFA20014 */
 #ifdef PSX_COSIM
     cosim_instr(0x80030678u);
@@ -10049,7 +10049,7 @@ block_8003065C:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20000004u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 24; g_debug_last_store_pc = 0x80030688u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 24, cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[29] + 24; g_debug_last_store_pc = 0x80030688u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 24, cpu->gpr[2]);
     PGXP_STORE(0xAFA20018u, _pgxa, cpu->gpr[2]); }  /* 0x80030688: 0xAFA20018 */
 #ifdef PSX_COSIM
     cosim_instr(0x80030688u);
@@ -10057,7 +10057,7 @@ block_8003065C:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20000004u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 28; g_debug_last_store_pc = 0x8003068Cu; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 28, cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[29] + 28; g_debug_last_store_pc = 0x8003068Cu; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 28, cpu->gpr[2]);
     PGXP_STORE(0xAFA2001Cu, _pgxa, cpu->gpr[2]); }  /* 0x8003068C: 0xAFA2001C */
 #ifdef PSX_COSIM
     cosim_instr(0x8003068Cu);
@@ -10068,7 +10068,7 @@ block_8003065C:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20000004u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 32; g_debug_last_store_pc = 0x80030690u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 32, cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[29] + 32; g_debug_last_store_pc = 0x80030690u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 32, cpu->gpr[2]);
     PGXP_STORE(0xAFA20020u, _pgxa, cpu->gpr[2]); }  /* 0x80030690: 0xAFA20020 */
 #ifdef PSX_COSIM
     cosim_instr(0x80030690u);
@@ -10119,7 +10119,7 @@ block_8003069C:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x10004u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[16]; g_debug_last_store_pc = 0x800306A0u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[16], cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[16]; g_debug_last_store_pc = 0x800306A0u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[16], cpu->gpr[2]);
     PGXP_STORE(0xAE020000u, _pgxa, cpu->gpr[2]); }  /* 0x800306A0: 0xAE020000 */
 #ifdef PSX_COSIM
     cosim_instr(0x800306A0u);
@@ -10135,7 +10135,7 @@ block_8003069C:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0xCu);
 #endif
-    { uint32_t _pgxa = cpu->gpr[3] + 19994; g_debug_last_store_pc = 0x800306A8u; psx_store_cycle_barrier(); cpu->write_half(cpu->gpr[3] + 19994, (uint16_t)cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[3] + 19994; g_debug_last_store_pc = 0x800306A8u; psx_store_cycle_barrier(); psx_mem_write_half(cpu, cpu->gpr[3] + 19994, (uint16_t)cpu->gpr[2]);
     PGXP_STORE(0xA4624E1Au, _pgxa, cpu->gpr[2]); }  /* 0x800306A8: 0xA4624E1A */
 #ifdef PSX_COSIM
     cosim_instr(0x800306A8u);
@@ -10172,7 +10172,7 @@ block_8003069C:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0xCu);
 #endif
-    { uint32_t _pgxa = cpu->gpr[3] + 15318; g_debug_last_store_pc = 0x800306BCu; psx_store_cycle_barrier(); cpu->write_half(cpu->gpr[3] + 15318, (uint16_t)cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[3] + 15318; g_debug_last_store_pc = 0x800306BCu; psx_store_cycle_barrier(); psx_mem_write_half(cpu, cpu->gpr[3] + 15318, (uint16_t)cpu->gpr[2]);
     PGXP_STORE(0xA4623BD6u, _pgxa, cpu->gpr[2]); }  /* 0x800306BC: 0xA4623BD6 */
 #ifdef PSX_COSIM
     cosim_instr(0x800306BCu);
@@ -10191,7 +10191,7 @@ block_8003069C:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x5u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[2] + 20282; g_debug_last_store_pc = 0x800306C4u; psx_store_cycle_barrier(); cpu->write_half(cpu->gpr[2] + 20282, (uint16_t)cpu->gpr[0]);
+    { uint32_t _pgxa = cpu->gpr[2] + 20282; g_debug_last_store_pc = 0x800306C4u; psx_store_cycle_barrier(); psx_mem_write_half(cpu, cpu->gpr[2] + 20282, (uint16_t)cpu->gpr[0]);
     PGXP_STORE(0xA4404F3Au, _pgxa, cpu->gpr[0]); }  /* 0x800306C4: 0xA4404F3A */
 #ifdef PSX_COSIM
     cosim_instr(0x800306C4u);
@@ -10349,7 +10349,7 @@ block_800306D0:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0xA0000000u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 68; g_debug_last_store_pc = 0x800306E4u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 68, cpu->gpr[31]);
+    { uint32_t _pgxa = cpu->gpr[29] + 68; g_debug_last_store_pc = 0x800306E4u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 68, cpu->gpr[31]);
     PGXP_STORE(0xAFBF0044u, _pgxa, cpu->gpr[31]); }  /* 0x800306E4: 0xAFBF0044 */
 #ifdef PSX_COSIM
     cosim_instr(0x800306E4u);
@@ -10357,7 +10357,7 @@ block_800306D0:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20040000u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 64; g_debug_last_store_pc = 0x800306E8u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 64, cpu->gpr[18]);
+    { uint32_t _pgxa = cpu->gpr[29] + 64; g_debug_last_store_pc = 0x800306E8u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 64, cpu->gpr[18]);
     PGXP_STORE(0xAFB20040u, _pgxa, cpu->gpr[18]); }  /* 0x800306E8: 0xAFB20040 */
 #ifdef PSX_COSIM
     cosim_instr(0x800306E8u);
@@ -10365,7 +10365,7 @@ block_800306D0:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20020000u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 60; g_debug_last_store_pc = 0x800306ECu; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 60, cpu->gpr[17]);
+    { uint32_t _pgxa = cpu->gpr[29] + 60; g_debug_last_store_pc = 0x800306ECu; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 60, cpu->gpr[17]);
     PGXP_STORE(0xAFB1003Cu, _pgxa, cpu->gpr[17]); }  /* 0x800306EC: 0xAFB1003C */
 #ifdef PSX_COSIM
     cosim_instr(0x800306ECu);
@@ -10376,7 +10376,7 @@ block_800306D0:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20010000u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 56; g_debug_last_store_pc = 0x800306F0u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 56, cpu->gpr[16]);
+    { uint32_t _pgxa = cpu->gpr[29] + 56; g_debug_last_store_pc = 0x800306F0u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 56, cpu->gpr[16]);
     PGXP_STORE(0xAFB00038u, _pgxa, cpu->gpr[16]); }  /* 0x800306F0: 0xAFB00038 */
 #ifdef PSX_COSIM
     cosim_instr(0x800306F0u);
@@ -10419,7 +10419,7 @@ block_800306D0:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x14u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[4] + 12180; g_debug_last_store_pc = 0x80030700u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[4] + 12180, cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[4] + 12180; g_debug_last_store_pc = 0x80030700u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[4] + 12180, cpu->gpr[2]);
     PGXP_STORE(0xAC822F94u, _pgxa, cpu->gpr[2]); }  /* 0x80030700: 0xAC822F94 */
 #ifdef PSX_COSIM
     cosim_instr(0x80030700u);
@@ -10462,7 +10462,7 @@ block_80030704:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x14u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[4] + 12180; g_debug_last_store_pc = 0x80030708u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[4] + 12180, cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[4] + 12180; g_debug_last_store_pc = 0x80030708u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[4] + 12180, cpu->gpr[2]);
     PGXP_STORE(0xAC822F94u, _pgxa, cpu->gpr[2]); }  /* 0x80030708: 0xAC822F94 */
 #ifdef PSX_COSIM
     cosim_instr(0x80030708u);
@@ -10976,7 +10976,7 @@ block_80030778:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0xCu);
 #endif
-    { uint32_t _pgxa = cpu->gpr[2] + 20264; g_debug_last_store_pc = 0x80030798u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[2] + 20264, cpu->gpr[3]);
+    { uint32_t _pgxa = cpu->gpr[2] + 20264; g_debug_last_store_pc = 0x80030798u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[2] + 20264, cpu->gpr[3]);
     PGXP_STORE(0xAC434F28u, _pgxa, cpu->gpr[3]); }  /* 0x80030798: 0xAC434F28 */
 #ifdef PSX_COSIM
     cosim_instr(0x80030798u);
@@ -11224,7 +11224,7 @@ block_800307D8:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0xCu);
 #endif
-    { uint32_t _pgxa = cpu->gpr[3] + 20282; g_debug_last_store_pc = 0x800307E4u; psx_store_cycle_barrier(); cpu->write_half(cpu->gpr[3] + 20282, (uint16_t)cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[3] + 20282; g_debug_last_store_pc = 0x800307E4u; psx_store_cycle_barrier(); psx_mem_write_half(cpu, cpu->gpr[3] + 20282, (uint16_t)cpu->gpr[2]);
     PGXP_STORE(0xA4624F3Au, _pgxa, cpu->gpr[2]); }  /* 0x800307E4: 0xA4624F3A */
 #ifdef PSX_COSIM
     cosim_instr(0x800307E4u);
@@ -11475,7 +11475,7 @@ block_80030820:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0xCu);
 #endif
-    { uint32_t _pgxa = cpu->gpr[3] + -14456; g_debug_last_store_pc = 0x80030828u; psx_store_cycle_barrier(); cpu->write_half(cpu->gpr[3] + -14456, (uint16_t)cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[3] + -14456; g_debug_last_store_pc = 0x80030828u; psx_store_cycle_barrier(); psx_mem_write_half(cpu, cpu->gpr[3] + -14456, (uint16_t)cpu->gpr[2]);
     PGXP_STORE(0xA462C788u, _pgxa, cpu->gpr[2]); }  /* 0x80030828: 0xA462C788 */
 #ifdef PSX_COSIM
     cosim_instr(0x80030828u);
@@ -11506,7 +11506,7 @@ block_80030820:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0xCu);
 #endif
-    { uint32_t _pgxa = cpu->gpr[3] + 20282; g_debug_last_store_pc = 0x80030838u; psx_store_cycle_barrier(); cpu->write_half(cpu->gpr[3] + 20282, (uint16_t)cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[3] + 20282; g_debug_last_store_pc = 0x80030838u; psx_store_cycle_barrier(); psx_mem_write_half(cpu, cpu->gpr[3] + 20282, (uint16_t)cpu->gpr[2]);
     PGXP_STORE(0xA4624F3Au, _pgxa, cpu->gpr[2]); }  /* 0x80030838: 0xA4624F3A */
 #ifdef PSX_COSIM
     cosim_instr(0x80030838u);
@@ -11651,7 +11651,7 @@ block_8003085C:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0xCu);
 #endif
-    { uint32_t _pgxa = cpu->gpr[3] + 20282; g_debug_last_store_pc = 0x80030864u; psx_store_cycle_barrier(); cpu->write_half(cpu->gpr[3] + 20282, (uint16_t)cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[3] + 20282; g_debug_last_store_pc = 0x80030864u; psx_store_cycle_barrier(); psx_mem_write_half(cpu, cpu->gpr[3] + 20282, (uint16_t)cpu->gpr[2]);
     PGXP_STORE(0xA4624F3Au, _pgxa, cpu->gpr[2]); }  /* 0x80030864: 0xA4624F3A */
 #ifdef PSX_COSIM
     cosim_instr(0x80030864u);
@@ -11936,7 +11936,7 @@ block_800308AC:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0xCu);
 #endif
-    { uint32_t _pgxa = cpu->gpr[3] + 20282; g_debug_last_store_pc = 0x800308B0u; psx_store_cycle_barrier(); cpu->write_half(cpu->gpr[3] + 20282, (uint16_t)cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[3] + 20282; g_debug_last_store_pc = 0x800308B0u; psx_store_cycle_barrier(); psx_mem_write_half(cpu, cpu->gpr[3] + 20282, (uint16_t)cpu->gpr[2]);
     PGXP_STORE(0xA4624F3Au, _pgxa, cpu->gpr[2]); }  /* 0x800308B0: 0xA4624F3A */
 #ifdef PSX_COSIM
     cosim_instr(0x800308B0u);
@@ -12095,7 +12095,7 @@ block_800308B4:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x10008u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[16] + -14456; g_debug_last_store_pc = 0x800308E8u; psx_store_cycle_barrier(); cpu->write_half(cpu->gpr[16] + -14456, (uint16_t)cpu->gpr[3]);
+    { uint32_t _pgxa = cpu->gpr[16] + -14456; g_debug_last_store_pc = 0x800308E8u; psx_store_cycle_barrier(); psx_mem_write_half(cpu, cpu->gpr[16] + -14456, (uint16_t)cpu->gpr[3]);
     PGXP_STORE(0xA603C788u, _pgxa, cpu->gpr[3]); }  /* 0x800308E8: 0xA603C788 */
 #ifdef PSX_COSIM
     cosim_instr(0x800308E8u);
@@ -12181,7 +12181,7 @@ block_800308EC:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20000004u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 16; g_debug_last_store_pc = 0x80030904u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 16, cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[29] + 16; g_debug_last_store_pc = 0x80030904u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 16, cpu->gpr[2]);
     PGXP_STORE(0xAFA20010u, _pgxa, cpu->gpr[2]); }  /* 0x80030904: 0xAFA20010 */
 #ifdef PSX_COSIM
     cosim_instr(0x80030904u);
@@ -12197,7 +12197,7 @@ block_800308EC:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20000004u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 20; g_debug_last_store_pc = 0x8003090Cu; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 20, cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[29] + 20; g_debug_last_store_pc = 0x8003090Cu; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 20, cpu->gpr[2]);
     PGXP_STORE(0xAFA20014u, _pgxa, cpu->gpr[2]); }  /* 0x8003090C: 0xAFA20014 */
 #ifdef PSX_COSIM
     cosim_instr(0x8003090Cu);
@@ -12260,7 +12260,7 @@ block_80030918:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20004u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[17]; g_debug_last_store_pc = 0x80030924u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[17], cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[17]; g_debug_last_store_pc = 0x80030924u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[17], cpu->gpr[2]);
     PGXP_STORE(0xAE220000u, _pgxa, cpu->gpr[2]); }  /* 0x80030924: 0xAE220000 */
 #ifdef PSX_COSIM
     cosim_instr(0x80030924u);
@@ -12433,7 +12433,7 @@ block_80030944:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0xCu);
 #endif
-    { uint32_t _pgxa = cpu->gpr[3] + 19994; g_debug_last_store_pc = 0x80030950u; psx_store_cycle_barrier(); cpu->write_half(cpu->gpr[3] + 19994, (uint16_t)cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[3] + 19994; g_debug_last_store_pc = 0x80030950u; psx_store_cycle_barrier(); psx_mem_write_half(cpu, cpu->gpr[3] + 19994, (uint16_t)cpu->gpr[2]);
     PGXP_STORE(0xA4624E1Au, _pgxa, cpu->gpr[2]); }  /* 0x80030950: 0xA4624E1A */
 #ifdef PSX_COSIM
     cosim_instr(0x80030950u);
@@ -12468,7 +12468,7 @@ block_80030944:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0xCu);
 #endif
-    { uint32_t _pgxa = cpu->gpr[3] + 15318; g_debug_last_store_pc = 0x8003095Cu; psx_store_cycle_barrier(); cpu->write_half(cpu->gpr[3] + 15318, (uint16_t)cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[3] + 15318; g_debug_last_store_pc = 0x8003095Cu; psx_store_cycle_barrier(); psx_mem_write_half(cpu, cpu->gpr[3] + 15318, (uint16_t)cpu->gpr[2]);
     PGXP_STORE(0xA4623BD6u, _pgxa, cpu->gpr[2]); }  /* 0x8003095C: 0xA4623BD6 */
 #ifdef PSX_COSIM
     cosim_instr(0x8003095Cu);
@@ -12487,7 +12487,7 @@ block_80030944:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x5u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[2] + 20282; g_debug_last_store_pc = 0x80030964u; psx_store_cycle_barrier(); cpu->write_half(cpu->gpr[2] + 20282, (uint16_t)cpu->gpr[0]);
+    { uint32_t _pgxa = cpu->gpr[2] + 20282; g_debug_last_store_pc = 0x80030964u; psx_store_cycle_barrier(); psx_mem_write_half(cpu, cpu->gpr[2] + 20282, (uint16_t)cpu->gpr[0]);
     PGXP_STORE(0xA4404F3Au, _pgxa, cpu->gpr[0]); }  /* 0x80030964: 0xA4404F3A */
 #ifdef PSX_COSIM
     cosim_instr(0x80030964u);
@@ -12524,7 +12524,7 @@ block_80030944:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0xCu);
 #endif
-    { uint32_t _pgxa = cpu->gpr[2] + -12848; g_debug_last_store_pc = 0x80030978u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[2] + -12848, cpu->gpr[3]);
+    { uint32_t _pgxa = cpu->gpr[2] + -12848; g_debug_last_store_pc = 0x80030978u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[2] + -12848, cpu->gpr[3]);
     PGXP_STORE(0xAC43CDD0u, _pgxa, cpu->gpr[3]); }  /* 0x80030978: 0xAC43CDD0 */
 #ifdef PSX_COSIM
     cosim_instr(0x80030978u);
@@ -12592,7 +12592,7 @@ block_80030984:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0xCu);
 #endif
-    { uint32_t _pgxa = cpu->gpr[3] + 19994; g_debug_last_store_pc = 0x80030988u; psx_store_cycle_barrier(); cpu->write_half(cpu->gpr[3] + 19994, (uint16_t)cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[3] + 19994; g_debug_last_store_pc = 0x80030988u; psx_store_cycle_barrier(); psx_mem_write_half(cpu, cpu->gpr[3] + 19994, (uint16_t)cpu->gpr[2]);
     PGXP_STORE(0xA4624E1Au, _pgxa, cpu->gpr[2]); }  /* 0x80030988: 0xA4624E1A */
 #ifdef PSX_COSIM
     cosim_instr(0x80030988u);
@@ -12619,7 +12619,7 @@ block_80030984:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0xCu);
 #endif
-    { uint32_t _pgxa = cpu->gpr[3] + 15318; g_debug_last_store_pc = 0x80030994u; psx_store_cycle_barrier(); cpu->write_half(cpu->gpr[3] + 15318, (uint16_t)cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[3] + 15318; g_debug_last_store_pc = 0x80030994u; psx_store_cycle_barrier(); psx_mem_write_half(cpu, cpu->gpr[3] + 15318, (uint16_t)cpu->gpr[2]);
     PGXP_STORE(0xA4623BD6u, _pgxa, cpu->gpr[2]); }  /* 0x80030994: 0xA4623BD6 */
 #ifdef PSX_COSIM
     cosim_instr(0x80030994u);
@@ -12642,7 +12642,7 @@ block_80030984:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x5u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[2] + 20282; g_debug_last_store_pc = 0x800309A0u; psx_store_cycle_barrier(); cpu->write_half(cpu->gpr[2] + 20282, (uint16_t)cpu->gpr[0]);
+    { uint32_t _pgxa = cpu->gpr[2] + 20282; g_debug_last_store_pc = 0x800309A0u; psx_store_cycle_barrier(); psx_mem_write_half(cpu, cpu->gpr[2] + 20282, (uint16_t)cpu->gpr[0]);
     PGXP_STORE(0xA4404F3Au, _pgxa, cpu->gpr[0]); }  /* 0x800309A0: 0xA4404F3A */
 #ifdef PSX_COSIM
     cosim_instr(0x800309A0u);
@@ -12943,7 +12943,7 @@ block_800309E8:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20000004u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 40; g_debug_last_store_pc = 0x800309ECu; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 40, cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[29] + 40; g_debug_last_store_pc = 0x800309ECu; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 40, cpu->gpr[2]);
     PGXP_STORE(0xAFA20028u, _pgxa, cpu->gpr[2]); }  /* 0x800309EC: 0xAFA20028 */
 #ifdef PSX_COSIM
     cosim_instr(0x800309ECu);
@@ -13082,7 +13082,7 @@ block_80030A10:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20000004u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 44; g_debug_last_store_pc = 0x80030A14u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 44, cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[29] + 44; g_debug_last_store_pc = 0x80030A14u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 44, cpu->gpr[2]);
     PGXP_STORE(0xAFA2002Cu, _pgxa, cpu->gpr[2]); }  /* 0x80030A14: 0xAFA2002C */
 #ifdef PSX_COSIM
     cosim_instr(0x80030A14u);
@@ -13178,7 +13178,7 @@ block_80030A28:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20000004u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 48; g_debug_last_store_pc = 0x80030A30u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 48, cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[29] + 48; g_debug_last_store_pc = 0x80030A30u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 48, cpu->gpr[2]);
     PGXP_STORE(0xAFA20030u, _pgxa, cpu->gpr[2]); }  /* 0x80030A30: 0xAFA20030 */
 #ifdef PSX_COSIM
     cosim_instr(0x80030A30u);
@@ -13213,7 +13213,7 @@ block_80030A34:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20000004u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 40; g_debug_last_store_pc = 0x80030A38u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 40, cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[29] + 40; g_debug_last_store_pc = 0x80030A38u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 40, cpu->gpr[2]);
     PGXP_STORE(0xAFA20028u, _pgxa, cpu->gpr[2]); }  /* 0x80030A38: 0xAFA20028 */
 #ifdef PSX_COSIM
     cosim_instr(0x80030A38u);
@@ -13232,7 +13232,7 @@ block_80030A34:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20000004u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 44; g_debug_last_store_pc = 0x80030A40u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 44, cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[29] + 44; g_debug_last_store_pc = 0x80030A40u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 44, cpu->gpr[2]);
     PGXP_STORE(0xAFA2002Cu, _pgxa, cpu->gpr[2]); }  /* 0x80030A40: 0xAFA2002C */
 #ifdef PSX_COSIM
     cosim_instr(0x80030A40u);
@@ -13240,7 +13240,7 @@ block_80030A34:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20000001u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 48; g_debug_last_store_pc = 0x80030A44u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 48, cpu->gpr[0]);
+    { uint32_t _pgxa = cpu->gpr[29] + 48; g_debug_last_store_pc = 0x80030A44u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 48, cpu->gpr[0]);
     PGXP_STORE(0xAFA00030u, _pgxa, cpu->gpr[0]); }  /* 0x80030A44: 0xAFA00030 */
 #ifdef PSX_COSIM
     cosim_instr(0x80030A44u);
@@ -13287,7 +13287,7 @@ block_80030A48:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20000004u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 16; g_debug_last_store_pc = 0x80030A54u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 16, cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[29] + 16; g_debug_last_store_pc = 0x80030A54u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 16, cpu->gpr[2]);
     PGXP_STORE(0xAFA20010u, _pgxa, cpu->gpr[2]); }  /* 0x80030A54: 0xAFA20010 */
 #ifdef PSX_COSIM
     cosim_instr(0x80030A54u);
@@ -13303,7 +13303,7 @@ block_80030A48:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20000004u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 20; g_debug_last_store_pc = 0x80030A5Cu; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 20, cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[29] + 20; g_debug_last_store_pc = 0x80030A5Cu; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 20, cpu->gpr[2]);
     PGXP_STORE(0xAFA20014u, _pgxa, cpu->gpr[2]); }  /* 0x80030A5C: 0xAFA20014 */
 #ifdef PSX_COSIM
     cosim_instr(0x80030A5Cu);
@@ -13327,7 +13327,7 @@ block_80030A48:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20000004u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 24; g_debug_last_store_pc = 0x80030A68u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 24, cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[29] + 24; g_debug_last_store_pc = 0x80030A68u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 24, cpu->gpr[2]);
     PGXP_STORE(0xAFA20018u, _pgxa, cpu->gpr[2]); }  /* 0x80030A68: 0xAFA20018 */
 #ifdef PSX_COSIM
     cosim_instr(0x80030A68u);
@@ -13351,7 +13351,7 @@ block_80030A48:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20000004u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 28; g_debug_last_store_pc = 0x80030A74u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 28, cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[29] + 28; g_debug_last_store_pc = 0x80030A74u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 28, cpu->gpr[2]);
     PGXP_STORE(0xAFA2001Cu, _pgxa, cpu->gpr[2]); }  /* 0x80030A74: 0xAFA2001C */
 #ifdef PSX_COSIM
     cosim_instr(0x80030A74u);
@@ -13393,7 +13393,7 @@ block_80030A48:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20000004u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 32; g_debug_last_store_pc = 0x80030A8Cu; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 32, cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[29] + 32; g_debug_last_store_pc = 0x80030A8Cu; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 32, cpu->gpr[2]);
     PGXP_STORE(0xAFA20020u, _pgxa, cpu->gpr[2]); }  /* 0x80030A8C: 0xAFA20020 */
 #ifdef PSX_COSIM
     cosim_instr(0x80030A8Cu);
@@ -13420,7 +13420,7 @@ block_80030A90:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x10004u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[16]; g_debug_last_store_pc = 0x80030A90u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[16], cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[16]; g_debug_last_store_pc = 0x80030A90u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[16], cpu->gpr[2]);
     PGXP_STORE(0xAE020000u, _pgxa, cpu->gpr[2]); }  /* 0x80030A90: 0xAE020000 */
 #ifdef PSX_COSIM
     cosim_instr(0x80030A90u);
@@ -13843,7 +13843,7 @@ block_80030778:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0xCu);
 #endif
-    { uint32_t _pgxa = cpu->gpr[2] + 20264; g_debug_last_store_pc = 0x80030798u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[2] + 20264, cpu->gpr[3]);
+    { uint32_t _pgxa = cpu->gpr[2] + 20264; g_debug_last_store_pc = 0x80030798u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[2] + 20264, cpu->gpr[3]);
     PGXP_STORE(0xAC434F28u, _pgxa, cpu->gpr[3]); }  /* 0x80030798: 0xAC434F28 */
 #ifdef PSX_COSIM
     cosim_instr(0x80030798u);
@@ -14091,7 +14091,7 @@ block_800307D8:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0xCu);
 #endif
-    { uint32_t _pgxa = cpu->gpr[3] + 20282; g_debug_last_store_pc = 0x800307E4u; psx_store_cycle_barrier(); cpu->write_half(cpu->gpr[3] + 20282, (uint16_t)cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[3] + 20282; g_debug_last_store_pc = 0x800307E4u; psx_store_cycle_barrier(); psx_mem_write_half(cpu, cpu->gpr[3] + 20282, (uint16_t)cpu->gpr[2]);
     PGXP_STORE(0xA4624F3Au, _pgxa, cpu->gpr[2]); }  /* 0x800307E4: 0xA4624F3A */
 #ifdef PSX_COSIM
     cosim_instr(0x800307E4u);
@@ -14342,7 +14342,7 @@ block_80030820:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0xCu);
 #endif
-    { uint32_t _pgxa = cpu->gpr[3] + -14456; g_debug_last_store_pc = 0x80030828u; psx_store_cycle_barrier(); cpu->write_half(cpu->gpr[3] + -14456, (uint16_t)cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[3] + -14456; g_debug_last_store_pc = 0x80030828u; psx_store_cycle_barrier(); psx_mem_write_half(cpu, cpu->gpr[3] + -14456, (uint16_t)cpu->gpr[2]);
     PGXP_STORE(0xA462C788u, _pgxa, cpu->gpr[2]); }  /* 0x80030828: 0xA462C788 */
 #ifdef PSX_COSIM
     cosim_instr(0x80030828u);
@@ -14373,7 +14373,7 @@ block_80030820:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0xCu);
 #endif
-    { uint32_t _pgxa = cpu->gpr[3] + 20282; g_debug_last_store_pc = 0x80030838u; psx_store_cycle_barrier(); cpu->write_half(cpu->gpr[3] + 20282, (uint16_t)cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[3] + 20282; g_debug_last_store_pc = 0x80030838u; psx_store_cycle_barrier(); psx_mem_write_half(cpu, cpu->gpr[3] + 20282, (uint16_t)cpu->gpr[2]);
     PGXP_STORE(0xA4624F3Au, _pgxa, cpu->gpr[2]); }  /* 0x80030838: 0xA4624F3A */
 #ifdef PSX_COSIM
     cosim_instr(0x80030838u);
@@ -14518,7 +14518,7 @@ block_8003085C:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0xCu);
 #endif
-    { uint32_t _pgxa = cpu->gpr[3] + 20282; g_debug_last_store_pc = 0x80030864u; psx_store_cycle_barrier(); cpu->write_half(cpu->gpr[3] + 20282, (uint16_t)cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[3] + 20282; g_debug_last_store_pc = 0x80030864u; psx_store_cycle_barrier(); psx_mem_write_half(cpu, cpu->gpr[3] + 20282, (uint16_t)cpu->gpr[2]);
     PGXP_STORE(0xA4624F3Au, _pgxa, cpu->gpr[2]); }  /* 0x80030864: 0xA4624F3A */
 #ifdef PSX_COSIM
     cosim_instr(0x80030864u);
@@ -14803,7 +14803,7 @@ block_800308AC:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0xCu);
 #endif
-    { uint32_t _pgxa = cpu->gpr[3] + 20282; g_debug_last_store_pc = 0x800308B0u; psx_store_cycle_barrier(); cpu->write_half(cpu->gpr[3] + 20282, (uint16_t)cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[3] + 20282; g_debug_last_store_pc = 0x800308B0u; psx_store_cycle_barrier(); psx_mem_write_half(cpu, cpu->gpr[3] + 20282, (uint16_t)cpu->gpr[2]);
     PGXP_STORE(0xA4624F3Au, _pgxa, cpu->gpr[2]); }  /* 0x800308B0: 0xA4624F3A */
 #ifdef PSX_COSIM
     cosim_instr(0x800308B0u);
@@ -14962,7 +14962,7 @@ block_800308B4:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x10008u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[16] + -14456; g_debug_last_store_pc = 0x800308E8u; psx_store_cycle_barrier(); cpu->write_half(cpu->gpr[16] + -14456, (uint16_t)cpu->gpr[3]);
+    { uint32_t _pgxa = cpu->gpr[16] + -14456; g_debug_last_store_pc = 0x800308E8u; psx_store_cycle_barrier(); psx_mem_write_half(cpu, cpu->gpr[16] + -14456, (uint16_t)cpu->gpr[3]);
     PGXP_STORE(0xA603C788u, _pgxa, cpu->gpr[3]); }  /* 0x800308E8: 0xA603C788 */
 #ifdef PSX_COSIM
     cosim_instr(0x800308E8u);
@@ -15048,7 +15048,7 @@ block_800308EC:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20000004u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 16; g_debug_last_store_pc = 0x80030904u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 16, cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[29] + 16; g_debug_last_store_pc = 0x80030904u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 16, cpu->gpr[2]);
     PGXP_STORE(0xAFA20010u, _pgxa, cpu->gpr[2]); }  /* 0x80030904: 0xAFA20010 */
 #ifdef PSX_COSIM
     cosim_instr(0x80030904u);
@@ -15064,7 +15064,7 @@ block_800308EC:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20000004u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 20; g_debug_last_store_pc = 0x8003090Cu; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 20, cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[29] + 20; g_debug_last_store_pc = 0x8003090Cu; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 20, cpu->gpr[2]);
     PGXP_STORE(0xAFA20014u, _pgxa, cpu->gpr[2]); }  /* 0x8003090C: 0xAFA20014 */
 #ifdef PSX_COSIM
     cosim_instr(0x8003090Cu);
@@ -15127,7 +15127,7 @@ block_80030918:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20004u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[17]; g_debug_last_store_pc = 0x80030924u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[17], cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[17]; g_debug_last_store_pc = 0x80030924u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[17], cpu->gpr[2]);
     PGXP_STORE(0xAE220000u, _pgxa, cpu->gpr[2]); }  /* 0x80030924: 0xAE220000 */
 #ifdef PSX_COSIM
     cosim_instr(0x80030924u);
@@ -15300,7 +15300,7 @@ block_80030944:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0xCu);
 #endif
-    { uint32_t _pgxa = cpu->gpr[3] + 19994; g_debug_last_store_pc = 0x80030950u; psx_store_cycle_barrier(); cpu->write_half(cpu->gpr[3] + 19994, (uint16_t)cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[3] + 19994; g_debug_last_store_pc = 0x80030950u; psx_store_cycle_barrier(); psx_mem_write_half(cpu, cpu->gpr[3] + 19994, (uint16_t)cpu->gpr[2]);
     PGXP_STORE(0xA4624E1Au, _pgxa, cpu->gpr[2]); }  /* 0x80030950: 0xA4624E1A */
 #ifdef PSX_COSIM
     cosim_instr(0x80030950u);
@@ -15335,7 +15335,7 @@ block_80030944:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0xCu);
 #endif
-    { uint32_t _pgxa = cpu->gpr[3] + 15318; g_debug_last_store_pc = 0x8003095Cu; psx_store_cycle_barrier(); cpu->write_half(cpu->gpr[3] + 15318, (uint16_t)cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[3] + 15318; g_debug_last_store_pc = 0x8003095Cu; psx_store_cycle_barrier(); psx_mem_write_half(cpu, cpu->gpr[3] + 15318, (uint16_t)cpu->gpr[2]);
     PGXP_STORE(0xA4623BD6u, _pgxa, cpu->gpr[2]); }  /* 0x8003095C: 0xA4623BD6 */
 #ifdef PSX_COSIM
     cosim_instr(0x8003095Cu);
@@ -15354,7 +15354,7 @@ block_80030944:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x5u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[2] + 20282; g_debug_last_store_pc = 0x80030964u; psx_store_cycle_barrier(); cpu->write_half(cpu->gpr[2] + 20282, (uint16_t)cpu->gpr[0]);
+    { uint32_t _pgxa = cpu->gpr[2] + 20282; g_debug_last_store_pc = 0x80030964u; psx_store_cycle_barrier(); psx_mem_write_half(cpu, cpu->gpr[2] + 20282, (uint16_t)cpu->gpr[0]);
     PGXP_STORE(0xA4404F3Au, _pgxa, cpu->gpr[0]); }  /* 0x80030964: 0xA4404F3A */
 #ifdef PSX_COSIM
     cosim_instr(0x80030964u);
@@ -15391,7 +15391,7 @@ block_80030944:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0xCu);
 #endif
-    { uint32_t _pgxa = cpu->gpr[2] + -12848; g_debug_last_store_pc = 0x80030978u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[2] + -12848, cpu->gpr[3]);
+    { uint32_t _pgxa = cpu->gpr[2] + -12848; g_debug_last_store_pc = 0x80030978u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[2] + -12848, cpu->gpr[3]);
     PGXP_STORE(0xAC43CDD0u, _pgxa, cpu->gpr[3]); }  /* 0x80030978: 0xAC43CDD0 */
 #ifdef PSX_COSIM
     cosim_instr(0x80030978u);
@@ -15459,7 +15459,7 @@ block_80030984:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0xCu);
 #endif
-    { uint32_t _pgxa = cpu->gpr[3] + 19994; g_debug_last_store_pc = 0x80030988u; psx_store_cycle_barrier(); cpu->write_half(cpu->gpr[3] + 19994, (uint16_t)cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[3] + 19994; g_debug_last_store_pc = 0x80030988u; psx_store_cycle_barrier(); psx_mem_write_half(cpu, cpu->gpr[3] + 19994, (uint16_t)cpu->gpr[2]);
     PGXP_STORE(0xA4624E1Au, _pgxa, cpu->gpr[2]); }  /* 0x80030988: 0xA4624E1A */
 #ifdef PSX_COSIM
     cosim_instr(0x80030988u);
@@ -15486,7 +15486,7 @@ block_80030984:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0xCu);
 #endif
-    { uint32_t _pgxa = cpu->gpr[3] + 15318; g_debug_last_store_pc = 0x80030994u; psx_store_cycle_barrier(); cpu->write_half(cpu->gpr[3] + 15318, (uint16_t)cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[3] + 15318; g_debug_last_store_pc = 0x80030994u; psx_store_cycle_barrier(); psx_mem_write_half(cpu, cpu->gpr[3] + 15318, (uint16_t)cpu->gpr[2]);
     PGXP_STORE(0xA4623BD6u, _pgxa, cpu->gpr[2]); }  /* 0x80030994: 0xA4623BD6 */
 #ifdef PSX_COSIM
     cosim_instr(0x80030994u);
@@ -15509,7 +15509,7 @@ block_80030984:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x5u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[2] + 20282; g_debug_last_store_pc = 0x800309A0u; psx_store_cycle_barrier(); cpu->write_half(cpu->gpr[2] + 20282, (uint16_t)cpu->gpr[0]);
+    { uint32_t _pgxa = cpu->gpr[2] + 20282; g_debug_last_store_pc = 0x800309A0u; psx_store_cycle_barrier(); psx_mem_write_half(cpu, cpu->gpr[2] + 20282, (uint16_t)cpu->gpr[0]);
     PGXP_STORE(0xA4404F3Au, _pgxa, cpu->gpr[0]); }  /* 0x800309A0: 0xA4404F3A */
 #ifdef PSX_COSIM
     cosim_instr(0x800309A0u);
@@ -15810,7 +15810,7 @@ block_800309E8:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20000004u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 40; g_debug_last_store_pc = 0x800309ECu; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 40, cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[29] + 40; g_debug_last_store_pc = 0x800309ECu; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 40, cpu->gpr[2]);
     PGXP_STORE(0xAFA20028u, _pgxa, cpu->gpr[2]); }  /* 0x800309EC: 0xAFA20028 */
 #ifdef PSX_COSIM
     cosim_instr(0x800309ECu);
@@ -15949,7 +15949,7 @@ block_80030A10:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20000004u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 44; g_debug_last_store_pc = 0x80030A14u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 44, cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[29] + 44; g_debug_last_store_pc = 0x80030A14u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 44, cpu->gpr[2]);
     PGXP_STORE(0xAFA2002Cu, _pgxa, cpu->gpr[2]); }  /* 0x80030A14: 0xAFA2002C */
 #ifdef PSX_COSIM
     cosim_instr(0x80030A14u);
@@ -16045,7 +16045,7 @@ block_80030A28:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20000004u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 48; g_debug_last_store_pc = 0x80030A30u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 48, cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[29] + 48; g_debug_last_store_pc = 0x80030A30u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 48, cpu->gpr[2]);
     PGXP_STORE(0xAFA20030u, _pgxa, cpu->gpr[2]); }  /* 0x80030A30: 0xAFA20030 */
 #ifdef PSX_COSIM
     cosim_instr(0x80030A30u);
@@ -16080,7 +16080,7 @@ block_80030A34:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20000004u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 40; g_debug_last_store_pc = 0x80030A38u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 40, cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[29] + 40; g_debug_last_store_pc = 0x80030A38u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 40, cpu->gpr[2]);
     PGXP_STORE(0xAFA20028u, _pgxa, cpu->gpr[2]); }  /* 0x80030A38: 0xAFA20028 */
 #ifdef PSX_COSIM
     cosim_instr(0x80030A38u);
@@ -16099,7 +16099,7 @@ block_80030A34:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20000004u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 44; g_debug_last_store_pc = 0x80030A40u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 44, cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[29] + 44; g_debug_last_store_pc = 0x80030A40u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 44, cpu->gpr[2]);
     PGXP_STORE(0xAFA2002Cu, _pgxa, cpu->gpr[2]); }  /* 0x80030A40: 0xAFA2002C */
 #ifdef PSX_COSIM
     cosim_instr(0x80030A40u);
@@ -16107,7 +16107,7 @@ block_80030A34:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20000001u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 48; g_debug_last_store_pc = 0x80030A44u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 48, cpu->gpr[0]);
+    { uint32_t _pgxa = cpu->gpr[29] + 48; g_debug_last_store_pc = 0x80030A44u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 48, cpu->gpr[0]);
     PGXP_STORE(0xAFA00030u, _pgxa, cpu->gpr[0]); }  /* 0x80030A44: 0xAFA00030 */
 #ifdef PSX_COSIM
     cosim_instr(0x80030A44u);
@@ -16154,7 +16154,7 @@ block_80030A48:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20000004u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 16; g_debug_last_store_pc = 0x80030A54u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 16, cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[29] + 16; g_debug_last_store_pc = 0x80030A54u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 16, cpu->gpr[2]);
     PGXP_STORE(0xAFA20010u, _pgxa, cpu->gpr[2]); }  /* 0x80030A54: 0xAFA20010 */
 #ifdef PSX_COSIM
     cosim_instr(0x80030A54u);
@@ -16170,7 +16170,7 @@ block_80030A48:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20000004u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 20; g_debug_last_store_pc = 0x80030A5Cu; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 20, cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[29] + 20; g_debug_last_store_pc = 0x80030A5Cu; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 20, cpu->gpr[2]);
     PGXP_STORE(0xAFA20014u, _pgxa, cpu->gpr[2]); }  /* 0x80030A5C: 0xAFA20014 */
 #ifdef PSX_COSIM
     cosim_instr(0x80030A5Cu);
@@ -16194,7 +16194,7 @@ block_80030A48:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20000004u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 24; g_debug_last_store_pc = 0x80030A68u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 24, cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[29] + 24; g_debug_last_store_pc = 0x80030A68u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 24, cpu->gpr[2]);
     PGXP_STORE(0xAFA20018u, _pgxa, cpu->gpr[2]); }  /* 0x80030A68: 0xAFA20018 */
 #ifdef PSX_COSIM
     cosim_instr(0x80030A68u);
@@ -16218,7 +16218,7 @@ block_80030A48:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20000004u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 28; g_debug_last_store_pc = 0x80030A74u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 28, cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[29] + 28; g_debug_last_store_pc = 0x80030A74u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 28, cpu->gpr[2]);
     PGXP_STORE(0xAFA2001Cu, _pgxa, cpu->gpr[2]); }  /* 0x80030A74: 0xAFA2001C */
 #ifdef PSX_COSIM
     cosim_instr(0x80030A74u);
@@ -16260,7 +16260,7 @@ block_80030A48:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20000004u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 32; g_debug_last_store_pc = 0x80030A8Cu; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 32, cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[29] + 32; g_debug_last_store_pc = 0x80030A8Cu; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 32, cpu->gpr[2]);
     PGXP_STORE(0xAFA20020u, _pgxa, cpu->gpr[2]); }  /* 0x80030A8C: 0xAFA20020 */
 #ifdef PSX_COSIM
     cosim_instr(0x80030A8Cu);
@@ -16287,7 +16287,7 @@ block_80030A90:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x10004u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[16]; g_debug_last_store_pc = 0x80030A90u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[16], cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[16]; g_debug_last_store_pc = 0x80030A90u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[16], cpu->gpr[2]);
     PGXP_STORE(0xAE020000u, _pgxa, cpu->gpr[2]); }  /* 0x80030A90: 0xAE020000 */
 #ifdef PSX_COSIM
     cosim_instr(0x80030A90u);
@@ -16433,7 +16433,7 @@ block_80030AAC:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20800000u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 76; g_debug_last_store_pc = 0x80030AB0u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 76, cpu->gpr[23]);
+    { uint32_t _pgxa = cpu->gpr[29] + 76; g_debug_last_store_pc = 0x80030AB0u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 76, cpu->gpr[23]);
     PGXP_STORE(0xAFB7004Cu, _pgxa, cpu->gpr[23]); }  /* 0x80030AB0: 0xAFB7004C */
 #ifdef PSX_COSIM
     cosim_instr(0x80030AB0u);
@@ -16449,7 +16449,7 @@ block_80030AAC:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x60000000u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 80; g_debug_last_store_pc = 0x80030AB8u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 80, cpu->gpr[30]);
+    { uint32_t _pgxa = cpu->gpr[29] + 80; g_debug_last_store_pc = 0x80030AB8u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 80, cpu->gpr[30]);
     PGXP_STORE(0xAFBE0050u, _pgxa, cpu->gpr[30]); }  /* 0x80030AB8: 0xAFBE0050 */
 #ifdef PSX_COSIM
     cosim_instr(0x80030AB8u);
@@ -16476,7 +16476,7 @@ block_80030AAC:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20020000u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 52; g_debug_last_store_pc = 0x80030AC4u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 52, cpu->gpr[17]);
+    { uint32_t _pgxa = cpu->gpr[29] + 52; g_debug_last_store_pc = 0x80030AC4u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 52, cpu->gpr[17]);
     PGXP_STORE(0xAFB10034u, _pgxa, cpu->gpr[17]); }  /* 0x80030AC4: 0xAFB10034 */
 #ifdef PSX_COSIM
     cosim_instr(0x80030AC4u);
@@ -16492,7 +16492,7 @@ block_80030AAC:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20040000u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 56; g_debug_last_store_pc = 0x80030ACCu; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 56, cpu->gpr[18]);
+    { uint32_t _pgxa = cpu->gpr[29] + 56; g_debug_last_store_pc = 0x80030ACCu; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 56, cpu->gpr[18]);
     PGXP_STORE(0xAFB20038u, _pgxa, cpu->gpr[18]); }  /* 0x80030ACC: 0xAFB20038 */
 #ifdef PSX_COSIM
     cosim_instr(0x80030ACCu);
@@ -16511,7 +16511,7 @@ block_80030AAC:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20100000u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 64; g_debug_last_store_pc = 0x80030AD4u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 64, cpu->gpr[20]);
+    { uint32_t _pgxa = cpu->gpr[29] + 64; g_debug_last_store_pc = 0x80030AD4u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 64, cpu->gpr[20]);
     PGXP_STORE(0xAFB40040u, _pgxa, cpu->gpr[20]); }  /* 0x80030AD4: 0xAFB40040 */
 #ifdef PSX_COSIM
     cosim_instr(0x80030AD4u);
@@ -16535,7 +16535,7 @@ block_80030AAC:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20400000u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 72; g_debug_last_store_pc = 0x80030AE0u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 72, cpu->gpr[22]);
+    { uint32_t _pgxa = cpu->gpr[29] + 72; g_debug_last_store_pc = 0x80030AE0u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 72, cpu->gpr[22]);
     PGXP_STORE(0xAFB60048u, _pgxa, cpu->gpr[22]); }  /* 0x80030AE0: 0xAFB60048 */
 #ifdef PSX_COSIM
     cosim_instr(0x80030AE0u);
@@ -16551,7 +16551,7 @@ block_80030AAC:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20080000u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 60; g_debug_last_store_pc = 0x80030AE8u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 60, cpu->gpr[19]);
+    { uint32_t _pgxa = cpu->gpr[29] + 60; g_debug_last_store_pc = 0x80030AE8u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 60, cpu->gpr[19]);
     PGXP_STORE(0xAFB3003Cu, _pgxa, cpu->gpr[19]); }  /* 0x80030AE8: 0xAFB3003C */
 #ifdef PSX_COSIM
     cosim_instr(0x80030AE8u);
@@ -16575,7 +16575,7 @@ block_80030AAC:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20200000u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 68; g_debug_last_store_pc = 0x80030AF4u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 68, cpu->gpr[21]);
+    { uint32_t _pgxa = cpu->gpr[29] + 68; g_debug_last_store_pc = 0x80030AF4u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 68, cpu->gpr[21]);
     PGXP_STORE(0xAFB50044u, _pgxa, cpu->gpr[21]); }  /* 0x80030AF4: 0xAFB50044 */
 #ifdef PSX_COSIM
     cosim_instr(0x80030AF4u);
@@ -16591,7 +16591,7 @@ block_80030AAC:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0xA0000000u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 84; g_debug_last_store_pc = 0x80030AFCu; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 84, cpu->gpr[31]);
+    { uint32_t _pgxa = cpu->gpr[29] + 84; g_debug_last_store_pc = 0x80030AFCu; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 84, cpu->gpr[31]);
     PGXP_STORE(0xAFBF0054u, _pgxa, cpu->gpr[31]); }  /* 0x80030AFC: 0xAFBF0054 */
 #ifdef PSX_COSIM
     cosim_instr(0x80030AFCu);
@@ -16602,7 +16602,7 @@ block_80030AAC:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20010000u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 48; g_debug_last_store_pc = 0x80030B00u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 48, cpu->gpr[16]);
+    { uint32_t _pgxa = cpu->gpr[29] + 48; g_debug_last_store_pc = 0x80030B00u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 48, cpu->gpr[16]);
     PGXP_STORE(0xAFB00030u, _pgxa, cpu->gpr[16]); }  /* 0x80030B00: 0xAFB00030 */
 #ifdef PSX_COSIM
     cosim_instr(0x80030B00u);
@@ -16784,7 +16784,7 @@ block_80030B20:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20000004u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 32; g_debug_last_store_pc = 0x80030B40u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 32, cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[29] + 32; g_debug_last_store_pc = 0x80030B40u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 32, cpu->gpr[2]);
     PGXP_STORE(0xAFA20020u, _pgxa, cpu->gpr[2]); }  /* 0x80030B40: 0xAFA20020 */
 #ifdef PSX_COSIM
     cosim_instr(0x80030B40u);
@@ -16800,7 +16800,7 @@ block_80030B20:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20000004u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 36; g_debug_last_store_pc = 0x80030B48u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 36, cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[29] + 36; g_debug_last_store_pc = 0x80030B48u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 36, cpu->gpr[2]);
     PGXP_STORE(0xAFA20024u, _pgxa, cpu->gpr[2]); }  /* 0x80030B48: 0xAFA20024 */
 #ifdef PSX_COSIM
     cosim_instr(0x80030B48u);
@@ -16827,7 +16827,7 @@ block_80030B20:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20000004u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 40; g_debug_last_store_pc = 0x80030B54u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 40, cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[29] + 40; g_debug_last_store_pc = 0x80030B54u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 40, cpu->gpr[2]);
     PGXP_STORE(0xAFA20028u, _pgxa, cpu->gpr[2]); }  /* 0x80030B54: 0xAFA20028 */
 #ifdef PSX_COSIM
     cosim_instr(0x80030B54u);
@@ -16835,7 +16835,7 @@ block_80030B20:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20080000u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 44; g_debug_last_store_pc = 0x80030B58u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 44, cpu->gpr[19]);
+    { uint32_t _pgxa = cpu->gpr[29] + 44; g_debug_last_store_pc = 0x80030B58u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 44, cpu->gpr[19]);
     PGXP_STORE(0xAFB3002Cu, _pgxa, cpu->gpr[19]); }  /* 0x80030B58: 0xAFB3002C */
 #ifdef PSX_COSIM
     cosim_instr(0x80030B58u);
@@ -16862,7 +16862,7 @@ block_80030B20:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20000020u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 24; g_debug_last_store_pc = 0x80030B64u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 24, cpu->gpr[5]);
+    { uint32_t _pgxa = cpu->gpr[29] + 24; g_debug_last_store_pc = 0x80030B64u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 24, cpu->gpr[5]);
     PGXP_STORE(0xAFA50018u, _pgxa, cpu->gpr[5]); }  /* 0x80030B64: 0xAFA50018 */
 #ifdef PSX_COSIM
     cosim_instr(0x80030B64u);
@@ -16878,7 +16878,7 @@ block_80030B20:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20000040u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 28; g_debug_last_store_pc = 0x80030B6Cu; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 28, cpu->gpr[6]);
+    { uint32_t _pgxa = cpu->gpr[29] + 28; g_debug_last_store_pc = 0x80030B6Cu; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 28, cpu->gpr[6]);
     PGXP_STORE(0xAFA6001Cu, _pgxa, cpu->gpr[6]); }  /* 0x80030B6C: 0xAFA6001C */
 #ifdef PSX_COSIM
     cosim_instr(0x80030B6Cu);
@@ -16897,7 +16897,7 @@ block_80030B20:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20010000u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 16; g_debug_last_store_pc = 0x80030B74u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 16, cpu->gpr[16]);
+    { uint32_t _pgxa = cpu->gpr[29] + 16; g_debug_last_store_pc = 0x80030B74u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 16, cpu->gpr[16]);
     PGXP_STORE(0xAFB00010u, _pgxa, cpu->gpr[16]); }  /* 0x80030B74: 0xAFB00010 */
 #ifdef PSX_COSIM
     cosim_instr(0x80030B74u);
@@ -16910,7 +16910,7 @@ block_80030B20:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20000008u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 20; g_debug_last_store_pc = 0x80030B7Cu; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 20, cpu->gpr[3]);
+    { uint32_t _pgxa = cpu->gpr[29] + 20; g_debug_last_store_pc = 0x80030B7Cu; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 20, cpu->gpr[3]);
     PGXP_STORE(0xAFA30014u, _pgxa, cpu->gpr[3]); }  /* 0x80030B7C: 0xAFA30014 */
 #ifdef PSX_COSIM
     cosim_instr(0x80030B7Cu);
@@ -17167,7 +17167,7 @@ block_80030BC4:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20200000u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 68; g_debug_last_store_pc = 0x80030BC8u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 68, cpu->gpr[21]);
+    { uint32_t _pgxa = cpu->gpr[29] + 68; g_debug_last_store_pc = 0x80030BC8u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 68, cpu->gpr[21]);
     PGXP_STORE(0xAFB50044u, _pgxa, cpu->gpr[21]); }  /* 0x80030BC8: 0xAFB50044 */
 #ifdef PSX_COSIM
     cosim_instr(0x80030BC8u);
@@ -17186,7 +17186,7 @@ block_80030BC4:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20020000u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 52; g_debug_last_store_pc = 0x80030BD0u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 52, cpu->gpr[17]);
+    { uint32_t _pgxa = cpu->gpr[29] + 52; g_debug_last_store_pc = 0x80030BD0u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 52, cpu->gpr[17]);
     PGXP_STORE(0xAFB10034u, _pgxa, cpu->gpr[17]); }  /* 0x80030BD0: 0xAFB10034 */
 #ifdef PSX_COSIM
     cosim_instr(0x80030BD0u);
@@ -17218,7 +17218,7 @@ block_80030BC4:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0xA0000000u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 72; g_debug_last_store_pc = 0x80030BE0u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 72, cpu->gpr[31]);
+    { uint32_t _pgxa = cpu->gpr[29] + 72; g_debug_last_store_pc = 0x80030BE0u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 72, cpu->gpr[31]);
     PGXP_STORE(0xAFBF0048u, _pgxa, cpu->gpr[31]); }  /* 0x80030BE0: 0xAFBF0048 */
 #ifdef PSX_COSIM
     cosim_instr(0x80030BE0u);
@@ -17226,7 +17226,7 @@ block_80030BC4:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20100000u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 64; g_debug_last_store_pc = 0x80030BE4u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 64, cpu->gpr[20]);
+    { uint32_t _pgxa = cpu->gpr[29] + 64; g_debug_last_store_pc = 0x80030BE4u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 64, cpu->gpr[20]);
     PGXP_STORE(0xAFB40040u, _pgxa, cpu->gpr[20]); }  /* 0x80030BE4: 0xAFB40040 */
 #ifdef PSX_COSIM
     cosim_instr(0x80030BE4u);
@@ -17234,7 +17234,7 @@ block_80030BC4:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20080000u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 60; g_debug_last_store_pc = 0x80030BE8u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 60, cpu->gpr[19]);
+    { uint32_t _pgxa = cpu->gpr[29] + 60; g_debug_last_store_pc = 0x80030BE8u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 60, cpu->gpr[19]);
     PGXP_STORE(0xAFB3003Cu, _pgxa, cpu->gpr[19]); }  /* 0x80030BE8: 0xAFB3003C */
 #ifdef PSX_COSIM
     cosim_instr(0x80030BE8u);
@@ -17242,7 +17242,7 @@ block_80030BC4:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20040000u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 56; g_debug_last_store_pc = 0x80030BECu; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 56, cpu->gpr[18]);
+    { uint32_t _pgxa = cpu->gpr[29] + 56; g_debug_last_store_pc = 0x80030BECu; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 56, cpu->gpr[18]);
     PGXP_STORE(0xAFB20038u, _pgxa, cpu->gpr[18]); }  /* 0x80030BEC: 0xAFB20038 */
 #ifdef PSX_COSIM
     cosim_instr(0x80030BECu);
@@ -17258,7 +17258,7 @@ block_80030BC4:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20010000u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 48; g_debug_last_store_pc = 0x80030BF4u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 48, cpu->gpr[16]);
+    { uint32_t _pgxa = cpu->gpr[29] + 48; g_debug_last_store_pc = 0x80030BF4u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 48, cpu->gpr[16]);
     PGXP_STORE(0xAFB00030u, _pgxa, cpu->gpr[16]); }  /* 0x80030BF4: 0xAFB00030 */
 #ifdef PSX_COSIM
     cosim_instr(0x80030BF4u);
@@ -17699,7 +17699,7 @@ block_80030C3C:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20000004u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 20; g_debug_last_store_pc = 0x80030C78u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 20, cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[29] + 20; g_debug_last_store_pc = 0x80030C78u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 20, cpu->gpr[2]);
     PGXP_STORE(0xAFA20014u, _pgxa, cpu->gpr[2]); }  /* 0x80030C78: 0xAFA20014 */
 #ifdef PSX_COSIM
     cosim_instr(0x80030C78u);
@@ -17718,7 +17718,7 @@ block_80030C3C:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20000004u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 24; g_debug_last_store_pc = 0x80030C80u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 24, cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[29] + 24; g_debug_last_store_pc = 0x80030C80u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 24, cpu->gpr[2]);
     PGXP_STORE(0xAFA20018u, _pgxa, cpu->gpr[2]); }  /* 0x80030C80: 0xAFA20018 */
 #ifdef PSX_COSIM
     cosim_instr(0x80030C80u);
@@ -17731,7 +17731,7 @@ block_80030C3C:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20000008u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 16; g_debug_last_store_pc = 0x80030C88u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 16, cpu->gpr[3]);
+    { uint32_t _pgxa = cpu->gpr[29] + 16; g_debug_last_store_pc = 0x80030C88u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 16, cpu->gpr[3]);
     PGXP_STORE(0xAFA30010u, _pgxa, cpu->gpr[3]); }  /* 0x80030C88: 0xAFA30010 */
 #ifdef PSX_COSIM
     cosim_instr(0x80030C88u);
@@ -17867,7 +17867,7 @@ block_80030CA8:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0xCu);
 #endif
-    { uint32_t _pgxa = cpu->gpr[2] + 2; g_debug_last_store_pc = 0x80030CA8u; psx_store_cycle_barrier(); cpu->write_half(cpu->gpr[2] + 2, (uint16_t)cpu->gpr[3]);
+    { uint32_t _pgxa = cpu->gpr[2] + 2; g_debug_last_store_pc = 0x80030CA8u; psx_store_cycle_barrier(); psx_mem_write_half(cpu, cpu->gpr[2] + 2, (uint16_t)cpu->gpr[3]);
     PGXP_STORE(0xA4430002u, _pgxa, cpu->gpr[3]); }  /* 0x80030CA8: 0xA4430002 */
 #ifdef PSX_COSIM
     cosim_instr(0x80030CA8u);
@@ -18124,7 +18124,7 @@ block_80030CDC:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20000004u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 16; g_debug_last_store_pc = 0x80030CF0u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 16, cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[29] + 16; g_debug_last_store_pc = 0x80030CF0u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 16, cpu->gpr[2]);
     PGXP_STORE(0xAFA20010u, _pgxa, cpu->gpr[2]); }  /* 0x80030CF0: 0xAFA20010 */
 #ifdef PSX_COSIM
     cosim_instr(0x80030CF0u);
@@ -18140,7 +18140,7 @@ block_80030CDC:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20000004u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 20; g_debug_last_store_pc = 0x80030CF8u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 20, cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[29] + 20; g_debug_last_store_pc = 0x80030CF8u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 20, cpu->gpr[2]);
     PGXP_STORE(0xAFA20014u, _pgxa, cpu->gpr[2]); }  /* 0x80030CF8: 0xAFA20014 */
 #ifdef PSX_COSIM
     cosim_instr(0x80030CF8u);
@@ -18236,7 +18236,7 @@ block_80030D04:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20000004u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 16; g_debug_last_store_pc = 0x80030D18u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 16, cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[29] + 16; g_debug_last_store_pc = 0x80030D18u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 16, cpu->gpr[2]);
     PGXP_STORE(0xAFA20010u, _pgxa, cpu->gpr[2]); }  /* 0x80030D18: 0xAFA20010 */
 #ifdef PSX_COSIM
     cosim_instr(0x80030D18u);
@@ -18255,7 +18255,7 @@ block_80030D04:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20000004u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 20; g_debug_last_store_pc = 0x80030D20u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 20, cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[29] + 20; g_debug_last_store_pc = 0x80030D20u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 20, cpu->gpr[2]);
     PGXP_STORE(0xAFA20014u, _pgxa, cpu->gpr[2]); }  /* 0x80030D20: 0xAFA20014 */
 #ifdef PSX_COSIM
     cosim_instr(0x80030D20u);
@@ -18271,7 +18271,7 @@ block_80030D04:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20000004u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 24; g_debug_last_store_pc = 0x80030D28u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 24, cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[29] + 24; g_debug_last_store_pc = 0x80030D28u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 24, cpu->gpr[2]);
     PGXP_STORE(0xAFA20018u, _pgxa, cpu->gpr[2]); }  /* 0x80030D28: 0xAFA20018 */
 #ifdef PSX_COSIM
     cosim_instr(0x80030D28u);
@@ -18279,7 +18279,7 @@ block_80030D04:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20000004u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 28; g_debug_last_store_pc = 0x80030D2Cu; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 28, cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[29] + 28; g_debug_last_store_pc = 0x80030D2Cu; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 28, cpu->gpr[2]);
     PGXP_STORE(0xAFA2001Cu, _pgxa, cpu->gpr[2]); }  /* 0x80030D2C: 0xAFA2001C */
 #ifdef PSX_COSIM
     cosim_instr(0x80030D2Cu);
@@ -18290,7 +18290,7 @@ block_80030D04:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20000004u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 32; g_debug_last_store_pc = 0x80030D30u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 32, cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[29] + 32; g_debug_last_store_pc = 0x80030D30u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 32, cpu->gpr[2]);
     PGXP_STORE(0xAFA20020u, _pgxa, cpu->gpr[2]); }  /* 0x80030D30: 0xAFA20020 */
 #ifdef PSX_COSIM
     cosim_instr(0x80030D30u);
@@ -18430,7 +18430,7 @@ block_80030D3C:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20000004u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 16; g_debug_last_store_pc = 0x80030D68u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 16, cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[29] + 16; g_debug_last_store_pc = 0x80030D68u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 16, cpu->gpr[2]);
     PGXP_STORE(0xAFA20010u, _pgxa, cpu->gpr[2]); }  /* 0x80030D68: 0xAFA20010 */
 #ifdef PSX_COSIM
     cosim_instr(0x80030D68u);
@@ -18449,7 +18449,7 @@ block_80030D3C:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20000004u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 24; g_debug_last_store_pc = 0x80030D70u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 24, cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[29] + 24; g_debug_last_store_pc = 0x80030D70u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 24, cpu->gpr[2]);
     PGXP_STORE(0xAFA20018u, _pgxa, cpu->gpr[2]); }  /* 0x80030D70: 0xAFA20018 */
 #ifdef PSX_COSIM
     cosim_instr(0x80030D70u);
@@ -18465,7 +18465,7 @@ block_80030D3C:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20000004u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 28; g_debug_last_store_pc = 0x80030D78u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 28, cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[29] + 28; g_debug_last_store_pc = 0x80030D78u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 28, cpu->gpr[2]);
     PGXP_STORE(0xAFA2001Cu, _pgxa, cpu->gpr[2]); }  /* 0x80030D78: 0xAFA2001C */
 #ifdef PSX_COSIM
     cosim_instr(0x80030D78u);
@@ -18484,7 +18484,7 @@ block_80030D3C:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20040000u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 20; g_debug_last_store_pc = 0x80030D80u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 20, cpu->gpr[18]);
+    { uint32_t _pgxa = cpu->gpr[29] + 20; g_debug_last_store_pc = 0x80030D80u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 20, cpu->gpr[18]);
     PGXP_STORE(0xAFB20014u, _pgxa, cpu->gpr[18]); }  /* 0x80030D80: 0xAFB20014 */
 #ifdef PSX_COSIM
     cosim_instr(0x80030D80u);
@@ -18492,7 +18492,7 @@ block_80030D3C:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20020000u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 32; g_debug_last_store_pc = 0x80030D84u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 32, cpu->gpr[17]);
+    { uint32_t _pgxa = cpu->gpr[29] + 32; g_debug_last_store_pc = 0x80030D84u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 32, cpu->gpr[17]);
     PGXP_STORE(0xAFB10020u, _pgxa, cpu->gpr[17]); }  /* 0x80030D84: 0xAFB10020 */
 #ifdef PSX_COSIM
     cosim_instr(0x80030D84u);
@@ -18500,7 +18500,7 @@ block_80030D3C:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20000004u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 36; g_debug_last_store_pc = 0x80030D88u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 36, cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[29] + 36; g_debug_last_store_pc = 0x80030D88u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 36, cpu->gpr[2]);
     PGXP_STORE(0xAFA20024u, _pgxa, cpu->gpr[2]); }  /* 0x80030D88: 0xAFA20024 */
 #ifdef PSX_COSIM
     cosim_instr(0x80030D88u);
@@ -18508,7 +18508,7 @@ block_80030D3C:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20000001u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 40; g_debug_last_store_pc = 0x80030D8Cu; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 40, cpu->gpr[0]);
+    { uint32_t _pgxa = cpu->gpr[29] + 40; g_debug_last_store_pc = 0x80030D8Cu; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 40, cpu->gpr[0]);
     PGXP_STORE(0xAFA00028u, _pgxa, cpu->gpr[0]); }  /* 0x80030D8C: 0xAFA00028 */
 #ifdef PSX_COSIM
     cosim_instr(0x80030D8Cu);
@@ -18519,7 +18519,7 @@ block_80030D3C:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20010000u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 44; g_debug_last_store_pc = 0x80030D90u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 44, cpu->gpr[16]);
+    { uint32_t _pgxa = cpu->gpr[29] + 44; g_debug_last_store_pc = 0x80030D90u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 44, cpu->gpr[16]);
     PGXP_STORE(0xAFB0002Cu, _pgxa, cpu->gpr[16]); }  /* 0x80030D90: 0xAFB0002C */
 #ifdef PSX_COSIM
     cosim_instr(0x80030D90u);
@@ -18609,7 +18609,7 @@ block_80030D9C:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20000004u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 16; g_debug_last_store_pc = 0x80030DB8u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 16, cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[29] + 16; g_debug_last_store_pc = 0x80030DB8u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 16, cpu->gpr[2]);
     PGXP_STORE(0xAFA20010u, _pgxa, cpu->gpr[2]); }  /* 0x80030DB8: 0xAFA20010 */
 #ifdef PSX_COSIM
     cosim_instr(0x80030DB8u);
@@ -18628,7 +18628,7 @@ block_80030D9C:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20000004u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 36; g_debug_last_store_pc = 0x80030DC0u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 36, cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[29] + 36; g_debug_last_store_pc = 0x80030DC0u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 36, cpu->gpr[2]);
     PGXP_STORE(0xAFA20024u, _pgxa, cpu->gpr[2]); }  /* 0x80030DC0: 0xAFA20024 */
 #ifdef PSX_COSIM
     cosim_instr(0x80030DC0u);
@@ -18644,7 +18644,7 @@ block_80030D9C:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20040000u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 20; g_debug_last_store_pc = 0x80030DC8u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 20, cpu->gpr[18]);
+    { uint32_t _pgxa = cpu->gpr[29] + 20; g_debug_last_store_pc = 0x80030DC8u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 20, cpu->gpr[18]);
     PGXP_STORE(0xAFB20014u, _pgxa, cpu->gpr[18]); }  /* 0x80030DC8: 0xAFB20014 */
 #ifdef PSX_COSIM
     cosim_instr(0x80030DC8u);
@@ -18652,7 +18652,7 @@ block_80030D9C:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20000001u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 24; g_debug_last_store_pc = 0x80030DCCu; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 24, cpu->gpr[0]);
+    { uint32_t _pgxa = cpu->gpr[29] + 24; g_debug_last_store_pc = 0x80030DCCu; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 24, cpu->gpr[0]);
     PGXP_STORE(0xAFA00018u, _pgxa, cpu->gpr[0]); }  /* 0x80030DCC: 0xAFA00018 */
 #ifdef PSX_COSIM
     cosim_instr(0x80030DCCu);
@@ -18663,7 +18663,7 @@ block_80030D9C:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20000001u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 28; g_debug_last_store_pc = 0x80030DD0u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 28, cpu->gpr[0]);
+    { uint32_t _pgxa = cpu->gpr[29] + 28; g_debug_last_store_pc = 0x80030DD0u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 28, cpu->gpr[0]);
     PGXP_STORE(0xAFA0001Cu, _pgxa, cpu->gpr[0]); }  /* 0x80030DD0: 0xAFA0001C */
 #ifdef PSX_COSIM
     cosim_instr(0x80030DD0u);
@@ -18671,7 +18671,7 @@ block_80030D9C:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20020000u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 32; g_debug_last_store_pc = 0x80030DD4u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 32, cpu->gpr[17]);
+    { uint32_t _pgxa = cpu->gpr[29] + 32; g_debug_last_store_pc = 0x80030DD4u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 32, cpu->gpr[17]);
     PGXP_STORE(0xAFB10020u, _pgxa, cpu->gpr[17]); }  /* 0x80030DD4: 0xAFB10020 */
 #ifdef PSX_COSIM
     cosim_instr(0x80030DD4u);
@@ -18679,7 +18679,7 @@ block_80030D9C:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20000004u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 40; g_debug_last_store_pc = 0x80030DD8u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 40, cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[29] + 40; g_debug_last_store_pc = 0x80030DD8u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 40, cpu->gpr[2]);
     PGXP_STORE(0xAFA20028u, _pgxa, cpu->gpr[2]); }  /* 0x80030DD8: 0xAFA20028 */
 #ifdef PSX_COSIM
     cosim_instr(0x80030DD8u);
@@ -18687,7 +18687,7 @@ block_80030D9C:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20010000u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 44; g_debug_last_store_pc = 0x80030DDCu; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 44, cpu->gpr[16]);
+    { uint32_t _pgxa = cpu->gpr[29] + 44; g_debug_last_store_pc = 0x80030DDCu; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 44, cpu->gpr[16]);
     PGXP_STORE(0xAFB0002Cu, _pgxa, cpu->gpr[16]); }  /* 0x80030DDC: 0xAFB0002C */
 #ifdef PSX_COSIM
     cosim_instr(0x80030DDCu);
@@ -18769,7 +18769,7 @@ block_80030DE8:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20000008u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 16; g_debug_last_store_pc = 0x80030E00u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 16, cpu->gpr[3]);
+    { uint32_t _pgxa = cpu->gpr[29] + 16; g_debug_last_store_pc = 0x80030E00u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 16, cpu->gpr[3]);
     PGXP_STORE(0xAFA30010u, _pgxa, cpu->gpr[3]); }  /* 0x80030E00: 0xAFA30010 */
 #ifdef PSX_COSIM
     cosim_instr(0x80030E00u);
@@ -18798,7 +18798,7 @@ block_80030DE8:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20000004u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 20; g_debug_last_store_pc = 0x80030E10u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 20, cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[29] + 20; g_debug_last_store_pc = 0x80030E10u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 20, cpu->gpr[2]);
     PGXP_STORE(0xAFA20014u, _pgxa, cpu->gpr[2]); }  /* 0x80030E10: 0xAFA20014 */
 #ifdef PSX_COSIM
     cosim_instr(0x80030E10u);
@@ -18948,7 +18948,7 @@ block_80030E24:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20010000u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 20; g_debug_last_store_pc = 0x80030E40u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 20, cpu->gpr[16]);
+    { uint32_t _pgxa = cpu->gpr[29] + 20; g_debug_last_store_pc = 0x80030E40u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 20, cpu->gpr[16]);
     PGXP_STORE(0xAFB00014u, _pgxa, cpu->gpr[16]); }  /* 0x80030E40: 0xAFB00014 */
 #ifdef PSX_COSIM
     cosim_instr(0x80030E40u);
@@ -18961,7 +18961,7 @@ block_80030E24:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20000004u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 16; g_debug_last_store_pc = 0x80030E48u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 16, cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[29] + 16; g_debug_last_store_pc = 0x80030E48u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 16, cpu->gpr[2]);
     PGXP_STORE(0xAFA20010u, _pgxa, cpu->gpr[2]); }  /* 0x80030E48: 0xAFA20010 */
 #ifdef PSX_COSIM
     cosim_instr(0x80030E48u);
@@ -19038,7 +19038,7 @@ block_80030E4C:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20010000u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 20; g_debug_last_store_pc = 0x80030E68u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 20, cpu->gpr[16]);
+    { uint32_t _pgxa = cpu->gpr[29] + 20; g_debug_last_store_pc = 0x80030E68u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 20, cpu->gpr[16]);
     PGXP_STORE(0xAFB00014u, _pgxa, cpu->gpr[16]); }  /* 0x80030E68: 0xAFB00014 */
 #ifdef PSX_COSIM
     cosim_instr(0x80030E68u);
@@ -19062,7 +19062,7 @@ block_80030E4C:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20000004u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 16; g_debug_last_store_pc = 0x80030E74u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 16, cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[29] + 16; g_debug_last_store_pc = 0x80030E74u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 16, cpu->gpr[2]);
     PGXP_STORE(0xAFA20010u, _pgxa, cpu->gpr[2]); }  /* 0x80030E74: 0xAFA20010 */
 #ifdef PSX_COSIM
     cosim_instr(0x80030E74u);
@@ -19150,7 +19150,7 @@ block_80030E78:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20010000u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 20; g_debug_last_store_pc = 0x80030E94u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 20, cpu->gpr[16]);
+    { uint32_t _pgxa = cpu->gpr[29] + 20; g_debug_last_store_pc = 0x80030E94u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 20, cpu->gpr[16]);
     PGXP_STORE(0xAFB00014u, _pgxa, cpu->gpr[16]); }  /* 0x80030E94: 0xAFB00014 */
 #ifdef PSX_COSIM
     cosim_instr(0x80030E94u);
@@ -19163,7 +19163,7 @@ block_80030E78:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20000004u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 16; g_debug_last_store_pc = 0x80030E9Cu; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 16, cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[29] + 16; g_debug_last_store_pc = 0x80030E9Cu; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 16, cpu->gpr[2]);
     PGXP_STORE(0xAFA20010u, _pgxa, cpu->gpr[2]); }  /* 0x80030E9C: 0xAFA20010 */
 #ifdef PSX_COSIM
     cosim_instr(0x80030E9Cu);
@@ -19248,7 +19248,7 @@ block_80030EA0:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20010000u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 20; g_debug_last_store_pc = 0x80030EBCu; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 20, cpu->gpr[16]);
+    { uint32_t _pgxa = cpu->gpr[29] + 20; g_debug_last_store_pc = 0x80030EBCu; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 20, cpu->gpr[16]);
     PGXP_STORE(0xAFB00014u, _pgxa, cpu->gpr[16]); }  /* 0x80030EBC: 0xAFB00014 */
 #ifdef PSX_COSIM
     cosim_instr(0x80030EBCu);
@@ -19272,7 +19272,7 @@ block_80030EA0:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20000004u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 16; g_debug_last_store_pc = 0x80030EC8u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 16, cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[29] + 16; g_debug_last_store_pc = 0x80030EC8u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 16, cpu->gpr[2]);
     PGXP_STORE(0xAFA20010u, _pgxa, cpu->gpr[2]); }  /* 0x80030EC8: 0xAFA20010 */
 #ifdef PSX_COSIM
     cosim_instr(0x80030EC8u);
@@ -19386,7 +19386,7 @@ block_80030EDC:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20000008u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 16; g_debug_last_store_pc = 0x80030EF4u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 16, cpu->gpr[3]);
+    { uint32_t _pgxa = cpu->gpr[29] + 16; g_debug_last_store_pc = 0x80030EF4u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 16, cpu->gpr[3]);
     PGXP_STORE(0xAFA30010u, _pgxa, cpu->gpr[3]); }  /* 0x80030EF4: 0xAFA30010 */
 #ifdef PSX_COSIM
     cosim_instr(0x80030EF4u);
@@ -19415,7 +19415,7 @@ block_80030EDC:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20000004u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 20; g_debug_last_store_pc = 0x80030F04u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 20, cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[29] + 20; g_debug_last_store_pc = 0x80030F04u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 20, cpu->gpr[2]);
     PGXP_STORE(0xAFA20014u, _pgxa, cpu->gpr[2]); }  /* 0x80030F04: 0xAFA20014 */
 #ifdef PSX_COSIM
     cosim_instr(0x80030F04u);
@@ -19535,7 +19535,7 @@ block_80030F20:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x30000u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[16]; g_debug_last_store_pc = 0x80030F28u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[16], cpu->gpr[17]);
+    { uint32_t _pgxa = cpu->gpr[16]; g_debug_last_store_pc = 0x80030F28u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[16], cpu->gpr[17]);
     PGXP_STORE(0xAE110000u, _pgxa, cpu->gpr[17]); }  /* 0x80030F28: 0xAE110000 */
 #ifdef PSX_COSIM
     cosim_instr(0x80030F28u);
@@ -19788,7 +19788,7 @@ block_80030F64:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20000008u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 16; g_debug_last_store_pc = 0x80030F80u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 16, cpu->gpr[3]);
+    { uint32_t _pgxa = cpu->gpr[29] + 16; g_debug_last_store_pc = 0x80030F80u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 16, cpu->gpr[3]);
     PGXP_STORE(0xAFA30010u, _pgxa, cpu->gpr[3]); }  /* 0x80030F80: 0xAFA30010 */
 #ifdef PSX_COSIM
     cosim_instr(0x80030F80u);
@@ -19817,7 +19817,7 @@ block_80030F64:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20000004u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 20; g_debug_last_store_pc = 0x80030F90u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 20, cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[29] + 20; g_debug_last_store_pc = 0x80030F90u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 20, cpu->gpr[2]);
     PGXP_STORE(0xAFA20014u, _pgxa, cpu->gpr[2]); }  /* 0x80030F90: 0xAFA20014 */
 #ifdef PSX_COSIM
     cosim_instr(0x80030F90u);
@@ -20110,7 +20110,7 @@ block_80030FD0:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20002u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[1]; g_debug_last_store_pc = 0x80030FE8u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[1], cpu->gpr[17]);
+    { uint32_t _pgxa = cpu->gpr[1]; g_debug_last_store_pc = 0x80030FE8u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[1], cpu->gpr[17]);
     PGXP_STORE(0xAC310000u, _pgxa, cpu->gpr[17]); }  /* 0x80030FE8: 0xAC310000 */
 #ifdef PSX_COSIM
     cosim_instr(0x80030FE8u);
@@ -20206,7 +20206,7 @@ block_80030FFC:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20800000u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 76; g_debug_last_store_pc = 0x80031004u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 76, cpu->gpr[23]);
+    { uint32_t _pgxa = cpu->gpr[29] + 76; g_debug_last_store_pc = 0x80031004u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 76, cpu->gpr[23]);
     PGXP_STORE(0xAFB7004Cu, _pgxa, cpu->gpr[23]); }  /* 0x80031004: 0xAFB7004C */
 #ifdef PSX_COSIM
     cosim_instr(0x80031004u);
@@ -20222,7 +20222,7 @@ block_80030FFC:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20020000u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 52; g_debug_last_store_pc = 0x8003100Cu; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 52, cpu->gpr[17]);
+    { uint32_t _pgxa = cpu->gpr[29] + 52; g_debug_last_store_pc = 0x8003100Cu; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 52, cpu->gpr[17]);
     PGXP_STORE(0xAFB10034u, _pgxa, cpu->gpr[17]); }  /* 0x8003100C: 0xAFB10034 */
 #ifdef PSX_COSIM
     cosim_instr(0x8003100Cu);
@@ -20260,7 +20260,7 @@ block_80030FFC:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20400000u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 72; g_debug_last_store_pc = 0x80031018u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 72, cpu->gpr[22]);
+    { uint32_t _pgxa = cpu->gpr[29] + 72; g_debug_last_store_pc = 0x80031018u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 72, cpu->gpr[22]);
     PGXP_STORE(0xAFB60048u, _pgxa, cpu->gpr[22]); }  /* 0x80031018: 0xAFB60048 */
 #ifdef PSX_COSIM
     cosim_instr(0x80031018u);
@@ -20279,7 +20279,7 @@ block_80030FFC:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20200000u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 68; g_debug_last_store_pc = 0x80031020u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 68, cpu->gpr[21]);
+    { uint32_t _pgxa = cpu->gpr[29] + 68; g_debug_last_store_pc = 0x80031020u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 68, cpu->gpr[21]);
     PGXP_STORE(0xAFB50044u, _pgxa, cpu->gpr[21]); }  /* 0x80031020: 0xAFB50044 */
 #ifdef PSX_COSIM
     cosim_instr(0x80031020u);
@@ -20295,7 +20295,7 @@ block_80030FFC:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20100000u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 64; g_debug_last_store_pc = 0x80031028u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 64, cpu->gpr[20]);
+    { uint32_t _pgxa = cpu->gpr[29] + 64; g_debug_last_store_pc = 0x80031028u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 64, cpu->gpr[20]);
     PGXP_STORE(0xAFB40040u, _pgxa, cpu->gpr[20]); }  /* 0x80031028: 0xAFB40040 */
 #ifdef PSX_COSIM
     cosim_instr(0x80031028u);
@@ -20341,7 +20341,7 @@ block_80030FFC:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20010000u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 48; g_debug_last_store_pc = 0x80031038u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 48, cpu->gpr[16]);
+    { uint32_t _pgxa = cpu->gpr[29] + 48; g_debug_last_store_pc = 0x80031038u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 48, cpu->gpr[16]);
     PGXP_STORE(0xAFB00030u, _pgxa, cpu->gpr[16]); }  /* 0x80031038: 0xAFB00030 */
 #ifdef PSX_COSIM
     cosim_instr(0x80031038u);
@@ -20360,7 +20360,7 @@ block_80030FFC:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0xA0000000u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 80; g_debug_last_store_pc = 0x80031040u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 80, cpu->gpr[31]);
+    { uint32_t _pgxa = cpu->gpr[29] + 80; g_debug_last_store_pc = 0x80031040u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 80, cpu->gpr[31]);
     PGXP_STORE(0xAFBF0050u, _pgxa, cpu->gpr[31]); }  /* 0x80031040: 0xAFBF0050 */
 #ifdef PSX_COSIM
     cosim_instr(0x80031040u);
@@ -20368,7 +20368,7 @@ block_80030FFC:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20080000u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 60; g_debug_last_store_pc = 0x80031044u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 60, cpu->gpr[19]);
+    { uint32_t _pgxa = cpu->gpr[29] + 60; g_debug_last_store_pc = 0x80031044u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 60, cpu->gpr[19]);
     PGXP_STORE(0xAFB3003Cu, _pgxa, cpu->gpr[19]); }  /* 0x80031044: 0xAFB3003C */
 #ifdef PSX_COSIM
     cosim_instr(0x80031044u);
@@ -20376,7 +20376,7 @@ block_80030FFC:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20040000u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 56; g_debug_last_store_pc = 0x80031048u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 56, cpu->gpr[18]);
+    { uint32_t _pgxa = cpu->gpr[29] + 56; g_debug_last_store_pc = 0x80031048u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 56, cpu->gpr[18]);
     PGXP_STORE(0xAFB20038u, _pgxa, cpu->gpr[18]); }  /* 0x80031048: 0xAFB20038 */
 #ifdef PSX_COSIM
     cosim_instr(0x80031048u);
@@ -20512,7 +20512,7 @@ block_80031050:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20000004u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 16; g_debug_last_store_pc = 0x80031084u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 16, cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[29] + 16; g_debug_last_store_pc = 0x80031084u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 16, cpu->gpr[2]);
     PGXP_STORE(0xAFA20010u, _pgxa, cpu->gpr[2]); }  /* 0x80031084: 0xAFA20010 */
 #ifdef PSX_COSIM
     cosim_instr(0x80031084u);
@@ -20528,7 +20528,7 @@ block_80031050:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20000004u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 20; g_debug_last_store_pc = 0x8003108Cu; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 20, cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[29] + 20; g_debug_last_store_pc = 0x8003108Cu; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 20, cpu->gpr[2]);
     PGXP_STORE(0xAFA20014u, _pgxa, cpu->gpr[2]); }  /* 0x8003108C: 0xAFA20014 */
 #ifdef PSX_COSIM
     cosim_instr(0x8003108Cu);
@@ -20547,7 +20547,7 @@ block_80031050:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20000004u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 24; g_debug_last_store_pc = 0x80031094u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 24, cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[29] + 24; g_debug_last_store_pc = 0x80031094u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 24, cpu->gpr[2]);
     PGXP_STORE(0xAFA20018u, _pgxa, cpu->gpr[2]); }  /* 0x80031094: 0xAFA20018 */
 #ifdef PSX_COSIM
     cosim_instr(0x80031094u);
@@ -20555,7 +20555,7 @@ block_80031050:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20000004u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 28; g_debug_last_store_pc = 0x80031098u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 28, cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[29] + 28; g_debug_last_store_pc = 0x80031098u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 28, cpu->gpr[2]);
     PGXP_STORE(0xAFA2001Cu, _pgxa, cpu->gpr[2]); }  /* 0x80031098: 0xAFA2001C */
 #ifdef PSX_COSIM
     cosim_instr(0x80031098u);
@@ -20563,7 +20563,7 @@ block_80031050:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20000004u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 32; g_debug_last_store_pc = 0x8003109Cu; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 32, cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[29] + 32; g_debug_last_store_pc = 0x8003109Cu; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 32, cpu->gpr[2]);
     PGXP_STORE(0xAFA20020u, _pgxa, cpu->gpr[2]); }  /* 0x8003109C: 0xAFA20020 */
 #ifdef PSX_COSIM
     cosim_instr(0x8003109Cu);
@@ -20768,7 +20768,7 @@ block_800310BC:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20000004u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 16; g_debug_last_store_pc = 0x800310E8u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 16, cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[29] + 16; g_debug_last_store_pc = 0x800310E8u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 16, cpu->gpr[2]);
     PGXP_STORE(0xAFA20010u, _pgxa, cpu->gpr[2]); }  /* 0x800310E8: 0xAFA20010 */
 #ifdef PSX_COSIM
     cosim_instr(0x800310E8u);
@@ -20792,7 +20792,7 @@ block_800310BC:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20000004u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 20; g_debug_last_store_pc = 0x800310F4u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 20, cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[29] + 20; g_debug_last_store_pc = 0x800310F4u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 20, cpu->gpr[2]);
     PGXP_STORE(0xAFA20014u, _pgxa, cpu->gpr[2]); }  /* 0x800310F4: 0xAFA20014 */
 #ifdef PSX_COSIM
     cosim_instr(0x800310F4u);
@@ -20816,7 +20816,7 @@ block_800310BC:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20000004u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 24; g_debug_last_store_pc = 0x80031100u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 24, cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[29] + 24; g_debug_last_store_pc = 0x80031100u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 24, cpu->gpr[2]);
     PGXP_STORE(0xAFA20018u, _pgxa, cpu->gpr[2]); }  /* 0x80031100: 0xAFA20018 */
 #ifdef PSX_COSIM
     cosim_instr(0x80031100u);
@@ -20837,7 +20837,7 @@ block_800310BC:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20000004u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 32; g_debug_last_store_pc = 0x8003110Cu; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 32, cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[29] + 32; g_debug_last_store_pc = 0x8003110Cu; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 32, cpu->gpr[2]);
     PGXP_STORE(0xAFA20020u, _pgxa, cpu->gpr[2]); }  /* 0x8003110C: 0xAFA20020 */
 #ifdef PSX_COSIM
     cosim_instr(0x8003110Cu);
@@ -20856,7 +20856,7 @@ block_800310BC:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20000004u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 36; g_debug_last_store_pc = 0x80031114u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 36, cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[29] + 36; g_debug_last_store_pc = 0x80031114u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 36, cpu->gpr[2]);
     PGXP_STORE(0xAFA20024u, _pgxa, cpu->gpr[2]); }  /* 0x80031114: 0xAFA20024 */
 #ifdef PSX_COSIM
     cosim_instr(0x80031114u);
@@ -20872,7 +20872,7 @@ block_800310BC:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20000004u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 40; g_debug_last_store_pc = 0x8003111Cu; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 40, cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[29] + 40; g_debug_last_store_pc = 0x8003111Cu; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 40, cpu->gpr[2]);
     PGXP_STORE(0xAFA20028u, _pgxa, cpu->gpr[2]); }  /* 0x8003111C: 0xAFA20028 */
 #ifdef PSX_COSIM
     cosim_instr(0x8003111Cu);
@@ -20891,7 +20891,7 @@ block_800310BC:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20000004u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 44; g_debug_last_store_pc = 0x80031124u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 44, cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[29] + 44; g_debug_last_store_pc = 0x80031124u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 44, cpu->gpr[2]);
     PGXP_STORE(0xAFA2002Cu, _pgxa, cpu->gpr[2]); }  /* 0x80031124: 0xAFA2002C */
 #ifdef PSX_COSIM
     cosim_instr(0x80031124u);
@@ -20904,7 +20904,7 @@ block_800310BC:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20000008u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 28; g_debug_last_store_pc = 0x8003112Cu; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 28, cpu->gpr[3]);
+    { uint32_t _pgxa = cpu->gpr[29] + 28; g_debug_last_store_pc = 0x8003112Cu; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 28, cpu->gpr[3]);
     PGXP_STORE(0xAFA3001Cu, _pgxa, cpu->gpr[3]); }  /* 0x8003112C: 0xAFA3001C */
 #ifdef PSX_COSIM
     cosim_instr(0x8003112Cu);
@@ -21028,7 +21028,7 @@ block_80031134:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20000008u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 16; g_debug_last_store_pc = 0x80031158u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 16, cpu->gpr[3]);
+    { uint32_t _pgxa = cpu->gpr[29] + 16; g_debug_last_store_pc = 0x80031158u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 16, cpu->gpr[3]);
     PGXP_STORE(0xAFA30010u, _pgxa, cpu->gpr[3]); }  /* 0x80031158: 0xAFA30010 */
 #ifdef PSX_COSIM
     cosim_instr(0x80031158u);
@@ -21057,7 +21057,7 @@ block_80031134:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20000004u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 20; g_debug_last_store_pc = 0x80031168u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 20, cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[29] + 20; g_debug_last_store_pc = 0x80031168u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 20, cpu->gpr[2]);
     PGXP_STORE(0xAFA20014u, _pgxa, cpu->gpr[2]); }  /* 0x80031168: 0xAFA20014 */
 #ifdef PSX_COSIM
     cosim_instr(0x80031168u);
@@ -21290,7 +21290,7 @@ block_800311AC:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20080000u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 60; g_debug_last_store_pc = 0x800311B4u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 60, cpu->gpr[19]);
+    { uint32_t _pgxa = cpu->gpr[29] + 60; g_debug_last_store_pc = 0x800311B4u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 60, cpu->gpr[19]);
     PGXP_STORE(0xAFB3003Cu, _pgxa, cpu->gpr[19]); }  /* 0x800311B4: 0xAFB3003C */
 #ifdef PSX_COSIM
     cosim_instr(0x800311B4u);
@@ -21306,7 +21306,7 @@ block_800311AC:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20020000u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 52; g_debug_last_store_pc = 0x800311BCu; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 52, cpu->gpr[17]);
+    { uint32_t _pgxa = cpu->gpr[29] + 52; g_debug_last_store_pc = 0x800311BCu; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 52, cpu->gpr[17]);
     PGXP_STORE(0xAFB10034u, _pgxa, cpu->gpr[17]); }  /* 0x800311BC: 0xAFB10034 */
 #ifdef PSX_COSIM
     cosim_instr(0x800311BCu);
@@ -21344,7 +21344,7 @@ block_800311AC:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20400000u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 72; g_debug_last_store_pc = 0x800311C8u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 72, cpu->gpr[22]);
+    { uint32_t _pgxa = cpu->gpr[29] + 72; g_debug_last_store_pc = 0x800311C8u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 72, cpu->gpr[22]);
     PGXP_STORE(0xAFB60048u, _pgxa, cpu->gpr[22]); }  /* 0x800311C8: 0xAFB60048 */
 #ifdef PSX_COSIM
     cosim_instr(0x800311C8u);
@@ -21363,7 +21363,7 @@ block_800311AC:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20200000u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 68; g_debug_last_store_pc = 0x800311D0u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 68, cpu->gpr[21]);
+    { uint32_t _pgxa = cpu->gpr[29] + 68; g_debug_last_store_pc = 0x800311D0u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 68, cpu->gpr[21]);
     PGXP_STORE(0xAFB50044u, _pgxa, cpu->gpr[21]); }  /* 0x800311D0: 0xAFB50044 */
 #ifdef PSX_COSIM
     cosim_instr(0x800311D0u);
@@ -21398,7 +21398,7 @@ block_800311AC:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x60000000u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 80; g_debug_last_store_pc = 0x800311DCu; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 80, cpu->gpr[30]);
+    { uint32_t _pgxa = cpu->gpr[29] + 80; g_debug_last_store_pc = 0x800311DCu; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 80, cpu->gpr[30]);
     PGXP_STORE(0xAFBE0050u, _pgxa, cpu->gpr[30]); }  /* 0x800311DC: 0xAFBE0050 */
 #ifdef PSX_COSIM
     cosim_instr(0x800311DCu);
@@ -21436,7 +21436,7 @@ block_800311AC:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20800000u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 76; g_debug_last_store_pc = 0x800311E8u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 76, cpu->gpr[23]);
+    { uint32_t _pgxa = cpu->gpr[29] + 76; g_debug_last_store_pc = 0x800311E8u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 76, cpu->gpr[23]);
     PGXP_STORE(0xAFB7004Cu, _pgxa, cpu->gpr[23]); }  /* 0x800311E8: 0xAFB7004C */
 #ifdef PSX_COSIM
     cosim_instr(0x800311E8u);
@@ -21455,7 +21455,7 @@ block_800311AC:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20100000u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 64; g_debug_last_store_pc = 0x800311F0u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 64, cpu->gpr[20]);
+    { uint32_t _pgxa = cpu->gpr[29] + 64; g_debug_last_store_pc = 0x800311F0u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 64, cpu->gpr[20]);
     PGXP_STORE(0xAFB40040u, _pgxa, cpu->gpr[20]); }  /* 0x800311F0: 0xAFB40040 */
 #ifdef PSX_COSIM
     cosim_instr(0x800311F0u);
@@ -21471,7 +21471,7 @@ block_800311AC:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0xA0000000u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 84; g_debug_last_store_pc = 0x800311F8u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 84, cpu->gpr[31]);
+    { uint32_t _pgxa = cpu->gpr[29] + 84; g_debug_last_store_pc = 0x800311F8u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 84, cpu->gpr[31]);
     PGXP_STORE(0xAFBF0054u, _pgxa, cpu->gpr[31]); }  /* 0x800311F8: 0xAFBF0054 */
 #ifdef PSX_COSIM
     cosim_instr(0x800311F8u);
@@ -21479,7 +21479,7 @@ block_800311AC:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20040000u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 56; g_debug_last_store_pc = 0x800311FCu; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 56, cpu->gpr[18]);
+    { uint32_t _pgxa = cpu->gpr[29] + 56; g_debug_last_store_pc = 0x800311FCu; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 56, cpu->gpr[18]);
     PGXP_STORE(0xAFB20038u, _pgxa, cpu->gpr[18]); }  /* 0x800311FC: 0xAFB20038 */
 #ifdef PSX_COSIM
     cosim_instr(0x800311FCu);
@@ -21490,7 +21490,7 @@ block_800311AC:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20010000u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 48; g_debug_last_store_pc = 0x80031200u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 48, cpu->gpr[16]);
+    { uint32_t _pgxa = cpu->gpr[29] + 48; g_debug_last_store_pc = 0x80031200u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 48, cpu->gpr[16]);
     PGXP_STORE(0xAFB00030u, _pgxa, cpu->gpr[16]); }  /* 0x80031200: 0xAFB00030 */
 #ifdef PSX_COSIM
     cosim_instr(0x80031200u);
@@ -21498,7 +21498,7 @@ block_800311AC:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20000020u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 92; g_debug_last_store_pc = 0x80031204u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 92, cpu->gpr[5]);
+    { uint32_t _pgxa = cpu->gpr[29] + 92; g_debug_last_store_pc = 0x80031204u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 92, cpu->gpr[5]);
     PGXP_STORE(0xAFA5005Cu, _pgxa, cpu->gpr[5]); }  /* 0x80031204: 0xAFA5005C */
 #ifdef PSX_COSIM
     cosim_instr(0x80031204u);
@@ -22046,7 +22046,7 @@ block_80031278:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20040000u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 20; g_debug_last_store_pc = 0x80031290u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 20, cpu->gpr[18]);
+    { uint32_t _pgxa = cpu->gpr[29] + 20; g_debug_last_store_pc = 0x80031290u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 20, cpu->gpr[18]);
     PGXP_STORE(0xAFB20014u, _pgxa, cpu->gpr[18]); }  /* 0x80031290: 0xAFB20014 */
 #ifdef PSX_COSIM
     cosim_instr(0x80031290u);
@@ -22089,7 +22089,7 @@ block_80031278:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20080000u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 16; g_debug_last_store_pc = 0x800312A0u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 16, cpu->gpr[19]);
+    { uint32_t _pgxa = cpu->gpr[29] + 16; g_debug_last_store_pc = 0x800312A0u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 16, cpu->gpr[19]);
     PGXP_STORE(0xAFB30010u, _pgxa, cpu->gpr[19]); }  /* 0x800312A0: 0xAFB30010 */
 #ifdef PSX_COSIM
     cosim_instr(0x800312A0u);
@@ -22318,7 +22318,7 @@ block_800312B4:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20000004u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 16; g_debug_last_store_pc = 0x800312ECu; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 16, cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[29] + 16; g_debug_last_store_pc = 0x800312ECu; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 16, cpu->gpr[2]);
     PGXP_STORE(0xAFA20010u, _pgxa, cpu->gpr[2]); }  /* 0x800312EC: 0xAFA20010 */
 #ifdef PSX_COSIM
     cosim_instr(0x800312ECu);
@@ -22342,7 +22342,7 @@ block_800312B4:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20000004u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 20; g_debug_last_store_pc = 0x800312F8u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 20, cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[29] + 20; g_debug_last_store_pc = 0x800312F8u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 20, cpu->gpr[2]);
     PGXP_STORE(0xAFA20014u, _pgxa, cpu->gpr[2]); }  /* 0x800312F8: 0xAFA20014 */
 #ifdef PSX_COSIM
     cosim_instr(0x800312F8u);
@@ -22366,7 +22366,7 @@ block_800312B4:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20000004u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 24; g_debug_last_store_pc = 0x80031304u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 24, cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[29] + 24; g_debug_last_store_pc = 0x80031304u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 24, cpu->gpr[2]);
     PGXP_STORE(0xAFA20018u, _pgxa, cpu->gpr[2]); }  /* 0x80031304: 0xAFA20018 */
 #ifdef PSX_COSIM
     cosim_instr(0x80031304u);
@@ -22390,7 +22390,7 @@ block_800312B4:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20000004u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 32; g_debug_last_store_pc = 0x80031310u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 32, cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[29] + 32; g_debug_last_store_pc = 0x80031310u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 32, cpu->gpr[2]);
     PGXP_STORE(0xAFA20020u, _pgxa, cpu->gpr[2]); }  /* 0x80031310: 0xAFA20020 */
 #ifdef PSX_COSIM
     cosim_instr(0x80031310u);
@@ -22406,7 +22406,7 @@ block_800312B4:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20000004u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 36; g_debug_last_store_pc = 0x80031318u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 36, cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[29] + 36; g_debug_last_store_pc = 0x80031318u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 36, cpu->gpr[2]);
     PGXP_STORE(0xAFA20024u, _pgxa, cpu->gpr[2]); }  /* 0x80031318: 0xAFA20024 */
 #ifdef PSX_COSIM
     cosim_instr(0x80031318u);
@@ -22414,7 +22414,7 @@ block_800312B4:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20020000u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 40; g_debug_last_store_pc = 0x8003131Cu; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 40, cpu->gpr[17]);
+    { uint32_t _pgxa = cpu->gpr[29] + 40; g_debug_last_store_pc = 0x8003131Cu; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 40, cpu->gpr[17]);
     PGXP_STORE(0xAFB10028u, _pgxa, cpu->gpr[17]); }  /* 0x8003131C: 0xAFB10028 */
 #ifdef PSX_COSIM
     cosim_instr(0x8003131Cu);
@@ -22425,7 +22425,7 @@ block_800312B4:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20040000u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 44; g_debug_last_store_pc = 0x80031320u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 44, cpu->gpr[18]);
+    { uint32_t _pgxa = cpu->gpr[29] + 44; g_debug_last_store_pc = 0x80031320u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 44, cpu->gpr[18]);
     PGXP_STORE(0xAFB2002Cu, _pgxa, cpu->gpr[18]); }  /* 0x80031320: 0xAFB2002C */
 #ifdef PSX_COSIM
     cosim_instr(0x80031320u);
@@ -22438,7 +22438,7 @@ block_800312B4:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20000008u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 28; g_debug_last_store_pc = 0x80031328u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 28, cpu->gpr[3]);
+    { uint32_t _pgxa = cpu->gpr[29] + 28; g_debug_last_store_pc = 0x80031328u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 28, cpu->gpr[3]);
     PGXP_STORE(0xAFA3001Cu, _pgxa, cpu->gpr[3]); }  /* 0x80031328: 0xAFA3001C */
 #ifdef PSX_COSIM
     cosim_instr(0x80031328u);
@@ -22690,7 +22690,7 @@ block_80031374:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20040000u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 48; g_debug_last_store_pc = 0x80031378u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 48, cpu->gpr[18]);
+    { uint32_t _pgxa = cpu->gpr[29] + 48; g_debug_last_store_pc = 0x80031378u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 48, cpu->gpr[18]);
     PGXP_STORE(0xAFB20030u, _pgxa, cpu->gpr[18]); }  /* 0x80031378: 0xAFB20030 */
 #ifdef PSX_COSIM
     cosim_instr(0x80031378u);
@@ -22709,7 +22709,7 @@ block_80031374:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20010000u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 40; g_debug_last_store_pc = 0x80031380u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 40, cpu->gpr[16]);
+    { uint32_t _pgxa = cpu->gpr[29] + 40; g_debug_last_store_pc = 0x80031380u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 40, cpu->gpr[16]);
     PGXP_STORE(0xAFB00028u, _pgxa, cpu->gpr[16]); }  /* 0x80031380: 0xAFB00028 */
 #ifdef PSX_COSIM
     cosim_instr(0x80031380u);
@@ -22744,7 +22744,7 @@ block_80031374:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20020000u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 44; g_debug_last_store_pc = 0x8003138Cu; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 44, cpu->gpr[17]);
+    { uint32_t _pgxa = cpu->gpr[29] + 44; g_debug_last_store_pc = 0x8003138Cu; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 44, cpu->gpr[17]);
     PGXP_STORE(0xAFB1002Cu, _pgxa, cpu->gpr[17]); }  /* 0x8003138C: 0xAFB1002C */
 #ifdef PSX_COSIM
     cosim_instr(0x8003138Cu);
@@ -22763,7 +22763,7 @@ block_80031374:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20080000u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 52; g_debug_last_store_pc = 0x80031394u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 52, cpu->gpr[19]);
+    { uint32_t _pgxa = cpu->gpr[29] + 52; g_debug_last_store_pc = 0x80031394u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 52, cpu->gpr[19]);
     PGXP_STORE(0xAFB30034u, _pgxa, cpu->gpr[19]); }  /* 0x80031394: 0xAFB30034 */
 #ifdef PSX_COSIM
     cosim_instr(0x80031394u);
@@ -22787,7 +22787,7 @@ block_80031374:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20100000u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 56; g_debug_last_store_pc = 0x800313A0u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 56, cpu->gpr[20]);
+    { uint32_t _pgxa = cpu->gpr[29] + 56; g_debug_last_store_pc = 0x800313A0u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 56, cpu->gpr[20]);
     PGXP_STORE(0xAFB40038u, _pgxa, cpu->gpr[20]); }  /* 0x800313A0: 0xAFB40038 */
 #ifdef PSX_COSIM
     cosim_instr(0x800313A0u);
@@ -22803,7 +22803,7 @@ block_80031374:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0xA0000000u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 60; g_debug_last_store_pc = 0x800313A8u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 60, cpu->gpr[31]);
+    { uint32_t _pgxa = cpu->gpr[29] + 60; g_debug_last_store_pc = 0x800313A8u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 60, cpu->gpr[31]);
     PGXP_STORE(0xAFBF003Cu, _pgxa, cpu->gpr[31]); }  /* 0x800313A8: 0xAFBF003C */
 #ifdef PSX_COSIM
     cosim_instr(0x800313A8u);
@@ -23174,7 +23174,7 @@ block_80031400:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20000004u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 16; g_debug_last_store_pc = 0x8003140Cu; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 16, cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[29] + 16; g_debug_last_store_pc = 0x8003140Cu; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 16, cpu->gpr[2]);
     PGXP_STORE(0xAFA20010u, _pgxa, cpu->gpr[2]); }  /* 0x8003140C: 0xAFA20010 */
 #ifdef PSX_COSIM
     cosim_instr(0x8003140Cu);
@@ -23236,7 +23236,7 @@ block_80031400:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20000004u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 20; g_debug_last_store_pc = 0x80031424u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 20, cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[29] + 20; g_debug_last_store_pc = 0x80031424u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 20, cpu->gpr[2]);
     PGXP_STORE(0xAFA20014u, _pgxa, cpu->gpr[2]); }  /* 0x80031424: 0xAFA20014 */
 #ifdef PSX_COSIM
     cosim_instr(0x80031424u);
@@ -23244,7 +23244,7 @@ block_80031400:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20000008u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 24; g_debug_last_store_pc = 0x80031428u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 24, cpu->gpr[3]);
+    { uint32_t _pgxa = cpu->gpr[29] + 24; g_debug_last_store_pc = 0x80031428u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 24, cpu->gpr[3]);
     PGXP_STORE(0xAFA30018u, _pgxa, cpu->gpr[3]); }  /* 0x80031428: 0xAFA30018 */
 #ifdef PSX_COSIM
     cosim_instr(0x80031428u);
@@ -23252,7 +23252,7 @@ block_80031400:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20000008u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 28; g_debug_last_store_pc = 0x8003142Cu; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 28, cpu->gpr[3]);
+    { uint32_t _pgxa = cpu->gpr[29] + 28; g_debug_last_store_pc = 0x8003142Cu; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 28, cpu->gpr[3]);
     PGXP_STORE(0xAFA3001Cu, _pgxa, cpu->gpr[3]); }  /* 0x8003142C: 0xAFA3001C */
 #ifdef PSX_COSIM
     cosim_instr(0x8003142Cu);
@@ -23263,7 +23263,7 @@ block_80031400:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20000008u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 32; g_debug_last_store_pc = 0x80031430u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 32, cpu->gpr[3]);
+    { uint32_t _pgxa = cpu->gpr[29] + 32; g_debug_last_store_pc = 0x80031430u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 32, cpu->gpr[3]);
     PGXP_STORE(0xAFA30020u, _pgxa, cpu->gpr[3]); }  /* 0x80031430: 0xAFA30020 */
 #ifdef PSX_COSIM
     cosim_instr(0x80031430u);
@@ -23515,7 +23515,7 @@ block_80031474:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20020000u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 36; g_debug_last_store_pc = 0x80031478u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 36, cpu->gpr[17]);
+    { uint32_t _pgxa = cpu->gpr[29] + 36; g_debug_last_store_pc = 0x80031478u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 36, cpu->gpr[17]);
     PGXP_STORE(0xAFB10024u, _pgxa, cpu->gpr[17]); }  /* 0x80031478: 0xAFB10024 */
 #ifdef PSX_COSIM
     cosim_instr(0x80031478u);
@@ -23547,7 +23547,7 @@ block_80031474:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0xA0000000u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 44; g_debug_last_store_pc = 0x80031488u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 44, cpu->gpr[31]);
+    { uint32_t _pgxa = cpu->gpr[29] + 44; g_debug_last_store_pc = 0x80031488u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 44, cpu->gpr[31]);
     PGXP_STORE(0xAFBF002Cu, _pgxa, cpu->gpr[31]); }  /* 0x80031488: 0xAFBF002C */
 #ifdef PSX_COSIM
     cosim_instr(0x80031488u);
@@ -23555,7 +23555,7 @@ block_80031474:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20040000u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 40; g_debug_last_store_pc = 0x8003148Cu; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 40, cpu->gpr[18]);
+    { uint32_t _pgxa = cpu->gpr[29] + 40; g_debug_last_store_pc = 0x8003148Cu; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 40, cpu->gpr[18]);
     PGXP_STORE(0xAFB20028u, _pgxa, cpu->gpr[18]); }  /* 0x8003148C: 0xAFB20028 */
 #ifdef PSX_COSIM
     cosim_instr(0x8003148Cu);
@@ -23579,7 +23579,7 @@ block_80031474:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20010000u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 32; g_debug_last_store_pc = 0x80031498u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 32, cpu->gpr[16]);
+    { uint32_t _pgxa = cpu->gpr[29] + 32; g_debug_last_store_pc = 0x80031498u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 32, cpu->gpr[16]);
     PGXP_STORE(0xAFB00020u, _pgxa, cpu->gpr[16]); }  /* 0x80031498: 0xAFB00020 */
 #ifdef PSX_COSIM
     cosim_instr(0x80031498u);
@@ -23625,7 +23625,7 @@ block_8003149C:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20004u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[17] + 12180; g_debug_last_store_pc = 0x800314A0u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[17] + 12180, cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[17] + 12180; g_debug_last_store_pc = 0x800314A0u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[17] + 12180, cpu->gpr[2]);
     PGXP_STORE(0xAE222F94u, _pgxa, cpu->gpr[2]); }  /* 0x800314A0: 0xAE222F94 */
 #ifdef PSX_COSIM
     cosim_instr(0x800314A0u);
@@ -24179,7 +24179,7 @@ block_8003153C:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x10004u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[2] + 20056; g_debug_last_store_pc = 0x80031548u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[2] + 20056, cpu->gpr[16]);
+    { uint32_t _pgxa = cpu->gpr[2] + 20056; g_debug_last_store_pc = 0x80031548u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[2] + 20056, cpu->gpr[16]);
     PGXP_STORE(0xAC504E58u, _pgxa, cpu->gpr[16]); }  /* 0x80031548: 0xAC504E58 */
 #ifdef PSX_COSIM
     cosim_instr(0x80031548u);
@@ -24384,7 +24384,7 @@ block_8003156C:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20001u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[17] + 12180; g_debug_last_store_pc = 0x8003157Cu; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[17] + 12180, cpu->gpr[0]);
+    { uint32_t _pgxa = cpu->gpr[17] + 12180; g_debug_last_store_pc = 0x8003157Cu; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[17] + 12180, cpu->gpr[0]);
     PGXP_STORE(0xAE202F94u, _pgxa, cpu->gpr[0]); }  /* 0x8003157C: 0xAE202F94 */
 #ifdef PSX_COSIM
     cosim_instr(0x8003157Cu);
@@ -24395,7 +24395,7 @@ block_8003156C:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20000004u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 16; g_debug_last_store_pc = 0x80031580u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 16, cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[29] + 16; g_debug_last_store_pc = 0x80031580u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 16, cpu->gpr[2]);
     PGXP_STORE(0xAFA20010u, _pgxa, cpu->gpr[2]); }  /* 0x80031580: 0xAFA20010 */
 #ifdef PSX_COSIM
     cosim_instr(0x80031580u);
@@ -24403,7 +24403,7 @@ block_8003156C:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20000001u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 20; g_debug_last_store_pc = 0x80031584u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 20, cpu->gpr[0]);
+    { uint32_t _pgxa = cpu->gpr[29] + 20; g_debug_last_store_pc = 0x80031584u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 20, cpu->gpr[0]);
     PGXP_STORE(0xAFA00014u, _pgxa, cpu->gpr[0]); }  /* 0x80031584: 0xAFA00014 */
 #ifdef PSX_COSIM
     cosim_instr(0x80031584u);
@@ -24416,7 +24416,7 @@ block_8003156C:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20000001u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 24; g_debug_last_store_pc = 0x8003158Cu; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 24, cpu->gpr[0]);
+    { uint32_t _pgxa = cpu->gpr[29] + 24; g_debug_last_store_pc = 0x8003158Cu; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 24, cpu->gpr[0]);
     PGXP_STORE(0xAFA00018u, _pgxa, cpu->gpr[0]); }  /* 0x8003158C: 0xAFA00018 */
 #ifdef PSX_COSIM
     cosim_instr(0x8003158Cu);
@@ -24501,7 +24501,7 @@ block_80031590:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20000004u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 16; g_debug_last_store_pc = 0x800315A4u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 16, cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[29] + 16; g_debug_last_store_pc = 0x800315A4u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 16, cpu->gpr[2]);
     PGXP_STORE(0xAFA20010u, _pgxa, cpu->gpr[2]); }  /* 0x800315A4: 0xAFA20010 */
 #ifdef PSX_COSIM
     cosim_instr(0x800315A4u);
@@ -24509,7 +24509,7 @@ block_80031590:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20000001u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 20; g_debug_last_store_pc = 0x800315A8u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 20, cpu->gpr[0]);
+    { uint32_t _pgxa = cpu->gpr[29] + 20; g_debug_last_store_pc = 0x800315A8u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 20, cpu->gpr[0]);
     PGXP_STORE(0xAFA00014u, _pgxa, cpu->gpr[0]); }  /* 0x800315A8: 0xAFA00014 */
 #ifdef PSX_COSIM
     cosim_instr(0x800315A8u);
@@ -24525,7 +24525,7 @@ block_80031590:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20000001u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 24; g_debug_last_store_pc = 0x800315B0u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 24, cpu->gpr[0]);
+    { uint32_t _pgxa = cpu->gpr[29] + 24; g_debug_last_store_pc = 0x800315B0u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 24, cpu->gpr[0]);
     PGXP_STORE(0xAFA00018u, _pgxa, cpu->gpr[0]); }  /* 0x800315B0: 0xAFA00018 */
 #ifdef PSX_COSIM
     cosim_instr(0x800315B0u);
@@ -24654,7 +24654,7 @@ block_800315C8:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x40004u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[2] + 19994; g_debug_last_store_pc = 0x800315D0u; psx_store_cycle_barrier(); cpu->write_half(cpu->gpr[2] + 19994, (uint16_t)cpu->gpr[18]);
+    { uint32_t _pgxa = cpu->gpr[2] + 19994; g_debug_last_store_pc = 0x800315D0u; psx_store_cycle_barrier(); psx_mem_write_half(cpu, cpu->gpr[2] + 19994, (uint16_t)cpu->gpr[18]);
     PGXP_STORE(0xA4524E1Au, _pgxa, cpu->gpr[18]); }  /* 0x800315D0: 0xA4524E1A */
 #ifdef PSX_COSIM
     cosim_instr(0x800315D0u);
@@ -24670,7 +24670,7 @@ block_800315C8:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0xCu);
 #endif
-    { uint32_t _pgxa = cpu->gpr[3] + 15318; g_debug_last_store_pc = 0x800315D8u; psx_store_cycle_barrier(); cpu->write_half(cpu->gpr[3] + 15318, (uint16_t)cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[3] + 15318; g_debug_last_store_pc = 0x800315D8u; psx_store_cycle_barrier(); psx_mem_write_half(cpu, cpu->gpr[3] + 15318, (uint16_t)cpu->gpr[2]);
     PGXP_STORE(0xA4623BD6u, _pgxa, cpu->gpr[2]); }  /* 0x800315D8: 0xA4623BD6 */
 #ifdef PSX_COSIM
     cosim_instr(0x800315D8u);
@@ -24693,7 +24693,7 @@ block_800315C8:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x5u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[2] + 20282; g_debug_last_store_pc = 0x800315E4u; psx_store_cycle_barrier(); cpu->write_half(cpu->gpr[2] + 20282, (uint16_t)cpu->gpr[0]);
+    { uint32_t _pgxa = cpu->gpr[2] + 20282; g_debug_last_store_pc = 0x800315E4u; psx_store_cycle_barrier(); psx_mem_write_half(cpu, cpu->gpr[2] + 20282, (uint16_t)cpu->gpr[0]);
     PGXP_STORE(0xA4404F3Au, _pgxa, cpu->gpr[0]); }  /* 0x800315E4: 0xA4404F3A */
 #ifdef PSX_COSIM
     cosim_instr(0x800315E4u);
@@ -24884,7 +24884,7 @@ block_8003160C:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0xA0000000u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 16; g_debug_last_store_pc = 0x8003161Cu; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 16, cpu->gpr[31]);
+    { uint32_t _pgxa = cpu->gpr[29] + 16; g_debug_last_store_pc = 0x8003161Cu; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 16, cpu->gpr[31]);
     PGXP_STORE(0xAFBF0010u, _pgxa, cpu->gpr[31]); }  /* 0x8003161C: 0xAFBF0010 */
 #ifdef PSX_COSIM
     cosim_instr(0x8003161Cu);
@@ -24957,7 +24957,7 @@ block_80031628:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x5u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[2] + 12180; g_debug_last_store_pc = 0x80031630u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[2] + 12180, cpu->gpr[0]);
+    { uint32_t _pgxa = cpu->gpr[2] + 12180; g_debug_last_store_pc = 0x80031630u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[2] + 12180, cpu->gpr[0]);
     PGXP_STORE(0xAC402F94u, _pgxa, cpu->gpr[0]); }  /* 0x80031630: 0xAC402F94 */
 #ifdef PSX_COSIM
     cosim_instr(0x80031630u);
@@ -24973,7 +24973,7 @@ block_80031628:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0xCu);
 #endif
-    { uint32_t _pgxa = cpu->gpr[3] + -14444; g_debug_last_store_pc = 0x80031638u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[3] + -14444, cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[3] + -14444; g_debug_last_store_pc = 0x80031638u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[3] + -14444, cpu->gpr[2]);
     PGXP_STORE(0xAC62C794u, _pgxa, cpu->gpr[2]); }  /* 0x80031638: 0xAC62C794 */
 #ifdef PSX_COSIM
     cosim_instr(0x80031638u);
@@ -25005,7 +25005,7 @@ block_80031628:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0xCu);
 #endif
-    { uint32_t _pgxa = cpu->gpr[3] + -10558; g_debug_last_store_pc = 0x80031648u; psx_store_cycle_barrier(); cpu->write_half(cpu->gpr[3] + -10558, (uint16_t)cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[3] + -10558; g_debug_last_store_pc = 0x80031648u; psx_store_cycle_barrier(); psx_mem_write_half(cpu, cpu->gpr[3] + -10558, (uint16_t)cpu->gpr[2]);
     PGXP_STORE(0xA462D6C2u, _pgxa, cpu->gpr[2]); }  /* 0x80031648: 0xA462D6C2 */
 #ifdef PSX_COSIM
     cosim_instr(0x80031648u);
@@ -25163,7 +25163,7 @@ block_80031654:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0xA0000000u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 32; g_debug_last_store_pc = 0x8003166Cu; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 32, cpu->gpr[31]);
+    { uint32_t _pgxa = cpu->gpr[29] + 32; g_debug_last_store_pc = 0x8003166Cu; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 32, cpu->gpr[31]);
     PGXP_STORE(0xAFBF0020u, _pgxa, cpu->gpr[31]); }  /* 0x8003166C: 0xAFBF0020 */
 #ifdef PSX_COSIM
     cosim_instr(0x8003166Cu);
@@ -25174,7 +25174,7 @@ block_80031654:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20080000u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 28; g_debug_last_store_pc = 0x80031670u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 28, cpu->gpr[19]);
+    { uint32_t _pgxa = cpu->gpr[29] + 28; g_debug_last_store_pc = 0x80031670u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 28, cpu->gpr[19]);
     PGXP_STORE(0xAFB3001Cu, _pgxa, cpu->gpr[19]); }  /* 0x80031670: 0xAFB3001C */
 #ifdef PSX_COSIM
     cosim_instr(0x80031670u);
@@ -25182,7 +25182,7 @@ block_80031654:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20040000u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 24; g_debug_last_store_pc = 0x80031674u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 24, cpu->gpr[18]);
+    { uint32_t _pgxa = cpu->gpr[29] + 24; g_debug_last_store_pc = 0x80031674u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 24, cpu->gpr[18]);
     PGXP_STORE(0xAFB20018u, _pgxa, cpu->gpr[18]); }  /* 0x80031674: 0xAFB20018 */
 #ifdef PSX_COSIM
     cosim_instr(0x80031674u);
@@ -25190,7 +25190,7 @@ block_80031654:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20020000u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 20; g_debug_last_store_pc = 0x80031678u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 20, cpu->gpr[17]);
+    { uint32_t _pgxa = cpu->gpr[29] + 20; g_debug_last_store_pc = 0x80031678u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 20, cpu->gpr[17]);
     PGXP_STORE(0xAFB10014u, _pgxa, cpu->gpr[17]); }  /* 0x80031678: 0xAFB10014 */
 #ifdef PSX_COSIM
     cosim_instr(0x80031678u);
@@ -25198,7 +25198,7 @@ block_80031654:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20010000u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 16; g_debug_last_store_pc = 0x8003167Cu; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 16, cpu->gpr[16]);
+    { uint32_t _pgxa = cpu->gpr[29] + 16; g_debug_last_store_pc = 0x8003167Cu; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 16, cpu->gpr[16]);
     PGXP_STORE(0xAFB00010u, _pgxa, cpu->gpr[16]); }  /* 0x8003167C: 0xAFB00010 */
 #ifdef PSX_COSIM
     cosim_instr(0x8003167Cu);
@@ -25236,7 +25236,7 @@ block_80031654:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x24u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[5] + 12180; g_debug_last_store_pc = 0x80031688u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[5] + 12180, cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[5] + 12180; g_debug_last_store_pc = 0x80031688u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[5] + 12180, cpu->gpr[2]);
     PGXP_STORE(0xACA22F94u, _pgxa, cpu->gpr[2]); }  /* 0x80031688: 0xACA22F94 */
 #ifdef PSX_COSIM
     cosim_instr(0x80031688u);
@@ -25252,7 +25252,7 @@ block_80031654:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x48u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[6] + -16280; g_debug_last_store_pc = 0x80031690u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[6] + -16280, cpu->gpr[3]);
+    { uint32_t _pgxa = cpu->gpr[6] + -16280; g_debug_last_store_pc = 0x80031690u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[6] + -16280, cpu->gpr[3]);
     PGXP_STORE(0xACC3C068u, _pgxa, cpu->gpr[3]); }  /* 0x80031690: 0xACC3C068 */
 #ifdef PSX_COSIM
     cosim_instr(0x80031690u);
@@ -25996,7 +25996,7 @@ block_80031748:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x80004u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[2] + 16; g_debug_last_store_pc = 0x80031770u; psx_store_cycle_barrier(); cpu->write_half(cpu->gpr[2] + 16, (uint16_t)cpu->gpr[19]);
+    { uint32_t _pgxa = cpu->gpr[2] + 16; g_debug_last_store_pc = 0x80031770u; psx_store_cycle_barrier(); psx_mem_write_half(cpu, cpu->gpr[2] + 16, (uint16_t)cpu->gpr[19]);
     PGXP_STORE(0xA4530010u, _pgxa, cpu->gpr[19]); }  /* 0x80031770: 0xA4530010 */
 #ifdef PSX_COSIM
     cosim_instr(0x80031770u);
@@ -26012,7 +26012,7 @@ block_80031748:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x10008u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[3] + 1; g_debug_last_store_pc = 0x80031778u; psx_store_cycle_barrier(); cpu->write_byte(cpu->gpr[3] + 1, (uint8_t)cpu->gpr[16]);
+    { uint32_t _pgxa = cpu->gpr[3] + 1; g_debug_last_store_pc = 0x80031778u; psx_store_cycle_barrier(); psx_mem_write_byte(cpu, cpu->gpr[3] + 1, (uint8_t)cpu->gpr[16]);
     PGXP_STORE(0xA0700001u, _pgxa, cpu->gpr[16]); }  /* 0x80031778: 0xA0700001 */
 #ifdef PSX_COSIM
     cosim_instr(0x80031778u);
@@ -26041,7 +26041,7 @@ block_80031748:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x41u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[6] + -14456; g_debug_last_store_pc = 0x80031788u; psx_store_cycle_barrier(); cpu->write_half(cpu->gpr[6] + -14456, (uint16_t)cpu->gpr[0]);
+    { uint32_t _pgxa = cpu->gpr[6] + -14456; g_debug_last_store_pc = 0x80031788u; psx_store_cycle_barrier(); psx_mem_write_half(cpu, cpu->gpr[6] + -14456, (uint16_t)cpu->gpr[0]);
     PGXP_STORE(0xA4C0C788u, _pgxa, cpu->gpr[0]); }  /* 0x80031788: 0xA4C0C788 */
 #ifdef PSX_COSIM
     cosim_instr(0x80031788u);
@@ -26199,7 +26199,7 @@ block_800317A0:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x10004u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[16] + -14456; g_debug_last_store_pc = 0x800317ACu; psx_store_cycle_barrier(); cpu->write_half(cpu->gpr[16] + -14456, (uint16_t)cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[16] + -14456; g_debug_last_store_pc = 0x800317ACu; psx_store_cycle_barrier(); psx_mem_write_half(cpu, cpu->gpr[16] + -14456, (uint16_t)cpu->gpr[2]);
     PGXP_STORE(0xA602C788u, _pgxa, cpu->gpr[2]); }  /* 0x800317AC: 0xA602C788 */
 #ifdef PSX_COSIM
     cosim_instr(0x800317ACu);
@@ -26274,7 +26274,7 @@ block_800317B0:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0xCu);
 #endif
-    { uint32_t _pgxa = cpu->gpr[2] + -12848; g_debug_last_store_pc = 0x800317C4u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[2] + -12848, cpu->gpr[3]);
+    { uint32_t _pgxa = cpu->gpr[2] + -12848; g_debug_last_store_pc = 0x800317C4u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[2] + -12848, cpu->gpr[3]);
     PGXP_STORE(0xAC43CDD0u, _pgxa, cpu->gpr[3]); }  /* 0x800317C4: 0xAC43CDD0 */
 #ifdef PSX_COSIM
     cosim_instr(0x800317C4u);
@@ -26453,7 +26453,7 @@ block_800317E8:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x44u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[6] + -14456; g_debug_last_store_pc = 0x800317F4u; psx_store_cycle_barrier(); cpu->write_half(cpu->gpr[6] + -14456, (uint16_t)cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[6] + -14456; g_debug_last_store_pc = 0x800317F4u; psx_store_cycle_barrier(); psx_mem_write_half(cpu, cpu->gpr[6] + -14456, (uint16_t)cpu->gpr[2]);
     PGXP_STORE(0xA4C2C788u, _pgxa, cpu->gpr[2]); }  /* 0x800317F4: 0xA4C2C788 */
 #ifdef PSX_COSIM
     cosim_instr(0x800317F4u);
@@ -26534,7 +26534,7 @@ block_80031800:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0xCu);
 #endif
-    { uint32_t _pgxa = cpu->gpr[3] + 20282; g_debug_last_store_pc = 0x80031808u; psx_store_cycle_barrier(); cpu->write_half(cpu->gpr[3] + 20282, (uint16_t)cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[3] + 20282; g_debug_last_store_pc = 0x80031808u; psx_store_cycle_barrier(); psx_mem_write_half(cpu, cpu->gpr[3] + 20282, (uint16_t)cpu->gpr[2]);
     PGXP_STORE(0xA4624F3Au, _pgxa, cpu->gpr[2]); }  /* 0x80031808: 0xA4624F3A */
 #ifdef PSX_COSIM
     cosim_instr(0x80031808u);
@@ -26679,7 +26679,7 @@ block_80031834:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x24u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[5] + -14456; g_debug_last_store_pc = 0x80031834u; psx_store_cycle_barrier(); cpu->write_half(cpu->gpr[5] + -14456, (uint16_t)cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[5] + -14456; g_debug_last_store_pc = 0x80031834u; psx_store_cycle_barrier(); psx_mem_write_half(cpu, cpu->gpr[5] + -14456, (uint16_t)cpu->gpr[2]);
     PGXP_STORE(0xA4A2C788u, _pgxa, cpu->gpr[2]); }  /* 0x80031834: 0xA4A2C788 */
 #ifdef PSX_COSIM
     cosim_instr(0x80031834u);
@@ -27412,7 +27412,7 @@ block_80031904:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x5u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[2] + 20282; g_debug_last_store_pc = 0x8003190Cu; psx_store_cycle_barrier(); cpu->write_half(cpu->gpr[2] + 20282, (uint16_t)cpu->gpr[0]);
+    { uint32_t _pgxa = cpu->gpr[2] + 20282; g_debug_last_store_pc = 0x8003190Cu; psx_store_cycle_barrier(); psx_mem_write_half(cpu, cpu->gpr[2] + 20282, (uint16_t)cpu->gpr[0]);
     PGXP_STORE(0xA4404F3Au, _pgxa, cpu->gpr[0]); }  /* 0x8003190C: 0xA4404F3A */
 #ifdef PSX_COSIM
     cosim_instr(0x8003190Cu);
@@ -27431,7 +27431,7 @@ block_80031904:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x14u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[4] + 19994; g_debug_last_store_pc = 0x80031914u; psx_store_cycle_barrier(); cpu->write_half(cpu->gpr[4] + 19994, (uint16_t)cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[4] + 19994; g_debug_last_store_pc = 0x80031914u; psx_store_cycle_barrier(); psx_mem_write_half(cpu, cpu->gpr[4] + 19994, (uint16_t)cpu->gpr[2]);
     PGXP_STORE(0xA4824E1Au, _pgxa, cpu->gpr[2]); }  /* 0x80031914: 0xA4824E1A */
 #ifdef PSX_COSIM
     cosim_instr(0x80031914u);
@@ -27469,7 +27469,7 @@ block_80031904:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0xCu);
 #endif
-    { uint32_t _pgxa = cpu->gpr[2] + 15318; g_debug_last_store_pc = 0x80031920u; psx_store_cycle_barrier(); cpu->write_half(cpu->gpr[2] + 15318, (uint16_t)cpu->gpr[3]);
+    { uint32_t _pgxa = cpu->gpr[2] + 15318; g_debug_last_store_pc = 0x80031920u; psx_store_cycle_barrier(); psx_mem_write_half(cpu, cpu->gpr[2] + 15318, (uint16_t)cpu->gpr[3]);
     PGXP_STORE(0xA4433BD6u, _pgxa, cpu->gpr[3]); }  /* 0x80031920: 0xA4433BD6 */
 #ifdef PSX_COSIM
     cosim_instr(0x80031920u);
@@ -27644,7 +27644,7 @@ block_8003194C:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20000004u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 16; g_debug_last_store_pc = 0x80031954u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 16, cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[29] + 16; g_debug_last_store_pc = 0x80031954u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 16, cpu->gpr[2]);
     PGXP_STORE(0xAFA20010u, _pgxa, cpu->gpr[2]); }  /* 0x80031954: 0xAFA20010 */
 #ifdef PSX_COSIM
     cosim_instr(0x80031954u);
@@ -27660,7 +27660,7 @@ block_8003194C:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20000004u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 20; g_debug_last_store_pc = 0x8003195Cu; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 20, cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[29] + 20; g_debug_last_store_pc = 0x8003195Cu; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 20, cpu->gpr[2]);
     PGXP_STORE(0xAFA20014u, _pgxa, cpu->gpr[2]); }  /* 0x8003195C: 0xAFA20014 */
 #ifdef PSX_COSIM
     cosim_instr(0x8003195Cu);
@@ -27679,7 +27679,7 @@ block_8003194C:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20010000u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 40; g_debug_last_store_pc = 0x80031964u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 40, cpu->gpr[16]);
+    { uint32_t _pgxa = cpu->gpr[29] + 40; g_debug_last_store_pc = 0x80031964u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 40, cpu->gpr[16]);
     PGXP_STORE(0xAFB00028u, _pgxa, cpu->gpr[16]); }  /* 0x80031964: 0xAFB00028 */
 #ifdef PSX_COSIM
     cosim_instr(0x80031964u);
@@ -27695,7 +27695,7 @@ block_8003194C:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20000004u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 24; g_debug_last_store_pc = 0x8003196Cu; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 24, cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[29] + 24; g_debug_last_store_pc = 0x8003196Cu; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 24, cpu->gpr[2]);
     PGXP_STORE(0xAFA20018u, _pgxa, cpu->gpr[2]); }  /* 0x8003196C: 0xAFA20018 */
 #ifdef PSX_COSIM
     cosim_instr(0x8003196Cu);
@@ -27706,7 +27706,7 @@ block_8003194C:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20000004u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 28; g_debug_last_store_pc = 0x80031970u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 28, cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[29] + 28; g_debug_last_store_pc = 0x80031970u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 28, cpu->gpr[2]);
     PGXP_STORE(0xAFA2001Cu, _pgxa, cpu->gpr[2]); }  /* 0x80031970: 0xAFA2001C */
 #ifdef PSX_COSIM
     cosim_instr(0x80031970u);
@@ -27714,7 +27714,7 @@ block_8003194C:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20000004u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 32; g_debug_last_store_pc = 0x80031974u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 32, cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[29] + 32; g_debug_last_store_pc = 0x80031974u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 32, cpu->gpr[2]);
     PGXP_STORE(0xAFA20020u, _pgxa, cpu->gpr[2]); }  /* 0x80031974: 0xAFA20020 */
 #ifdef PSX_COSIM
     cosim_instr(0x80031974u);
@@ -27765,7 +27765,7 @@ block_8003194C:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0xA0000000u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 44; g_debug_last_store_pc = 0x80031988u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 44, cpu->gpr[31]);
+    { uint32_t _pgxa = cpu->gpr[29] + 44; g_debug_last_store_pc = 0x80031988u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 44, cpu->gpr[31]);
     PGXP_STORE(0xAFBF002Cu, _pgxa, cpu->gpr[31]); }  /* 0x80031988: 0xAFBF002C */
 #ifdef PSX_COSIM
     cosim_instr(0x80031988u);
@@ -27813,7 +27813,7 @@ block_80031998:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x10004u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[16]; g_debug_last_store_pc = 0x80031998u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[16], cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[16]; g_debug_last_store_pc = 0x80031998u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[16], cpu->gpr[2]);
     PGXP_STORE(0xAE020000u, _pgxa, cpu->gpr[2]); }  /* 0x80031998: 0xAE020000 */
 #ifdef PSX_COSIM
     cosim_instr(0x80031998u);
@@ -27979,7 +27979,7 @@ block_800319AC:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0xA0000000u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 16; g_debug_last_store_pc = 0x800319C4u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 16, cpu->gpr[31]);
+    { uint32_t _pgxa = cpu->gpr[29] + 16; g_debug_last_store_pc = 0x800319C4u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 16, cpu->gpr[31]);
     PGXP_STORE(0xAFBF0010u, _pgxa, cpu->gpr[31]); }  /* 0x800319C4: 0xAFBF0010 */
 #ifdef PSX_COSIM
     cosim_instr(0x800319C4u);
@@ -27987,7 +27987,7 @@ block_800319AC:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0xCu);
 #endif
-    { uint32_t _pgxa = cpu->gpr[3] + 7; g_debug_last_store_pc = 0x800319C8u; psx_store_cycle_barrier(); cpu->write_byte(cpu->gpr[3] + 7, (uint8_t)cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[3] + 7; g_debug_last_store_pc = 0x800319C8u; psx_store_cycle_barrier(); psx_mem_write_byte(cpu, cpu->gpr[3] + 7, (uint8_t)cpu->gpr[2]);
     PGXP_STORE(0xA0620007u, _pgxa, cpu->gpr[2]); }  /* 0x800319C8: 0xA0620007 */
 #ifdef PSX_COSIM
     cosim_instr(0x800319C8u);
@@ -28011,7 +28011,7 @@ block_800319AC:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0xCu);
 #endif
-    { uint32_t _pgxa = cpu->gpr[3] + 30; g_debug_last_store_pc = 0x800319D4u; psx_store_cycle_barrier(); cpu->write_byte(cpu->gpr[3] + 30, (uint8_t)cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[3] + 30; g_debug_last_store_pc = 0x800319D4u; psx_store_cycle_barrier(); psx_mem_write_byte(cpu, cpu->gpr[3] + 30, (uint8_t)cpu->gpr[2]);
     PGXP_STORE(0xA062001Eu, _pgxa, cpu->gpr[2]); }  /* 0x800319D4: 0xA062001E */
 #ifdef PSX_COSIM
     cosim_instr(0x800319D4u);
@@ -28035,7 +28035,7 @@ block_800319AC:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x9u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[3] + 22; g_debug_last_store_pc = 0x800319E0u; psx_store_cycle_barrier(); cpu->write_half(cpu->gpr[3] + 22, (uint16_t)cpu->gpr[0]);
+    { uint32_t _pgxa = cpu->gpr[3] + 22; g_debug_last_store_pc = 0x800319E0u; psx_store_cycle_barrier(); psx_mem_write_half(cpu, cpu->gpr[3] + 22, (uint16_t)cpu->gpr[0]);
     PGXP_STORE(0xA4600016u, _pgxa, cpu->gpr[0]); }  /* 0x800319E0: 0xA4600016 */
 #ifdef PSX_COSIM
     cosim_instr(0x800319E0u);
@@ -28187,7 +28187,7 @@ block_80031A04:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x5u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[2] + 7; g_debug_last_store_pc = 0x80031A10u; psx_store_cycle_barrier(); cpu->write_byte(cpu->gpr[2] + 7, (uint8_t)cpu->gpr[0]);
+    { uint32_t _pgxa = cpu->gpr[2] + 7; g_debug_last_store_pc = 0x80031A10u; psx_store_cycle_barrier(); psx_mem_write_byte(cpu, cpu->gpr[2] + 7, (uint8_t)cpu->gpr[0]);
     PGXP_STORE(0xA0400007u, _pgxa, cpu->gpr[0]); }  /* 0x80031A10: 0xA0400007 */
 #ifdef PSX_COSIM
     cosim_instr(0x80031A10u);
@@ -28219,7 +28219,7 @@ block_80031A04:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x5u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[2] + 4; g_debug_last_store_pc = 0x80031A20u; psx_store_cycle_barrier(); cpu->write_byte(cpu->gpr[2] + 4, (uint8_t)cpu->gpr[0]);
+    { uint32_t _pgxa = cpu->gpr[2] + 4; g_debug_last_store_pc = 0x80031A20u; psx_store_cycle_barrier(); psx_mem_write_byte(cpu, cpu->gpr[2] + 4, (uint8_t)cpu->gpr[0]);
     PGXP_STORE(0xA0400004u, _pgxa, cpu->gpr[0]); }  /* 0x80031A20: 0xA0400004 */
 #ifdef PSX_COSIM
     cosim_instr(0x80031A20u);
@@ -28235,7 +28235,7 @@ block_80031A04:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0xCu);
 #endif
-    { uint32_t _pgxa = cpu->gpr[3] + 19980; g_debug_last_store_pc = 0x80031A28u; psx_store_cycle_barrier(); cpu->write_half(cpu->gpr[3] + 19980, (uint16_t)cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[3] + 19980; g_debug_last_store_pc = 0x80031A28u; psx_store_cycle_barrier(); psx_mem_write_half(cpu, cpu->gpr[3] + 19980, (uint16_t)cpu->gpr[2]);
     PGXP_STORE(0xA4624E0Cu, _pgxa, cpu->gpr[2]); }  /* 0x80031A28: 0xA4624E0C */
 #ifdef PSX_COSIM
     cosim_instr(0x80031A28u);
@@ -28266,7 +28266,7 @@ block_80031A04:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0xCu);
 #endif
-    { uint32_t _pgxa = cpu->gpr[3] + -10582; g_debug_last_store_pc = 0x80031A38u; psx_store_cycle_barrier(); cpu->write_half(cpu->gpr[3] + -10582, (uint16_t)cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[3] + -10582; g_debug_last_store_pc = 0x80031A38u; psx_store_cycle_barrier(); psx_mem_write_half(cpu, cpu->gpr[3] + -10582, (uint16_t)cpu->gpr[2]);
     PGXP_STORE(0xA462D6AAu, _pgxa, cpu->gpr[2]); }  /* 0x80031A38: 0xA462D6AA */
 #ifdef PSX_COSIM
     cosim_instr(0x80031A38u);
@@ -28333,7 +28333,7 @@ block_80031A3C:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0xCu);
 #endif
-    { uint32_t _pgxa = cpu->gpr[3] + 4; g_debug_last_store_pc = 0x80031A50u; psx_store_cycle_barrier(); cpu->write_byte(cpu->gpr[3] + 4, (uint8_t)cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[3] + 4; g_debug_last_store_pc = 0x80031A50u; psx_store_cycle_barrier(); psx_mem_write_byte(cpu, cpu->gpr[3] + 4, (uint8_t)cpu->gpr[2]);
     PGXP_STORE(0xA0620004u, _pgxa, cpu->gpr[2]); }  /* 0x80031A50: 0xA0620004 */
 #ifdef PSX_COSIM
     cosim_instr(0x80031A50u);
@@ -28375,7 +28375,7 @@ block_80031A3C:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0xCu);
 #endif
-    { uint32_t _pgxa = cpu->gpr[3] + 19980; g_debug_last_store_pc = 0x80031A60u; psx_store_cycle_barrier(); cpu->write_half(cpu->gpr[3] + 19980, (uint16_t)cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[3] + 19980; g_debug_last_store_pc = 0x80031A60u; psx_store_cycle_barrier(); psx_mem_write_half(cpu, cpu->gpr[3] + 19980, (uint16_t)cpu->gpr[2]);
     PGXP_STORE(0xA4624E0Cu, _pgxa, cpu->gpr[2]); }  /* 0x80031A60: 0xA4624E0C */
 #ifdef PSX_COSIM
     cosim_instr(0x80031A60u);
@@ -29752,7 +29752,7 @@ block_80031BD0:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x14u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[4] + 4; g_debug_last_store_pc = 0x80031BE4u; psx_store_cycle_barrier(); cpu->write_byte(cpu->gpr[4] + 4, (uint8_t)cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[4] + 4; g_debug_last_store_pc = 0x80031BE4u; psx_store_cycle_barrier(); psx_mem_write_byte(cpu, cpu->gpr[4] + 4, (uint8_t)cpu->gpr[2]);
     PGXP_STORE(0xA0820004u, _pgxa, cpu->gpr[2]); }  /* 0x80031BE4: 0xA0820004 */
 #ifdef PSX_COSIM
     cosim_instr(0x80031BE4u);
@@ -30031,7 +30031,7 @@ block_80031C24:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0xCu);
 #endif
-    { uint32_t _pgxa = cpu->gpr[3] + -10582; g_debug_last_store_pc = 0x80031C30u; psx_store_cycle_barrier(); cpu->write_half(cpu->gpr[3] + -10582, (uint16_t)cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[3] + -10582; g_debug_last_store_pc = 0x80031C30u; psx_store_cycle_barrier(); psx_mem_write_half(cpu, cpu->gpr[3] + -10582, (uint16_t)cpu->gpr[2]);
     PGXP_STORE(0xA462D6AAu, _pgxa, cpu->gpr[2]); }  /* 0x80031C30: 0xA462D6AA */
 #ifdef PSX_COSIM
     cosim_instr(0x80031C30u);
@@ -30120,7 +30120,7 @@ block_80031C44:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0xCu);
 #endif
-    { uint32_t _pgxa = cpu->gpr[3] + 19980; g_debug_last_store_pc = 0x80031C44u; psx_store_cycle_barrier(); cpu->write_half(cpu->gpr[3] + 19980, (uint16_t)cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[3] + 19980; g_debug_last_store_pc = 0x80031C44u; psx_store_cycle_barrier(); psx_mem_write_half(cpu, cpu->gpr[3] + 19980, (uint16_t)cpu->gpr[2]);
     PGXP_STORE(0xA4624E0Cu, _pgxa, cpu->gpr[2]); }  /* 0x80031C44: 0xA4624E0C */
 #ifdef PSX_COSIM
     cosim_instr(0x80031C44u);
@@ -30207,7 +30207,7 @@ block_80031C5C:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0xCu);
 #endif
-    { uint32_t _pgxa = cpu->gpr[3] + 19980; g_debug_last_store_pc = 0x80031C64u; psx_store_cycle_barrier(); cpu->write_half(cpu->gpr[3] + 19980, (uint16_t)cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[3] + 19980; g_debug_last_store_pc = 0x80031C64u; psx_store_cycle_barrier(); psx_mem_write_half(cpu, cpu->gpr[3] + 19980, (uint16_t)cpu->gpr[2]);
     PGXP_STORE(0xA4624E0Cu, _pgxa, cpu->gpr[2]); }  /* 0x80031C64: 0xA4624E0C */
 #ifdef PSX_COSIM
     cosim_instr(0x80031C64u);
@@ -30301,7 +30301,7 @@ block_80031C68:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x14u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[4] + 4; g_debug_last_store_pc = 0x80031C84u; psx_store_cycle_barrier(); cpu->write_byte(cpu->gpr[4] + 4, (uint8_t)cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[4] + 4; g_debug_last_store_pc = 0x80031C84u; psx_store_cycle_barrier(); psx_mem_write_byte(cpu, cpu->gpr[4] + 4, (uint8_t)cpu->gpr[2]);
     PGXP_STORE(0xA0820004u, _pgxa, cpu->gpr[2]); }  /* 0x80031C84: 0xA0820004 */
 #ifdef PSX_COSIM
     cosim_instr(0x80031C84u);
@@ -30317,7 +30317,7 @@ block_80031C68:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0xCu);
 #endif
-    { uint32_t _pgxa = cpu->gpr[3] + 19980; g_debug_last_store_pc = 0x80031C8Cu; psx_store_cycle_barrier(); cpu->write_half(cpu->gpr[3] + 19980, (uint16_t)cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[3] + 19980; g_debug_last_store_pc = 0x80031C8Cu; psx_store_cycle_barrier(); psx_mem_write_half(cpu, cpu->gpr[3] + 19980, (uint16_t)cpu->gpr[2]);
     PGXP_STORE(0xA4624E0Cu, _pgxa, cpu->gpr[2]); }  /* 0x80031C8C: 0xA4624E0C */
 #ifdef PSX_COSIM
     cosim_instr(0x80031C8Cu);
@@ -30355,7 +30355,7 @@ block_80031C68:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0xCu);
 #endif
-    { uint32_t _pgxa = cpu->gpr[3] + -568; g_debug_last_store_pc = 0x80031C98u; psx_store_cycle_barrier(); cpu->write_half(cpu->gpr[3] + -568, (uint16_t)cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[3] + -568; g_debug_last_store_pc = 0x80031C98u; psx_store_cycle_barrier(); psx_mem_write_half(cpu, cpu->gpr[3] + -568, (uint16_t)cpu->gpr[2]);
     PGXP_STORE(0xA462FDC8u, _pgxa, cpu->gpr[2]); }  /* 0x80031C98: 0xA462FDC8 */
 #ifdef PSX_COSIM
     cosim_instr(0x80031C98u);
@@ -30500,7 +30500,7 @@ block_80031A04:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x5u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[2] + 7; g_debug_last_store_pc = 0x80031A10u; psx_store_cycle_barrier(); cpu->write_byte(cpu->gpr[2] + 7, (uint8_t)cpu->gpr[0]);
+    { uint32_t _pgxa = cpu->gpr[2] + 7; g_debug_last_store_pc = 0x80031A10u; psx_store_cycle_barrier(); psx_mem_write_byte(cpu, cpu->gpr[2] + 7, (uint8_t)cpu->gpr[0]);
     PGXP_STORE(0xA0400007u, _pgxa, cpu->gpr[0]); }  /* 0x80031A10: 0xA0400007 */
 #ifdef PSX_COSIM
     cosim_instr(0x80031A10u);
@@ -30547,7 +30547,7 @@ block_80031A14:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x5u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[2] + 4; g_debug_last_store_pc = 0x80031A20u; psx_store_cycle_barrier(); cpu->write_byte(cpu->gpr[2] + 4, (uint8_t)cpu->gpr[0]);
+    { uint32_t _pgxa = cpu->gpr[2] + 4; g_debug_last_store_pc = 0x80031A20u; psx_store_cycle_barrier(); psx_mem_write_byte(cpu, cpu->gpr[2] + 4, (uint8_t)cpu->gpr[0]);
     PGXP_STORE(0xA0400004u, _pgxa, cpu->gpr[0]); }  /* 0x80031A20: 0xA0400004 */
 #ifdef PSX_COSIM
     cosim_instr(0x80031A20u);
@@ -30563,7 +30563,7 @@ block_80031A14:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0xCu);
 #endif
-    { uint32_t _pgxa = cpu->gpr[3] + 19980; g_debug_last_store_pc = 0x80031A28u; psx_store_cycle_barrier(); cpu->write_half(cpu->gpr[3] + 19980, (uint16_t)cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[3] + 19980; g_debug_last_store_pc = 0x80031A28u; psx_store_cycle_barrier(); psx_mem_write_half(cpu, cpu->gpr[3] + 19980, (uint16_t)cpu->gpr[2]);
     PGXP_STORE(0xA4624E0Cu, _pgxa, cpu->gpr[2]); }  /* 0x80031A28: 0xA4624E0C */
 #ifdef PSX_COSIM
     cosim_instr(0x80031A28u);
@@ -30594,7 +30594,7 @@ block_80031A14:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0xCu);
 #endif
-    { uint32_t _pgxa = cpu->gpr[3] + -10582; g_debug_last_store_pc = 0x80031A38u; psx_store_cycle_barrier(); cpu->write_half(cpu->gpr[3] + -10582, (uint16_t)cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[3] + -10582; g_debug_last_store_pc = 0x80031A38u; psx_store_cycle_barrier(); psx_mem_write_half(cpu, cpu->gpr[3] + -10582, (uint16_t)cpu->gpr[2]);
     PGXP_STORE(0xA462D6AAu, _pgxa, cpu->gpr[2]); }  /* 0x80031A38: 0xA462D6AA */
 #ifdef PSX_COSIM
     cosim_instr(0x80031A38u);
@@ -30661,7 +30661,7 @@ block_80031A3C:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0xCu);
 #endif
-    { uint32_t _pgxa = cpu->gpr[3] + 4; g_debug_last_store_pc = 0x80031A50u; psx_store_cycle_barrier(); cpu->write_byte(cpu->gpr[3] + 4, (uint8_t)cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[3] + 4; g_debug_last_store_pc = 0x80031A50u; psx_store_cycle_barrier(); psx_mem_write_byte(cpu, cpu->gpr[3] + 4, (uint8_t)cpu->gpr[2]);
     PGXP_STORE(0xA0620004u, _pgxa, cpu->gpr[2]); }  /* 0x80031A50: 0xA0620004 */
 #ifdef PSX_COSIM
     cosim_instr(0x80031A50u);
@@ -30703,7 +30703,7 @@ block_80031A3C:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0xCu);
 #endif
-    { uint32_t _pgxa = cpu->gpr[3] + 19980; g_debug_last_store_pc = 0x80031A60u; psx_store_cycle_barrier(); cpu->write_half(cpu->gpr[3] + 19980, (uint16_t)cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[3] + 19980; g_debug_last_store_pc = 0x80031A60u; psx_store_cycle_barrier(); psx_mem_write_half(cpu, cpu->gpr[3] + 19980, (uint16_t)cpu->gpr[2]);
     PGXP_STORE(0xA4624E0Cu, _pgxa, cpu->gpr[2]); }  /* 0x80031A60: 0xA4624E0C */
 #ifdef PSX_COSIM
     cosim_instr(0x80031A60u);
@@ -32080,7 +32080,7 @@ block_80031BD0:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x14u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[4] + 4; g_debug_last_store_pc = 0x80031BE4u; psx_store_cycle_barrier(); cpu->write_byte(cpu->gpr[4] + 4, (uint8_t)cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[4] + 4; g_debug_last_store_pc = 0x80031BE4u; psx_store_cycle_barrier(); psx_mem_write_byte(cpu, cpu->gpr[4] + 4, (uint8_t)cpu->gpr[2]);
     PGXP_STORE(0xA0820004u, _pgxa, cpu->gpr[2]); }  /* 0x80031BE4: 0xA0820004 */
 #ifdef PSX_COSIM
     cosim_instr(0x80031BE4u);
@@ -32359,7 +32359,7 @@ block_80031C24:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0xCu);
 #endif
-    { uint32_t _pgxa = cpu->gpr[3] + -10582; g_debug_last_store_pc = 0x80031C30u; psx_store_cycle_barrier(); cpu->write_half(cpu->gpr[3] + -10582, (uint16_t)cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[3] + -10582; g_debug_last_store_pc = 0x80031C30u; psx_store_cycle_barrier(); psx_mem_write_half(cpu, cpu->gpr[3] + -10582, (uint16_t)cpu->gpr[2]);
     PGXP_STORE(0xA462D6AAu, _pgxa, cpu->gpr[2]); }  /* 0x80031C30: 0xA462D6AA */
 #ifdef PSX_COSIM
     cosim_instr(0x80031C30u);
@@ -32448,7 +32448,7 @@ block_80031C44:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0xCu);
 #endif
-    { uint32_t _pgxa = cpu->gpr[3] + 19980; g_debug_last_store_pc = 0x80031C44u; psx_store_cycle_barrier(); cpu->write_half(cpu->gpr[3] + 19980, (uint16_t)cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[3] + 19980; g_debug_last_store_pc = 0x80031C44u; psx_store_cycle_barrier(); psx_mem_write_half(cpu, cpu->gpr[3] + 19980, (uint16_t)cpu->gpr[2]);
     PGXP_STORE(0xA4624E0Cu, _pgxa, cpu->gpr[2]); }  /* 0x80031C44: 0xA4624E0C */
 #ifdef PSX_COSIM
     cosim_instr(0x80031C44u);
@@ -32535,7 +32535,7 @@ block_80031C5C:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0xCu);
 #endif
-    { uint32_t _pgxa = cpu->gpr[3] + 19980; g_debug_last_store_pc = 0x80031C64u; psx_store_cycle_barrier(); cpu->write_half(cpu->gpr[3] + 19980, (uint16_t)cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[3] + 19980; g_debug_last_store_pc = 0x80031C64u; psx_store_cycle_barrier(); psx_mem_write_half(cpu, cpu->gpr[3] + 19980, (uint16_t)cpu->gpr[2]);
     PGXP_STORE(0xA4624E0Cu, _pgxa, cpu->gpr[2]); }  /* 0x80031C64: 0xA4624E0C */
 #ifdef PSX_COSIM
     cosim_instr(0x80031C64u);
@@ -32629,7 +32629,7 @@ block_80031C68:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x14u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[4] + 4; g_debug_last_store_pc = 0x80031C84u; psx_store_cycle_barrier(); cpu->write_byte(cpu->gpr[4] + 4, (uint8_t)cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[4] + 4; g_debug_last_store_pc = 0x80031C84u; psx_store_cycle_barrier(); psx_mem_write_byte(cpu, cpu->gpr[4] + 4, (uint8_t)cpu->gpr[2]);
     PGXP_STORE(0xA0820004u, _pgxa, cpu->gpr[2]); }  /* 0x80031C84: 0xA0820004 */
 #ifdef PSX_COSIM
     cosim_instr(0x80031C84u);
@@ -32645,7 +32645,7 @@ block_80031C68:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0xCu);
 #endif
-    { uint32_t _pgxa = cpu->gpr[3] + 19980; g_debug_last_store_pc = 0x80031C8Cu; psx_store_cycle_barrier(); cpu->write_half(cpu->gpr[3] + 19980, (uint16_t)cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[3] + 19980; g_debug_last_store_pc = 0x80031C8Cu; psx_store_cycle_barrier(); psx_mem_write_half(cpu, cpu->gpr[3] + 19980, (uint16_t)cpu->gpr[2]);
     PGXP_STORE(0xA4624E0Cu, _pgxa, cpu->gpr[2]); }  /* 0x80031C8C: 0xA4624E0C */
 #ifdef PSX_COSIM
     cosim_instr(0x80031C8Cu);
@@ -32683,7 +32683,7 @@ block_80031C68:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0xCu);
 #endif
-    { uint32_t _pgxa = cpu->gpr[3] + -568; g_debug_last_store_pc = 0x80031C98u; psx_store_cycle_barrier(); cpu->write_half(cpu->gpr[3] + -568, (uint16_t)cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[3] + -568; g_debug_last_store_pc = 0x80031C98u; psx_store_cycle_barrier(); psx_mem_write_half(cpu, cpu->gpr[3] + -568, (uint16_t)cpu->gpr[2]);
     PGXP_STORE(0xA462FDC8u, _pgxa, cpu->gpr[2]); }  /* 0x80031C98: 0xA462FDC8 */
 #ifdef PSX_COSIM
     cosim_instr(0x80031C98u);
@@ -32903,7 +32903,7 @@ block_80031CAC:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0xA0000000u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 56; g_debug_last_store_pc = 0x80031CB8u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 56, cpu->gpr[31]);
+    { uint32_t _pgxa = cpu->gpr[29] + 56; g_debug_last_store_pc = 0x80031CB8u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 56, cpu->gpr[31]);
     PGXP_STORE(0xAFBF0038u, _pgxa, cpu->gpr[31]); }  /* 0x80031CB8: 0xAFBF0038 */
 #ifdef PSX_COSIM
     cosim_instr(0x80031CB8u);
@@ -32911,7 +32911,7 @@ block_80031CAC:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20080000u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 52; g_debug_last_store_pc = 0x80031CBCu; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 52, cpu->gpr[19]);
+    { uint32_t _pgxa = cpu->gpr[29] + 52; g_debug_last_store_pc = 0x80031CBCu; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 52, cpu->gpr[19]);
     PGXP_STORE(0xAFB30034u, _pgxa, cpu->gpr[19]); }  /* 0x80031CBC: 0xAFB30034 */
 #ifdef PSX_COSIM
     cosim_instr(0x80031CBCu);
@@ -32922,7 +32922,7 @@ block_80031CAC:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20040000u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 48; g_debug_last_store_pc = 0x80031CC0u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 48, cpu->gpr[18]);
+    { uint32_t _pgxa = cpu->gpr[29] + 48; g_debug_last_store_pc = 0x80031CC0u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 48, cpu->gpr[18]);
     PGXP_STORE(0xAFB20030u, _pgxa, cpu->gpr[18]); }  /* 0x80031CC0: 0xAFB20030 */
 #ifdef PSX_COSIM
     cosim_instr(0x80031CC0u);
@@ -32930,7 +32930,7 @@ block_80031CAC:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20020000u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 44; g_debug_last_store_pc = 0x80031CC4u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 44, cpu->gpr[17]);
+    { uint32_t _pgxa = cpu->gpr[29] + 44; g_debug_last_store_pc = 0x80031CC4u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 44, cpu->gpr[17]);
     PGXP_STORE(0xAFB1002Cu, _pgxa, cpu->gpr[17]); }  /* 0x80031CC4: 0xAFB1002C */
 #ifdef PSX_COSIM
     cosim_instr(0x80031CC4u);
@@ -32938,7 +32938,7 @@ block_80031CAC:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20010000u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 40; g_debug_last_store_pc = 0x80031CC8u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 40, cpu->gpr[16]);
+    { uint32_t _pgxa = cpu->gpr[29] + 40; g_debug_last_store_pc = 0x80031CC8u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 40, cpu->gpr[16]);
     PGXP_STORE(0xAFB00028u, _pgxa, cpu->gpr[16]); }  /* 0x80031CC8: 0xAFB00028 */
 #ifdef PSX_COSIM
     cosim_instr(0x80031CC8u);
@@ -33184,7 +33184,7 @@ block_80031D00:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x5u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[2] + 31; g_debug_last_store_pc = 0x80031D0Cu; psx_store_cycle_barrier(); cpu->write_byte(cpu->gpr[2] + 31, (uint8_t)cpu->gpr[0]);
+    { uint32_t _pgxa = cpu->gpr[2] + 31; g_debug_last_store_pc = 0x80031D0Cu; psx_store_cycle_barrier(); psx_mem_write_byte(cpu, cpu->gpr[2] + 31, (uint8_t)cpu->gpr[0]);
     PGXP_STORE(0xA040001Fu, _pgxa, cpu->gpr[0]); }  /* 0x80031D0C: 0xA040001F */
 #ifdef PSX_COSIM
     cosim_instr(0x80031D0Cu);
@@ -33208,7 +33208,7 @@ block_80031D00:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x14u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[4] + 30; g_debug_last_store_pc = 0x80031D18u; psx_store_cycle_barrier(); cpu->write_byte(cpu->gpr[4] + 30, (uint8_t)cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[4] + 30; g_debug_last_store_pc = 0x80031D18u; psx_store_cycle_barrier(); psx_mem_write_byte(cpu, cpu->gpr[4] + 30, (uint8_t)cpu->gpr[2]);
     PGXP_STORE(0xA082001Eu, _pgxa, cpu->gpr[2]); }  /* 0x80031D18: 0xA082001E */
 #ifdef PSX_COSIM
     cosim_instr(0x80031D18u);
@@ -33232,7 +33232,7 @@ block_80031D00:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x14u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[2] + 29; g_debug_last_store_pc = 0x80031D24u; psx_store_cycle_barrier(); cpu->write_byte(cpu->gpr[2] + 29, (uint8_t)cpu->gpr[4]);
+    { uint32_t _pgxa = cpu->gpr[2] + 29; g_debug_last_store_pc = 0x80031D24u; psx_store_cycle_barrier(); psx_mem_write_byte(cpu, cpu->gpr[2] + 29, (uint8_t)cpu->gpr[4]);
     PGXP_STORE(0xA044001Du, _pgxa, cpu->gpr[4]); }  /* 0x80031D24: 0xA044001D */
 #ifdef PSX_COSIM
     cosim_instr(0x80031D24u);
@@ -33252,7 +33252,7 @@ block_80031D00:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x14u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[2] + 28; g_debug_last_store_pc = 0x80031D30u; psx_store_cycle_barrier(); cpu->write_byte(cpu->gpr[2] + 28, (uint8_t)cpu->gpr[4]);
+    { uint32_t _pgxa = cpu->gpr[2] + 28; g_debug_last_store_pc = 0x80031D30u; psx_store_cycle_barrier(); psx_mem_write_byte(cpu, cpu->gpr[2] + 28, (uint8_t)cpu->gpr[4]);
     PGXP_STORE(0xA044001Cu, _pgxa, cpu->gpr[4]); }  /* 0x80031D30: 0xA044001C */
 #ifdef PSX_COSIM
     cosim_instr(0x80031D30u);
@@ -33346,7 +33346,7 @@ block_80031D34:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20000004u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 16; g_debug_last_store_pc = 0x80031D48u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 16, cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[29] + 16; g_debug_last_store_pc = 0x80031D48u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 16, cpu->gpr[2]);
     PGXP_STORE(0xAFA20010u, _pgxa, cpu->gpr[2]); }  /* 0x80031D48: 0xAFA20010 */
 #ifdef PSX_COSIM
     cosim_instr(0x80031D48u);
@@ -33354,7 +33354,7 @@ block_80031D34:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20000001u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 20; g_debug_last_store_pc = 0x80031D4Cu; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 20, cpu->gpr[0]);
+    { uint32_t _pgxa = cpu->gpr[29] + 20; g_debug_last_store_pc = 0x80031D4Cu; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 20, cpu->gpr[0]);
     PGXP_STORE(0xAFA00014u, _pgxa, cpu->gpr[0]); }  /* 0x80031D4C: 0xAFA00014 */
 #ifdef PSX_COSIM
     cosim_instr(0x80031D4Cu);
@@ -33370,7 +33370,7 @@ block_80031D34:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20000001u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 24; g_debug_last_store_pc = 0x80031D54u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 24, cpu->gpr[0]);
+    { uint32_t _pgxa = cpu->gpr[29] + 24; g_debug_last_store_pc = 0x80031D54u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 24, cpu->gpr[0]);
     PGXP_STORE(0xAFA00018u, _pgxa, cpu->gpr[0]); }  /* 0x80031D54: 0xAFA00018 */
 #ifdef PSX_COSIM
     cosim_instr(0x80031D54u);
@@ -33425,7 +33425,7 @@ block_80031D58:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0xCu);
 #endif
-    { uint32_t _pgxa = cpu->gpr[3] + 30; g_debug_last_store_pc = 0x80031D68u; psx_store_cycle_barrier(); cpu->write_byte(cpu->gpr[3] + 30, (uint8_t)cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[3] + 30; g_debug_last_store_pc = 0x80031D68u; psx_store_cycle_barrier(); psx_mem_write_byte(cpu, cpu->gpr[3] + 30, (uint8_t)cpu->gpr[2]);
     PGXP_STORE(0xA062001Eu, _pgxa, cpu->gpr[2]); }  /* 0x80031D68: 0xA062001E */
 #ifdef PSX_COSIM
     cosim_instr(0x80031D68u);
@@ -33547,7 +33547,7 @@ block_80031D7C:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0xCu);
 #endif
-    { uint32_t _pgxa = cpu->gpr[3] + 30; g_debug_last_store_pc = 0x80031D88u; psx_store_cycle_barrier(); cpu->write_byte(cpu->gpr[3] + 30, (uint8_t)cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[3] + 30; g_debug_last_store_pc = 0x80031D88u; psx_store_cycle_barrier(); psx_mem_write_byte(cpu, cpu->gpr[3] + 30, (uint8_t)cpu->gpr[2]);
     PGXP_STORE(0xA062001Eu, _pgxa, cpu->gpr[2]); }  /* 0x80031D88: 0xA062001E */
 #ifdef PSX_COSIM
     cosim_instr(0x80031D88u);
@@ -33612,7 +33612,7 @@ block_80031D8C:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20000004u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 16; g_debug_last_store_pc = 0x80031D98u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 16, cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[29] + 16; g_debug_last_store_pc = 0x80031D98u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 16, cpu->gpr[2]);
     PGXP_STORE(0xAFA20010u, _pgxa, cpu->gpr[2]); }  /* 0x80031D98: 0xAFA20010 */
 #ifdef PSX_COSIM
     cosim_instr(0x80031D98u);
@@ -33674,7 +33674,7 @@ block_80031D8C:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20000004u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 20; g_debug_last_store_pc = 0x80031DB0u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 20, cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[29] + 20; g_debug_last_store_pc = 0x80031DB0u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 20, cpu->gpr[2]);
     PGXP_STORE(0xAFA20014u, _pgxa, cpu->gpr[2]); }  /* 0x80031DB0: 0xAFA20014 */
 #ifdef PSX_COSIM
     cosim_instr(0x80031DB0u);
@@ -33682,7 +33682,7 @@ block_80031D8C:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20010000u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 24; g_debug_last_store_pc = 0x80031DB4u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 24, cpu->gpr[16]);
+    { uint32_t _pgxa = cpu->gpr[29] + 24; g_debug_last_store_pc = 0x80031DB4u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 24, cpu->gpr[16]);
     PGXP_STORE(0xAFB00018u, _pgxa, cpu->gpr[16]); }  /* 0x80031DB4: 0xAFB00018 */
 #ifdef PSX_COSIM
     cosim_instr(0x80031DB4u);
@@ -33690,7 +33690,7 @@ block_80031D8C:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20010000u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 28; g_debug_last_store_pc = 0x80031DB8u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 28, cpu->gpr[16]);
+    { uint32_t _pgxa = cpu->gpr[29] + 28; g_debug_last_store_pc = 0x80031DB8u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 28, cpu->gpr[16]);
     PGXP_STORE(0xAFB0001Cu, _pgxa, cpu->gpr[16]); }  /* 0x80031DB8: 0xAFB0001C */
 #ifdef PSX_COSIM
     cosim_instr(0x80031DB8u);
@@ -33698,7 +33698,7 @@ block_80031D8C:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20010000u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 32; g_debug_last_store_pc = 0x80031DBCu; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 32, cpu->gpr[16]);
+    { uint32_t _pgxa = cpu->gpr[29] + 32; g_debug_last_store_pc = 0x80031DBCu; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 32, cpu->gpr[16]);
     PGXP_STORE(0xAFB00020u, _pgxa, cpu->gpr[16]); }  /* 0x80031DBC: 0xAFB00020 */
 #ifdef PSX_COSIM
     cosim_instr(0x80031DBCu);
@@ -33815,7 +33815,7 @@ block_80031DE0:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x40004u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[18]; g_debug_last_store_pc = 0x80031DE8u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[18], cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[18]; g_debug_last_store_pc = 0x80031DE8u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[18], cpu->gpr[2]);
     PGXP_STORE(0xAE420000u, _pgxa, cpu->gpr[2]); }  /* 0x80031DE8: 0xAE420000 */
 #ifdef PSX_COSIM
     cosim_instr(0x80031DE8u);
@@ -33874,7 +33874,7 @@ block_80031DEC:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x14u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[4] + 30; g_debug_last_store_pc = 0x80031DF8u; psx_store_cycle_barrier(); cpu->write_byte(cpu->gpr[4] + 30, (uint8_t)cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[4] + 30; g_debug_last_store_pc = 0x80031DF8u; psx_store_cycle_barrier(); psx_mem_write_byte(cpu, cpu->gpr[4] + 30, (uint8_t)cpu->gpr[2]);
     PGXP_STORE(0xA082001Eu, _pgxa, cpu->gpr[2]); }  /* 0x80031DF8: 0xA082001E */
 #ifdef PSX_COSIM
     cosim_instr(0x80031DF8u);
@@ -33897,7 +33897,7 @@ block_80031DEC:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x5u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[2] + 31; g_debug_last_store_pc = 0x80031E04u; psx_store_cycle_barrier(); cpu->write_byte(cpu->gpr[2] + 31, (uint8_t)cpu->gpr[0]);
+    { uint32_t _pgxa = cpu->gpr[2] + 31; g_debug_last_store_pc = 0x80031E04u; psx_store_cycle_barrier(); psx_mem_write_byte(cpu, cpu->gpr[2] + 31, (uint8_t)cpu->gpr[0]);
     PGXP_STORE(0xA040001Fu, _pgxa, cpu->gpr[0]); }  /* 0x80031E04: 0xA040001F */
 #ifdef PSX_COSIM
     cosim_instr(0x80031E04u);
@@ -34014,7 +34014,7 @@ block_80031DEC:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0xCu);
 #endif
-    { uint32_t _pgxa = cpu->gpr[2] + 2; g_debug_last_store_pc = 0x80031E34u; psx_store_cycle_barrier(); cpu->write_half(cpu->gpr[2] + 2, (uint16_t)cpu->gpr[3]);
+    { uint32_t _pgxa = cpu->gpr[2] + 2; g_debug_last_store_pc = 0x80031E34u; psx_store_cycle_barrier(); psx_mem_write_half(cpu, cpu->gpr[2] + 2, (uint16_t)cpu->gpr[3]);
     PGXP_STORE(0xA4430002u, _pgxa, cpu->gpr[3]); }  /* 0x80031E34: 0xA4430002 */
 #ifdef PSX_COSIM
     cosim_instr(0x80031E34u);
@@ -34096,7 +34096,7 @@ block_80031E38:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0xCu);
 #endif
-    { uint32_t _pgxa = cpu->gpr[3] + 31; g_debug_last_store_pc = 0x80031E50u; psx_store_cycle_barrier(); cpu->write_byte(cpu->gpr[3] + 31, (uint8_t)cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[3] + 31; g_debug_last_store_pc = 0x80031E50u; psx_store_cycle_barrier(); psx_mem_write_byte(cpu, cpu->gpr[3] + 31, (uint8_t)cpu->gpr[2]);
     PGXP_STORE(0xA062001Fu, _pgxa, cpu->gpr[2]); }  /* 0x80031E50: 0xA062001F */
 #ifdef PSX_COSIM
     cosim_instr(0x80031E50u);
@@ -34304,7 +34304,7 @@ block_80031E7C:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20000004u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 16; g_debug_last_store_pc = 0x80031E8Cu; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 16, cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[29] + 16; g_debug_last_store_pc = 0x80031E8Cu; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 16, cpu->gpr[2]);
     PGXP_STORE(0xAFA20010u, _pgxa, cpu->gpr[2]); }  /* 0x80031E8C: 0xAFA20010 */
 #ifdef PSX_COSIM
     cosim_instr(0x80031E8Cu);
@@ -34336,7 +34336,7 @@ block_80031E7C:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20000004u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 20; g_debug_last_store_pc = 0x80031E9Cu; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 20, cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[29] + 20; g_debug_last_store_pc = 0x80031E9Cu; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 20, cpu->gpr[2]);
     PGXP_STORE(0xAFA20014u, _pgxa, cpu->gpr[2]); }  /* 0x80031E9C: 0xAFA20014 */
 #ifdef PSX_COSIM
     cosim_instr(0x80031E9Cu);
@@ -34448,7 +34448,7 @@ block_80031EB0:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20000004u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 16; g_debug_last_store_pc = 0x80031EB8u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 16, cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[29] + 16; g_debug_last_store_pc = 0x80031EB8u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 16, cpu->gpr[2]);
     PGXP_STORE(0xAFA20010u, _pgxa, cpu->gpr[2]); }  /* 0x80031EB8: 0xAFA20010 */
 #ifdef PSX_COSIM
     cosim_instr(0x80031EB8u);
@@ -34467,7 +34467,7 @@ block_80031EB0:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20000004u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 20; g_debug_last_store_pc = 0x80031EC0u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 20, cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[29] + 20; g_debug_last_store_pc = 0x80031EC0u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 20, cpu->gpr[2]);
     PGXP_STORE(0xAFA20014u, _pgxa, cpu->gpr[2]); }  /* 0x80031EC0: 0xAFA20014 */
 #ifdef PSX_COSIM
     cosim_instr(0x80031EC0u);
@@ -34499,7 +34499,7 @@ block_80031EB0:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20000004u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 24; g_debug_last_store_pc = 0x80031ED0u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 24, cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[29] + 24; g_debug_last_store_pc = 0x80031ED0u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 24, cpu->gpr[2]);
     PGXP_STORE(0xAFA20018u, _pgxa, cpu->gpr[2]); }  /* 0x80031ED0: 0xAFA20018 */
 #ifdef PSX_COSIM
     cosim_instr(0x80031ED0u);
@@ -34507,7 +34507,7 @@ block_80031EB0:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20000004u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 28; g_debug_last_store_pc = 0x80031ED4u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 28, cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[29] + 28; g_debug_last_store_pc = 0x80031ED4u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 28, cpu->gpr[2]);
     PGXP_STORE(0xAFA2001Cu, _pgxa, cpu->gpr[2]); }  /* 0x80031ED4: 0xAFA2001C */
 #ifdef PSX_COSIM
     cosim_instr(0x80031ED4u);
@@ -34515,7 +34515,7 @@ block_80031EB0:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20000004u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 32; g_debug_last_store_pc = 0x80031ED8u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 32, cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[29] + 32; g_debug_last_store_pc = 0x80031ED8u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 32, cpu->gpr[2]);
     PGXP_STORE(0xAFA20020u, _pgxa, cpu->gpr[2]); }  /* 0x80031ED8: 0xAFA20020 */
 #ifdef PSX_COSIM
     cosim_instr(0x80031ED8u);
@@ -34558,7 +34558,7 @@ block_80031EE4:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20004u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[17]; g_debug_last_store_pc = 0x80031EE4u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[17], cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[17]; g_debug_last_store_pc = 0x80031EE4u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[17], cpu->gpr[2]);
     PGXP_STORE(0xAE220000u, _pgxa, cpu->gpr[2]); }  /* 0x80031EE4: 0xAE220000 */
 #ifdef PSX_COSIM
     cosim_instr(0x80031EE4u);
@@ -34641,7 +34641,7 @@ block_80031EF4:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0xCu);
 #endif
-    { uint32_t _pgxa = cpu->gpr[3] + 30; g_debug_last_store_pc = 0x80031F00u; psx_store_cycle_barrier(); cpu->write_byte(cpu->gpr[3] + 30, (uint8_t)cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[3] + 30; g_debug_last_store_pc = 0x80031F00u; psx_store_cycle_barrier(); psx_mem_write_byte(cpu, cpu->gpr[3] + 30, (uint8_t)cpu->gpr[2]);
     PGXP_STORE(0xA062001Eu, _pgxa, cpu->gpr[2]); }  /* 0x80031F00: 0xA062001E */
 #ifdef PSX_COSIM
     cosim_instr(0x80031F00u);
@@ -34658,7 +34658,7 @@ block_80031EF4:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x5u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[2] + 31; g_debug_last_store_pc = 0x80031F0Cu; psx_store_cycle_barrier(); cpu->write_byte(cpu->gpr[2] + 31, (uint8_t)cpu->gpr[0]);
+    { uint32_t _pgxa = cpu->gpr[2] + 31; g_debug_last_store_pc = 0x80031F0Cu; psx_store_cycle_barrier(); psx_mem_write_byte(cpu, cpu->gpr[2] + 31, (uint8_t)cpu->gpr[0]);
     PGXP_STORE(0xA040001Fu, _pgxa, cpu->gpr[0]); }  /* 0x80031F0C: 0xA040001F */
 #ifdef PSX_COSIM
     cosim_instr(0x80031F0Cu);
@@ -34720,7 +34720,7 @@ block_80031F10:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0xCu);
 #endif
-    { uint32_t _pgxa = cpu->gpr[3] + 31; g_debug_last_store_pc = 0x80031F24u; psx_store_cycle_barrier(); cpu->write_byte(cpu->gpr[3] + 31, (uint8_t)cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[3] + 31; g_debug_last_store_pc = 0x80031F24u; psx_store_cycle_barrier(); psx_mem_write_byte(cpu, cpu->gpr[3] + 31, (uint8_t)cpu->gpr[2]);
     PGXP_STORE(0xA062001Fu, _pgxa, cpu->gpr[2]); }  /* 0x80031F24: 0xA062001F */
 #ifdef PSX_COSIM
     cosim_instr(0x80031F24u);
@@ -35086,7 +35086,7 @@ block_80031F74:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20040000u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 16; g_debug_last_store_pc = 0x80031F94u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 16, cpu->gpr[18]);
+    { uint32_t _pgxa = cpu->gpr[29] + 16; g_debug_last_store_pc = 0x80031F94u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 16, cpu->gpr[18]);
     PGXP_STORE(0xAFB20010u, _pgxa, cpu->gpr[18]); }  /* 0x80031F94: 0xAFB20010 */
 #ifdef PSX_COSIM
     cosim_instr(0x80031F94u);
@@ -35094,7 +35094,7 @@ block_80031F74:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20000004u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 20; g_debug_last_store_pc = 0x80031F98u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 20, cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[29] + 20; g_debug_last_store_pc = 0x80031F98u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 20, cpu->gpr[2]);
     PGXP_STORE(0xAFA20014u, _pgxa, cpu->gpr[2]); }  /* 0x80031F98: 0xAFA20014 */
 #ifdef PSX_COSIM
     cosim_instr(0x80031F98u);
@@ -35240,7 +35240,7 @@ block_80031FA4:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20000004u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 16; g_debug_last_store_pc = 0x80031FC8u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 16, cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[29] + 16; g_debug_last_store_pc = 0x80031FC8u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 16, cpu->gpr[2]);
     PGXP_STORE(0xAFA20010u, _pgxa, cpu->gpr[2]); }  /* 0x80031FC8: 0xAFA20010 */
 #ifdef PSX_COSIM
     cosim_instr(0x80031FC8u);
@@ -35248,7 +35248,7 @@ block_80031FA4:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20080000u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 20; g_debug_last_store_pc = 0x80031FCCu; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 20, cpu->gpr[19]);
+    { uint32_t _pgxa = cpu->gpr[29] + 20; g_debug_last_store_pc = 0x80031FCCu; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 20, cpu->gpr[19]);
     PGXP_STORE(0xAFB30014u, _pgxa, cpu->gpr[19]); }  /* 0x80031FCC: 0xAFB30014 */
 #ifdef PSX_COSIM
     cosim_instr(0x80031FCCu);
@@ -35342,7 +35342,7 @@ block_80031FD8:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20000004u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 16; g_debug_last_store_pc = 0x80031FECu; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 16, cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[29] + 16; g_debug_last_store_pc = 0x80031FECu; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 16, cpu->gpr[2]);
     PGXP_STORE(0xAFA20010u, _pgxa, cpu->gpr[2]); }  /* 0x80031FEC: 0xAFA20010 */
 #ifdef PSX_COSIM
     cosim_instr(0x80031FECu);
@@ -35361,7 +35361,7 @@ block_80031FD8:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20000004u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 20; g_debug_last_store_pc = 0x80031FF4u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 20, cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[29] + 20; g_debug_last_store_pc = 0x80031FF4u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 20, cpu->gpr[2]);
     PGXP_STORE(0xAFA20014u, _pgxa, cpu->gpr[2]); }  /* 0x80031FF4: 0xAFA20014 */
 #ifdef PSX_COSIM
     cosim_instr(0x80031FF4u);
@@ -35377,7 +35377,7 @@ block_80031FD8:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20000004u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 24; g_debug_last_store_pc = 0x80031FFCu; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 24, cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[29] + 24; g_debug_last_store_pc = 0x80031FFCu; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 24, cpu->gpr[2]);
     PGXP_STORE(0xAFA20018u, _pgxa, cpu->gpr[2]); }  /* 0x80031FFC: 0xAFA20018 */
 #ifdef PSX_COSIM
     cosim_instr(0x80031FFCu);
@@ -35388,7 +35388,7 @@ block_80031FD8:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20000004u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 28; g_debug_last_store_pc = 0x80032000u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 28, cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[29] + 28; g_debug_last_store_pc = 0x80032000u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 28, cpu->gpr[2]);
     PGXP_STORE(0xAFA2001Cu, _pgxa, cpu->gpr[2]); }  /* 0x80032000: 0xAFA2001C */
 #ifdef PSX_COSIM
     cosim_instr(0x80032000u);
@@ -35396,7 +35396,7 @@ block_80031FD8:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20000004u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 32; g_debug_last_store_pc = 0x80032004u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 32, cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[29] + 32; g_debug_last_store_pc = 0x80032004u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 32, cpu->gpr[2]);
     PGXP_STORE(0xAFA20020u, _pgxa, cpu->gpr[2]); }  /* 0x80032004: 0xAFA20020 */
 #ifdef PSX_COSIM
     cosim_instr(0x80032004u);
@@ -35436,7 +35436,7 @@ block_80032010:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20004u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[17]; g_debug_last_store_pc = 0x80032010u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[17], cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[17]; g_debug_last_store_pc = 0x80032010u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[17], cpu->gpr[2]);
     PGXP_STORE(0xAE220000u, _pgxa, cpu->gpr[2]); }  /* 0x80032010: 0xAE220000 */
 #ifdef PSX_COSIM
     cosim_instr(0x80032010u);
@@ -35504,7 +35504,7 @@ block_80032020:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x9u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[3] + 31; g_debug_last_store_pc = 0x80032028u; psx_store_cycle_barrier(); cpu->write_byte(cpu->gpr[3] + 31, (uint8_t)cpu->gpr[0]);
+    { uint32_t _pgxa = cpu->gpr[3] + 31; g_debug_last_store_pc = 0x80032028u; psx_store_cycle_barrier(); psx_mem_write_byte(cpu, cpu->gpr[3] + 31, (uint8_t)cpu->gpr[0]);
     PGXP_STORE(0xA060001Fu, _pgxa, cpu->gpr[0]); }  /* 0x80032028: 0xA060001F */
 #ifdef PSX_COSIM
     cosim_instr(0x80032028u);
@@ -35524,7 +35524,7 @@ block_80032020:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x80004u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[2] + 30; g_debug_last_store_pc = 0x80032034u; psx_store_cycle_barrier(); cpu->write_byte(cpu->gpr[2] + 30, (uint8_t)cpu->gpr[19]);
+    { uint32_t _pgxa = cpu->gpr[2] + 30; g_debug_last_store_pc = 0x80032034u; psx_store_cycle_barrier(); psx_mem_write_byte(cpu, cpu->gpr[2] + 30, (uint8_t)cpu->gpr[19]);
     PGXP_STORE(0xA053001Eu, _pgxa, cpu->gpr[19]); }  /* 0x80032034: 0xA053001E */
 #ifdef PSX_COSIM
     cosim_instr(0x80032034u);
@@ -35602,7 +35602,7 @@ block_80032038:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0xCu);
 #endif
-    { uint32_t _pgxa = cpu->gpr[3] + 31; g_debug_last_store_pc = 0x80032050u; psx_store_cycle_barrier(); cpu->write_byte(cpu->gpr[3] + 31, (uint8_t)cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[3] + 31; g_debug_last_store_pc = 0x80032050u; psx_store_cycle_barrier(); psx_mem_write_byte(cpu, cpu->gpr[3] + 31, (uint8_t)cpu->gpr[2]);
     PGXP_STORE(0xA062001Fu, _pgxa, cpu->gpr[2]); }  /* 0x80032050: 0xA062001F */
 #ifdef PSX_COSIM
     cosim_instr(0x80032050u);
@@ -35740,7 +35740,7 @@ block_80032070:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20000004u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 16; g_debug_last_store_pc = 0x8003207Cu; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 16, cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[29] + 16; g_debug_last_store_pc = 0x8003207Cu; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 16, cpu->gpr[2]);
     PGXP_STORE(0xAFA20010u, _pgxa, cpu->gpr[2]); }  /* 0x8003207C: 0xAFA20010 */
 #ifdef PSX_COSIM
     cosim_instr(0x8003207Cu);
@@ -35772,7 +35772,7 @@ block_80032070:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20000004u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 20; g_debug_last_store_pc = 0x8003208Cu; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 20, cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[29] + 20; g_debug_last_store_pc = 0x8003208Cu; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 20, cpu->gpr[2]);
     PGXP_STORE(0xAFA20014u, _pgxa, cpu->gpr[2]); }  /* 0x8003208C: 0xAFA20014 */
 #ifdef PSX_COSIM
     cosim_instr(0x8003208Cu);
@@ -35876,7 +35876,7 @@ block_8003209C:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20000004u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 16; g_debug_last_store_pc = 0x800320A8u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 16, cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[29] + 16; g_debug_last_store_pc = 0x800320A8u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 16, cpu->gpr[2]);
     PGXP_STORE(0xAFA20010u, _pgxa, cpu->gpr[2]); }  /* 0x800320A8: 0xAFA20010 */
 #ifdef PSX_COSIM
     cosim_instr(0x800320A8u);
@@ -35895,7 +35895,7 @@ block_8003209C:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20000004u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 20; g_debug_last_store_pc = 0x800320B0u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 20, cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[29] + 20; g_debug_last_store_pc = 0x800320B0u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 20, cpu->gpr[2]);
     PGXP_STORE(0xAFA20014u, _pgxa, cpu->gpr[2]); }  /* 0x800320B0: 0xAFA20014 */
 #ifdef PSX_COSIM
     cosim_instr(0x800320B0u);
@@ -35927,7 +35927,7 @@ block_8003209C:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20000004u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 24; g_debug_last_store_pc = 0x800320C0u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 24, cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[29] + 24; g_debug_last_store_pc = 0x800320C0u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 24, cpu->gpr[2]);
     PGXP_STORE(0xAFA20018u, _pgxa, cpu->gpr[2]); }  /* 0x800320C0: 0xAFA20018 */
 #ifdef PSX_COSIM
     cosim_instr(0x800320C0u);
@@ -35935,7 +35935,7 @@ block_8003209C:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20000004u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 28; g_debug_last_store_pc = 0x800320C4u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 28, cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[29] + 28; g_debug_last_store_pc = 0x800320C4u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 28, cpu->gpr[2]);
     PGXP_STORE(0xAFA2001Cu, _pgxa, cpu->gpr[2]); }  /* 0x800320C4: 0xAFA2001C */
 #ifdef PSX_COSIM
     cosim_instr(0x800320C4u);
@@ -35943,7 +35943,7 @@ block_8003209C:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20000004u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 32; g_debug_last_store_pc = 0x800320C8u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 32, cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[29] + 32; g_debug_last_store_pc = 0x800320C8u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 32, cpu->gpr[2]);
     PGXP_STORE(0xAFA20020u, _pgxa, cpu->gpr[2]); }  /* 0x800320C8: 0xAFA20020 */
 #ifdef PSX_COSIM
     cosim_instr(0x800320C8u);
@@ -35986,7 +35986,7 @@ block_800320D4:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x10004u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[16]; g_debug_last_store_pc = 0x800320D4u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[16], cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[16]; g_debug_last_store_pc = 0x800320D4u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[16], cpu->gpr[2]);
     PGXP_STORE(0xAE020000u, _pgxa, cpu->gpr[2]); }  /* 0x800320D4: 0xAE020000 */
 #ifdef PSX_COSIM
     cosim_instr(0x800320D4u);
@@ -36143,7 +36143,7 @@ block_80031D00:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x5u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[2] + 31; g_debug_last_store_pc = 0x80031D0Cu; psx_store_cycle_barrier(); cpu->write_byte(cpu->gpr[2] + 31, (uint8_t)cpu->gpr[0]);
+    { uint32_t _pgxa = cpu->gpr[2] + 31; g_debug_last_store_pc = 0x80031D0Cu; psx_store_cycle_barrier(); psx_mem_write_byte(cpu, cpu->gpr[2] + 31, (uint8_t)cpu->gpr[0]);
     PGXP_STORE(0xA040001Fu, _pgxa, cpu->gpr[0]); }  /* 0x80031D0C: 0xA040001F */
 #ifdef PSX_COSIM
     cosim_instr(0x80031D0Cu);
@@ -36167,7 +36167,7 @@ block_80031D00:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x14u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[4] + 30; g_debug_last_store_pc = 0x80031D18u; psx_store_cycle_barrier(); cpu->write_byte(cpu->gpr[4] + 30, (uint8_t)cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[4] + 30; g_debug_last_store_pc = 0x80031D18u; psx_store_cycle_barrier(); psx_mem_write_byte(cpu, cpu->gpr[4] + 30, (uint8_t)cpu->gpr[2]);
     PGXP_STORE(0xA082001Eu, _pgxa, cpu->gpr[2]); }  /* 0x80031D18: 0xA082001E */
 #ifdef PSX_COSIM
     cosim_instr(0x80031D18u);
@@ -36191,7 +36191,7 @@ block_80031D00:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x14u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[2] + 29; g_debug_last_store_pc = 0x80031D24u; psx_store_cycle_barrier(); cpu->write_byte(cpu->gpr[2] + 29, (uint8_t)cpu->gpr[4]);
+    { uint32_t _pgxa = cpu->gpr[2] + 29; g_debug_last_store_pc = 0x80031D24u; psx_store_cycle_barrier(); psx_mem_write_byte(cpu, cpu->gpr[2] + 29, (uint8_t)cpu->gpr[4]);
     PGXP_STORE(0xA044001Du, _pgxa, cpu->gpr[4]); }  /* 0x80031D24: 0xA044001D */
 #ifdef PSX_COSIM
     cosim_instr(0x80031D24u);
@@ -36211,7 +36211,7 @@ block_80031D00:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x14u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[2] + 28; g_debug_last_store_pc = 0x80031D30u; psx_store_cycle_barrier(); cpu->write_byte(cpu->gpr[2] + 28, (uint8_t)cpu->gpr[4]);
+    { uint32_t _pgxa = cpu->gpr[2] + 28; g_debug_last_store_pc = 0x80031D30u; psx_store_cycle_barrier(); psx_mem_write_byte(cpu, cpu->gpr[2] + 28, (uint8_t)cpu->gpr[4]);
     PGXP_STORE(0xA044001Cu, _pgxa, cpu->gpr[4]); }  /* 0x80031D30: 0xA044001C */
 #ifdef PSX_COSIM
     cosim_instr(0x80031D30u);
@@ -36305,7 +36305,7 @@ block_80031D34:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20000004u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 16; g_debug_last_store_pc = 0x80031D48u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 16, cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[29] + 16; g_debug_last_store_pc = 0x80031D48u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 16, cpu->gpr[2]);
     PGXP_STORE(0xAFA20010u, _pgxa, cpu->gpr[2]); }  /* 0x80031D48: 0xAFA20010 */
 #ifdef PSX_COSIM
     cosim_instr(0x80031D48u);
@@ -36313,7 +36313,7 @@ block_80031D34:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20000001u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 20; g_debug_last_store_pc = 0x80031D4Cu; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 20, cpu->gpr[0]);
+    { uint32_t _pgxa = cpu->gpr[29] + 20; g_debug_last_store_pc = 0x80031D4Cu; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 20, cpu->gpr[0]);
     PGXP_STORE(0xAFA00014u, _pgxa, cpu->gpr[0]); }  /* 0x80031D4C: 0xAFA00014 */
 #ifdef PSX_COSIM
     cosim_instr(0x80031D4Cu);
@@ -36329,7 +36329,7 @@ block_80031D34:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20000001u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 24; g_debug_last_store_pc = 0x80031D54u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 24, cpu->gpr[0]);
+    { uint32_t _pgxa = cpu->gpr[29] + 24; g_debug_last_store_pc = 0x80031D54u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 24, cpu->gpr[0]);
     PGXP_STORE(0xAFA00018u, _pgxa, cpu->gpr[0]); }  /* 0x80031D54: 0xAFA00018 */
 #ifdef PSX_COSIM
     cosim_instr(0x80031D54u);
@@ -36384,7 +36384,7 @@ block_80031D58:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0xCu);
 #endif
-    { uint32_t _pgxa = cpu->gpr[3] + 30; g_debug_last_store_pc = 0x80031D68u; psx_store_cycle_barrier(); cpu->write_byte(cpu->gpr[3] + 30, (uint8_t)cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[3] + 30; g_debug_last_store_pc = 0x80031D68u; psx_store_cycle_barrier(); psx_mem_write_byte(cpu, cpu->gpr[3] + 30, (uint8_t)cpu->gpr[2]);
     PGXP_STORE(0xA062001Eu, _pgxa, cpu->gpr[2]); }  /* 0x80031D68: 0xA062001E */
 #ifdef PSX_COSIM
     cosim_instr(0x80031D68u);
@@ -36506,7 +36506,7 @@ block_80031D7C:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0xCu);
 #endif
-    { uint32_t _pgxa = cpu->gpr[3] + 30; g_debug_last_store_pc = 0x80031D88u; psx_store_cycle_barrier(); cpu->write_byte(cpu->gpr[3] + 30, (uint8_t)cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[3] + 30; g_debug_last_store_pc = 0x80031D88u; psx_store_cycle_barrier(); psx_mem_write_byte(cpu, cpu->gpr[3] + 30, (uint8_t)cpu->gpr[2]);
     PGXP_STORE(0xA062001Eu, _pgxa, cpu->gpr[2]); }  /* 0x80031D88: 0xA062001E */
 #ifdef PSX_COSIM
     cosim_instr(0x80031D88u);
@@ -36571,7 +36571,7 @@ block_80031D8C:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20000004u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 16; g_debug_last_store_pc = 0x80031D98u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 16, cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[29] + 16; g_debug_last_store_pc = 0x80031D98u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 16, cpu->gpr[2]);
     PGXP_STORE(0xAFA20010u, _pgxa, cpu->gpr[2]); }  /* 0x80031D98: 0xAFA20010 */
 #ifdef PSX_COSIM
     cosim_instr(0x80031D98u);
@@ -36633,7 +36633,7 @@ block_80031D8C:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20000004u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 20; g_debug_last_store_pc = 0x80031DB0u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 20, cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[29] + 20; g_debug_last_store_pc = 0x80031DB0u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 20, cpu->gpr[2]);
     PGXP_STORE(0xAFA20014u, _pgxa, cpu->gpr[2]); }  /* 0x80031DB0: 0xAFA20014 */
 #ifdef PSX_COSIM
     cosim_instr(0x80031DB0u);
@@ -36641,7 +36641,7 @@ block_80031D8C:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20010000u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 24; g_debug_last_store_pc = 0x80031DB4u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 24, cpu->gpr[16]);
+    { uint32_t _pgxa = cpu->gpr[29] + 24; g_debug_last_store_pc = 0x80031DB4u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 24, cpu->gpr[16]);
     PGXP_STORE(0xAFB00018u, _pgxa, cpu->gpr[16]); }  /* 0x80031DB4: 0xAFB00018 */
 #ifdef PSX_COSIM
     cosim_instr(0x80031DB4u);
@@ -36649,7 +36649,7 @@ block_80031D8C:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20010000u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 28; g_debug_last_store_pc = 0x80031DB8u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 28, cpu->gpr[16]);
+    { uint32_t _pgxa = cpu->gpr[29] + 28; g_debug_last_store_pc = 0x80031DB8u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 28, cpu->gpr[16]);
     PGXP_STORE(0xAFB0001Cu, _pgxa, cpu->gpr[16]); }  /* 0x80031DB8: 0xAFB0001C */
 #ifdef PSX_COSIM
     cosim_instr(0x80031DB8u);
@@ -36657,7 +36657,7 @@ block_80031D8C:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20010000u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 32; g_debug_last_store_pc = 0x80031DBCu; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 32, cpu->gpr[16]);
+    { uint32_t _pgxa = cpu->gpr[29] + 32; g_debug_last_store_pc = 0x80031DBCu; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 32, cpu->gpr[16]);
     PGXP_STORE(0xAFB00020u, _pgxa, cpu->gpr[16]); }  /* 0x80031DBC: 0xAFB00020 */
 #ifdef PSX_COSIM
     cosim_instr(0x80031DBCu);
@@ -36774,7 +36774,7 @@ block_80031DE0:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x40004u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[18]; g_debug_last_store_pc = 0x80031DE8u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[18], cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[18]; g_debug_last_store_pc = 0x80031DE8u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[18], cpu->gpr[2]);
     PGXP_STORE(0xAE420000u, _pgxa, cpu->gpr[2]); }  /* 0x80031DE8: 0xAE420000 */
 #ifdef PSX_COSIM
     cosim_instr(0x80031DE8u);
@@ -36833,7 +36833,7 @@ block_80031DEC:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x14u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[4] + 30; g_debug_last_store_pc = 0x80031DF8u; psx_store_cycle_barrier(); cpu->write_byte(cpu->gpr[4] + 30, (uint8_t)cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[4] + 30; g_debug_last_store_pc = 0x80031DF8u; psx_store_cycle_barrier(); psx_mem_write_byte(cpu, cpu->gpr[4] + 30, (uint8_t)cpu->gpr[2]);
     PGXP_STORE(0xA082001Eu, _pgxa, cpu->gpr[2]); }  /* 0x80031DF8: 0xA082001E */
 #ifdef PSX_COSIM
     cosim_instr(0x80031DF8u);
@@ -36856,7 +36856,7 @@ block_80031DEC:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x5u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[2] + 31; g_debug_last_store_pc = 0x80031E04u; psx_store_cycle_barrier(); cpu->write_byte(cpu->gpr[2] + 31, (uint8_t)cpu->gpr[0]);
+    { uint32_t _pgxa = cpu->gpr[2] + 31; g_debug_last_store_pc = 0x80031E04u; psx_store_cycle_barrier(); psx_mem_write_byte(cpu, cpu->gpr[2] + 31, (uint8_t)cpu->gpr[0]);
     PGXP_STORE(0xA040001Fu, _pgxa, cpu->gpr[0]); }  /* 0x80031E04: 0xA040001F */
 #ifdef PSX_COSIM
     cosim_instr(0x80031E04u);
@@ -36973,7 +36973,7 @@ block_80031DEC:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0xCu);
 #endif
-    { uint32_t _pgxa = cpu->gpr[2] + 2; g_debug_last_store_pc = 0x80031E34u; psx_store_cycle_barrier(); cpu->write_half(cpu->gpr[2] + 2, (uint16_t)cpu->gpr[3]);
+    { uint32_t _pgxa = cpu->gpr[2] + 2; g_debug_last_store_pc = 0x80031E34u; psx_store_cycle_barrier(); psx_mem_write_half(cpu, cpu->gpr[2] + 2, (uint16_t)cpu->gpr[3]);
     PGXP_STORE(0xA4430002u, _pgxa, cpu->gpr[3]); }  /* 0x80031E34: 0xA4430002 */
 #ifdef PSX_COSIM
     cosim_instr(0x80031E34u);
@@ -37055,7 +37055,7 @@ block_80031E38:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0xCu);
 #endif
-    { uint32_t _pgxa = cpu->gpr[3] + 31; g_debug_last_store_pc = 0x80031E50u; psx_store_cycle_barrier(); cpu->write_byte(cpu->gpr[3] + 31, (uint8_t)cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[3] + 31; g_debug_last_store_pc = 0x80031E50u; psx_store_cycle_barrier(); psx_mem_write_byte(cpu, cpu->gpr[3] + 31, (uint8_t)cpu->gpr[2]);
     PGXP_STORE(0xA062001Fu, _pgxa, cpu->gpr[2]); }  /* 0x80031E50: 0xA062001F */
 #ifdef PSX_COSIM
     cosim_instr(0x80031E50u);
@@ -37263,7 +37263,7 @@ block_80031E7C:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20000004u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 16; g_debug_last_store_pc = 0x80031E8Cu; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 16, cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[29] + 16; g_debug_last_store_pc = 0x80031E8Cu; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 16, cpu->gpr[2]);
     PGXP_STORE(0xAFA20010u, _pgxa, cpu->gpr[2]); }  /* 0x80031E8C: 0xAFA20010 */
 #ifdef PSX_COSIM
     cosim_instr(0x80031E8Cu);
@@ -37295,7 +37295,7 @@ block_80031E7C:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20000004u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 20; g_debug_last_store_pc = 0x80031E9Cu; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 20, cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[29] + 20; g_debug_last_store_pc = 0x80031E9Cu; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 20, cpu->gpr[2]);
     PGXP_STORE(0xAFA20014u, _pgxa, cpu->gpr[2]); }  /* 0x80031E9C: 0xAFA20014 */
 #ifdef PSX_COSIM
     cosim_instr(0x80031E9Cu);
@@ -37407,7 +37407,7 @@ block_80031EB0:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20000004u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 16; g_debug_last_store_pc = 0x80031EB8u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 16, cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[29] + 16; g_debug_last_store_pc = 0x80031EB8u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 16, cpu->gpr[2]);
     PGXP_STORE(0xAFA20010u, _pgxa, cpu->gpr[2]); }  /* 0x80031EB8: 0xAFA20010 */
 #ifdef PSX_COSIM
     cosim_instr(0x80031EB8u);
@@ -37426,7 +37426,7 @@ block_80031EB0:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20000004u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 20; g_debug_last_store_pc = 0x80031EC0u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 20, cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[29] + 20; g_debug_last_store_pc = 0x80031EC0u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 20, cpu->gpr[2]);
     PGXP_STORE(0xAFA20014u, _pgxa, cpu->gpr[2]); }  /* 0x80031EC0: 0xAFA20014 */
 #ifdef PSX_COSIM
     cosim_instr(0x80031EC0u);
@@ -37458,7 +37458,7 @@ block_80031EB0:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20000004u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 24; g_debug_last_store_pc = 0x80031ED0u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 24, cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[29] + 24; g_debug_last_store_pc = 0x80031ED0u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 24, cpu->gpr[2]);
     PGXP_STORE(0xAFA20018u, _pgxa, cpu->gpr[2]); }  /* 0x80031ED0: 0xAFA20018 */
 #ifdef PSX_COSIM
     cosim_instr(0x80031ED0u);
@@ -37466,7 +37466,7 @@ block_80031EB0:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20000004u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 28; g_debug_last_store_pc = 0x80031ED4u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 28, cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[29] + 28; g_debug_last_store_pc = 0x80031ED4u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 28, cpu->gpr[2]);
     PGXP_STORE(0xAFA2001Cu, _pgxa, cpu->gpr[2]); }  /* 0x80031ED4: 0xAFA2001C */
 #ifdef PSX_COSIM
     cosim_instr(0x80031ED4u);
@@ -37474,7 +37474,7 @@ block_80031EB0:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20000004u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 32; g_debug_last_store_pc = 0x80031ED8u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 32, cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[29] + 32; g_debug_last_store_pc = 0x80031ED8u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 32, cpu->gpr[2]);
     PGXP_STORE(0xAFA20020u, _pgxa, cpu->gpr[2]); }  /* 0x80031ED8: 0xAFA20020 */
 #ifdef PSX_COSIM
     cosim_instr(0x80031ED8u);
@@ -37517,7 +37517,7 @@ block_80031EE4:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20004u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[17]; g_debug_last_store_pc = 0x80031EE4u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[17], cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[17]; g_debug_last_store_pc = 0x80031EE4u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[17], cpu->gpr[2]);
     PGXP_STORE(0xAE220000u, _pgxa, cpu->gpr[2]); }  /* 0x80031EE4: 0xAE220000 */
 #ifdef PSX_COSIM
     cosim_instr(0x80031EE4u);
@@ -37600,7 +37600,7 @@ block_80031EF4:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0xCu);
 #endif
-    { uint32_t _pgxa = cpu->gpr[3] + 30; g_debug_last_store_pc = 0x80031F00u; psx_store_cycle_barrier(); cpu->write_byte(cpu->gpr[3] + 30, (uint8_t)cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[3] + 30; g_debug_last_store_pc = 0x80031F00u; psx_store_cycle_barrier(); psx_mem_write_byte(cpu, cpu->gpr[3] + 30, (uint8_t)cpu->gpr[2]);
     PGXP_STORE(0xA062001Eu, _pgxa, cpu->gpr[2]); }  /* 0x80031F00: 0xA062001E */
 #ifdef PSX_COSIM
     cosim_instr(0x80031F00u);
@@ -37617,7 +37617,7 @@ block_80031EF4:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x5u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[2] + 31; g_debug_last_store_pc = 0x80031F0Cu; psx_store_cycle_barrier(); cpu->write_byte(cpu->gpr[2] + 31, (uint8_t)cpu->gpr[0]);
+    { uint32_t _pgxa = cpu->gpr[2] + 31; g_debug_last_store_pc = 0x80031F0Cu; psx_store_cycle_barrier(); psx_mem_write_byte(cpu, cpu->gpr[2] + 31, (uint8_t)cpu->gpr[0]);
     PGXP_STORE(0xA040001Fu, _pgxa, cpu->gpr[0]); }  /* 0x80031F0C: 0xA040001F */
 #ifdef PSX_COSIM
     cosim_instr(0x80031F0Cu);
@@ -37679,7 +37679,7 @@ block_80031F10:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0xCu);
 #endif
-    { uint32_t _pgxa = cpu->gpr[3] + 31; g_debug_last_store_pc = 0x80031F24u; psx_store_cycle_barrier(); cpu->write_byte(cpu->gpr[3] + 31, (uint8_t)cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[3] + 31; g_debug_last_store_pc = 0x80031F24u; psx_store_cycle_barrier(); psx_mem_write_byte(cpu, cpu->gpr[3] + 31, (uint8_t)cpu->gpr[2]);
     PGXP_STORE(0xA062001Fu, _pgxa, cpu->gpr[2]); }  /* 0x80031F24: 0xA062001F */
 #ifdef PSX_COSIM
     cosim_instr(0x80031F24u);
@@ -38045,7 +38045,7 @@ block_80031F74:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20040000u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 16; g_debug_last_store_pc = 0x80031F94u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 16, cpu->gpr[18]);
+    { uint32_t _pgxa = cpu->gpr[29] + 16; g_debug_last_store_pc = 0x80031F94u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 16, cpu->gpr[18]);
     PGXP_STORE(0xAFB20010u, _pgxa, cpu->gpr[18]); }  /* 0x80031F94: 0xAFB20010 */
 #ifdef PSX_COSIM
     cosim_instr(0x80031F94u);
@@ -38053,7 +38053,7 @@ block_80031F74:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20000004u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 20; g_debug_last_store_pc = 0x80031F98u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 20, cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[29] + 20; g_debug_last_store_pc = 0x80031F98u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 20, cpu->gpr[2]);
     PGXP_STORE(0xAFA20014u, _pgxa, cpu->gpr[2]); }  /* 0x80031F98: 0xAFA20014 */
 #ifdef PSX_COSIM
     cosim_instr(0x80031F98u);
@@ -38199,7 +38199,7 @@ block_80031FA4:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20000004u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 16; g_debug_last_store_pc = 0x80031FC8u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 16, cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[29] + 16; g_debug_last_store_pc = 0x80031FC8u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 16, cpu->gpr[2]);
     PGXP_STORE(0xAFA20010u, _pgxa, cpu->gpr[2]); }  /* 0x80031FC8: 0xAFA20010 */
 #ifdef PSX_COSIM
     cosim_instr(0x80031FC8u);
@@ -38207,7 +38207,7 @@ block_80031FA4:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20080000u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 20; g_debug_last_store_pc = 0x80031FCCu; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 20, cpu->gpr[19]);
+    { uint32_t _pgxa = cpu->gpr[29] + 20; g_debug_last_store_pc = 0x80031FCCu; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 20, cpu->gpr[19]);
     PGXP_STORE(0xAFB30014u, _pgxa, cpu->gpr[19]); }  /* 0x80031FCC: 0xAFB30014 */
 #ifdef PSX_COSIM
     cosim_instr(0x80031FCCu);
@@ -38301,7 +38301,7 @@ block_80031FD8:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20000004u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 16; g_debug_last_store_pc = 0x80031FECu; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 16, cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[29] + 16; g_debug_last_store_pc = 0x80031FECu; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 16, cpu->gpr[2]);
     PGXP_STORE(0xAFA20010u, _pgxa, cpu->gpr[2]); }  /* 0x80031FEC: 0xAFA20010 */
 #ifdef PSX_COSIM
     cosim_instr(0x80031FECu);
@@ -38320,7 +38320,7 @@ block_80031FD8:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20000004u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 20; g_debug_last_store_pc = 0x80031FF4u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 20, cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[29] + 20; g_debug_last_store_pc = 0x80031FF4u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 20, cpu->gpr[2]);
     PGXP_STORE(0xAFA20014u, _pgxa, cpu->gpr[2]); }  /* 0x80031FF4: 0xAFA20014 */
 #ifdef PSX_COSIM
     cosim_instr(0x80031FF4u);
@@ -38336,7 +38336,7 @@ block_80031FD8:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20000004u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 24; g_debug_last_store_pc = 0x80031FFCu; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 24, cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[29] + 24; g_debug_last_store_pc = 0x80031FFCu; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 24, cpu->gpr[2]);
     PGXP_STORE(0xAFA20018u, _pgxa, cpu->gpr[2]); }  /* 0x80031FFC: 0xAFA20018 */
 #ifdef PSX_COSIM
     cosim_instr(0x80031FFCu);
@@ -38347,7 +38347,7 @@ block_80031FD8:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20000004u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 28; g_debug_last_store_pc = 0x80032000u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 28, cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[29] + 28; g_debug_last_store_pc = 0x80032000u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 28, cpu->gpr[2]);
     PGXP_STORE(0xAFA2001Cu, _pgxa, cpu->gpr[2]); }  /* 0x80032000: 0xAFA2001C */
 #ifdef PSX_COSIM
     cosim_instr(0x80032000u);
@@ -38355,7 +38355,7 @@ block_80031FD8:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20000004u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 32; g_debug_last_store_pc = 0x80032004u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 32, cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[29] + 32; g_debug_last_store_pc = 0x80032004u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 32, cpu->gpr[2]);
     PGXP_STORE(0xAFA20020u, _pgxa, cpu->gpr[2]); }  /* 0x80032004: 0xAFA20020 */
 #ifdef PSX_COSIM
     cosim_instr(0x80032004u);
@@ -38395,7 +38395,7 @@ block_80032010:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20004u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[17]; g_debug_last_store_pc = 0x80032010u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[17], cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[17]; g_debug_last_store_pc = 0x80032010u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[17], cpu->gpr[2]);
     PGXP_STORE(0xAE220000u, _pgxa, cpu->gpr[2]); }  /* 0x80032010: 0xAE220000 */
 #ifdef PSX_COSIM
     cosim_instr(0x80032010u);
@@ -38463,7 +38463,7 @@ block_80032020:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x9u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[3] + 31; g_debug_last_store_pc = 0x80032028u; psx_store_cycle_barrier(); cpu->write_byte(cpu->gpr[3] + 31, (uint8_t)cpu->gpr[0]);
+    { uint32_t _pgxa = cpu->gpr[3] + 31; g_debug_last_store_pc = 0x80032028u; psx_store_cycle_barrier(); psx_mem_write_byte(cpu, cpu->gpr[3] + 31, (uint8_t)cpu->gpr[0]);
     PGXP_STORE(0xA060001Fu, _pgxa, cpu->gpr[0]); }  /* 0x80032028: 0xA060001F */
 #ifdef PSX_COSIM
     cosim_instr(0x80032028u);
@@ -38483,7 +38483,7 @@ block_80032020:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x80004u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[2] + 30; g_debug_last_store_pc = 0x80032034u; psx_store_cycle_barrier(); cpu->write_byte(cpu->gpr[2] + 30, (uint8_t)cpu->gpr[19]);
+    { uint32_t _pgxa = cpu->gpr[2] + 30; g_debug_last_store_pc = 0x80032034u; psx_store_cycle_barrier(); psx_mem_write_byte(cpu, cpu->gpr[2] + 30, (uint8_t)cpu->gpr[19]);
     PGXP_STORE(0xA053001Eu, _pgxa, cpu->gpr[19]); }  /* 0x80032034: 0xA053001E */
 #ifdef PSX_COSIM
     cosim_instr(0x80032034u);
@@ -38561,7 +38561,7 @@ block_80032038:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0xCu);
 #endif
-    { uint32_t _pgxa = cpu->gpr[3] + 31; g_debug_last_store_pc = 0x80032050u; psx_store_cycle_barrier(); cpu->write_byte(cpu->gpr[3] + 31, (uint8_t)cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[3] + 31; g_debug_last_store_pc = 0x80032050u; psx_store_cycle_barrier(); psx_mem_write_byte(cpu, cpu->gpr[3] + 31, (uint8_t)cpu->gpr[2]);
     PGXP_STORE(0xA062001Fu, _pgxa, cpu->gpr[2]); }  /* 0x80032050: 0xA062001F */
 #ifdef PSX_COSIM
     cosim_instr(0x80032050u);
@@ -38699,7 +38699,7 @@ block_80032070:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20000004u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 16; g_debug_last_store_pc = 0x8003207Cu; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 16, cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[29] + 16; g_debug_last_store_pc = 0x8003207Cu; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 16, cpu->gpr[2]);
     PGXP_STORE(0xAFA20010u, _pgxa, cpu->gpr[2]); }  /* 0x8003207C: 0xAFA20010 */
 #ifdef PSX_COSIM
     cosim_instr(0x8003207Cu);
@@ -38731,7 +38731,7 @@ block_80032070:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20000004u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 20; g_debug_last_store_pc = 0x8003208Cu; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 20, cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[29] + 20; g_debug_last_store_pc = 0x8003208Cu; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 20, cpu->gpr[2]);
     PGXP_STORE(0xAFA20014u, _pgxa, cpu->gpr[2]); }  /* 0x8003208C: 0xAFA20014 */
 #ifdef PSX_COSIM
     cosim_instr(0x8003208Cu);
@@ -38835,7 +38835,7 @@ block_8003209C:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20000004u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 16; g_debug_last_store_pc = 0x800320A8u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 16, cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[29] + 16; g_debug_last_store_pc = 0x800320A8u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 16, cpu->gpr[2]);
     PGXP_STORE(0xAFA20010u, _pgxa, cpu->gpr[2]); }  /* 0x800320A8: 0xAFA20010 */
 #ifdef PSX_COSIM
     cosim_instr(0x800320A8u);
@@ -38854,7 +38854,7 @@ block_8003209C:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20000004u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 20; g_debug_last_store_pc = 0x800320B0u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 20, cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[29] + 20; g_debug_last_store_pc = 0x800320B0u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 20, cpu->gpr[2]);
     PGXP_STORE(0xAFA20014u, _pgxa, cpu->gpr[2]); }  /* 0x800320B0: 0xAFA20014 */
 #ifdef PSX_COSIM
     cosim_instr(0x800320B0u);
@@ -38886,7 +38886,7 @@ block_8003209C:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20000004u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 24; g_debug_last_store_pc = 0x800320C0u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 24, cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[29] + 24; g_debug_last_store_pc = 0x800320C0u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 24, cpu->gpr[2]);
     PGXP_STORE(0xAFA20018u, _pgxa, cpu->gpr[2]); }  /* 0x800320C0: 0xAFA20018 */
 #ifdef PSX_COSIM
     cosim_instr(0x800320C0u);
@@ -38894,7 +38894,7 @@ block_8003209C:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20000004u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 28; g_debug_last_store_pc = 0x800320C4u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 28, cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[29] + 28; g_debug_last_store_pc = 0x800320C4u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 28, cpu->gpr[2]);
     PGXP_STORE(0xAFA2001Cu, _pgxa, cpu->gpr[2]); }  /* 0x800320C4: 0xAFA2001C */
 #ifdef PSX_COSIM
     cosim_instr(0x800320C4u);
@@ -38902,7 +38902,7 @@ block_8003209C:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20000004u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 32; g_debug_last_store_pc = 0x800320C8u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 32, cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[29] + 32; g_debug_last_store_pc = 0x800320C8u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 32, cpu->gpr[2]);
     PGXP_STORE(0xAFA20020u, _pgxa, cpu->gpr[2]); }  /* 0x800320C8: 0xAFA20020 */
 #ifdef PSX_COSIM
     cosim_instr(0x800320C8u);
@@ -38945,7 +38945,7 @@ block_800320D4:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x10004u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[16]; g_debug_last_store_pc = 0x800320D4u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[16], cpu->gpr[2]);
+    { uint32_t _pgxa = cpu->gpr[16]; g_debug_last_store_pc = 0x800320D4u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[16], cpu->gpr[2]);
     PGXP_STORE(0xAE020000u, _pgxa, cpu->gpr[2]); }  /* 0x800320D4: 0xAE020000 */
 #ifdef PSX_COSIM
     cosim_instr(0x800320D4u);
@@ -39109,7 +39109,7 @@ block_800320F4:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20010000u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 16; g_debug_last_store_pc = 0x800320F8u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 16, cpu->gpr[16]);
+    { uint32_t _pgxa = cpu->gpr[29] + 16; g_debug_last_store_pc = 0x800320F8u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 16, cpu->gpr[16]);
     PGXP_STORE(0xAFB00010u, _pgxa, cpu->gpr[16]); }  /* 0x800320F8: 0xAFB00010 */
 #ifdef PSX_COSIM
     cosim_instr(0x800320F8u);
@@ -39133,7 +39133,7 @@ block_800320F4:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0xA0000000u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 24; g_debug_last_store_pc = 0x80032104u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 24, cpu->gpr[31]);
+    { uint32_t _pgxa = cpu->gpr[29] + 24; g_debug_last_store_pc = 0x80032104u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 24, cpu->gpr[31]);
     PGXP_STORE(0xAFBF0018u, _pgxa, cpu->gpr[31]); }  /* 0x80032104: 0xAFBF0018 */
 #ifdef PSX_COSIM
     cosim_instr(0x80032104u);
@@ -39141,7 +39141,7 @@ block_800320F4:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x20020000u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[29] + 20; g_debug_last_store_pc = 0x80032108u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[29] + 20, cpu->gpr[17]);
+    { uint32_t _pgxa = cpu->gpr[29] + 20; g_debug_last_store_pc = 0x80032108u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[29] + 20, cpu->gpr[17]);
     PGXP_STORE(0xAFB10014u, _pgxa, cpu->gpr[17]); }  /* 0x80032108: 0xAFB10014 */
 #ifdef PSX_COSIM
     cosim_instr(0x80032108u);
@@ -39772,7 +39772,7 @@ block_800321D4:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x9u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[3]; g_debug_last_store_pc = 0x800321D4u; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[3], cpu->gpr[0]);
+    { uint32_t _pgxa = cpu->gpr[3]; g_debug_last_store_pc = 0x800321D4u; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[3], cpu->gpr[0]);
     PGXP_STORE(0xAC600000u, _pgxa, cpu->gpr[0]); }  /* 0x800321D4: 0xAC600000 */
 #ifdef PSX_COSIM
     cosim_instr(0x800321D4u);
@@ -39780,7 +39780,7 @@ block_800321D4:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x18u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[3] + 4; g_debug_last_store_pc = 0x800321D8u; psx_store_cycle_barrier(); cpu->write_half(cpu->gpr[3] + 4, (uint16_t)cpu->gpr[4]);
+    { uint32_t _pgxa = cpu->gpr[3] + 4; g_debug_last_store_pc = 0x800321D8u; psx_store_cycle_barrier(); psx_mem_write_half(cpu, cpu->gpr[3] + 4, (uint16_t)cpu->gpr[4]);
     PGXP_STORE(0xA4640004u, _pgxa, cpu->gpr[4]); }  /* 0x800321D8: 0xA4640004 */
 #ifdef PSX_COSIM
     cosim_instr(0x800321D8u);
@@ -39788,7 +39788,7 @@ block_800321D4:
 #ifdef PSX_ENABLE_BLOCK_CYCLES
     psx_cyc_step(cpu, 0x28u);
 #endif
-    { uint32_t _pgxa = cpu->gpr[5]; g_debug_last_store_pc = 0x800321DCu; psx_store_cycle_barrier(); cpu->write_word(cpu->gpr[5], cpu->gpr[3]);
+    { uint32_t _pgxa = cpu->gpr[5]; g_debug_last_store_pc = 0x800321DCu; psx_store_cycle_barrier(); psx_mem_write_word(cpu, cpu->gpr[5], cpu->gpr[3]);
     PGXP_STORE(0xACA30000u, _pgxa, cpu->gpr[3]); }  /* 0x800321DC: 0xACA30000 */
 #ifdef PSX_COSIM
     cosim_instr(0x800321DCu);
