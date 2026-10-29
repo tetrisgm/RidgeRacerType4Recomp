@@ -30,6 +30,9 @@ Worktree: `C:/Users/Shokunin/dev/r4-wt-interp`; both repositories use
 R4 Release build with JOBS=4 and 23/23 remaining CTests pass. Fresh sampler,
 stream, presenter/metadata and mailbox/lease fixtures pass, including cross-caller
 staging. Hidden real-GL complete-frame ownership fixture: 111 checks, 0 failures.
+Final reverted-source rebuild and all 23 CTests pass. Hidden smoke exits 0 after
+40 steps through race-12s (frame 9179), with PGXP enabled and zero dispatch/segment
+misses. Evidence: `analysis/interp-reverted-final-smoke/`. All owned runtimes stopped.
 
 Ten-second hidden 8K races (18x, full PGXP, Car Effects and Rewind enabled),
 compact observer layout at framework `2e39cbe6`:
