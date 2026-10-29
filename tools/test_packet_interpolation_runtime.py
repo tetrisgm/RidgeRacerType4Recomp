@@ -35,6 +35,11 @@ def audit(port, seconds, stationary=False, sample_limit=45):
     if not stationary and any(r.get("mode") == "vertex_source_audit" for r in rows):
         if not any(r.get("source_moving", 0) for r in rows):
             errors.append("No moving source geometry was observed; paused samples cannot pass the driving gate")
+    if rows:
+        for counter in ('failed_pairs', 'storage_misses'):
+            delta = rows[-1].get(counter, 0) - rows[0].get(counter, 0)
+            if delta:
+                errors.append(f"{counter} increased by {delta} between polls")
     for row in rows:
         if row["failed"] or row["ambiguous"] or row["invalid"] or row["partial_provenance"]:
             errors.append(f"Packet {row['sequence']} has ambiguous or missing provenance")

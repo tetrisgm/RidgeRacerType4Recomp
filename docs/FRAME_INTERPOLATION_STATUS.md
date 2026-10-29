@@ -1,3 +1,27 @@
+# Exclusive performance follow-up (2026-10-29)
+
+Framework `045d53e0` moves transform attachment allocation and reclamation to
+a CPU worker and groups primitive provenance with draw setup. Guest capture,
+seal, release and reset perform no allocations (64 retained-attachment fixture).
+Cumulative failed-pair, peak-unmatched and storage-admission counters prevent
+sparse polling from hiding failures. Five focused framework tests and 22 R4
+tests pass; the PGXP-off boot fixture remains excluded.
+
+`tools/measure_interpolation_ab.py` obtains `../perf.lock` after Get-Process
+reports no runtime, starts only hidden owned processes, and runs FPS-off/on
+60-second pairs from slot 9. It preserves the local mod state, keeps full PGXP,
+18x, Car Effects and Rewind, collects guest profiles and checks for interference
+once per second. Distinct-image counts use the existing 8x8 presenter trace and
+are explicitly lower bounds, not full-image or physical-scanout measurements.
+
+Measurement is in progress. The initial follow-up pair was rejected because
+another hidden phase-3 release runtime started while our lock was held. Its
+PID and overlapping seconds are retained in `analysis/interp-exclusive-after`.
+No other agent's process was stopped. Valid exclusive results will replace this
+paragraph before delivery. This phase remains unaccepted.
+
+---
+
 # Phase 4 follow-up: geometry fixes pushed; performance acceptance FAILED
 
 2026-10-29. Framework implementation through `d516f5fa` on
