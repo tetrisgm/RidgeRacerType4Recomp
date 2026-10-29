@@ -3,6 +3,18 @@
 The `psxrecomp` and `recomp-ui` submodule gitlinks are the pins. Bump them
 deliberately and record each bump here with the reason and what was verified.
 
+2026-10-29 phase-5 topic pin: `6e47aa80` (fork
+`feat/frame-arch-5-rewind`, based on `4f893c1a`). Adds generic native-only
+per-frame reverse-page snapshots and held rewind with muted audio and native
+scanout presentation. No GL snapshot reads or renderer plumbing changes.
+R4 defaults restore rewind and 60 FPS; Car Effects and full PGXP stay enabled.
+Release build, 31/31 permitted R4 tests, native/delta/hold/serializer fixtures,
+and hidden dummy-audio boot-to-race smoke pass with zero dispatch/segment misses.
+Final TCP demo: 601 captures at 0.467880 ms mean host cost, 124 byte-exact
+restores; earlier repeated windows 0.381678-0.427349 ms and mapped-Y hold pass.
+See [Phase 5 evidence](REWIND_PHASE5.md) for scope and maximum-cost caveat.
+Supervisor integration only; this pin has not merged into `r4/main`.
+
 2026-10-28 native-authority phase pin: `4f893c1a` (fork `r4/main`, merge of
 `feat/frame-arch-1-native-authority` through `464bc104`). Original GP0 executes
 on a CPU-native raster worker; guest VRAM reads, snapshots and scanout no

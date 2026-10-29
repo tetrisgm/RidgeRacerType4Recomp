@@ -198,10 +198,9 @@ antialiasing_mode = "off"
 # selected internal resolution is rendered as is; frame rate gives way, not
 # resolution. The 1080p floor stays as the limit if a player turns it on.
 dynamic_resolution = false
-# Rewind snapshots synchronously read back VRAM and interrupt real-time audio
-# on the owner's PC. Opt in with Y in Modern controls, Select + Y in Classic;
-# enable Rewind in Settings first. A saved [video] rewind wins.
-rewind = false
+# Hold Y (Modern controls), Select + Y (Classic), or F8 to rewind.
+# Per-frame native snapshots; saved player preferences still win.
+rewind = true
 dynamic_resolution_min = "1080p"
 dynamic_resolution_start_min = false
 # Render thread (psxrecomp docs/RENDER_THREAD.md): the OpenGL backend runs on

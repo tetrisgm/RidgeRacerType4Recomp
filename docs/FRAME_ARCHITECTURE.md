@@ -226,3 +226,15 @@ ownership; transaction APIs themselves remain until their specified phase-4
 replacement. No fallback has been added. HD presentation tracking still uses
 its ordered presentation mirror; independent packets must carry exact native
 texture inputs rather than promote that mirror back to guest authority.
+
+### Phase-5 topic implementation (2026-10-29)
+
+Per-frame streaming reverse-page deltas and hold-to-rewind are implemented on
+`feat/frame-arch-5-rewind`, based on native authority `4f893c1a`. Native VRAM and
+texture-cache completion is queued independently of GL; snapshots remain
+unpublished until complete. Hidden all-on race means were 0.382-0.427 ms/frame;
+174 reverse restores matched full serialized guest state byte-for-byte, including
+a mapped Y-button hold/release check. These are mean host capture costs, not a
+hard latency bound or acceptance of the other phases. See
+[implementation, tests and reproduction](REWIND_PHASE5.md). Supervisor integration
+is still separate; no merge into `r4/main` accompanies this topic.
