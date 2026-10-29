@@ -3,6 +3,15 @@
 The `psxrecomp` and `recomp-ui` submodule gitlinks are the pins. Bump them
 deliberately and record each bump here with the reason and what was verified.
 
+2026-10-29 phase-4 presenter topic pin: `2e39cbe6` (includes `9ead2f08`).
+Adds retained packet sampling, source-model appearance classification, streamed
+vertex identity, projection interpolation and opaque Car Effects metadata.
+Removes the unused private worker pool. R4 switches FPS to the generic presenter
+and removes its guest re-execution path. Build/23 CTests and focused sampler,
+stream, presenter and lease fixtures pass. Regeneration leaves 50 ordinary
+shards unchanged and emits no private draw clones. Visual/rate acceptance is
+not yet closed; see [status](FRAME_INTERPOLATION_STATUS.md).
+
 2026-10-29 phase-4 continuation topic pin: `cf8aadf2` (via `398e6bc2`).
 Adds original RAM provenance, deterministic duplicate assignment, frozen-pair
 TCP inspection and projective-path census coverage. R4 build/32 CTests and

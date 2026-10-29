@@ -34,10 +34,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#ifdef R4_THREADED_DRAW
-#include "psx_exec_ctx.h"
-#include "r4_draw_mods.h"
-#endif
 
 #define PKG "r4.enhancement.widescreen"
 #define FEATURE "widescreen"
@@ -121,19 +117,7 @@ struct {
 } s_stat;
 } R4WsState;
 static R4WsState s_main = {.s_pvs_union = R4_WS_PVS_UNION};
-#ifdef R4_THREADED_DRAW
-struct R4WsDrawState {
-    R4WsState state;
-    PsxExecCtx *ctx;
-    int margin, failed;
-    size_t count, capacity, replay;
-    struct R4WsTag { uint32_t key; int edge; size_t word_index; } *tags;
-};
-static _Thread_local R4WsDrawState *s_private;
-static R4WsState *ws_state(void) { return s_private ? &s_private->state : &s_main; }
-#else
 static R4WsState *ws_state(void) { return &s_main; }
-#endif
 #define s_enabled (ws_state()->s_enabled)
 #define s_pvs_union (ws_state()->s_pvs_union)
 #define s_trace (ws_state()->s_trace)
@@ -143,46 +127,18 @@ static R4WsState *ws_state(void) { return &s_main; }
 #define s_stat (ws_state()->s_stat)
 
 static uint32_t rd32(uint32_t a) {
-#ifdef R4_THREADED_DRAW
-    if (s_private) return psx_ctx_read32(s_private->ctx, a);
-#endif
     return psx_mod_read_word(a);
 }
 static uint16_t rd16(uint32_t a) {
-#ifdef R4_THREADED_DRAW
-    if (s_private) return (uint16_t)(rd32(a & ~3u) >> ((a & 2u) * 8u));
-#endif
     return psx_mod_read_half(a);
 }
 static void wr32(uint32_t a, uint32_t v) {
-#ifdef R4_THREADED_DRAW
-    if (s_private) { psx_ctx_write32(s_private->ctx, a, v); return; }
-#endif
     psx_mod_write_word(a, v);
 }
 static int ws_margin(void) {
-#ifdef R4_THREADED_DRAW
-    if (s_private) return s_private->margin;
-#endif
     return psx_mod_widescreen_x_margin();
 }
 static void ws_tag(uint32_t key, int edge) {
-#ifdef R4_THREADED_DRAW
-    if (s_private) {
-        if (s_private->failed) return;
-        if (s_private->count == s_private->capacity) {
-            size_t cap = s_private->capacity ? s_private->capacity * 2 : 4096;
-            if (cap > 65536) { s_private->failed = 1; return; }
-            void *p = realloc(s_private->tags, cap * sizeof *s_private->tags);
-            if (!p) { s_private->failed = 1; return; }
-            s_private->tags = p; s_private->capacity = cap;
-        }
-        size_t word_index = 0;
-        (void)psx_ctx_gpu_words(s_private->ctx, &word_index);
-        s_private->tags[s_private->count++] = (struct R4WsTag){key, edge, word_index};
-        return;
-    }
-#endif
     psx_mod_tag_hud_primitive(key, edge);
 }
 
@@ -465,54 +421,3 @@ PSX_MOD_CONSTRUCTOR(r4_register_widescreen)
     (void)psx_mod_register_vblank_plugin(PLUGIN_ID, r4_ws_vblank);
     (void)psx_mod_register_savestate_plugin(PLUGIN_ID, r4_ws_savestate_loaded);
 }
-
-#ifdef R4_THREADED_DRAW
-int r4_ws_draw_register_entries(PsxCtxEntryHook callback, void *user) {
-    int n = 0;
-    for (int i = 0; i < R4_HUD_PRODUCER_COUNT; ++i)
-        n += r4_draw_mods_register_one(r4_hud_producers[i].fn, callback, user);
-    for (size_t i = 0; i < R4_WS_CLOSER_COUNT; ++i)
-        n += r4_draw_mods_register_one(r4_hud_closers[i], callback, user);
-    n += r4_draw_mods_register_one(R4_CLEAR_OTAG_FN, callback, user);
-    n += r4_draw_mods_register_one(R4_DRAW_OTAG_FN, callback, user);
-    n += r4_draw_mods_register_one(R4_PVS_OCTANT_FN, callback, user);
-    n += r4_draw_mods_register_one(R4_PVS_MERGE_FN, callback, user);
-    return n == R4_WS_HOOK_COUNT;
-}
-R4WsDrawState *r4_ws_draw_capture(void) {
-    R4WsDrawState *p = calloc(1, sizeof *p);
-    if (!p) return NULL;
-    p->state = s_main;
-    p->margin = psx_mod_widescreen_x_margin();
-    R4WsDrawState *prior = s_private;
-    s_private = p; s_trace = 0; s_private = prior;
-    return p;
-}
-int r4_ws_draw_entry(R4WsDrawState *p, CPUState *cpu, uint32_t address) {
-    if (!p || !cpu || !cpu->ctx || p->failed) return 0;
-    R4WsDrawState *prior = s_private;
-    s_private = p; p->ctx = cpu->ctx;
-    for (int i = 0; i < R4_HUD_PRODUCER_COUNT; ++i)
-        if (address == r4_hud_producers[i].fn) r4_hud_enter(cpu, address);
-    for (size_t i = 0; i < R4_WS_CLOSER_COUNT; ++i)
-        if (address == r4_hud_closers[i]) r4_hud_closer(cpu, address);
-    if (address == R4_CLEAR_OTAG_FN) r4_clear_otag(cpu, address);
-    if (address == R4_DRAW_OTAG_FN) r4_draw_otag(cpu, address);
-    if (address == R4_PVS_OCTANT_FN) r4_ws_pvs_octant(cpu, address);
-    if (address == R4_PVS_MERGE_FN) r4_ws_pvs_merge(cpu, address);
-    s_private = prior;
-    return !p->failed;
-}
-int r4_ws_draw_replay_metadata(R4WsDrawState *p, size_t word_index) {
-    if (!p || p->failed) return 0;
-    while (p->replay < p->count && p->tags[p->replay].word_index == word_index) {
-        const struct R4WsTag *t = &p->tags[p->replay++];
-        psx_mod_tag_hud_primitive(t->key, t->edge);
-    }
-    if (p->replay < p->count && p->tags[p->replay].word_index < word_index) return 0;
-    return 1;
-}
-void r4_ws_draw_destroy(R4WsDrawState *p) {
-    if (p) { free(p->tags); free(p); }
-}
-#endif

@@ -38,8 +38,8 @@ def audit(port, seconds, stationary=False, sample_limit=45):
     for row in rows:
         if row["failed"] or row["ambiguous"] or row["invalid"] or row["partial_provenance"]:
             errors.append(f"Packet {row['sequence']} has ambiguous or missing provenance")
-        if row.get("new_source", 0):
-            errors.append(f"Packet {row['sequence']} has {row['new_source']} unverified new-source vertices")
+        if row.get("new_source", 0) != row.get("verified_appearance", 0) or row.get("unexplained", 0):
+            errors.append(f"Packet {row['sequence']} has {row['new_source']} new-source vertices without complete model-appearance classification")
         if row["unmatched"]:
             errors.append(f"Packet {row['sequence']} has unclassified unmatched geometry")
     return {"mode": "candidate_audit_not_presenter_acceptance", "samples": rows,

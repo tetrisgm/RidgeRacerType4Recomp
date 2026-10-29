@@ -1,4 +1,6 @@
-# R4 frame pipeline: current implementation
+# R4 frame pipeline: historical audit and phase-4 update
+
+**Phase-4 topic update (2026-10-29):** R4 FPS now selects the generic retained-packet presenter. Guest interpolation, field lists, private workers and their title adapters are removed. Car Effects metadata is captured into packets and sampled on the render owner. The detailed audit below describes the earlier pipeline; its extra-pass and worker sections are historical. Current implementation and acceptance results: [Phase-4 status](FRAME_INTERPOLATION_STATUS.md). Shared transactional APIs still serve separate netplay local-view/stereo features; FPS does not invoke them.
 
 Code audit, 2026-10-28. This is a map for design review, not a proposed replacement architecture or a new benchmark. No builds, game runs, or measurements were performed for this document.
 

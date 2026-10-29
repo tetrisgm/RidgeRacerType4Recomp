@@ -7,9 +7,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#ifdef R4_THREADED_DRAW
-#include "r4_draw_mods.h"
-#endif
 
 #define PKG "r4.enhancement.camera-lookaround"
 #define FEATURE "camera-lookaround"
@@ -31,13 +28,7 @@ typedef struct {
     uint32_t original[5], written[5];
 } R4CameraState;
 static R4CameraState s_main;
-#ifdef R4_THREADED_DRAW
-struct R4CameraDrawState { R4CameraState state; PsxExecCtx *ctx; };
-static _Thread_local R4CameraDrawState *s_private;
-static R4CameraState *camera_state(void) { return s_private ? &s_private->state : &s_main; }
-#else
 static R4CameraState *camera_state(void) { return &s_main; }
-#endif
 #define s_enabled (camera_state()->enabled)
 #define s_look (camera_state()->look)
 #define s_restore_pending (camera_state()->restore_pending)
@@ -51,27 +42,15 @@ static const uint32_t k_camera_inputs[5] = {
 
 
 static uint32_t rd32(uint32_t address) {
-#ifdef R4_THREADED_DRAW
-    if (s_private) return psx_ctx_read32(s_private->ctx, address);
-#endif
     return psx_mod_read_word(address);
 }
 static uint16_t rd16(uint32_t address) {
-#ifdef R4_THREADED_DRAW
-    if (s_private) return (uint16_t)(rd32(address & ~3u) >> ((address & 2u)*8u));
-#endif
     return psx_mod_read_half(address);
 }
 static uint8_t rd8(uint32_t address) {
-#ifdef R4_THREADED_DRAW
-    if (s_private) return (uint8_t)(rd32(address & ~3u) >> ((address & 3u)*8u));
-#endif
     return psx_mod_read_byte(address);
 }
 static void wr32(uint32_t address,uint32_t value) {
-#ifdef R4_THREADED_DRAW
-    if (s_private) { psx_ctx_write32(s_private->ctx,address,value); return; }
-#endif
     psx_mod_write_word(address,value);
 }
 
@@ -229,23 +208,3 @@ PSX_MOD_CONSTRUCTOR(r4_camera_look_register) {
     s_hooks_registered += psx_mod_register_function_entry_plugin(
         PLUGIN_ID, R4_CAMERA_LOOK_INPUT_RESTORE_ENTRY, r4_camera_look_restore);
 }
-
-#ifdef R4_THREADED_DRAW
-R4CameraDrawState *r4_camera_draw_capture(void) {
-    R4CameraDrawState *p=calloc(1,sizeof *p);
-    if(p) p->state=s_main;
-    return p;
-}
-int r4_camera_draw_entry(R4CameraDrawState *p, CPUState *cpu,uint32_t address) {
-    if(!p || !cpu || !cpu->ctx) return 0;
-    R4CameraDrawState *prior=s_private; s_private=p; p->ctx=cpu->ctx;
-    if(address==R4_CAMERA_BUILDER) r4_camera_look_build(cpu,address);
-    if(address==R4_CAMERA_LOOK_INPUT_RESTORE_ENTRY) r4_camera_look_restore(cpu,address);
-    s_private=prior; return 1;
-}
-int r4_camera_draw_register_entries(PsxCtxEntryHook callback,void *user) {
-    return r4_draw_mods_register_one(R4_CAMERA_BUILDER,callback,user) &&
-           r4_draw_mods_register_one(R4_CAMERA_LOOK_INPUT_RESTORE_ENTRY,callback,user);
-}
-void r4_camera_draw_destroy(R4CameraDrawState *p) { free(p); }
-#endif

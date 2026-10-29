@@ -90,8 +90,8 @@ def test_manifests():
     check(set(option_values(fr, 'frame-rate', 'rate')) == {'auto', '30', '60', '90', '100', '120', '144', 'display'},
           'frame rate: auto, fixed rates, display refresh and original 30 FPS')
     plugin = open(os.path.join(ROOT, 'src', 'mods', 'r4_frame_rate_plugin.c'), encoding='utf-8').read()
-    check('R4_FR_AUTO_ORIGINAL_SCALE 18u' in plugin and 'psx_mod_internal_scale()' in plugin,
-          'frame rate: Auto resolves from the internal scale, original frames from 18x')
+    check('packet_interpolation_set_rate(active_rate)' in plugin and 'r4_interp' not in plugin,
+          'frame rate: generic packet presenter at every internal scale')
     check(not any(o['id'] in ('method', 'blend') for o in fr.get('option', [])),
           'frame rate: no crossfade or image-warp option')
 
