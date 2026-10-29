@@ -3,7 +3,7 @@
 ## Latest: native authority promoted; continue phase 2
 
 Phase-2 topic is `feat/frame-arch-2-mailbox`, based on `4f893c1a`.
-WIP `3b2fd278` is committed and pushed to fork; it is not merged or pinned.
+WIPs through `cb0dde2d` are committed and pushed to fork; phase 2 is not merged or pinned.
 The audio callback now exclusively owns the resampler, fed by an SPSC PCM
 transport; main/callback register Games/Pro Audio MMCSS. The old push-audio
 diagnostic switch is removed. Load/rewind requests discard old-timeline PCM
@@ -17,6 +17,32 @@ timeline invalidation, and native pixel equality after skipping 62 pending
 packets. Presentation seeds can observe native VRAM/cache without consuming
 the dirty rows needed by rewind. Dev build and R4 32/32 pass; focused native,
 mailbox and audio tests pass. No phase-2 race acceptance claim or merge yet.
+
+Further phase-2 work adds `frame_owner.h/.cpp`: a dedicated consumer with
+startup/shutdown-only context transfer, bounded newest-wins consumption,
+load epochs, consumer-thread identity, Games MMCSS and timed idle callbacks.
+Its blocked-consumer and idle-tick tests pass. GL recording now maintains a
+producer-owned persistent draw-state mirror and restores it across ordinary
+and async extra passes (including discard). Six hidden GL modes retain pixel
+parity. Latest dev build/32 tests and hidden smoke/12 live+paused queries pass;
+owned PID 29628 was stopped. Receipts are `phase2-state-pass-gl/rth-rk999nru`
+and `phase2-state-runtime` under `analysis/perf-20261028/`. The new owner is
+still not connected to the GL backend; do not claim queue backpressure fixed.
+
+2026-10-29 continuation: native HD contexts and immutable Duck/Beetle
+provenance snapshots are implemented. Native context configure/reload/tracking/
+diag tests make zero GL calls; two consumers can apply a held Duck snapshot
+independently after source destruction. Pending copy state survives capture.
+Packets can own one bounded CPU-only attachment; held/replaced/invalidation
+lifetime tests pass. These APIs are not yet connected to native raster jobs or
+production GL packets. Five focused tests pass, dev build and R4 32/32 pass.
+Hidden HD fixture passes 231 full-surface and 217 tiled checks with PGXP depth,
+colour perspective and seams on (`phase2-hd-context-gl/final-receipt.json`).
+Seven old fixture failures reproduced with the previous HD implementation;
+updated fixture explicitly restores caller memory and checks private renderer
+reads instead of expecting guest VRAM publication/context holds. Hidden smoke
+and live/paused diagnostics pass, zero misses/acquisitions; owned PID 27708
+stopped (`phase2-hd-context-runtime`). No phase-2 performance claim.
 
 Next: replace the incremental GL ring with independently seeded packets,
 including full persistent render state, durable controls and exact native HD

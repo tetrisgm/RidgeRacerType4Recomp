@@ -5,6 +5,26 @@ code has not moved since its row is not re-tested (CLAUDE.md, Verification
 scale). Update the row when its code changes or a new check is run.
 Evidence dirs are local (not tracked).
 
+## Frame architecture phase 2 work in progress, 2026-10-28
+
+Phase 2 is **not accepted**. Its mailbox and presentation-owner components
+are tested, but the GL backend still uses the incremental blocking ring.
+No new race throughput claim is made for these component changes.
+
+| Component | Result | Evidence |
+|---|---|---|
+| Callback-owned audio resampler/SPSC PCM, MMCSS | Exact waveform/controller parity; concurrent wrap and timeline resets pass; old push-audio switch removed | `audio_transport_test` |
+| Owned frame packets | Immutable seeds, bounded replacement, overflow rejection and load epochs pass | `frame_mailbox_test` |
+| Native packet seed | Newest packet reproduces exact native pixels after 62 pending packets are replaced; observation leaves rewind dirty rows intact | `native_raster_test` |
+| Presentation-owner worker | 10000 publications complete while consumer callback is blocked; only startup/shutdown context transfers; timed work continues without new guest packets | `frame_mailbox_test` |
+| Producer draw-state mirror | Six hidden GL modes retain matching pixels; extra-pass state is restored before the next real frame | `analysis/perf-20261028/phase2-state-pass-gl/rth-rk999nru/receipt.json` |
+| R4 integration | Dev build and 32/32 tests pass; hidden smoke reaches race with zero dispatch/segment misses; live/paused diagnostic queries retain zero context acquisitions | `analysis/perf-20261028/phase2-state-runtime/` |
+
+Remaining phase-2 integration: independently seeded GL packets, durable
+configuration/diagnostics, exact native HD provenance, retained-surface handling
+after packet replacement, and the slowed-GPU real-time acceptance run. Phases
+3, 3b, 4 and 5 remain unimplemented. Phase 4 retains the owner's 100% match bar.
+
 ## Native-authority phase gate, 2026-10-28
 
 Framework `464bc104`: native GP0/GPUREAD/snapshot fixtures pass; the all-on
@@ -213,3 +233,28 @@ a performance acceptance run.
 | Extra Trial widescreen | not verified (3f493ea reverted) | — |
 | Windows package | df285a0 | `analysis/release-assets-v021-20261027` |
 | macOS packages (arm64, x64) | df285a0 | same |
+
+## Frame architecture phase 2 ownership continuation, 2026-10-29
+
+2026-10-29 continuation: native HD contexts and immutable Duck/Beetle
+provenance snapshots are implemented. Native context configure/reload/tracking/
+diag tests make zero GL calls; two consumers can apply a held Duck snapshot
+independently after source destruction. Pending copy state survives capture.
+Packets can own one bounded CPU-only attachment; held/replaced/invalidation
+lifetime tests pass. These APIs are not yet connected to native raster jobs or
+production GL packets. Five focused tests pass, dev build and R4 32/32 pass.
+Hidden HD fixture passes 231 full-surface and 217 tiled checks with PGXP depth,
+colour perspective and seams on (`phase2-hd-context-gl/final-receipt.json`).
+Seven old fixture failures reproduced with the previous HD implementation;
+updated fixture explicitly restores caller memory and checks private renderer
+reads instead of expecting guest VRAM publication/context holds. Hidden smoke
+and live/paused diagnostics pass, zero misses/acquisitions; owned PID 27708
+stopped (`phase2-hd-context-runtime`). No phase-2 performance claim.
+
+Native provenance capture and packet attachment lifetime are prerequisites only;
+production GL remains on the incremental ring. Phase 2 acceptance is pending.
+
+Framework WIP `cb0dde2d` is pushed on the phase-2 topic, unmerged/unpinned.
+Registered `gl_hd_texture_pack_test` also passes (both hidden HD modes plus
+its native-texture baseline, PGXP renderer features enabled for all three).
+Native-context tests cover both Beetle and Duck formats.
