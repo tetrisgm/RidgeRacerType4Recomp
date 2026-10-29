@@ -350,3 +350,85 @@ fixed-function Gouraud interpolation permits one RGB code of rounding when
 the viewport width changes. Mask/alpha and page-position invariance remain
 exact. This does not relax guest-native pixel parity. Production region
 selection and removal of full-VRAM HR allocations remain unfinished.
+
+## Part 2: guest execution (added 2026-10-29)
+
+Part 1 redesigned everything after the GP0 stream. It treated guest execution
+as a given, and that was the gap: with the GPU wait gone, the guest thread is the
+bottleneck. At the grid race start (hidden 8K, all features on), the guest runs
+at 54-56 VBlanks/s, uses about 88% of a core, and heavy VBlanks take 31-47 ms of CPU.
+This is the same on every branch. Rewind, Car Effects and PGXP CPU mode each
+cost under 1 VBlank/s; the cost is structural.
+
+The generated code is native in name only. Every MIPS instruction carries:
+- a `psx_cyc_step()` call (cycle model),
+- a `psx_icache_fetch()` call (instruction-cache simulation),
+- a `PGXP_ALU()`/load/store call (PGXP CPU mode),
+- registers in a memory struct.
+
+Every memory access goes through read/write functions, with debug write checks
+and cycle observation hooks. Every GP0 command takes a mutex, moves a large job
+and wakes a thread. That's an emulator's per-instruction overhead, compiled.
+
+**Principle: per-instruction cost is zero unless the game can observe it.**
+Faithfulness is defined at **observation points**: I/O reads and writes,
+interrupts, timer and root-counter reads, DMA, GTE results and VBlank. Between
+them, the guest only needs to be correct, not simulated.
+
+1. **Static block timing.**
+   - The recompiler computes each basic block's cycle cost (including
+     instruction-cache refill cost under the same model) at compile time, and
+     the block charges it with one add.
+   - At an observation point inside a block, the static partial cost up to
+     that instruction is charged first, so every observed timer, IRQ or DMA
+     value is identical to the current per-instruction model.
+   - Device deadlines are checked at block ends and observation points only.
+   - The per-instruction `psx_cyc_step` and `psx_icache_fetch` calls are
+     deleted.
+   - Proof: the timing-sensitive test suite and frame fingerprints match the
+     current model bit for bit.
+2. **Inline memory fast path.**
+   - RAM, scratchpad and BIOS loads and stores are emitted inline (mask plus
+     base pointer).
+   - Only the I/O region calls a function.
+   - Code-write detection (self-modifying code, overlays) is page-granular: a
+     dirty bit set inline, not a call.
+3. **Debug and trace hooks cost nothing.**
+   - Shipped builds compile them out (`PSX_NO_DEBUG_TOOLS`).
+   - Dev builds keep them behind one global branch that's predicted off; there
+     is no call and no performance-counter read unless a client enabled the
+     feature.
+4. **PGXP CPU mode stays on and becomes cheap.**
+   - Shadow precision state is kept beside the registers.
+   - Codegen emits inline propagation for the common ops.
+   - Values with no precision skip work after one predictable test.
+   - Memory precision uses a direct-mapped shadow of RAM (no hash or map
+     lookup).
+   - Output must be identical to today's PGXP (vertex streams compared byte
+     for byte on the phase 3b audit scenes).
+5. **Lock-free, batched GP0 handoff.**
+   - An SPSC ring of POD packets, with no allocation.
+   - The worker is woken only when it's parked, or at batch boundaries (end of
+     a DMA chain, VBlank, a read needing completion).
+6. **Zero host work per frame** beyond the pacing sleep: no allocation, no
+   device or display queries, no syscalls on the guest thread (checked by a
+   counter).
+
+**Budget:**
+- The guest thread averages under 8 ms per VBlank at the grid race start
+  (Release, all features on), with the heaviest VBlank under 12 ms.
+- So 60.0 VBlanks/s, 0 starved samples and a maximum interval under 20 ms hold
+  with real headroom.
+- Measured only on the grid race start (the heaviest scene), never on a light
+  savestate.
+
+| # | Phase | Done when |
+|---|---|---|
+| G1 | Lock-free GP0 handoff, zero guest allocation, free debug hooks (items 3, 5, 6) | Hooks and allocations gone from the guest profile; grid 60.0/0 starved |
+| G2 | Static block timing (item 1) | Timing tests and fingerprints identical; per-instruction calls gone |
+| G3 | Inline memory fast path (item 2) | Memory calls only for I/O in the profile |
+| G4 | Inline PGXP CPU mode (item 4) | PGXP streams byte-identical; within budget |
+
+Each phase lands on a framework topic branch, generic for every title,
+faithful by default. A title that needs per-instruction precision can opt into
+the old model.
