@@ -207,3 +207,7 @@ packets. Regeneration unchanged; focused framework and R4 tests pass. Exclusive
 This pin is a topic delivery, not a promotion into r4/main.
 
 2026-10-29: G1 pins fork r4/main 3d7fedc8 (fix/guest-hotpath merged after the Part 2 gate): fresh grid 60.04 VBlanks/s, 0 starved, 0 packet allocation events; CTest 23/23, native/GL fixtures and verified 40-step hidden smoke pass. tools/regen.sh completed with all 50 generated shards unchanged. Final CPU budget remains G4 work.
+
+### 2026-10-29: G2 static timing
+
+Pin psxrecomp 69751f42942aea5061dc311779faeccb192c4b28 (fork r4/main merge of fix/static-block-timing e268240e). Both emitters compose cached ALU timing segments and inline cache-hit tests; exact grid fingerprints, timing/cache/overlay checks, 23 CTests and hidden 40-step smoke pass. Regenerated game and OpenBIOS; stamp current. Supervisor grid: 10.050 ms guest CPU/VBlank (G1 11.903), zero starved and packet allocations, cadence 60.048, harness 59.94, max wall 37.381 ms. Final performance budget remains outstanding for G3/G4. Evidence: psxrecomp/docs/internal/GUEST_EXECUTION.md.
