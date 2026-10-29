@@ -12,6 +12,7 @@ Usage: python3 tools/smoke.py OUT_DIR [--port 4797]
 Start the game first, e.g.:  tools/run_r4.sh build
 """
 import os
+import json
 import sys
 import time
 
@@ -96,7 +97,11 @@ def main():
             if label == "menu":
                 engage_widescreen(port)
             path = os.path.join(out, f"{i:02d}_{label}.png")
-            cmd({"cmd": "screenshot", "path": path}, port=port)
+            shot = cmd({"cmd": "screenshot", "path": path}, port=port)
+            with open(path + ".json", "w", encoding="utf8") as receipt:
+                json.dump(shot, receipt, indent=2)
+            if not shot.get("ok") or not os.path.isfile(path):
+                raise RuntimeError(f"screenshot failed at {label}: {shot}")
             frame = cmd({"cmd": "frame"}, port=port).get("frame")
             d = cmd({"cmd": "dispatch_stats"}, port=port)
             print(f"{i:02d} {label:<11} frame={frame} "
