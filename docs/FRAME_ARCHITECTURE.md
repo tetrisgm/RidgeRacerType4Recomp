@@ -290,3 +290,34 @@ that guest redraw and its admission machinery altogether.
 The fork advanced independently with PGXP audit0e97c44d while phase2 was being
 verified. Its changes are preserved in integration. Revalidate them after the
 phase3 surface conversion; their presence does not waive the phase3b checks.
+
+### Phase-3 work in progress (2026-10-29)
+
+Depth clears now use scissored `glClear` after flushing ordered surface work;
+the old depth-clear vertices and their mode are removed. Neighboring depth
+domains remain intact in a real-GL regression. The separate colour/depth
+primitive replay is still present and is not claimed removed by this change.
+
+Flat, textured and upload/copy-quad vertices now use bounded fenced streams.
+The Windows target uses coherent persistent mapping and vertex binding offsets;
+there is no per-batch buffer orphaning in these paths. The framework also
+supports OpenGL 3.3 platforms, including macOS, where ARB_buffer_storage is
+unavailable: those use the same bounded segment lifetime with fixed allocation
+and subdata updates. This is a capability implementation of the streaming
+contract, not a title flag or retention of the per-batch orphaning path.
+Only the presentation owner can wait for segment reuse. A hidden regression
+forces repeated wraps and checks every rendered primitive on both contracts.
+
+GPU telemetry now timestamps consumed packets, excluding inter-packet idle and
+the injected consumer delay. Collection polls availability and drops telemetry
+when its bounded query ring fills. It reports GPU timeline elapsed time, not a
+claim of hardware utilization; timestamp spans can still include submission
+bubbles within a packet. The older scene timer spans packet idle and must not
+be used as GPU busy time. Release cadence diagnostics expose the new counters.
+
+The imported framework execution profile changes the savestate compatibility
+identity. The old benchmark slot 9 is preserved and is rejected by this build;
+a fresh boot-to-race smoke created a separate slot 10. New results must identify
+that fixture change rather than imply an exact same-state comparison.
+Phase 3 is not accepted: direct wide surfaces, on-demand render-target tiles
+and one-pass primitive depth remain to implement.

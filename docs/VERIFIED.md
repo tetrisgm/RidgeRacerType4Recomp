@@ -370,3 +370,41 @@ Integrated fork pin `a8a62e54`: imported PGXP CPU regressions5/5 pass,
 `phase2-merged-pgxp-origin/rth-whf7lxvs` passes real-GL translated-page tests
 at1x/4x/9x with all corrections on, R4 32/32 passes. Required regeneration
 completed with no generated changes. No BIOS/recompiler regeneration needed.
+
+## Frame architecture phase 3 groundwork, 2026-10-29 (not accepted)
+
+On `feat/frame-arch-3-surfaces`, commit `98ff69cb` (pushed, not merged): scissored depth clears replace clear geometry;
+flat/textured/upload-quad streams replace per-batch orphaning with bounded
+fenced storage, persistent on the owner PC. GL3.3 fixed-storage/subdata uses
+the same lifetime contract. Packet GPU timestamps exclude inter-packet idle.
+The full-VRAM surfaces, duplicate submission and colour/depth replay remain.
+
+- Dev build and R4 CTest 32/32 pass. Framework full build and 295 non-hardware
+  tests pass; the one stale generated TCP command index was regenerated and
+  its check rerun successfully.
+- `phase3-stream-wrap/rth-32_w5d30`: 4110 pixel/storage checks pass across
+  persistent and portable implementations, with 31 flat and 102 textured
+  segment rotations per run.
+- `phase3-stream-pgxp-fixed/rth-3wmh6we9`: translated pages, analytical colour
+  and perspective texture coordinates, depth probes and scissored depth
+  preservation pass at 1x/4x/9x, with PGXP enabled throughout.
+- `phase3-stream-packet/rth-_765jj_9`: 74 checks pass, including exactly two
+  GPU-timed consumed packets after 62 pending replacements.
+- `phase3-new-profile-smoke`: hidden boot-to-race smoke to frame9754, zero
+  dispatch/segment misses. Owned PID7452 stopped. The execution identity
+  changed from50425fc7 to c3745900 after framework integration, so slot9 is
+  correctly rejected. Preserved slot9; created fresh fixture in unused slot10.
+- Hidden18x, actual7680x4320 client, Rewind,60config, active CarEffects and full
+  PGXP: `phase3-stream-clear-slot10-18`, owned PID15980 stopped. Scale remains18,
+  no dynamic scaling; zero dispatch misses and guest context/queue waits.
+
+| Receipt | Fixture | VBlanks/s | Max interval ms | Starved samples | Swap completions/s (not distinct images) | GPU packet elapsed ms | Presentation portion ms |
+|---|---|---:|---:|---:|---:|---:|---:|
+| phase2 packet-deadline-normal18 | slot9, old execution identity | 59.983 | 43.919 | 0 | 55.07 | not validly scoped | not validly scoped |
+| phase3-stream-clear-slot10-18 | slot10, new execution identity | 60.044 | 41.345 | 0 | 51.20 | 18.948 | 12.509 |
+
+This is not a same-savestate speedup comparison. GPU values are timestamp
+elapsed intervals for776 consumed packets, not utilization; they may include
+submission bubbles inside a packet. No telemetry capacity drops. Distinct
+image rate is not established. Final performance and phase3 acceptance remain
+unmet; continue the surface redesign before phases3b/4/5.

@@ -1,3 +1,19 @@
+## Phase3 continuation (2026-10-29)
+
+Current framework branch `feat/frame-arch-3-surfaces`, based on accepted phase2
+integration a8a62e54. Topic commit98ff69cb is pushed (not merged). Work adds scissored depth clears, bounded persistent vertex
+streams (GL3.3 fixed-storage variant), and nonblocking packet GPU timestamps.
+Old depth-clear geometry/mode removed; colour/depth replay and full VRAM remain.
+Dev build/R4 32 tests, hidden stream4110checks, PGXP1x/4x/9x, packet74checks pass.
+Framework full build passed; 295 non-hardware unit tests pass after regenerating
+the TCP command index for the imported PGXP audit commands.
+Hidden smoke frame9754 zero misses, PID7452 stopped. New slot10 benchmark
+required by execution identity change; old slot9 preserved. Slot10 18x all-on:
+60.044Hz,max41.345ms,zero starved,51.2swaps/s(not distinct),GPU packet18.948ms
+including12.509ms presentation. PID15980 stopped. No live game.
+No phase3 acceptance or promotion. Continue direct-wide/on-demand RTT surfaces,
+one-pass depth, then3b/4/5. No owner-only blocker. Do not finalize at checkpoint.
+
 ## Current rollout boundary: phase 3 (2026-10-29)
 
 Phase2 accepted and promoted: framework topic27d6d167, merged with independently
