@@ -830,6 +830,10 @@ static void r4_race_hud_activate(void) {
 static void r4_race_hud_session_reset(void) {
     s_enabled.store(false, std::memory_order_relaxed);
     s_panels_shown.store(0);
+    /* The framework clears session-owned HUD callbacks before invoking reset
+     * hooks. Keep this shared draw layer installed for Car Effects even when
+     * the optional Race HUD package itself is off. */
+    psx_host_set_hud_draw_cb(hud_draw, nullptr);
 }
 
 PSX_MOD_CONSTRUCTOR(r4_register_race_hud) {

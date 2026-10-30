@@ -3,6 +3,24 @@
 The `psxrecomp` and `recomp-ui` submodule gitlinks are the pins. Bump them
 deliberately and record each bump here with the reason and what was verified.
 
+2026-10-30 final release integration: pin fork `r4/main` at `fc175dce`
+(`fc175dce` merges release blocking waits and startup measurement support).
+This carries the frame architecture's native authority and immutable presentation
+packets, guest execution improvements, retained presentation surfaces and audio
+reserve fixes, followed by blocking runtime waits and opt-in host sampling.
+The matching validated launcher remains `c6ac60c7`; no launcher bump is needed.
+
+The fresh branch starts at master `4ba15698` (PR #96). `351dfbc` and the packet
+interpolation integration are already ancestors. Comparing the audit/release
+branches showed that their Car Effects pause/rewind clock, sampled speedometer,
+and persistent HUD callback were missing from master; those runtime changes and
+the clock test are imported without obsolete topic pins or historical claims.
+The release measurement harness comes from `9740775`. The PGXP boot test now
+checks default and explicitly enabled settings, never a disabled PGXP case.
+`tools/regen.sh` regenerates the game from the disc; its normalized output is
+unchanged from master's committed generated files. Rewind, 60 FPS, Car Effects,
+and full PGXP remain enabled by default. See VERIFIED.md for this pin's gates.
+
 2026-10-29 final frame integration: pin psxrecomp fork `r4/main` at
 `c925067d` (merge of VBlank interval topic `a0c824c6`). The topic reduces
 the observed maximum VBlank interval from roughly 38 ms to 24.962 ms; the

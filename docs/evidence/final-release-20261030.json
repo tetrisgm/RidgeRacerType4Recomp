@@ -1,0 +1,275 @@
+{
+  "framework": "fc175dce",
+  "launcher": "c6ac60c747079702c182a1f969739c7a3d1154ee",
+  "base": "4ba15698",
+  "build": {
+    "type": "Release",
+    "compiler": "Clang",
+    "optimization": "-O3 -DNDEBUG",
+    "ipo": "ThinLTO",
+    "debug_tools": false,
+    "bios": "OpenBIOS",
+    "jobs": 4,
+    "vulkan": false
+  },
+  "conditions": {
+    "hidden_window": true,
+    "audio_driver": "dummy",
+    "internal_scale": 18,
+    "rewind": true,
+    "race_fps": 60,
+    "car_effects": true,
+    "pgxp": "fully enabled",
+    "owner_apps": "left running",
+    "warmup_seconds": 10,
+    "requested_measurement_seconds": 120
+  },
+  "summary": {
+    "report_seconds": 121.029,
+    "vblanks_per_s": 59.99388576291633,
+    "presented_per_s": 59.99388576291633,
+    "game_cpu_core_percent": 77.31160657492218,
+    "host_cpu_percent": 88.59444444444445,
+    "audio_underruns": 0.0,
+    "gpu_ms_per_present": 5.645017393747417,
+    "gpu_present_ms_per_present": 1.5520748679245282
+  },
+  "provenance": {
+    "executable": "C:\\Users\\Shokunin\\dev\\r4-wt-final\\build\\r4-runtime.exe",
+    "sha256": "971c7d1b5711075cd7b18e54cf864c7ef55e745d63574e00a25c97c695a87372",
+    "environment": {
+      "SDL_AUDIODRIVER": "dummy",
+      "PSX_FRAME_REPORT_MS": "1000",
+      "PSX_GL_ASYNC_GPU_TIMER": "1",
+      "PSX_HLE_SCHEDULER": "0",
+      "PSX_BIOS_HLE": "0",
+      "PSX_PRESENT_IMAGE_RING": "0",
+      "PSX_LOAD_SLOT": "9",
+      "PSX_HOLD_PADS": "bfff"
+    },
+    "seconds": 120.0
+  },
+  "threads": [
+    {
+      "tid": 19852,
+      "name": "PSX emulation",
+      "cpu_percent": 41.65045110641528
+    },
+    {
+      "tid": 34232,
+      "name": "PSX render",
+      "cpu_percent": 17.73249974891652
+    },
+    {
+      "tid": 44840,
+      "name": "",
+      "cpu_percent": 6.891613103008117
+    },
+    {
+      "tid": 4944,
+      "name": "PSX native raster",
+      "cpu_percent": 5.322365337617275
+    },
+    {
+      "tid": 18788,
+      "name": "",
+      "cpu_percent": 1.6607872183719752
+    },
+    {
+      "tid": 18836,
+      "name": "",
+      "cpu_percent": 1.582324830102433
+    },
+    {
+      "tid": 20512,
+      "name": "",
+      "cpu_percent": 1.4254000535633486
+    },
+    {
+      "tid": 48276,
+      "name": "PSX audio",
+      "cpu_percent": 0.3530807472129396
+    },
+    {
+      "tid": 40004,
+      "name": "PSX present",
+      "cpu_percent": 0.3530807472129396
+    },
+    {
+      "tid": 28000,
+      "name": "PSX input reclamation",
+      "cpu_percent": 0.19615597067385535
+    },
+    {
+      "tid": 12400,
+      "name": "",
+      "cpu_percent": 0.10461651769272284
+    },
+    {
+      "tid": 17168,
+      "name": "PSX transform storage",
+      "cpu_percent": 0.039231194134771066
+    },
+    {
+      "tid": 24640,
+      "name": "",
+      "cpu_percent": 0.0
+    },
+    {
+      "tid": 8960,
+      "name": "",
+      "cpu_percent": 0.0
+    },
+    {
+      "tid": 25528,
+      "name": "",
+      "cpu_percent": 0.0
+    },
+    {
+      "tid": 44116,
+      "name": "WindhawkMainLoopThreadAttachExempt",
+      "cpu_percent": 0.0
+    },
+    {
+      "tid": 47052,
+      "name": "overlay-preserve-write",
+      "cpu_percent": 0.0
+    },
+    {
+      "tid": 39284,
+      "name": "DeviceHotplugThread",
+      "cpu_percent": 0.0
+    },
+    {
+      "tid": 7720,
+      "name": "",
+      "cpu_percent": 0.0
+    },
+    {
+      "tid": 13756,
+      "name": "",
+      "cpu_percent": 0.0
+    },
+    {
+      "tid": 47936,
+      "name": "",
+      "cpu_percent": 0.0
+    },
+    {
+      "tid": 6516,
+      "name": "SDL_joystick",
+      "cpu_percent": 0.0
+    },
+    {
+      "tid": 28708,
+      "name": "",
+      "cpu_percent": 0.0
+    },
+    {
+      "tid": 22808,
+      "name": "",
+      "cpu_percent": 0.0
+    },
+    {
+      "tid": 30340,
+      "name": "",
+      "cpu_percent": 0.0
+    },
+    {
+      "tid": 37516,
+      "name": "",
+      "cpu_percent": 0.0
+    },
+    {
+      "tid": 2056,
+      "name": "",
+      "cpu_percent": 0.0
+    }
+  ],
+  "limits": "Present-thread swap completions, not unique pixel hashes or physical scanout; dummy audio tests callback transport, not speakers.",
+  "validation": {
+    "release_ctest": {
+      "passed": 24,
+      "total": 24
+    },
+    "pgxp_boot": "passed: default and explicitly enabled",
+    "smoke": {
+      "checkpoints": 40,
+      "dispatch_misses": 0,
+      "segment_misses": 0,
+      "last_checkpoint_frame": 8908,
+      "final_state": {
+        "dispatch_stats": {
+          "id": 0,
+          "ok": true,
+          "static_hits": 3703591,
+          "miss_total": 0,
+          "miss_unique": 0,
+          "segment_miss_total": 0,
+          "segment_miss_unique": 0
+        },
+        "geom_correction": {
+          "id": 0,
+          "ok": true,
+          "geometry_correction": 1,
+          "texture_correction": 1,
+          "geometry_vertex_hits": 0,
+          "perspective_triangles": 2390892,
+          "texcorr": {
+            "attempts": 3315635,
+            "armed": 3282717,
+            "no_correction": 0,
+            "no_source": 0,
+            "no_depth": 32918
+          },
+          "lookups": 0,
+          "miss_unrecorded": 0,
+          "miss_ambiguous": 0,
+          "pgxp": {
+            "enabled": 1,
+            "cpu_mode": 1,
+            "tolerance": -1.0,
+            "position_fallback": 0,
+            "preserve_projection": 1,
+            "culling": 1,
+            "lookups": 10693617,
+            "dataflow_hit": 10668345,
+            "fallback_hit": 0,
+            "native": 25272,
+            "value_mismatch": 23977,
+            "trunc_reject": 4,
+            "tolerance_reject": 0,
+            "depth_only": 0,
+            "w_valid": 10411763,
+            "over_one_pixel": 2097091,
+            "produced": 15818621,
+            "swc2_stores": 3050852,
+            "ppp_produced": 8758119,
+            "ppp_window_fallback": 247780,
+            "tri_precise": 3548991,
+            "tri_mixed": 14945,
+            "tri_native": 603,
+            "rect_bypass": 126260,
+            "rect_partial": 9,
+            "nclip_precise": 6320116,
+            "nclip_disagree": 2525320,
+            "nclip_corrected": 2525320,
+            "word": {
+              "lookups": 20574686,
+              "hit": 20259918,
+              "untracked": 0,
+              "mismatch": 0,
+              "partial": 25268,
+              "no_z": 289500
+            }
+          }
+        },
+        "frame": {
+          "id": 0,
+          "ok": true,
+          "frame": 8912
+        }
+      }
+    }
+  }
+}

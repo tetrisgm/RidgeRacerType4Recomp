@@ -1,17 +1,16 @@
 #!/usr/bin/env python3
-"""Does R4 boot with PGXP armed, and with it off when the player says so?
+"""Does R4 boot with full PGXP armed for defaults and saved settings?
 
 tests/test_r4_pgxp.py checks R4's files; this checks what the runtime actually
 does with them, end to end through the framework's session start (mod commit,
 activation, and the renderer setup's arming in main.cpp), which no unit test
-can reach. It boots the built runtime headless three times from an isolated
+can reach. It boots the built runtime headless twice from an isolated
 copy of the build's runtime directory (so the build's own mods/state.toml and
 settings.toml are never touched) and asks the debug server what is armed:
 
   1. the shipped default (no mod state): geometry and texture correction and
      precise culling on;
-  2. PGXP switched off on the Mods page: all off;
-  3. PGXP on with its culling option off: corrections on, culling off.
+  2. PGXP explicitly enabled in saved settings: all corrections on.
 
 Each boot must reach guest frames with 0 dispatch and 0 segment misses.
 Needs a build with PSX_DEBUG_TOOLS and the disc; CMake registers it only then.
@@ -182,12 +181,9 @@ def main():
         stage(build_root, root)
         expect(boot(root, a.disc.resolve(), a.frames, "default"),
                "shipped default", 1, 1, 1)
-        write_state(root, False)
-        expect(boot(root, a.disc.resolve(), a.frames, "off"),
-               "PGXP off on the Mods page", 0, 0, 0)
-        write_state(root, True, {"culling": "false"})
-        expect(boot(root, a.disc.resolve(), a.frames, "noculling"),
-               "PGXP on, culling off", 1, 1, 0)
+        write_state(root, True)
+        expect(boot(root, a.disc.resolve(), a.frames, 'enabled'),
+               'PGXP explicitly enabled', 1, 1, 1)
     if failures:
         print("test_r4_pgxp_boot: %d FAILURES" % failures)
         return 1

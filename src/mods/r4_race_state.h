@@ -63,6 +63,8 @@ typedef struct R4RaceState {
                                  * frame: a game frame lasts two, more when the game
                                  * slows down */
     int in_race;
+    int paused;                /* guest pause, sampled with the scene */
+    int speedometer;
     int car_count;
     R4RaceCar cars[R4_RACE_CARS];          /* [0] = player 1 */
     R4RaceCamera cameras[R4_RACE_VIEWS];   /* per view (0: full screen; 1, 2: split screen) */
