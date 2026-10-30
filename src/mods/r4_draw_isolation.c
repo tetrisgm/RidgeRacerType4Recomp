@@ -8,7 +8,7 @@
  * Findings and the workflow: docs/DRAW_ISOLATION.md.
  *
  * Every top-level call of a race-handler draw function (the call lists of
- * r4_interp.c, which are the race draw paths with logic removed) and the
+ * race handler, which are the race draw paths with logic removed) and the
  * main loop's two ClearOTagR calls run nested from their entry hook inside
  * psx_draw_iso_enter()/leave() (psxrecomp draw_isolation.h), in place on the
  * guest clock. At VSync(0) (the pass point: tick built, display about to
@@ -49,7 +49,7 @@
 #include "draw_isolation.h"
 #include "mod_plugins.h"
 #include "psx_memory.h"
-#include "r4_interp_math.h"
+#include "r4_race_mode.h"
 
 extern int psx_get_in_exception(void);
 
@@ -74,7 +74,7 @@ extern int psx_get_in_exception(void);
 #define R4_PHASE            0x800FF860u
 #define R4_TICK             0x800F2F94u
 
-/* Draw entry points of the race handlers (r4_interp.c call lists; static
+/* Draw entry points of the race handlers (race handler call lists; static
  * audit in analysis/jp-hack/impl2/fps_r4.md). All are trusted entry hooks in
  * game.toml mod_function_entry_funcs. */
 static const uint32_t k_draw_fns[] = {
@@ -86,7 +86,7 @@ static const uint32_t k_draw_fns[] = {
     /* 3D: viewport, view build, cars, course, objects, course tail, mirror */
     0x8006F2B0u, 0x8006E4D0u, 0x8002E554u, 0x8002DC00u, 0x8006F00Cu, 0x80074AD8u,
     0x800374F8u, 0x80070A58u,
-    /* Demo/replay setup, fade, text and replay badge (r4_interp.c). */
+    /* Demo/replay setup, fade, text and replay badge (race handler). */
     0x800914B0u, 0x80014A84u, 0x800558E8u, 0x80020074u, 0x80090600u,
     0x8004CBACu, 0x80059E24u, 0x80096660u, 0x8004C8BCu, 0x8004CC40u,
 };

@@ -3,6 +3,117 @@
 The `psxrecomp` and `recomp-ui` submodule gitlinks are the pins. Bump them
 deliberately and record each bump here with the reason and what was verified.
 
+2026-10-29 final frame integration: pin psxrecomp fork `r4/main` at
+`c925067d` (merge of VBlank interval topic `a0c824c6`). The topic reduces
+the observed maximum VBlank interval from roughly 38 ms to 24.962 ms; the
+under-20-ms performance goal remains open. This R4 branch folds in phase 3b
+`8debe2f`, Rewind `21d2a50`, interpolation `7b9eab7`, regeneration
+`351dfbc`, and phase 3 integration `2875e38`. Regenerated game output with
+`tools/regen.sh`. Rewind, Race frame rate, Car Effects, and full PGXP are
+enabled by default. Final build, CTest, and smoke results are in VERIFIED.md.
+
+2026-10-29 phase-4 wait-attribution pin: `7a46df9e` (via `8d412798`). Publication wakes the
+render owner without acquiring its mutex; immutable transform history uses
+fixed-step deferred retirement. Opt-in VBlank telemetry includes worst-20
+sleep/overshoot, publication, native enqueue/completion, history, and guest
+CPU timings.
+JOBS=4 build and regeneration pass (generated output unchanged), 22 permitted
+R4 tests and seven focused framework checks pass. Final locked A/B results are
+recorded in [the phase-4 status](FRAME_INTERPOLATION_STATUS.md).
+
+2026-10-29 phase-4 validation pin: `bf2fb59e` (documentation-only above
+`2e39cbe6`). Records failed visual and 8K-rate acceptance after stock comparison;
+no production-readiness claim. Final regeneration changes no generated output.
+Compact-layout rewind restores 49 snapshots without failures and resumes a
+clean 45-pair census. See [final evidence](FRAME_INTERPOLATION_STATUS.md).
+
+2026-10-29 phase-4 presenter topic pin: `2e39cbe6` (includes `9ead2f08`).
+Adds retained packet sampling, source-model appearance classification, streamed
+vertex identity, projection interpolation and opaque Car Effects metadata.
+Removes the unused private worker pool. R4 switches FPS to the generic presenter
+and removes its guest re-execution path. Build/23 CTests and focused sampler,
+stream, presenter and lease fixtures pass. Regeneration leaves 50 ordinary
+shards unchanged and emits no private draw clones. Visual/rate acceptance is
+not yet closed; see [status](FRAME_INTERPOLATION_STATUS.md).
+
+2026-10-29 phase-4 continuation topic pin: `cf8aadf2` (via `398e6bc2`).
+Adds original RAM provenance, deterministic duplicate assignment, frozen-pair
+TCP inspection and projective-path census coverage. R4 build/32 CTests and
+five focused framework tests pass; regeneration leaves 50 shards unchanged.
+The inclusive 45-sample race gate fails (max 1592 unclassified unmatched,
+zero ambiguous, one invalid depth). No production cutover, legacy deletion,
+merge or generic 8K60/120 performance claim. See
+[phase-4 status](FRAME_INTERPOLATION_STATUS.md).
+
+2026-10-29 phase-4 development topic pin: `cf4f8b69` (fork
+`feat/frame-arch-4-interp`, based on `r4/main` at `d2185504`). Adds a separate
+packet-pair sampler, validated PGXP projection provenance and an opt-in
+presenter audit. This is not a production FPS cutover: repeated-instance
+identity still fails the runtime gate (18/45 samples flagged, up to 66
+ambiguous candidates). R4 build and 32/32 tests, five focused framework tests
+and hidden complete-frame GL fixture pass. Hidden smoke has zero dispatch or
+segment misses. Regeneration leaves all 50 shards unchanged. No legacy path
+deletion, merge, PR or 8K60/120 acceptance. See
+[phase-4 status](FRAME_INTERPOLATION_STATUS.md).
+
+2026-10-29 phase-5 enhanced reverse pin: `c544b04a` (fork
+`feat/frame-arch-5-rewind`). Integrates packet presenter through `27d6d167`, adds
+512 MiB immutable packet history aligned with native capture ticks, waits for
+each replay before stepping again, and branches forward on release. Repairs
+the duplicated HUD by invalidating native/enhanced center-splice equivalence
+and derived caches after restore; PGXP remains fully enabled. Hidden GL fixture:
+111 checks; Release build, 31 permitted CTests, native/mailbox/hold/serializer
+fixtures pass; regeneration leaves 50 shards unchanged. Fixed 18x/4320-line
+120-second run: 7,200 captures, zero gaps/failures/dispatch misses, mean
+0.200516 ms, p99 0.316 ms, maximum 0.7186 ms. Mapped Y: 94 exact restores and
+enhanced replays; debug hold: 272, reaching the bounded history edge and resuming.
+No R4 PR or merge into `r4/main`. See [evidence and hand-off](REWIND_PHASE5.md).
+
+2026-10-29 phase-5 latency follow-up pin: `6cb8b57d` (fork
+`feat/frame-arch-5-rewind`). Preallocated reverse-page pool, immutable capture
+buffer, CPU delta/eviction worker and ordered native checkpoint mailbox.
+Retained worker events avoid Windows condition-variable contention/polling;
+emulation-thread above-normal priority is scoped to configured rewind.
+R4 also reattaches the shared HUD/Effects callback during plugin activation.
+Regeneration: 50 shards unchanged. Release build, 31 permitted R4 tests and
+native/serializer/delta/worker/hold fixtures pass. Hidden 600-second 18x race:
+35,994 captures, zero frame gap/failures/dispatch misses; mean 0.185991 ms,
+p50 0.178 ms, p99 0.298 ms, maximum 0.5175 ms. PGXP fully on; Effects draws
+verified. Mapped Y restores 151 byte-exact states; debug hold restores 154;
+release resumes and all menu probes stay closed. Enhanced reverse presentation
+is still missing, and composed-output artifacts remain: this is not full
+phase-5 acceptance. No renderer-plumbing edits, PR or merge into `r4/main`.
+See [complete evidence and remaining integration](REWIND_PHASE5.md).
+
+2026-10-29 phase-5 topic pin: `6e47aa80` (fork
+`feat/frame-arch-5-rewind`, based on `4f893c1a`). Adds generic native-only
+per-frame reverse-page snapshots and held rewind with muted audio and native
+scanout presentation. No GL snapshot reads or renderer plumbing changes.
+R4 defaults restore rewind and 60 FPS; Car Effects and full PGXP stay enabled.
+Release build, 31/31 permitted R4 tests, native/delta/hold/serializer fixtures,
+and hidden dummy-audio boot-to-race smoke pass with zero dispatch/segment misses.
+Final TCP demo: 601 captures at 0.467880 ms mean host cost, 124 byte-exact
+restores; earlier repeated windows 0.381678-0.427349 ms and mapped-Y hold pass.
+See [Phase 5 evidence](REWIND_PHASE5.md) for scope and maximum-cost caveat.
+Supervisor integration only; this pin has not merged into `r4/main`.
+
+2026-10-28 native-authority phase pin: `4f893c1a` (fork `r4/main`, merge of
+`feat/frame-arch-1-native-authority` through `464bc104`). Original GP0 executes
+on a CPU-native raster worker; guest VRAM reads, snapshots and scanout no
+longer depend on GL. Renderer controls/diagnostics and CPU images are queued;
+native display history replaces continuous debug VRAM readback. Native pixel
+oracle and save fixtures pass, framework unit gate/R4 32 tests/hidden GL and
+race smoke pass, and the same-save all-on race has zero context acquisitions.
+Queue backpressure, legacy ownership APIs and the remaining rollout are open;
+53.075 VBlanks/s is not the performance target. No recompiler changes.
+
+2026-10-28 performance pin: `ac65fcf5` (fork `fix/race-cadence-metrics`,
+to `r4/main`) adds opt-in `main_cadence` debug telemetry for host VBlank
+intervals and pre-wait pacing debt; no guest timing changes. It carries
+the existing `a7122c59` display and `487ec042` Steam-pad selection fixes.
+Launcher remains `c6ac60c` (to its `r4/main`). Game regeneration is required
+for this pin; acceptance and release gates are recorded in `docs/VERIFIED.md`.
+
 | Date | psxrecomp | recomp-ui | recomp-net (nested) | rbengine (nested) | Why / verified |
 |---|---|---|---|---|---|
 | 2026-09-25 | `19b5a65f` (master) | `b688ca7` (master) | `c2338c6` (psxrecomp's pin) | `a7b9850` (psxrecomp's pin) | Initial bring-up on latest masters (not MMX6's pins). Verified on macOS arm64: OpenBIOS HLE-boot and full LLE boot to the intro movie, menus, Grand Prix race, audio (SPU + XA), 0 dispatch misses, native overlay shards, rollback self-check 7/7 PASS, two-instance netplay (delay-sync and rollback) VS race with 0 digest mismatches. |
@@ -94,3 +205,54 @@ its own.
 | 2026-10-28 | `80b058e6` (`fix/steam-controller-outside-steam` on `r4/main` `be636e41`) | unchanged | unchanged | unchanged | Controllers when R4 is not started from Steam: P1 on Keyboard adopts the first connected pad (keybinds stay live; launcher still saves Keyboard), and a physical Valve pad's Steam Desktop Configuration echoes (Escape, Tab, Enter, mouse clicks) are dropped while that pad has input held. Runtime only; no regen. Verified on Windows (PC), debug-tools build: ctest 32 of 32, `controller_type_test` passes, headless `tools/smoke.py` to a Grand Prix race with 0 dispatch misses. Physical Steam Controller (2026 model, 28DE:1304 Proteus dongle) not yet checked hands-on. |
 | 2026-10-28 | `2b5a3817` (fork `r4/main`: `feat/menu-main-screen` + `fix/steam-controller-outside-steam`) | `5d8eaa3` | | | Integration pin of the two rows above. |
 | 2026-10-28 | `2b5a3817` (unchanged) | `8b3fcaf` (recomp-launcher branch `feat/add-to-steam` on `r4/main` `5d8eaa3`; not pushed) | | | Add to Steam (owner, 2026-10-28): opt-in `controls.steam` puts a Steam section on Controls (only when Steam is installed and R4 is not registered; "Running from Steam" when Steam started it). The button writes a non-Steam shortcut "Ridge Racer Type 4 Recompiled" into every local user's `shortcuts.vdf` (append-only, unknown fields kept, `.bak` first, idempotent), then offers Restart Steam on click. Controller template left to Steam's default for non-Steam games (Gamepad). No framework change, no regen. Verified on Windows: R4 ctest 32/32, recomp-launcher core + 3 new script tests against a fake Steam folder (`R4L_STEAM_ROOT`; `r4l_core`/`r4l_render_all` fail identically without the change), headless smoke to race-12s 0 dispatch / segment misses. Real Steam folder never written. |
+| 2026-10-28 | `a7122c59` (fork branch `fix/display-playtest-20261028` on `fix/prefer-steam-virtual-pad` `487ec042`; not pushed) | `c6ac60c` (recomp-launcher `fix/display-playtest-20261028`; not pushed) | | | Owner playtest display fixes: Internal resolution applies live from the in-game menu (no false "Applies after restart"), Windows Borderless is a borderless popup one row taller than the monitor (no fullscreen-flip promotion, instant Alt-Tab), Internal resolution rows show real pixels ("4K · 3840×2160 (9×)" at 16:9). Match display capped at 4K/9x by default (`match_display_max_lines = 2160`). Runtime only; no regen. Verified: ctest 32/32, headless smoke 0 dispatch misses, hidden-window menu change Match display -> 1440p applied live (hr_scale 9 -> 6, same PID). Borderless Alt-Tab needs the owner's eyes. |
+
+2026-10-29: Phase-4 topic pins 657876f2 for pre-cull transform attachments, source-table sampling and signed-depth clipping fixtures. Audit remains unaccepted (unverified new sources); production interpolation remains legacy.
+
+2026-10-29 interpolation profiling topic: framework code `014e2cb5` adds CPU-worker
+transform storage and direct immutable-history leases; R4 FPS still uses generic
+packets. Regeneration unchanged; focused framework and R4 tests pass. Exclusive
+60-second A/B tests fail timing/throughput acceptance; see FRAME_INTERPOLATION_STATUS.md.
+This pin is a topic delivery, not a promotion into r4/main.
+
+2026-10-29: G1 pins fork r4/main 3d7fedc8 (fix/guest-hotpath merged after the Part 2 gate): fresh grid 60.04 VBlanks/s, 0 starved, 0 packet allocation events; CTest 23/23, native/GL fixtures and verified 40-step hidden smoke pass. tools/regen.sh completed with all 50 generated shards unchanged. Final CPU budget remains G4 work.
+
+### 2026-10-29: G2 static timing
+
+Pin psxrecomp 69751f42942aea5061dc311779faeccb192c4b28 (fork r4/main merge of fix/static-block-timing e268240e). Both emitters compose cached ALU timing segments and inline cache-hit tests; exact grid fingerprints, timing/cache/overlay checks, 23 CTests and hidden 40-step smoke pass. Regenerated game and OpenBIOS; stamp current. Supervisor grid: 10.050 ms guest CPU/VBlank (G1 11.903), zero starved and packet allocations, cadence 60.048, harness 59.94, max wall 37.381 ms. Final performance budget remains outstanding for G3/G4. Evidence: psxrecomp/docs/internal/GUEST_EXECUTION.md.
+
+2026-10-29 G3 pins fork r4/main 1ae4b9f5 (fix/inline-memory 95f99dca). Compiled RAM/scratch/BIOS access bypasses callbacks; exact timing/store differential tests and 120 grid fingerprints, 23 root CTests, native fixtures and 40-step smoke pass. Regenerated OpenBIOS and R4. Final grid 60.01/0 starved/0 packet allocations, mean CPU11.792ms (G2 10.050), maxwall36.667ms. CPU regression recorded; final G4 budget remains unmet.
+
+2026-10-29 G4 integration pin: `dd5dca60` (G4 topic `f88e83b7`, merge
+`ad0a2c42`, fork integration `ae0df75b`). Inline PGXP, compact shadow propagation,
+static timing continuation and alias-safe read-absorb storage retain exact
+guest and PGXP results. OpenBIOS and game output regenerated. The owner removed
+the inherited 37-38 ms interval as a G4 merge gate and requested immediate
+merge; framework topic and r4/main are pushed. Prior final-candidate checks:
+480 exact guest frames, 581,682 ordered triangle records, focused tests and
+zero-miss hidden smoke pass. The interrupted final build was rerun successfully with
+the fork's production surface integration. Final integrated verification and
+the separate three-hour interval task are recorded in the framework's
+`docs/internal/GUEST_EXECUTION.md`; broader legacy source-guard failures are
+not represented as a green full framework suite.
+
+2026-10-29 interval investigation pin: `a0c824c6` on framework
+`fix/vblank-interval`, pushed for review, **not merged into r4/main and not a
+performance promotion**. G4 remains accepted on main at `dd5dca60`.
+Pre-edge event pacing, compact shared precision logic and admitted-block GTE
+and MULT/DIV timing reduced the observed maximum from the inherited roughly
+37-38 ms to a best/final **24.962 ms**. The requested **under-20-ms gate failed**.
+Final fresh supervisor slot11: harness59.98/cadence60.006 VBlanks/s, zero starved
+samples and packet allocations, mean guest-thread CPU8.934ms. Worst interval
+contains115365297 CPU cycles and only0.061ms native completion wait; active
+execution is the remaining bottleneck. Stop within the owner's approximately
+three-hour time box; larger mixed-load timing/GPR localization does not fit it.
+
+OpenBIOS stamp current and R4 regenerated with tools/regen.sh. Final build exits0;
+13 focused framework/22 permitted R4/3 emitter checks and native recorded-oracle
+fixtures pass.480 guest fingerprints and571890 ordered PGXP triangles match;
+40-step hidden smoke has zero dispatch/segment misses. The PGXP-off boot test
+is excluded; broader legacy framework failures are not claimed fixed.
+Detailed before/after table, root-cause limits, estimated remaining cost and
+numeric receipts: psxrecomp/docs/internal/GUEST_EXECUTION.md and
+psxrecomp/docs/internal/GUEST_EXECUTION_INTERVAL_RECEIPTS.json.

@@ -172,9 +172,7 @@ if(R4_REGION STREQUAL "PAL")
     target_compile_definitions(psx-runtime PRIVATE R4_REGION_PAL=1)
     target_include_directories(psx-runtime PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/pal/mods")
 endif()
-if(R4_REGION STREQUAL "USA" AND EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/${R4_GEN_STEM}_draw.c")
-    target_compile_definitions(psx-runtime PRIVATE R4_THREADED_DRAW=1 R4_ASYNC_DRAW=1)
-endif()
+
 
 # Launcher translations of this project (launcher/i18n/<code>.json), staged
 # next to recomp-ui's own. Select one with -DR4L_UI_LANGUAGE=fr or the
@@ -244,27 +242,6 @@ if(R4_BUILD_TESTS AND BUILD_TESTING)
         add_test(NAME r4_link_netplay_setup COMMAND r4-link-netplay-tests)
     endif()
     # Pure widescreen helpers, no game data needed.
-    if(NOT MSVC)
-        find_package(Threads REQUIRED)
-        add_executable(r4-draw-ws-tests tests/test_r4_draw_ws.c)
-        target_compile_options(r4-draw-ws-tests PRIVATE -O2)
-        target_include_directories(r4-draw-ws-tests PRIVATE
-            "${PSXRECOMP_ROOT}/runtime/include" "${CMAKE_CURRENT_SOURCE_DIR}/src/mods")
-        target_link_libraries(r4-draw-ws-tests PRIVATE Threads::Threads)
-        add_test(NAME r4_draw_ws COMMAND r4-draw-ws-tests)
-        add_executable(r4-draw-md-tests tests/test_r4_draw_md.c)
-        target_compile_options(r4-draw-md-tests PRIVATE -O2)
-        target_include_directories(r4-draw-md-tests PRIVATE
-            "${PSXRECOMP_ROOT}/runtime/include" "${CMAKE_CURRENT_SOURCE_DIR}/src/mods")
-        target_link_libraries(r4-draw-md-tests PRIVATE Threads::Threads m)
-        add_test(NAME r4_draw_md COMMAND r4-draw-md-tests)
-        add_executable(r4-draw-camera-tests tests/test_r4_draw_camera.c)
-        target_compile_options(r4-draw-camera-tests PRIVATE -O2)
-        target_include_directories(r4-draw-camera-tests PRIVATE
-            "${PSXRECOMP_ROOT}/runtime/include" "${CMAKE_CURRENT_SOURCE_DIR}/src/mods")
-        target_link_libraries(r4-draw-camera-tests PRIVATE Threads::Threads m)
-        add_test(NAME r4_draw_camera COMMAND r4-draw-camera-tests)
-    endif()
     if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_r4_widescreen.c")
         add_executable(r4-widescreen-tests
             "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_r4_widescreen.c")
@@ -286,16 +263,6 @@ if(R4_BUILD_TESTS AND BUILD_TESTING)
         add_test(NAME ${name} COMMAND test_${name})
         set_tests_properties(${name} PROPERTIES DEPENDS ${name}_build)
     endfunction()
-    r4_plugin_test(r4_interp "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_r4_interp.c")
-    r4_plugin_test(r4_interp_plugin
-        "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_r4_interp_plugin.c"
-        "${CMAKE_CURRENT_SOURCE_DIR}/src/mods/r4_interp.c")
-    if(EXISTS "${PSXRECOMP_ROOT}/runtime/include/psx_exec_ctx.h")
-        r4_plugin_test(r4_interp_private
-            "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_r4_interp_plugin.c"
-            "${CMAKE_CURRENT_SOURCE_DIR}/src/mods/r4_interp.c")
-        target_compile_definitions(test_r4_interp_private PRIVATE R4_THREADED_DRAW=1)
-    endif()
     if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_r4_jogcon_compat.c")
         r4_plugin_test(r4_jogcon_compat
             "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_r4_jogcon_compat.c"

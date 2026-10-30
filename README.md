@@ -85,17 +85,17 @@ Switching a feature off gives you the stock game for that part.
 | **JogCon input**: recognized steering wheels drive as R4's JogCon; ordinary gamepads use native DualShock analog steering | Yes | Mods → **JogCon Input** off; the pad mode is under Settings → Controller |
 | **PGXP**: steady geometry and straight (perspective-correct) textures, with precise culling so the far road has no gaps and CPU-mode propagation (precision tracked through CPU arithmetic too) | Yes | Mods → Visual → **PGXP Precision** off, or turn only its **Precise culling** option off |
 | **Max Detail**: longer draw distance (far bridges, buildings and road no longer pop in), full course and car detail at every distance, 1P detail in split screen, car reflections in the race | Yes | Mods → Detail → **R4 Max Detail** off, or set any one option (Draw distance, Course detail, Car detail, Split screen, Car reflections) back to **Stock**. Mirror scenery stays Stock unless you choose Full |
-| **Race frame rate**: Auto by default — 60 FPS, or the original 30 FPS at an 8K (18x) internal resolution, where the GPU cannot hold 60; extra frames are drawn with the game's own code while logic keeps its original 30 Hz cadence. Choose 30, 60, 90, 100, 120, 144 FPS or Match display refresh; achieved rate depends on resolution and GPU load | Yes, Auto | Mods → Display → **Race frame rate** → Presentation rate **30 FPS (original)**, or turn the mod off |
+| **Race frame rate**: optional extra race draws at 60–144 FPS; achieved rate depends on resolution and GPU load. Logic keeps its original cadence | Yes, 60 FPS | Mods → Display → **Race frame rate** on; choose a presentation rate |
 | **VS split screen**: the OpenGL renderer draws 2P split screen in about a tenth of the draws (same picture) | Yes | Set `PSX_GL_TEXWIN_BATCH=0` for one run |
 | **Widescreen**: races fill the window at whatever shape you give it (Fit to Window), with real extra scenery at the sides and the HUD at the edges | Yes, Fit to Window | Mods → Display → **R4 Custom Renderer** off (stock 4:3), or pick 16:9 / 21:9 / 32:9 |
-| **Match display + supersampling**: the game renders at your monitor's pixel height (up to 8K/18×), times 1.5 on displays under 4K, and is resolved down, for clean edges (no blur filter on top) | Yes | Settings → Display → **Graphics preset** (Low renders at native resolution without supersampling); the preset sets the internal resolution |
+| **Match display + supersampling**: the game renders at your monitor's pixel height, capped at 4K/9×, times 1.5 on displays under 4K, for clean edges (no blur filter on top) | Yes | Settings → Display → **Internal resolution**; explicit 5K/8K remain available |
 | **Dynamic resolution**: off; the picture stays at the chosen internal resolution and the frame rate gives way instead | No | `dynamic_resolution = true` in `settings.toml` (floor 1080 lines) |
 | **Render thread + present thread**: OpenGL work and the window swap run off the game's thread | Yes | `PSX_RENDER_THREAD=0` / `PSX_PRESENT_THREAD=0` for one run |
 | **PGXP extras**: a depth buffer (no sorting errors where polygons cross), smooth shading across corrected vertices, and closed seams between polygons | Yes, with PGXP | They follow **PGXP Precision**; `PSX_PGXP_DEPTH=0` for one run |
 | **HD HUD**: the race HUD (rank, lap/time and speed digits, RPM gauge, course map) drawn from high-resolution artwork, **HD HUD by [Kuid0us](https://github.com/Kuid0us/T4HDHUD)** | Yes (OpenGL) | Mods → Visual → **HD HUD** off |
 | **Car Effects**: exhaust flames on upshifts and the rev limiter, tyre smoke when drifting, sparks on impacts, drawn as PC particles; also steadies the race camera's one-pixel jitter. Offline only | Yes (owner, 2026-10-27) | Mods → Display → **Car Effects** off |
 | **Online battle, 2-4 players**: R4's Link Battle over the internet or LAN, each player on their own machine with their own full-screen view | Available from the launcher's NETPLAY page | Just play offline; local split screen stays 2-player VS Battle |
-| **No Rewind in split screen or online**: Rewind is off in 2-player VS Battle and in every netplay session, so a rewind can't put one player out of step | Yes, always | Not a setting. Rewind still works in single-player races (enable it in Settings; Y in Modern, Select + Y in Classic) |
+| **No Rewind in split screen or online**: Rewind is off in 2-player VS Battle and in every netplay session, so a rewind can't put one player out of step | Yes, always | Not a setting. Rewind still works in single-player races (on by default; hold Y in Modern, Select + Y in Classic) |
 
 In netplay every peer runs without the game-changing mods. The ones that only
 change your own screen or your own pad (hide mirror, widescreen in your own
@@ -242,22 +242,25 @@ Not offered in R4 (owner, 2026-10-20): psxrecomp's frame generation is off in
 every graphics preset and its launcher row is hidden. Race logic keeps its
 original 30 Hz cadence.
 
-The **Race frame rate** mod (on by default) shows races at 60 FPS, or at the
-original 30 FPS when the internal resolution resolves to 18x (8K Match
-display), where the GPU cannot hold 60 (**Auto**; pick **60 FPS** to force
-it). Between
+The **Race frame rate** mod is opt-in. The original 30 FPS race frames
+keep emulation and audio at real time on the owner's 8K display. With the
+mod enabled, **Auto** selects 60 FPS, or 30 FPS at internal scale 18x;
+explicit rates override that choice. Car Effects requires serial extra
+draws, so disable it when seeking the highest optional presentation rate.
+Between
 two game ticks it redraws the race with the game's own draw routines and the
-cars and camera placed halfway, then restores the machine exactly, so logic,
-input and audio keep the original 30 Hz cadence. Presentation rate **30 FPS
+cars and camera placed at intermediate positions, so logic,
+input and audio keep their original timing. Presentation rate **30 FPS
 (original)** shows the game's own frames only. It never falls back to image
 warping or crossfading. Online frames are local to each player's view.
 
-The in-between frame costs the emulation thread most of a game frame's work
-(the GL side runs on the render thread, psxrecomp `docs/RENDER_PASSES.md`
-"Queued passes"). When the emulation thread has no room left, the game would
-start missing VBlanks; the mod instead pauses the in-between frames for a
-while (the race shows at 30 FPS, at full speed) and tries again, so a busy
-host settles on steady stretches rather than alternating frame by frame.
+With Car Effects or Race HUD enabled, extra draws run serially on the
+emulation thread and restore its state afterward. This can cost most of
+another game frame; the serial path suspends extra frames when its budget
+is exhausted. Otherwise, private worker contexts produce the extra draw
+commands and the render thread replays them. Both paths still require GPU
+work for each output. On the owner's 8K panel, neither sustained 60 FPS
+with real-time audio reliably, so the enhancement is off by default.
 
 ## HD HUD
 
@@ -286,7 +289,7 @@ never renders below 1080 lines.
 | 4K | 9× | 2880×2160 | |
 | 5K | 12× | 3840×2880 | |
 | 8K | 18× | 5760×4320 | Past a 16384 GPU texture limit (Apple GPUs) only the displayed frame is kept at 8K |
-| Match display | monitor height ÷ 240, at most 18× | | Your monitor's pixel height, capped at 8K |
+| Match display | monitor height ÷ 240, at most 9× | | Your monitor's pixel height, capped at 4K (pick 5K/8K by hand) |
 
 - The menus are 480-line screens, so they render at twice the target and are
   resolved down; movies are unchanged.
@@ -420,7 +423,7 @@ Mods -> Controllers -> **Controls** (on by default) picks the race scheme:
 
 - **Modern** (default): on a gamepad with analog triggers, RT is gas and LT
   is brake (analog), the left stick steers, Square / Circle shift down / up,
-  R1 changes the camera view and Y opens Rewind (on by default).
+  R1 changes the camera view and hold Y to rewind; release it to resume play. Rewind is on by default.
   The stick steers in either pad mode. R4 sees its native NeGcon while you
   drive; menus, the pause menu, keyboards and pads without triggers keep the
   stock controls.
@@ -524,3 +527,13 @@ The bundled HD HUD pack is Kuid0us's artwork of the HUD (see
 `docs/HD_HUD.md`).
 
 The compiled game needs your own disc to run.
+
+### Hold to rewind
+
+Hold F8 or the configured controller shortcut to play backwards, and release
+it to continue from that point. Modern controls use Y; Classic uses Select + Y.
+There is no snapshot selection menu. Reverse playback presents native PS1
+scanout and mutes audio; enhanced rendering resumes on release with PGXP still
+on. History captures every guest frame and stores changed native-state pages.
+See [phase-5 verification](docs/REWIND_PHASE5.md) for timing and reproducible
+TCP checks. Split-screen and netplay restrictions remain in force.

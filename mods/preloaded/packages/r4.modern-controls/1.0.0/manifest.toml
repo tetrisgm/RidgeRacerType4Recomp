@@ -14,7 +14,7 @@ game_id = "SLUS-00797"
 [[feature]]
 id = "modern-controls"
 name = "Controls"
-description = "Modern: in races on a gamepad with analog triggers, RT is gas and LT is brake (native analog NeGcon pressure), the left stick steers, Square / Circle shift down / up, R1 changes the camera view and Y opens Rewind (enable Rewind in Settings). Menus, keyboards and pads without triggers keep the stock controls. Classic, or this feature off: R4's stock controls, unchanged."
+description = "Modern: in races on a gamepad with analog triggers, RT is gas and LT is brake (native analog NeGcon pressure), the left stick steers, Square / Circle shift down / up, R1 changes the camera view and holding Y rewinds and releasing it resumes play (Rewind is on by default). Menus, keyboards and pads without triggers keep the stock controls. Classic, or this feature off: R4's stock controls, unchanged."
 group = "Controllers"
 channel = "stable"
 default_enabled = true

@@ -4,6 +4,12 @@ R4 pins `tetrisgm/psxrecomp` `r4/main` (CLAUDE.md, fork model). Every change
 that fork carries over upstream master is listed here with its upstream PR.
 When this table is empty, re-pin to upstream master and archive the fork.
 
+Architecture phase-1 topic `feat/frame-arch-1-native-authority` through
+`464bc104` is merged to fork `r4/main` at `4f893c1a`. No upstream or R4 PR was
+opened. Native-authority verification and the remaining ownership/packet work
+are recorded in VERIFIED and FRAME_ARCHITECTURE. The old queued-VRAM-snapshot
+branch remains unmerged; native CPU snapshots supersede its authority path.
+
 The latest full upstream-master sync is `d108e9a0` (2026-10-24). The current
 fork pin `e4efba40` (on `0bcc5a49`, below) additionally backports merged #761, #769–#772, #727's
 final pixel fixture, and #773's restore-scope repair. Full master sync was
@@ -15,6 +21,10 @@ targeted pin; generated game C is unchanged. The fork-only changes below remain.
 
 | Change | Topic branch | Upstream PR | State |
 |---|---|---|---|
+| Native authoritative VRAM, original GP0 capture, queued renderer controls and diagnostics | `feat/frame-arch-1-native-authority` | none | in fork `r4/main` via `4f893c1a`; phase-2 backpressure remains |
+| Opt-in main VBlank wall cadence and pre-wait pacing debt (`main_cadence`) | `fix/race-cadence-metrics` | none yet | `ac65fcf5`; live hidden-window diagnosis, no guest timing changes |
+| Live internal resolution, Windows borderless popup, pixel labels | `fix/display-playtest-20261028` | none yet | `a7122c59`; existing display playtest fixes carried by the performance pin |
+| Prefer Steam's active virtual pad over a silent physical Valve pad | `fix/prefer-steam-virtual-pad` | none yet | `487ec042`; carried by the performance pin |
 | Keyboard seat adopts a pad; Steam desktop-layout echo guard for physical Valve pads | `fix/steam-controller-outside-steam` | none yet | local (`80b058e6`), not pushed; needs hands-on Steam Controller check |
 | Avoid postfx GL texture-size driver queries for known renderer surfaces | `fix/postfx-known-dims` | none yet | in `r4/main` (`8a3bf9f1`); exact GL pixels on Windows and Mac |
 | Avoid composition-context GL framebuffer-binding queries per queued output | `fix/presenter-fbo-bindings` | none yet | in `r4/main` (`e1f2e457`); exact present-thread pixels on Windows and Mac |

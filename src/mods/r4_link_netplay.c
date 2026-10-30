@@ -14,7 +14,6 @@
 #include "psx_netplay.h"
 #include "cpu_state.h"
 #include "r4_link_analog_steering.h"
-#include "r4_interp.h"
 #if !defined(PSX_NO_DEBUG_TOOLS) && !defined(R4_LINK_TEST)
 #include "netplay_state_digest.h"
 #endif
@@ -1015,7 +1014,6 @@ static int r4_link_draw_local_view(struct CPUState *cpu, void *user,
                 r4_link_call(&call, 0x80033974u, car, 0);
             else
                 r4_link_call(&call, 0x800340ECu, car, 0);
-            r4_interp_local_camera();
         }
         r4_link_call(&call, 0x8006E4D0u, 0, 0);
         const uint32_t side = psx_mod_read_half(0x800AD6C0u) ^ 1u;
@@ -1117,10 +1115,8 @@ static void r4_link_local_view(struct CPUState *cpu)
                                   digest_receipts < 16u;
         const uint32_t digest_before = verify_digest ? netplay_master_digest(cpu) : 0;
 #endif
-        r4_interp_local_begin(cpu, view.seat);
         const int ok = psx_mod_render_local_view(cpu, &rect,
                                                  r4_link_draw_local_view, &view);
-        r4_interp_local_end(cpu, &rect, r4_link_draw_local_view, &view, ok);
 #if !defined(PSX_NO_DEBUG_TOOLS) && !defined(R4_LINK_TEST)
         if (verify_digest) {
             const uint32_t digest_after = netplay_master_digest(cpu);

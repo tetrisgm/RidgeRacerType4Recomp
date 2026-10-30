@@ -14,7 +14,7 @@ game_id = "SLUS-00797"
 [[feature]]
 id = "frame-rate"
 name = "Race frame rate"
-description = "Choose a presentation rate or follow the display refresh. Extra frames redraw geometry; logic, input and audio keep their original 30 Hz cadence. Auto is 60 FPS, or the original 30 FPS at an 8K (18x) internal resolution where the GPU cannot hold 60. 30 FPS shows the original frames only."
+description = "Extra race frames; 60 FPS on by default. Choose a presentation rate or follow the display refresh. Extra frames redraw geometry; logic, input and audio keep their original timing. Auto is 60 FPS, or the original 30 FPS at an 8K (18x) internal resolution. 30 FPS shows the original frames only."
 group = "Display"
 default_enabled = true
 
@@ -24,7 +24,7 @@ id = "rate"
 label = "Presentation rate"
 group = "Display"
 type = "choice"
-default = "auto"
+default = "60"
 
 [[option.choice]]
 value = "auto"

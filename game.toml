@@ -176,12 +176,13 @@ aspect_ratio = "4:3"
 # Borderless (desktop) fullscreen until the player picks another Window mode
 # in Display (saved to settings.toml, which outranks this). Owner 2026-10-27.
 fullscreen = "borderless"
-# R4 ships Match display (up to 8K/18x) as its
+# R4 ships Match display, capped at 4K/9x (18x on an 8K panel could not hold
+# 60; owner playtest 2026-10-28; 5K/8K stay pickable), as its
 # default internal resolution; the framework default is Native. A player's
 # pick in Settings -> Display is saved to settings.toml and outranks this, as
 # does a saved legacy supersampling factor (psxrecomp docs/config_schema.md).
 internal_resolution = "display"
-match_display_max_lines = 4320
+match_display_max_lines = 2160
 # Keep full-VRAM rendering on 4K/8K displays; smaller displays retain SSAA.
 supersample_disable_at_lines = 2160
 # Internal resolution presets divide their target height by this: R4's races
@@ -197,8 +198,8 @@ antialiasing_mode = "off"
 # selected internal resolution is rendered as is; frame rate gives way, not
 # resolution. The 1080p floor stays as the limit if a player turns it on.
 dynamic_resolution = false
-# Rewind on by default (owner, 2026-10-28): Y in Modern controls, Select + Y in
-# Classic. Title default; a player's saved [video] rewind wins.
+# Hold Y (Modern controls), Select + Y (Classic), or F8 to rewind.
+# Per-frame native snapshots; saved player preferences still win.
 rewind = true
 dynamic_resolution_min = "1080p"
 dynamic_resolution_start_min = false
@@ -680,43 +681,3 @@ kseg_mask = "0x1FFFFFFF"
 # callees, plus the libgpu entry points every pass calls (ClearOTagR,
 # DrawOTag, PutDrawEnv). Their static callee closure is cloned into
 # generated/SLUS_007.97_draw.c; the main-context code is unchanged.
-[threaded_draw]
-roots = [
-    "0x8006F00C",   # course renderer
-    "0x80061078",   # course indirect dispatch, observed from 0x80060F94
-    # Course draw programs at EXE 0x800A2370..0x800A2450, dispatched by
-    # 0x800614B8 through the pointer at a0+0x7C (USA DISC.md image).
-    "0x80061C34", "0x800628C8", "0x80063344", "0x80063E64", "0x80064A68",
-    "0x80065744", "0x800661FC", "0x80066D58", "0x8006723C", "0x80067DB8",
-    "0x80061028", "0x8006BF54", "0x8006CBA4", "0x8006A928", "0x8006B3EC",
-    "0x80068A0C", "0x80069954",
-    # Object primitive dispatch tables in EXE 0x800A2310..0x800A236C;
-    # 0x8005FFFC reached 0x80060958 through the second table.
-    "0x8005FB50", "0x8005FBB8", "0x8005FC44", "0x8005FDC8",
-    "0x8005F6F4", "0x8005F758", "0x8005F7E8", "0x8005F964",
-    "0x80060178", "0x800601F4", "0x8006029C", "0x80060E34",
-    "0x800608BC", "0x80060958", "0x80060BB0", "0x80060EDC",
-    "0x80060AFC", # constructed in t2 by 0x8006095C/0x80060960, moving object draw
-    "0x8007559C", # object draw dispatch table at 0x8001137C (also normal-code seed)
-    # Indirect seven-way draw dispatch table at EXE 0x800111A8.
-    "0x80055590", "0x800555A0", "0x800555B0", "0x800555C0",
-    "0x800555D0", "0x800555E0", "0x800555F0",
-    # Remaining literal calls in r4_interp.c: Time Attack, split, demo/replay.
-    "0x80014A84", "0x80020074", "0x800207D4", "0x80021774", "0x80021C38",
-    "0x80022340", "0x8002C194", "0x8002DC00", "0x8003C4B4", "0x8004C8BC",
-    "0x8004CBAC", "0x8004CC40", "0x800558E8", "0x80055968", "0x800559BC",
-    "0x80059E24", "0x80090600", "0x800914B0", "0x80096660",
-    # Grand Prix draw sequence (src/mods/r4_interp.c seq_grand_prix).
-    "0x8006F2B0", "0x80034444", "0x80039C04", "0x8002BEA4", "0x8002C0F8",
-    "0x800212E0", "0x80021134", "0x80021614", "0x80021960", "0x80021A20",
-    "0x80021DDC", "0x80022048", "0x80021BA4", "0x80020A98", "0x8006E4D0",
-    "0x8002E554", "0x8002258C", "0x80074AD8", "0x800374F8", "0x80070A58",
-    "0x80093418",   # ClearOTagR
-    "0x80093520",   # DrawOTag
-    "0x80093590",   # PutDrawEnv
-    # libgpu device table (*0x800ABC70 = 0x800ABC30): the queue and transfer
-    # functions DrawOTag / ClearOTagR / PutDrawEnv reach through jalr.
-    "0x80094D7C", "0x80094DA0", "0x800945A0", "0x80094C8C", "0x80094CC4",
-    "0x80094D04", "0x80094A0C", "0x800947D0", "0x80095050", "0x80094CB0",
-    "0x800944C0", "0x80094D4C", "0x800952B0", "0x800944A8", "0x80095400",
-]
