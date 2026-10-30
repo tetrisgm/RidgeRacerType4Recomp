@@ -1,5 +1,17 @@
 # Framework pin history
 
+2026-10-30 release wait validation topic pin: `fc175dce` (fork `r4/main`).
+Includes the owner's requested merge after the hidden 18x Release race gate:
+59.573 presented images/s, 60.003 VBlanks/s, zero audio underruns over 121.027 s,
+with PGXP enabled, LLE and dummy audio. Whole-machine CPU averaged 65.99%;
+the game used 0.829 logical CPU. Runtime waiters block, the final pacer spin is
+200 us, and startup slot restore is safe before LLE fibers begin. Full results
+and per-thread receipts: psxrecomp/docs/internal/RELEASE_WAIT_AUDIT.md.
+Game output was regenerated with tools/regen.sh, never hand-edited. Release
+build, 22 R4 tests, six focused runtime tests, restore-edge check and hidden
+PGXP GL packet fixture pass. This R4 topic preserves the validation harness
+and regenerated pin; it does not merge or publish a release of the R4 project.
+
 2026-10-29 functional phase-4/phase-3 integration pin: `68b60bbb`.
 Fork `r4/main` already contained phase4 `7a46df9e` at `1ae4b9f5`; phase3
 `499a12ab` is now merged with production owned-surface allocation and lifecycle.
