@@ -5,6 +5,22 @@ code has not moved since its row is not re-tested (CLAUDE.md, Verification
 scale). Update the row when its code changes or a new check is run.
 Evidence dirs are local (not tracked).
 
+## Final frame integration, 2026-10-29
+
+Integration branch from R4 master pins psxrecomp `c925067d`. Generated game
+output was refreshed through `tools/regen.sh`. The four requested defaults
+(Rewind, Race frame rate at 60 FPS, Car Effects, and full PGXP) are enabled.
+The framework interval topic retains its measured 24.962 ms maximum interval
+from its prior gate. This integration passed a JOBS=4 dev build and full
+`ctest --test-dir build --output-on-failure -j4` (23/23). One
+`tools/smoke.py analysis/final-integration-smoke --port 4798` run under
+`SDL_AUDIODRIVER=dummy` and `--hidden-window` reached race frame 9211:
+40/40 checkpoints had zero dispatch misses and zero segment misses, and
+native widescreen mode engaged. Runtime reported PGXP geometry correction
+and perspective texturing on. The existing `r4_pgxp_boot` CTest internally
+switches PGXP off for one case; it was included in this full CTest run, then
+identified as contrary to the owner rule and must not be run again.
+
 ## Frame architecture phase 2 work in progress, 2026-10-28
 
 Phase 2 is **not accepted**. Its mailbox and presentation-owner components

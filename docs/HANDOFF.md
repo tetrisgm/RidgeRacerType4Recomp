@@ -1,5 +1,14 @@
 # Handoff
 
+## Final frame integration, 2026-10-29
+
+R4 master integration branch folds in phase 3b (`8debe2f`), Rewind
+(`21d2a50`), interpolation (`7b9eab7`), regenerated R4 (`351dfbc`), and
+phase 3 integration (`2875e38`). It pins psxrecomp fork `r4/main` at
+`c925067d`, which merges the gated interval topic `a0c824c6`. Regeneration
+ran via `tools/regen.sh`. Defaults are Rewind, 60 FPS Race frame rate,
+Car Effects, and full PGXP on. See VERIFIED.md for final integrated checks.
+
 ## Latest: native authority promoted; continue phase 2
 
 Phase-2 topic is `feat/frame-arch-2-mailbox`, based on `4f893c1a`.

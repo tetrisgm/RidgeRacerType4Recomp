@@ -3,6 +3,15 @@
 The `psxrecomp` and `recomp-ui` submodule gitlinks are the pins. Bump them
 deliberately and record each bump here with the reason and what was verified.
 
+2026-10-29 final frame integration: pin psxrecomp fork `r4/main` at
+`c925067d` (merge of VBlank interval topic `a0c824c6`). The topic reduces
+the observed maximum VBlank interval from roughly 38 ms to 24.962 ms; the
+under-20-ms performance goal remains open. This R4 branch folds in phase 3b
+`8debe2f`, Rewind `21d2a50`, interpolation `7b9eab7`, regeneration
+`351dfbc`, and phase 3 integration `2875e38`. Regenerated game output with
+`tools/regen.sh`. Rewind, Race frame rate, Car Effects, and full PGXP are
+enabled by default. Final build, CTest, and smoke results are in VERIFIED.md.
+
 2026-10-29 phase-4 wait-attribution pin: `7a46df9e` (via `8d412798`). Publication wakes the
 render owner without acquiring its mutex; immutable transform history uses
 fixed-step deferred retirement. Opt-in VBlank telemetry includes worst-20
