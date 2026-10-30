@@ -42,13 +42,13 @@ try:
  subprocess.run([sys.executable,str(ROOT/'tools/mod_state.py'),str(build),'--defaults'],check=True)
  subprocess.run([sys.executable,str(ROOT/'tools/mod_state.py'),str(build),'--enable','r4.enhancement.frame-rate/frame-rate','rate=60'],check=True)
  if a.no_rewind: gamefile.write_bytes(saved_game.replace(b'rewind = true',b'rewind = false'))
- env=dict(os.environ,SDL_AUDIODRIVER='dummy',PSX_PRESENT_TRACE=str(out/'present.csv'),PSX_PRESENT_IMAGE_RING='0',PSX_PACKET_INTERPOLATION_AUDIT='0',PSX_GL_ASYNC_GPU_TIMER='1')
+ env=dict(os.environ,SDL_AUDIODRIVER='dummy',PSX_PRESENT_TRACE=str(out/'present.csv'),PSX_PRESENT_SLOT_TRACE=str(out/'slots.csv'),PSX_PRESENT_IMAGE_RING='0',PSX_PACKET_INTERPOLATION_AUDIT='0',PSX_GL_ASYNC_GPU_TIMER='1')
  env['PATH']=r'C:\Users\Shokunin\AppData\Local\retcomm\toolchains\cmake-clang-v1\latest\bin;C:\msys64\mingw64\bin;'+env['PATH']
  if a.profile:env['LLVM_PROFILE_FILE']=str(Path(a.profile).resolve())
  if a.disable: subprocess.run([sys.executable,str(ROOT/'tools/mod_state.py'),str(build),'--disable',a.disable],check=True)
  # A private working directory and memory-card path preserve personal saves.
- (out/'provenance.json').write_text(json.dumps(dict(executable=str(build/'r4-runtime.exe'),sha256=hashlib.sha256((build/'r4-runtime.exe').read_bytes()).hexdigest(),framework=subprocess.check_output(['git','-C',str(ROOT/'psxrecomp'),'rev-parse','HEAD'],text=True).strip(),framework_dirty=bool(subprocess.check_output(['git','-C',str(ROOT/'psxrecomp'),'status','--porcelain'],text=True).strip()),environment={k:env[k] for k in ('SDL_AUDIODRIVER','PSX_PRESENT_DELAY_MS','PSX_PRESENT_GUEST_CLOCK','PSX_GL_LEGACY_SURFACE_TEST','PSX_RENDER_OP_PROFILE','PSX_GL_ASYNC_GPU_TIMER','PSX_PACKET_INTERPOLATION_AUDIT') if k in env},hidden=True,audio_driver='dummy',pgo_profile=a.profile),indent=2))
- proc=subprocess.Popen([str(build/'r4-runtime.exe'),'--game',str(build/'game.toml'),'--disc',str(ROOT/'disc/R4 - Ridge Racer Type 4 (USA).cue'),'--no-launcher','--hidden-window','--debug-port',str(a.port),'--memcard-dir',str(out/'saves')],cwd=out,env=env,stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL,creationflags=subprocess.CREATE_NO_WINDOW)
+ (out/'provenance.json').write_text(json.dumps(dict(executable=str(build/'r4-runtime.exe'),sha256=hashlib.sha256((build/'r4-runtime.exe').read_bytes()).hexdigest(),framework=subprocess.check_output(['git','-C',str(ROOT/'psxrecomp'),'rev-parse','HEAD'],text=True).strip(),framework_dirty=bool(subprocess.check_output(['git','-C',str(ROOT/'psxrecomp'),'status','--porcelain'],text=True).strip()),environment={k:env[k] for k in ('SDL_AUDIODRIVER','PSX_HLE_SCHEDULER','PSX_BIOS_HLE','PSX_BIOS_HLE_KEEP_INTRO','PSX_HOST_SAMPLER','PSX_PACKET_HD_CACHE','PSX_INTERPOLATION_REUSE','PSX_SURFACE_REUSE','PSX_AUDIO_ADAPTIVE','PSX_PRESENT_DELAY_MS','PSX_PRESENT_GUEST_CLOCK','PSX_GL_LEGACY_SURFACE_TEST','PSX_RENDER_OP_PROFILE','PSX_GL_ASYNC_GPU_TIMER','PSX_PACKET_INTERPOLATION_AUDIT') if k in env},hidden=True,audio_driver='dummy',pgo_profile=a.profile),indent=2))
+ proc=subprocess.Popen([str(build/'r4-runtime.exe'),'--game',str(build/'game.toml'),'--disc',str(ROOT/'disc/R4 - Ridge Racer Type 4 (USA).cue'),'--no-launcher','--hidden-window','--debug-port',str(a.port),'--memcard-dir',str(out/'saves')],cwd=out,env=env,stdout=(out/'runtime.log').open('wb'),stderr=subprocess.STDOUT,creationflags=subprocess.CREATE_NO_WINDOW)
  deadline=time.monotonic()+180
  while True:
   if proc.poll() is not None:raise RuntimeError(f'Runtime exited {proc.returncode}')
@@ -120,10 +120,14 @@ try:
   time.sleep(.05)
  end=time.perf_counter_ns()
  after={k:ask(k) for k in ['frame','audio_stats','packet_interpolation','main_cadence','render_thread','dispatch_stats','rewind_status','mod_counters']}
+ if env.get('PSX_AUDIT_CPU_PROFILE'):
+  (out/'host-profile.json').write_text(json.dumps(ask('host_profile',frame_lo=before['frame']['frame'],frame_hi=after['frame']['frame'],top=32768,callers=1)))
  ask('set_input',buttons='0xFFFF');ask('screenshot',path=str(out/'lap.png'))
  rewind_before=ask('rewind_status',hold=1,verify=1);time.sleep(.5);rewind_held=ask('rewind_status');ask('screenshot',path=str(out/'rewind.png'),packet=1);ask('rewind_status',hold=0);time.sleep(.3)
  (out/'raw.json').write_text(json.dumps(dict(before=before,after=after,start=start,end=end)));(out/'rewind.json').write_text(json.dumps(dict(before=rewind_before,held=rewind_held,after=ask('rewind_status'),pgxp=ask('pgxp')),indent=2))
- ask('quit');proc.wait(timeout=30)
+ ask('quit');exit_code=proc.wait(timeout=30)
+ (out/'exit.json').write_text(json.dumps(dict(exit_code=exit_code)))
+ if exit_code:raise RuntimeError(f'Runtime exit {exit_code}; trace may be incomplete')
  time.sleep(1.2)
  presented=[r for r in csv.DictReader((out/'present.csv').open()) if start<=int(r['time_ns'])<=end]
  pa=before['packet_interpolation']['presenter'];pb=after['packet_interpolation']['presenter'];n=pb['motion_steps']-pa['motion_steps'];sm=pb['motion_sum_ms']-pa['motion_sum_ms'];ss=pb['motion_sum_sq_ms']-pa['motion_sum_sq_ms'];occup=[r['audio_stats']['out']['fill_ms'] for r in rows]
