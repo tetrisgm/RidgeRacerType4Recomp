@@ -1,13 +1,32 @@
 # Handoff
 
-## Final frame integration, 2026-10-29
+## Current: final release integration, 2026-10-30
 
-R4 master integration branch folds in phase 3b (`8debe2f`), Rewind
-(`21d2a50`), interpolation (`7b9eab7`), regenerated R4 (`351dfbc`), and
-phase 3 integration (`2875e38`). It pins psxrecomp fork `r4/main` at
-`c925067d`, which merges the gated interval topic `a0c824c6`. Regeneration
-ran via `tools/regen.sh`. Defaults are Rewind, 60 FPS Race frame rate,
-Car Effects, and full PGXP on. See VERIFIED.md for final integrated checks.
+The final branch `feat/frame-arch-final`, based on master `4ba15698` (PR #96),
+pins psxrecomp fork `r4/main` at `fc175dce` and recomp-ui at `c6ac60c7`.
+It adds the audit branch's missing Car Effects guest-clock/rewind reset and
+shared HUD callback fixes, their test, and the release measurement harness.
+Regeneration through `tools/regen.sh` matches the committed generated output;
+no generated file was hand-edited. Rewind, 60 FPS, Car Effects and full PGXP
+are enabled by default. The PGXP boot test now only exercises enabled PGXP.
+
+Release build and 24/24 Release CTests pass. The diagnostic PGXP boot test
+and all 40 smoke checkpoints pass with zero dispatch/segment misses (race
+frame 8908), with PGXP enabled throughout. The fresh private-grid 120-second
+18x race passes: 59.994 completed presentations/s, 59.994 VBlanks/s, zero audio
+underruns (121.029-second report window). The owner's apps stayed running;
+whole-machine CPU averaged 88.59%. Hidden window and dummy audio only.
+See VERIFIED.md and `docs/evidence/final-release-20261030.json` for evidence
+and measurement limits. Historical phase acceptance limitations below remain
+historical records; this gate does not prove physical 8K scanout or every
+visual-equivalence target in FRAME_ARCHITECTURE.md.
+
+The handoff is a playtest package, not a GitHub release. Installation backs up
+`C:\Users\Shokunin\Games\R4-test` to `R4-test.bak-20261030`, retains input.ini,
+keybinds.ini, disc.cfg, bios.cfg, rom.cfg and saves/, and drops settings.toml.
+The installed game must remain closed for the owner to launch.
+
+## Historical notes
 
 ## Latest: native authority promoted; continue phase 2
 

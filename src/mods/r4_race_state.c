@@ -274,6 +274,8 @@ static void view_build(struct CPUState *cpu, uint32_t address)
     else *e = *prev;
     if (s_published && new_frame) s_history[s_history_n++ % HISTORY] = *prev;
     e->frame = frame;
+    e->paused = psx_mod_read_byte(0x800F4E18u) != 0;
+    e->speedometer = r16(0x800AC0B0u + 0x296u);
     e->in_race = psx_mod_read_half(RACE_WORD) == 0x180u;
 
     if (new_frame) {

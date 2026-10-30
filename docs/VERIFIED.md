@@ -5,6 +5,27 @@ code has not moved since its row is not re-tested (CLAUDE.md, Verification
 scale). Update the row when its code changes or a new check is run.
 Evidence dirs are local (not tracked).
 
+## Final release integration, 2026-10-30
+
+| Gate | Result | Evidence |
+|---|---|---|
+| Release build, framework `fc175dce`, launcher `c6ac60c7` | Pass; packaging flags, OpenBIOS, Clang Release `-O3 -DNDEBUG`, ThinLTO, debug tools off, JOBS=4 | `build-final.log`, `configure-final.log` |
+| Regeneration | Pass; normalized generated output matches master | `regen-final.log`; `tools/regen.sh` |
+| Release CTest | 24/24 pass | `ctest-final.log` |
+| PGXP boot, diagnostic build | Pass, defaults and saved enabled settings; PGXP never disabled | `ctest-pgxp-final.log` |
+| Hidden boot-to-race smoke | 40/40 checkpoints, 0 dispatch/segment misses; race frame 8908; PGXP on | `analysis/final/smoke/` |
+| 120 s Release race, 18x, all requested defaults on | **59.994 images/s; 59.994 VBlanks/s; 0 audio underruns** | [receipt](evidence/final-release-20261030.json); `analysis/release-waits/final-120/` |
+
+The 120-second measurement follows ten seconds of warmup and a verified
+same-build private slot restore. Report boundaries span 121.029 seconds.
+Owner applications stayed running (88.59% average whole-machine CPU).
+Images/s counts completed presentation callbacks, not distinct pixel hashes or
+physical scanout. Dummy audio exercises callback transport, not a sound device.
+The local build config raises only Match display's cap to 4320 lines for the
+18x gate; the shipped config retains its existing defaults. All game windows
+were hidden, with PGXP fully on. Older failures below are historical evidence,
+not claims that this throughput gate proves every original architecture goal.
+
 ## Final frame integration, 2026-10-29
 
 Integration branch from R4 master pins psxrecomp `c925067d`. Generated game
