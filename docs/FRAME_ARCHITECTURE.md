@@ -293,3 +293,24 @@ VBlanks/s and interpolation still adds starvation. Final 8K distinct-image lower
 bounds are 51.34 / 94.02 at requested 60 / 120. Narrow frozen-pair captures have
 stable endpoints and no added clear-colour gaps; full visual equivalence remains
 unestablished. See [A/B profiles and remaining gates](FRAME_INTERPOLATION_STATUS.md).
+
+## Phase 3 functional integration (2026-10-29)
+
+Framework `68b60bbb` merges the surfaces topic `499a12ab` over the phase-4
+integration already in fork r4/main. Production uses native VRAM, independent
+direct-wide display bands and on-demand offscreen tiles. Full scaled VRAM
+allocation remains only in the legacy reference fixture. Copy/gather,
+diagnostic capture, rescale, restore and shutdown follow surface ownership.
+The pool preserves depth/stencil when resizing and retires unused owners;
+empty drawing areas and clipped clears are handled without aborting.
+
+Functional gates passed: build, 26 permitted CTests, 80 production-surface
+checks at 1x/4x/9x/18x, cropped-reference parity, native raster and coverage
+fixtures. Hidden dummy-audio race smoke had zero dispatch/segment misses and
+45 moving pairs with zero unmatched/ambiguous/invalid. Boot-wide interpolation
+history still includes two earlier failed pairs, unchanged from phase4;
+no new failed pairs occurred in the moving-race census. PGXP remained on
+through the smokes and surface fixtures. An earlier unfiltered CTest invoked
+the PGXP-off boot test inadvertently; it was excluded from subsequent gates.
+No performance/timing measurements were run; the phase table performance
+target remains unverified by this integration.

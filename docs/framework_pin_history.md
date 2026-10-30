@@ -1,5 +1,18 @@
 # Framework pin history
 
+2026-10-29 functional phase-4/phase-3 integration pin: `68b60bbb`.
+Fork `r4/main` already contained phase4 `7a46df9e` at `1ae4b9f5`; phase3
+`499a12ab` is now merged with production owned-surface allocation and lifecycle.
+Regenerated game output with tools/regen.sh (55 ordinary shards, no private
+draw clones); no generated source was hand-edited. Build and 26 permitted
+CTests pass. PGXP-off boot test is excluded after an inadvertent earlier run.
+Hidden dummy-audio smoke: zero dispatch/segment misses, 45 moving race pairs
+with zero unmatched/ambiguous/invalid. Both phase4 and phase3 boot-wide audit
+histories retain two earlier failed pairs; the race census adds none.
+Surface fixture: 80 checks at 1x/4x/9x/18x; cropped-reference parity and native
+raster/coverage checks pass. No performance measurements or acceptance claim.
+
+
 The `psxrecomp` and `recomp-ui` submodule gitlinks are the pins. Bump them
 deliberately and record each bump here with the reason and what was verified.
 
