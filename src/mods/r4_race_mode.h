@@ -1,44 +1,6 @@
-/* r4_interp_math.h - pure math of R4's interpolated frames (r4_interp.c).
- * Header-only so tests/test_r4_interp.c checks exactly what the plugin runs. */
-#ifndef R4_INTERP_MATH_H
-#define R4_INTERP_MATH_H
-
+#ifndef R4_RACE_MODE_H
+#define R4_RACE_MODE_H
 #include <stdint.h>
-
-#include "r4_interp_fields.h"
-
-/* Per-tick change of a field, wrap-aware for 12-bit angles (the game's
- * 0..4095 turn; the cheat's `sll/sra 0x14`). s16 angles are compared as s16. */
-static inline int32_t r4_field_delta(uint8_t kind, int32_t prev, int32_t cur) {
-    int32_t d;
-    if (kind == R4_FIELD_ANGLE12_H)
-        d = (int32_t)(int16_t)cur - (int32_t)(int16_t)prev;
-    else
-        d = (int32_t)((uint32_t)cur - (uint32_t)prev);
-    if (kind == R4_FIELD_ANGLE12 || kind == R4_FIELD_ANGLE12_H)
-        d = (int32_t)((uint32_t)d << 20) >> 20;
-    return d;
-}
-
-static inline int r4_field_snaps(const R4InterpField *f, int32_t d) {
-    int64_t a = d < 0 ? -(int64_t)d : (int64_t)d;
-    return a > (int64_t)f->snap;
-}
-
-/* prev + d * alpha, alpha in Q16, rounded to nearest (int64: |d| * alpha
- * reaches 2^34 for the fine-position fields). */
-static inline int32_t r4_lerp(int32_t prev, int32_t d, uint32_t alpha_q16) {
-    int64_t step = ((int64_t)d * (int64_t)alpha_q16 + 0x8000) >> 16;
-    return (int32_t)((uint32_t)prev + (uint32_t)step);
-}
-
-/* The HUD speed in km/h exactly as the race handlers compute it:
- * (s16)car[0x1D8] * 160 / 1168, truncated toward zero (their mulhi 0xE070381D
- * sequence at 0x80117790-0x801177C4). */
-static inline int32_t r4_kmh(int16_t raw) {
-    return ((int32_t)raw * 160) / 1168;
-}
-
 /* Race handlers the plugin knows how to redraw (fps_r4 notes, section 2.1). */
 enum {
     R4_MODE_NONE = 0,
@@ -83,5 +45,6 @@ static inline int r4_classify_handler(uint32_t handler, const uint32_t *words) {
     }
     return R4_MODE_NONE;
 }
+
 
 #endif

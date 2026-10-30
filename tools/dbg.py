@@ -13,6 +13,8 @@ Examples:
 """
 import json
 import socket
+import os
+import struct
 import sys
 
 DEFAULT_PORT = 4797  # game.toml [runtime] debug_port (SLUS-00797)
@@ -40,9 +42,40 @@ def build_payload(args):
     return json.dumps(obj)
 
 
+_source_port = 20000 + os.getpid() % 20000
+
+
+def connect(port, timeout):
+    try:
+        return socket.create_connection(("127.0.0.1", port), timeout=timeout)
+    except OSError as error:
+        if getattr(error, "winerror", None) != 10048:
+            raise
+    # Only retry connect, before any request bytes: never replay a mutation.
+    # Other programs can exhaust Windows' dynamic range with TIME_WAIT sockets.
+    # Bind an unused diagnostic source port without changing global TCP policy.
+    global _source_port
+    for _ in range(128):
+        _source_port = 20000 + (_source_port - 20000 + 1) % 20000
+        candidate = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        try:
+            candidate.settimeout(timeout)
+            candidate.bind(("127.0.0.1", _source_port))
+            candidate.connect(("127.0.0.1", port))
+            # Response is read completely before close; avoid adding another
+            # TIME_WAIT entry to an already exhausted host.
+            candidate.setsockopt(socket.SOL_SOCKET, socket.SO_LINGER, struct.pack("HH", 1, 0))
+            return candidate
+        except OSError as error:
+            candidate.close()
+            if getattr(error, "winerror", None) != 10048:
+                raise
+    raise OSError("No free diagnostic TCP source port after 128 attempts")
+
+
 def send(payload, port=DEFAULT_PORT, timeout=20.0):
     """Send one request line and return the decoded response text."""
-    with socket.create_connection(("127.0.0.1", port), timeout=timeout) as s:
+    with connect(port, timeout) as s:
         s.sendall(payload.encode() + b"\n")
         buf = b""
         s.settimeout(timeout)

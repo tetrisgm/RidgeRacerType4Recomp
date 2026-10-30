@@ -1,3 +1,4 @@
+#include "r4_race_hud.h"
 /* Modern race HUD for R4.
  *
  * Drawn by the host as vectors (Dear ImGui, already linked for the in-game
@@ -812,13 +813,12 @@ int hud_command(const char *args, char *reply, int cap) {
 }
 
 }  // namespace
-/* Until their filter/view metadata is captured per draw job, use the existing
- * serial redraw path for these optional visual packages. */
-extern "C" int r4_optional_draw_hooks_active(void) {
-    return s_enabled.load(std::memory_order_relaxed) || r4_car_effects_active();
+void r4_race_hud_bind() {
+    psx_host_set_hud_draw_cb(hud_draw, nullptr);
 }
 
 static void r4_race_hud_activate(void) {
+    r4_race_hud_bind();
     s_enabled.store(true, std::memory_order_relaxed);
     if (g_panels_env && s_stock_hooks != k_stock_filter_count + 1)
         std::fprintf(stderr, "[r4-race-hud] %d of %d stock HUD hooks registered\n", s_stock_hooks,
@@ -833,12 +833,10 @@ static void r4_race_hud_session_reset(void) {
 }
 
 PSX_MOD_CONSTRUCTOR(r4_register_race_hud) {
-    /* The HUD layer is set once for the session and serves both this HUD and
-     * the car effects; it draws only in a race, and the traces are read on
-     * the first draw. */
+    /* Plugin activation clears session-owned callbacks. Each active feature
+     * reattaches this shared layer, including Effects with the HUD disabled. */
     const char *e = std::getenv("PSX_R4_HUD");
     g_panels_env = !(e && e[0] == '0');
-    psx_host_set_hud_draw_cb(hud_draw, nullptr);
     (void)psx_mod_register_activation_plugin(PLUGIN_ID, r4_race_hud_activate);
     (void)psx_mod_register_session_reset_plugin(PLUGIN_ID, r4_race_hud_session_reset);
     (void)psx_mod_register_command("r4.hud", hud_command);

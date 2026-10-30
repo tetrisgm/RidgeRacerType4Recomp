@@ -1,5 +1,199 @@
 # Handoff
 
+## Latest: native authority promoted; continue phase 2
+
+Phase-2 topic is `feat/frame-arch-2-mailbox`, based on `4f893c1a`.
+WIPs through `cb0dde2d` are committed and pushed to fork; phase 2 is not merged or pinned.
+The audio callback now exclusively owns the resampler, fed by an SPSC PCM
+transport; main/callback register Games/Pro Audio MMCSS. The old push-audio
+diagnostic switch is removed. Load/rewind requests discard old-timeline PCM
+on the callback without discarding subsequently produced samples. Exact
+resampler parity, concurrent wrap/fill and timeline-reset tests pass.
+
+The bounded three-slot frame packet transport is implemented and tested but
+**not yet wired into the GL command path**. Tests cover a stalled consumer,
+owned 1 MiB seeds, command order/alignment, whole-packet overflow rejection,
+timeline invalidation, and native pixel equality after skipping 62 pending
+packets. Presentation seeds can observe native VRAM/cache without consuming
+the dirty rows needed by rewind. Dev build and R4 32/32 pass; focused native,
+mailbox and audio tests pass. No phase-2 race acceptance claim or merge yet.
+
+Further phase-2 work adds `frame_owner.h/.cpp`: a dedicated consumer with
+startup/shutdown-only context transfer, bounded newest-wins consumption,
+load epochs, consumer-thread identity, Games MMCSS and timed idle callbacks.
+Its blocked-consumer and idle-tick tests pass. GL recording now maintains a
+producer-owned persistent draw-state mirror and restores it across ordinary
+and async extra passes (including discard). Six hidden GL modes retain pixel
+parity. Latest dev build/32 tests and hidden smoke/12 live+paused queries pass;
+owned PID 29628 was stopped. Receipts are `phase2-state-pass-gl/rth-rk999nru`
+and `phase2-state-runtime` under `analysis/perf-20261028/`. The new owner is
+still not connected to the GL backend; do not claim queue backpressure fixed.
+
+2026-10-29 continuation: native HD contexts and immutable Duck/Beetle
+provenance snapshots are implemented. Native context configure/reload/tracking/
+diag tests make zero GL calls; two consumers can apply a held Duck snapshot
+independently after source destruction. Pending copy state survives capture.
+Packets can own one bounded CPU-only attachment; held/replaced/invalidation
+lifetime tests pass. These APIs are not yet connected to native raster jobs or
+production GL packets. Five focused tests pass, dev build and R4 32/32 pass.
+Hidden HD fixture passes 231 full-surface and 217 tiled checks with PGXP depth,
+colour perspective and seams on (`phase2-hd-context-gl/final-receipt.json`).
+Seven old fixture failures reproduced with the previous HD implementation;
+updated fixture explicitly restores caller memory and checks private renderer
+reads instead of expecting guest VRAM publication/context holds. Hidden smoke
+and live/paused diagnostics pass, zero misses/acquisitions; owned PID 27708
+stopped (`phase2-hd-context-runtime`). No phase-2 performance claim.
+
+Next: replace the incremental GL ring with independently seeded packets,
+including full persistent render state, durable controls and exact native HD
+texture inputs. Capture the seed before the first native GP0 of its packet;
+capturing lazily at the first presentation call would already include that
+draw and double-apply semi-transparency. Do not drop the existing incremental
+records or silently discard HD upload/copy provenance. Preserve retained
+enhanced surfaces when frames are consecutive, and account for missed writes
+when a packet is replaced. Then run the slowed-GPU phase-2 acceptance gate
+and continue phases 3, 3b, 4, 5. No owner-only blocker is identified.
+
+Framework phase-1 topic through `464bc104` is merged/pushed to fork r4/main
+at `4f893c1a`. Original GP0/native pixel and snapshot fixtures pass. The race
+records zero GL context acquisitions, but render-queue backpressure remains:
+53.075 VBlanks/s,max67.360ms,79173starved,53.16swap completions/s at18x/all-on.
+Native display history and pure-render diagnostics have no GL drain/context
+move. Full framework build/unit gate, R4 32 tests, six hidden GL modes and
+hidden smoke frame8767 pass; live/paused renderer queries pass. All owned
+processes are stopped. Phase-1 gate is specifically native authority/race
+context ownership; non-race legacy ownership APIs migrate with phase2 packet
+controls and transactions disappear in phase4. Exact native HD texture inputs
+must travel with independent packets. See FRAME_ARCHITECTURE sequencing note.
+
+Continue phases2,3,3b,4,5 without ending at a checkpoint. Phase4 match bar is
+100%. No R4 PRs, packaging, visible windows or display changes.
+
+The following records are historical and superseded where they conflict.
+
+## Current work: native authority integrated, phase 1 still open
+
+Latest framework WIP is `1f5f6e1a`, pushed on the phase-1 topic, unmerged.
+It queues renderer controls and immutable CPU/depth24/blank/hold images,
+publishes diagnostic snapshots, removes handoff VRAM publication, and carries
+oversized records through bounded transport fragments instead of GL migration.
+All six hidden GL modes, transport tests, build/32 R4 tests, and hidden smoke
+pass. Latest same-save all-on 18x run: 53.353 VBlanks/s, 64.265 ms maximum,
+78556 starved samples, 53.33 swap completions/s, zero context acquisitions.
+Earlier repeats varied substantially (9.643 and 43.031 VBlanks/s); do not claim
+causal performance acceptance. Details and receipts are in VERIFIED.
+
+Work after that commit: thread-safe completed-thumbnail publication removes
+present-image-ring GL drains. Its concurrent Windows writer/reader test passes.
+An asynchronous render-owner diagnostic callback is being integrated into the
+TCP server for pure-renderer handlers (coherency ring, present ring, post-AA).
+It uses IO_EXEC ownership and thread-local response append ownership so the
+emulation thread continues while the renderer produces a response. Dev build,
+32 R4 tests, hidden smoke (zero misses), six GL fixture modes and live/paused
+TCP queries pass. Additional pure-renderer queries (shader, bloom, batch sites,
+interpolation) are covered too. These changes remain uncommitted. The full
+framework unit tree in `psxrecomp/build-prsync` is currently rebuilding; it is
+Release/debug-tools-off, but is not the final R4 Release performance build.
+Do not merge/pin until remaining phase-1 ownership paths and gates are resolved.
+
+Continue the full rollout through 2, 3, 3b, 4 and 5 without stopping at a
+checkpoint. Phase 4 requires **100%** matching of primitives present in both
+packets (owner commit `26b54a3`). No phase has passed acceptance or merged.
+
+On `feat/frame-arch-1-native-authority`, original GP0 inputs now reach the
+native worker before widescreen transforms and RGB555 conversion. GPUREAD,
+native scanout, savestates and rewind VRAM read native CPU memory. Snapshot
+wire preserves texture/palette cache state and partial uploads. Reference
+coverage: 10000 mixed draws, 10000 coordinate cases, 2000 interlaced draws,
+2000 fill/copies; all exact. Fixed interlaced fills and odd GPUREAD high halves;
+write-invalidated row caching removes per-halfword worker round trips.
+
+Dev build, R4 32/32, ten parser/native/scanout framework fixtures, actual-parser
+debug/production parity and hidden boot-to-race smoke pass (zero misses).
+Latest integrated measurement `native-authority-integrated-18.json` is still
+39.716 VBlanks/s, max 77.948 ms, 224724 starved samples. Remaining phase-1 work:
+renderer controls/diagnostics still migrate GL context; old transaction and
+backend publication paths remain. Mailbox must use independent native inputs,
+not drop incremental GL records that future frames depend on. No active game
+process remains from that measurement. R4 gitlink remains `ac65fcf5` deliberately.
+
+The following section records the earlier component-only checkpoint; its
+"not integrated" statements are superseded by the status above.
+
+## Previous checkpoint: frame architecture, 2026-10-28 (phase 1 incomplete)
+
+Follow `docs/FRAME_ARCHITECTURE.md`, including owner amendment `b832af3`:
+phase 3b audits PGXP; phase 4 is generic packet interpolation, not private
+guest redraw workers. No phase has passed acceptance or been merged yet.
+
+Framework checkout/topic `feat/frame-arch-1-native-authority` is at
+`643af69d`, pushed to `fork`, based on fork `r4/main` `ac65fcf5`. WIP
+`b56f4914` adds independent SW raster contexts and an ordered CPU-only native
+queue. Partial A0 fragments preserve masked destinations, wrapping, received
+prefixes and snapshot/resume between fragments. Tests and build/smoke results
+are in VERIFIED. Runtime does not yet call the native queue. `643af69d` additionally adds a
+native-only RGB888 polygon path with integer attribute planes and dithering;
+hand-known gradient/dither fixtures pass, but full oracle parity and original
+GP0 capture/routing remain outstanding.
+
+Next integration boundary: capture native command inputs before GPU parser
+widescreen/HUD transforms and RGB555 truncation. A facade-level duplication
+would inherit those presentation changes. The existing software raster lacks
+dither state and uses reduced-precision Gouraud interpolation; the historical
+accuracy ledger already identifies this. A pinned local Beetle reference is
+at `analysis/perf-20261028/beetle-reference`, commit
+`53246dc2d00f3c00cc56baa1061902da7a6651e4`; no reference code was copied into
+the framework. Hardware pixel parity remains unverified.
+
+The earlier `fix/queued-vram-snapshot` commits `a1af76d0` and `1efd81f9`
+remain preserved, unmerged. Their render-owner completion should be replaced
+by native completion in the new design. R4's gitlink remains `ac65fcf5`;
+do not mistake the modified local submodule pointer for a promoted pin.
+No visible windows, display-mode changes, packaging, installation or PRs.
+
+## Current work (2026-10-28, owner PC real-time performance)
+
+Final gates at framework `ac65fcf5`: regen unchanged, build, 32/32 ctest,
+hidden boot-to-race smoke with zero dispatch/segment misses. Fresh defaults
+resolve to 9x internal at an actual 7680x4320 drawable. Clean 25-second
+recheck: 59.977 main callbacks/s, zero audio starvation, zero whole-period
+pacing debt entries and 30.00 presents/s with zero presentation hitches.
+The separate image-traced run confirms 30.00 distinct images/s; readback
+perturbed its pacing, documented in VERIFIED. Default and optional-worker
+composed screenshots were inspected. Receipts are under `final-gates/` and
+`acceptance-defaults*` in the evidence directory below.
+
+Performance defaults: retain PGXP including CPU propagation, Car Effects,
+borderless fullscreen, fixed resolution and the existing 4K/9x Match display
+cap. Rewind and the Race frame rate enhancement become opt-in. The owner's
+8K output now uses original 30 FPS race images at full emulation speed;
+60 FPS enhancement performance is **not restored**. Same-save hidden GL
+25-second comparison: 18x old defaults 50.898 main callbacks/s, 171184
+starved audio samples, 25.48 distinct images/s; new 9x/original-frame
+defaults 60.049 callbacks/s, zero starved samples, zero pacing entries a
+whole period late, 30.04 distinct images/s. Full table and measurement
+semantics are in `docs/VERIFIED.md`. All measured runs had zero misses.
+
+Rewind synchronously reads back VRAM during machine snapshots. Extra race
+draws overload this 8K configuration even after enabling private workers
+by disabling Car Effects. CPU mode, seams, bloom and presenter slot count
+did not solve that. Controller enumeration is event-driven; the closed
+overlay is not doing frame rendering. The optional worker scheduler now
+uses exact indexed rational boundaries after stalls/lead skips, preventing
+spurious near-one redraws; regressions use the actual framework planner.
+
+Ghidra setup is complete at `C:/Users/Shokunin/dev/ghidra-mcp`: official
+Ghidra 12.1.4, Temurin JDK 21, Python 3.12 venv/pyghidra-mcp, analyzed
+OpenBIOS at BFC00000 and SLUS_007.97 text at 80010000. `ghidra` is registered
+in the owner's Codex config. MCP stdio verification lists 1460 game functions;
+setup and receipt are local `README.md` and `stdio-verification.json` there.
+
+Local performance harness/evidence: `analysis/perf-20261028/`. Slot 9 is a
+fresh GP grid save. Debug performance runs must disable DISPLAY_RING,
+PRESENT_IMAGE_RING, GL_PERF and ASYNC_GPU timer/ops unless profiling them;
+the debug defaults are not representative of the release renderer. No
+visible game windows were opened and the display mode was never changed.
+
 ## Current work (2026-10-27, PGXP seam strips)
 
 The owner's "pgxp was buggy" on the 0.2.1 candidate (8K/18x) was seam
