@@ -21,6 +21,90 @@ build pass. A hidden race smoke has zero dispatch misses. The static native
 image and normalized PGXP stream match, while enhanced presentation still
 alternates between two hashes; see FRAME_ARCHITECTURE. This topic is for
 supervisor integration and has not been merged to `r4/main`.
+2026-10-29 phase-4 wait-attribution pin: `7a46df9e` (via `8d412798`). Publication wakes the
+render owner without acquiring its mutex; immutable transform history uses
+fixed-step deferred retirement. Opt-in VBlank telemetry includes worst-20
+sleep/overshoot, publication, native enqueue/completion, history, and guest
+CPU timings.
+JOBS=4 build and regeneration pass (generated output unchanged), 22 permitted
+R4 tests and seven focused framework checks pass. Final locked A/B results are
+recorded in [the phase-4 status](FRAME_INTERPOLATION_STATUS.md).
+
+2026-10-29 phase-4 validation pin: `bf2fb59e` (documentation-only above
+`2e39cbe6`). Records failed visual and 8K-rate acceptance after stock comparison;
+no production-readiness claim. Final regeneration changes no generated output.
+Compact-layout rewind restores 49 snapshots without failures and resumes a
+clean 45-pair census. See [final evidence](FRAME_INTERPOLATION_STATUS.md).
+
+2026-10-29 phase-4 presenter topic pin: `2e39cbe6` (includes `9ead2f08`).
+Adds retained packet sampling, source-model appearance classification, streamed
+vertex identity, projection interpolation and opaque Car Effects metadata.
+Removes the unused private worker pool. R4 switches FPS to the generic presenter
+and removes its guest re-execution path. Build/23 CTests and focused sampler,
+stream, presenter and lease fixtures pass. Regeneration leaves 50 ordinary
+shards unchanged and emits no private draw clones. Visual/rate acceptance is
+not yet closed; see [status](FRAME_INTERPOLATION_STATUS.md).
+
+2026-10-29 phase-4 continuation topic pin: `cf8aadf2` (via `398e6bc2`).
+Adds original RAM provenance, deterministic duplicate assignment, frozen-pair
+TCP inspection and projective-path census coverage. R4 build/32 CTests and
+five focused framework tests pass; regeneration leaves 50 shards unchanged.
+The inclusive 45-sample race gate fails (max 1592 unclassified unmatched,
+zero ambiguous, one invalid depth). No production cutover, legacy deletion,
+merge or generic 8K60/120 performance claim. See
+[phase-4 status](FRAME_INTERPOLATION_STATUS.md).
+
+2026-10-29 phase-4 development topic pin: `cf4f8b69` (fork
+`feat/frame-arch-4-interp`, based on `r4/main` at `d2185504`). Adds a separate
+packet-pair sampler, validated PGXP projection provenance and an opt-in
+presenter audit. This is not a production FPS cutover: repeated-instance
+identity still fails the runtime gate (18/45 samples flagged, up to 66
+ambiguous candidates). R4 build and 32/32 tests, five focused framework tests
+and hidden complete-frame GL fixture pass. Hidden smoke has zero dispatch or
+segment misses. Regeneration leaves all 50 shards unchanged. No legacy path
+deletion, merge, PR or 8K60/120 acceptance. See
+[phase-4 status](FRAME_INTERPOLATION_STATUS.md).
+
+2026-10-29 phase-5 enhanced reverse pin: `c544b04a` (fork
+`feat/frame-arch-5-rewind`). Integrates packet presenter through `27d6d167`, adds
+512 MiB immutable packet history aligned with native capture ticks, waits for
+each replay before stepping again, and branches forward on release. Repairs
+the duplicated HUD by invalidating native/enhanced center-splice equivalence
+and derived caches after restore; PGXP remains fully enabled. Hidden GL fixture:
+111 checks; Release build, 31 permitted CTests, native/mailbox/hold/serializer
+fixtures pass; regeneration leaves 50 shards unchanged. Fixed 18x/4320-line
+120-second run: 7,200 captures, zero gaps/failures/dispatch misses, mean
+0.200516 ms, p99 0.316 ms, maximum 0.7186 ms. Mapped Y: 94 exact restores and
+enhanced replays; debug hold: 272, reaching the bounded history edge and resuming.
+No R4 PR or merge into `r4/main`. See [evidence and hand-off](REWIND_PHASE5.md).
+
+2026-10-29 phase-5 latency follow-up pin: `6cb8b57d` (fork
+`feat/frame-arch-5-rewind`). Preallocated reverse-page pool, immutable capture
+buffer, CPU delta/eviction worker and ordered native checkpoint mailbox.
+Retained worker events avoid Windows condition-variable contention/polling;
+emulation-thread above-normal priority is scoped to configured rewind.
+R4 also reattaches the shared HUD/Effects callback during plugin activation.
+Regeneration: 50 shards unchanged. Release build, 31 permitted R4 tests and
+native/serializer/delta/worker/hold fixtures pass. Hidden 600-second 18x race:
+35,994 captures, zero frame gap/failures/dispatch misses; mean 0.185991 ms,
+p50 0.178 ms, p99 0.298 ms, maximum 0.5175 ms. PGXP fully on; Effects draws
+verified. Mapped Y restores 151 byte-exact states; debug hold restores 154;
+release resumes and all menu probes stay closed. Enhanced reverse presentation
+is still missing, and composed-output artifacts remain: this is not full
+phase-5 acceptance. No renderer-plumbing edits, PR or merge into `r4/main`.
+See [complete evidence and remaining integration](REWIND_PHASE5.md).
+
+2026-10-29 phase-5 topic pin: `6e47aa80` (fork
+`feat/frame-arch-5-rewind`, based on `4f893c1a`). Adds generic native-only
+per-frame reverse-page snapshots and held rewind with muted audio and native
+scanout presentation. No GL snapshot reads or renderer plumbing changes.
+R4 defaults restore rewind and 60 FPS; Car Effects and full PGXP stay enabled.
+Release build, 31/31 permitted R4 tests, native/delta/hold/serializer fixtures,
+and hidden dummy-audio boot-to-race smoke pass with zero dispatch/segment misses.
+Final TCP demo: 601 captures at 0.467880 ms mean host cost, 124 byte-exact
+restores; earlier repeated windows 0.381678-0.427349 ms and mapped-Y hold pass.
+See [Phase 5 evidence](REWIND_PHASE5.md) for scope and maximum-cost caveat.
+Supervisor integration only; this pin has not merged into `r4/main`.
 
 2026-10-28 native-authority phase pin: `4f893c1a` (fork `r4/main`, merge of
 `feat/frame-arch-1-native-authority` through `464bc104`). Original GP0 executes
@@ -131,3 +215,11 @@ its own.
 | 2026-10-28 | `2b5a3817` (fork `r4/main`: `feat/menu-main-screen` + `fix/steam-controller-outside-steam`) | `5d8eaa3` | | | Integration pin of the two rows above. |
 | 2026-10-28 | `2b5a3817` (unchanged) | `8b3fcaf` (recomp-launcher branch `feat/add-to-steam` on `r4/main` `5d8eaa3`; not pushed) | | | Add to Steam (owner, 2026-10-28): opt-in `controls.steam` puts a Steam section on Controls (only when Steam is installed and R4 is not registered; "Running from Steam" when Steam started it). The button writes a non-Steam shortcut "Ridge Racer Type 4 Recompiled" into every local user's `shortcuts.vdf` (append-only, unknown fields kept, `.bak` first, idempotent), then offers Restart Steam on click. Controller template left to Steam's default for non-Steam games (Gamepad). No framework change, no regen. Verified on Windows: R4 ctest 32/32, recomp-launcher core + 3 new script tests against a fake Steam folder (`R4L_STEAM_ROOT`; `r4l_core`/`r4l_render_all` fail identically without the change), headless smoke to race-12s 0 dispatch / segment misses. Real Steam folder never written. |
 | 2026-10-28 | `a7122c59` (fork branch `fix/display-playtest-20261028` on `fix/prefer-steam-virtual-pad` `487ec042`; not pushed) | `c6ac60c` (recomp-launcher `fix/display-playtest-20261028`; not pushed) | | | Owner playtest display fixes: Internal resolution applies live from the in-game menu (no false "Applies after restart"), Windows Borderless is a borderless popup one row taller than the monitor (no fullscreen-flip promotion, instant Alt-Tab), Internal resolution rows show real pixels ("4K · 3840×2160 (9×)" at 16:9). Match display capped at 4K/9x by default (`match_display_max_lines = 2160`). Runtime only; no regen. Verified: ctest 32/32, headless smoke 0 dispatch misses, hidden-window menu change Match display -> 1440p applied live (hr_scale 9 -> 6, same PID). Borderless Alt-Tab needs the owner's eyes. |
+
+2026-10-29: Phase-4 topic pins 657876f2 for pre-cull transform attachments, source-table sampling and signed-depth clipping fixtures. Audit remains unaccepted (unverified new sources); production interpolation remains legacy.
+
+2026-10-29 interpolation profiling topic: framework code `014e2cb5` adds CPU-worker
+transform storage and direct immutable-history leases; R4 FPS still uses generic
+packets. Regeneration unchanged; focused framework and R4 tests pass. Exclusive
+60-second A/B tests fail timing/throughput acceptance; see FRAME_INTERPOLATION_STATUS.md.
+This pin is a topic delivery, not a promotion into r4/main.

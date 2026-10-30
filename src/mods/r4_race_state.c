@@ -11,6 +11,8 @@
 #include "cpu_state.h"
 #include "mod_plugins.h"
 #include "r4_race_state.h"
+#include "packet_metadata.h"
+#define R4_RACE_METADATA UINT64_C(0x5234524143450001)
 
 /* The car effects are the only reader, so the hook belongs to their plugin. */
 #define PLUGIN_ID "r4.car-effects"
@@ -328,6 +330,7 @@ static const R4RaceState *state_at(int delay)
 
 int r4_race_state_read_delayed(R4RaceState *out, int delay)
 {
+    if(packet_metadata_read(R4_RACE_METADATA,out,sizeof *out)) return 1;
     for (int attempt = 0; attempt < 4; ++attempt) {
         const unsigned v0 = atomic_load_explicit(&s_version, memory_order_acquire);
         if (!v0) return 0;
@@ -360,8 +363,39 @@ int r4_race_project(const R4RaceState *s, int view, float wx, float wy, float wz
     return 1;
 }
 
+static int packet_capture(void *out) {
+    memset(out,0,sizeof(R4RaceState));
+    (void)r4_race_state_read_delayed(out,0);
+    return 1; /* An empty captured state must not fall back to live guest state. */
+}
+static int32_t lerp_i(int32_t a,int32_t b,double t) {return (int32_t)llround(a+t*((double)b-a));}
+static int32_t lerp_angle(int32_t a,int32_t b,double t) {return (a+(int32_t)llround(t*angle_diff(a,b)))&4095;}
+static void packet_blend(const void *older,const void *newer,double t,void *output) {
+    const R4RaceState *a=older,*b=newer;R4RaceState *o=output;*o=*b;
+    if(!a->in_race || !b->in_race || a->car_count!=b->car_count) return;
+    for(int i=0;i<b->car_count && i<R4_RACE_CARS;++i) {
+        const R4RaceCar *ac=&a->cars[i],*bc=&b->cars[i];R4RaceCar *c=&o->cars[i];
+#define LINEAR(f) c->f=lerp_i(ac->f,bc->f,t)
+#define ANGLE(f) c->f=lerp_angle(ac->f,bc->f,t)
+        LINEAR(x);LINEAR(y);LINEAR(z);LINEAR(vx);LINEAR(vz);LINEAR(speed);LINEAR(rpm);LINEAR(slip);
+        ANGLE(heading);ANGLE(pitch);ANGLE(roll);ANGLE(motion_heading);
+#undef LINEAR
+#undef ANGLE
+    }
+    for(int i=0;i<R4_RACE_VIEWS;++i) {
+        const R4RaceCamera *ac=&a->cameras[i],*bc=&b->cameras[i];R4RaceCamera *c=&o->cameras[i];
+        if(!ac->valid || !bc->valid) continue;
+        for(int k=0;k<3;++k)c->eye[k]=lerp_i(ac->eye[k],bc->eye[k],t);
+        c->pitch=lerp_angle(ac->pitch,bc->pitch,t);c->yaw=lerp_angle(ac->yaw,bc->yaw,t);
+        c->roll=lerp_angle(ac->roll,bc->roll,t);rotations(c->matrix,c->pitch,c->yaw,c->roll);
+        c->h=lerp_i(ac->h,bc->h,t);c->ofx=lerp_i(ac->ofx,bc->ofx,t);c->ofy=lerp_i(ac->ofy,bc->ofy,t);
+    }
+    for(int k=0;k<3;++k)o->light_dir[k]=(float)(a->light_dir[k]+t*(b->light_dir[k]-a->light_dir[k]));
+}
+
 PSX_MOD_CONSTRUCTOR(r4_register_race_state)
 {
+    (void)packet_metadata_register(R4_RACE_METADATA,sizeof(R4RaceState),packet_capture,packet_blend);
     (void)psx_mod_register_function_entry_plugin(PLUGIN_ID, VIEW_BUILD, view_build);
     (void)psx_mod_register_command("r4.camera", camera_command);
 }

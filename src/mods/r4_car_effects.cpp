@@ -1,3 +1,4 @@
+#include "r4_race_hud.h"
 /* Car effects for R4, drawn by the host on the HUD layer, under the race HUD,
  * from the race state (r4_race_state.h).
  *
@@ -1008,7 +1009,10 @@ void r4_car_effects_draw(ImDrawList *dl, int W, int H, bool split_screen) {
 
 static void r4_car_effects_restore(void) { g_restore.store(true); }
 
-static void r4_car_effects_activate(void) { s_enabled.store(true, std::memory_order_relaxed); }
+static void r4_car_effects_activate(void) {
+    s_enabled.store(true, std::memory_order_relaxed);
+    r4_race_hud_bind();
+}
 
 /* Host-only: a plan without this plugin (or a netplay match) starts with the
  * effects off and the lighting chain's live values neutral. */

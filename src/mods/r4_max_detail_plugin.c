@@ -53,10 +53,6 @@ static int s_hooks_registered;
          psx_mod_register_function_entry_plugin(PLUGIN_ID, (address), (callback)))
 #define R4_MD_HOOK_COUNT 15
 
-#ifdef R4_THREADED_DRAW
-#include "psx_exec_ctx.h"
-#include "r4_draw_mods.h"
-#endif
 #define R4_MD_BOUNDS_CACHE 4096u
 typedef struct {
 int s_enabled;
@@ -126,13 +122,7 @@ int s_big_heap_allowed;  /* R4_MD_BIG_HEAP=0 turns it off for A/B */
 } R4MdState;
 static R4MdState s_main = {.s_sections_override=-1, .s_ahead_override=-1,
     .s_behind_override=-1, .s_far_cars_override=-1};
-#ifdef R4_THREADED_DRAW
-struct R4MdDrawState { R4MdState state; PsxExecCtx *ctx; int margin, ram8; };
-static _Thread_local R4MdDrawState *s_private;
-static R4MdState *md_state(void) { return s_private ? &s_private->state : &s_main; }
-#else
 static R4MdState *md_state(void) { return &s_main; }
-#endif
 #define s_enabled (md_state()->s_enabled)
 #define s_trace (md_state()->s_trace)
 #define s_opt (md_state()->s_opt)
@@ -197,40 +187,21 @@ static R4MdState *md_state(void) { return &s_main; }
 
 
 static uint32_t rd32(uint32_t a) {
-#ifdef R4_THREADED_DRAW
-    if (s_private) return psx_ctx_read32(s_private->ctx, a);
-#endif
     return psx_mod_read_word(a);
 }
 static uint16_t rd16(uint32_t a) {
-#ifdef R4_THREADED_DRAW
-    if (s_private) return (uint16_t)(rd32(a & ~3u) >> ((a & 2u) * 8u));
-#endif
     return psx_mod_read_half(a);
 }
 static void wr32(uint32_t a, uint32_t v) {
-#ifdef R4_THREADED_DRAW
-    if (s_private) { psx_ctx_write32(s_private->ctx, a, v); return; }
-#endif
     psx_mod_write_word(a, v);
 }
 static void wr16(uint32_t a, uint16_t v) {
-#ifdef R4_THREADED_DRAW
-    if (s_private) { unsigned shift=(a & 2u)*8u;
-        wr32(a & ~3u, (rd32(a & ~3u) & ~(65535u << shift)) | ((uint32_t)v << shift)); return; }
-#endif
     psx_mod_write_half(a, v);
 }
 static int md_margin(void) {
-#ifdef R4_THREADED_DRAW
-    if (s_private) return s_private->margin;
-#endif
     return psx_mod_widescreen_x_margin();
 }
 static int md_ram8(void) {
-#ifdef R4_THREADED_DRAW
-    if (s_private) return s_private->ram8;
-#endif
     return psx_ram_8mb_active();
 }
 
@@ -994,43 +965,3 @@ PSX_MOD_CONSTRUCTOR(r4_register_max_detail)
     (void)psx_mod_register_activation_plugin(PLUGIN_ID, r4_max_detail_activate);
     (void)psx_mod_register_vblank_plugin(PLUGIN_ID, r4_md_vblank);
 }
-
-#ifdef R4_THREADED_DRAW
-/* Logic tick pacing/governor hooks stay on main; a redraw starts with their
- * captured decisions and does not advance the guest clock. */
-static const struct { uint32_t address; PSXModFunctionEntryCallback call; } draw_hooks[] = {
-    {R4_MD_COURSE_DISPATCH_FN, r4_md_course},
-    {R4_PVS_OCTANT_FN, r4_md_pvs_octant}, {R4_PVS_MERGE_FN, r4_md_pvs_merge},
-    {R4_DRAW_OTAG_FN, r4_md_draw_otag}, {R4_MD_CLEAR_OTAG_FN, r4_md_clear_otag},
-    {R4_MD_ENV_RENDER_FN, r4_md_env}, {R4_MD_MIRROR_LIMIT_FN, r4_md_mirror_limit},
-    {R4_MD_MIRROR_LIST_FN, r4_md_mirror_list}, {R4_MD_XF_FN, r4_md_xf_entry},
-    {R4_MD_XF_SETTRANS_FN, r4_md_xf_set_trans}, {R4_MD_CAR_DRAW_FN, r4_md_car_draw},
-    {R4_MD_CAR_AFTER_LOD_FN, r4_md_car_after_lod}, {R4_MD_RAND_STUB, r4_md_rand},
-};
-int r4_md_draw_register_entries(PsxCtxEntryHook callback, void *user) {
-    int n = 0;
-    for (size_t i=0;i<sizeof draw_hooks/sizeof draw_hooks[0];++i)
-        n += r4_draw_mods_register_one(draw_hooks[i].address,callback,user);
-    return n == sizeof draw_hooks/sizeof draw_hooks[0];
-}
-R4MdDrawState *r4_md_draw_capture(void) {
-    R4MdDrawState *p = calloc(1,sizeof *p);
-    if (!p) return NULL;
-    p->state = s_main;
-    p->margin = psx_mod_widescreen_x_margin();
-    p->ram8 = psx_ram_8mb_active();
-    R4MdDrawState *prior = s_private;
-    s_private = p; s_trace = 0; s_private = prior;
-    return p;
-}
-int r4_md_draw_entry(R4MdDrawState *p, CPUState *cpu, uint32_t address) {
-    if (!p || !cpu || !cpu->ctx) return 0;
-    R4MdDrawState *prior = s_private;
-    s_private = p; p->ctx = cpu->ctx;
-    for (size_t i=0;i<sizeof draw_hooks/sizeof draw_hooks[0];++i)
-        if (address == draw_hooks[i].address) draw_hooks[i].call(cpu,address);
-    s_private = prior;
-    return 1;
-}
-void r4_md_draw_destroy(R4MdDrawState *p) { free(p); }
-#endif

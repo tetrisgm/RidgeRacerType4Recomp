@@ -263,3 +263,33 @@ ownership; transaction APIs themselves remain until their specified phase-4
 replacement. No fallback has been added. HD presentation tracking still uses
 its ordered presentation mirror; independent packets must carry exact native
 texture inputs rather than promote that mirror back to guest authority.
+
+### Phase-5 topic implementation (2026-10-29)
+
+Native reverse-page snapshots and hold-to-rewind are implemented on
+`feat/frame-arch-5-rewind`, based on native authority `4f893c1a`. The latency
+follow-up preallocates storage, moves delta comparison/eviction to a CPU worker,
+and publishes ordered native checkpoints without draw-queue locking. Native
+VRAM and texture-cache completion remains independent of GL; incomplete states
+are never published. Held Y is verified against byte-exact restored state and
+closed main-menu probes, with forward capture resuming on release.
+
+Enhanced reverse presentation is still missing: this topic continues to present
+native scanout while held. It therefore does not claim full phase-5 acceptance.
+See [implementation, complete soak results and reproduction](REWIND_PHASE5.md),
+including failed experiments and the required immutable-packet renderer
+integration. Supervisor integration is separate; no merge into `r4/main`
+accompanies this topic.
+
+
+### Phase-4 topic disposition (2026-10-29)
+
+The packet presenter, interpolated Car Effects metadata and R4 FPS cutover are
+implemented on `feat/frame-arch-4-interp`, with legacy R4 guest redraw removed.
+The exclusive profiling follow-up moves transform allocation/reclamation off the
+guest and removes render-side history copying. It is **not accepted**: 2,982 timed
+pairs have zero match failures, but same-build FPS-off baselines are below 60
+VBlanks/s and interpolation still adds starvation. Final 8K distinct-image lower
+bounds are 51.34 / 94.02 at requested 60 / 120. Narrow frozen-pair captures have
+stable endpoints and no added clear-colour gaps; full visual equivalence remains
+unestablished. See [A/B profiles and remaining gates](FRAME_INTERPOLATION_STATUS.md).
