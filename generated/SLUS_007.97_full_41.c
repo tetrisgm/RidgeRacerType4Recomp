@@ -295,7 +295,7 @@ block_8007563C:
 #endif
     
 #ifdef PSX_ENABLE_BLOCK_CYCLES
-    psx_gte_read(cpu, 12);
+    psx_gte_read_compiled(cpu, 12);
 #endif
     cpu->gpr[12] = cpu->gte_ctrl[0];  /* cfc2 */
     PGXP_COP2(0x484C0000u, cpu->gpr[12], 0u);  /* 0x8007563C: 0x484C0000 */
@@ -311,7 +311,7 @@ block_8007563C:
 #endif
     
 #ifdef PSX_ENABLE_BLOCK_CYCLES
-    psx_gte_read(cpu, 13);
+    psx_gte_read_compiled(cpu, 13);
 #endif
     cpu->gpr[13] = cpu->gte_ctrl[1];  /* cfc2 */
     PGXP_COP2(0x484D0800u, cpu->gpr[13], 0u);  /* 0x80075640: 0x484D0800 */
@@ -323,7 +323,7 @@ block_8007563C:
 #endif
     
 #ifdef PSX_ENABLE_BLOCK_CYCLES
-    psx_gte_stall(cpu);
+    psx_gte_stall_compiled(cpu);
 #endif
     cpu->gte_ctrl[8] = cpu->gpr[12];  /* ctc2 */
     PGXP_COP2(0x48CC4000u, cpu->gpr[12], 0u);  /* 0x80075644: 0x48CC4000 */
@@ -335,7 +335,7 @@ block_8007563C:
 #endif
     
 #ifdef PSX_ENABLE_BLOCK_CYCLES
-    psx_gte_stall(cpu);
+    psx_gte_stall_compiled(cpu);
 #endif
     cpu->gte_ctrl[9] = cpu->gpr[13];  /* ctc2 */
     PGXP_COP2(0x48CD4800u, cpu->gpr[13], 0u);  /* 0x80075648: 0x48CD4800 */
@@ -347,7 +347,7 @@ block_8007563C:
 #endif
     
 #ifdef PSX_ENABLE_BLOCK_CYCLES
-    psx_gte_read(cpu, 12);
+    psx_gte_read_compiled(cpu, 12);
 #endif
     cpu->gpr[12] = cpu->gte_ctrl[2];  /* cfc2 */
     PGXP_COP2(0x484C1000u, cpu->gpr[12], 0u);  /* 0x8007564C: 0x484C1000 */
@@ -363,7 +363,7 @@ block_8007563C:
 #endif
     
 #ifdef PSX_ENABLE_BLOCK_CYCLES
-    psx_gte_read(cpu, 13);
+    psx_gte_read_compiled(cpu, 13);
 #endif
     cpu->gpr[13] = cpu->gte_ctrl[3];  /* cfc2 */
     PGXP_COP2(0x484D1800u, cpu->gpr[13], 0u);  /* 0x80075650: 0x484D1800 */
@@ -375,7 +375,7 @@ block_8007563C:
 #endif
     
 #ifdef PSX_ENABLE_BLOCK_CYCLES
-    psx_gte_stall(cpu);
+    psx_gte_stall_compiled(cpu);
 #endif
     cpu->gte_ctrl[10] = cpu->gpr[12];  /* ctc2 */
     PGXP_COP2(0x48CC5000u, cpu->gpr[12], 0u);  /* 0x80075654: 0x48CC5000 */
@@ -387,7 +387,7 @@ block_8007563C:
 #endif
     
 #ifdef PSX_ENABLE_BLOCK_CYCLES
-    psx_gte_stall(cpu);
+    psx_gte_stall_compiled(cpu);
 #endif
     cpu->gte_ctrl[11] = cpu->gpr[13];  /* ctc2 */
     PGXP_COP2(0x48CD5800u, cpu->gpr[13], 0u);  /* 0x80075658: 0x48CD5800 */
@@ -399,7 +399,7 @@ block_8007563C:
 #endif
     
 #ifdef PSX_ENABLE_BLOCK_CYCLES
-    psx_gte_read(cpu, 12);
+    psx_gte_read_compiled(cpu, 12);
 #endif
     cpu->gpr[12] = gte_read_ctrl(cpu, 4);  /* cfc2 */
     PGXP_COP2(0x484C2000u, cpu->gpr[12], 0u);  /* 0x8007565C: 0x484C2000 */
@@ -415,7 +415,7 @@ block_8007563C:
 #endif
     
 #ifdef PSX_ENABLE_BLOCK_CYCLES
-    psx_gte_read(cpu, 13);
+    psx_gte_read_compiled(cpu, 13);
 #endif
     cpu->gpr[13] = cpu->gte_ctrl[5];  /* cfc2 */
     PGXP_COP2(0x484D2800u, cpu->gpr[13], 0u);  /* 0x80075660: 0x484D2800 */
@@ -427,7 +427,7 @@ block_8007563C:
 #endif
     
 #ifdef PSX_ENABLE_BLOCK_CYCLES
-    psx_gte_stall(cpu);
+    psx_gte_stall_compiled(cpu);
 #endif
     gte_write_ctrl(cpu, 12, cpu->gpr[12]);  /* ctc2 */
     PGXP_COP2(0x48CC6000u, cpu->gpr[12], 0u);  /* 0x80075664: 0x48CC6000 */
@@ -439,7 +439,7 @@ block_8007563C:
 #endif
     
 #ifdef PSX_ENABLE_BLOCK_CYCLES
-    psx_gte_stall(cpu);
+    psx_gte_stall_compiled(cpu);
 #endif
     cpu->gte_ctrl[13] = cpu->gpr[13];  /* ctc2 */
     PGXP_COP2(0x48CD6800u, cpu->gpr[13], 0u);  /* 0x80075668: 0x48CD6800 */
@@ -451,7 +451,7 @@ block_8007563C:
 #endif
     
 #ifdef PSX_ENABLE_BLOCK_CYCLES
-    psx_gte_read(cpu, 12);
+    psx_gte_read_compiled(cpu, 12);
 #endif
     cpu->gpr[12] = cpu->gte_ctrl[6];  /* cfc2 */
     PGXP_COP2(0x484C3000u, cpu->gpr[12], 0u);  /* 0x8007566C: 0x484C3000 */
@@ -467,7 +467,7 @@ block_8007563C:
 #endif
     
 #ifdef PSX_ENABLE_BLOCK_CYCLES
-    psx_gte_read(cpu, 13);
+    psx_gte_read_compiled(cpu, 13);
 #endif
     cpu->gpr[13] = cpu->gte_ctrl[7];  /* cfc2 */
     PGXP_COP2(0x484D3800u, cpu->gpr[13], 0u);  /* 0x80075670: 0x484D3800 */
@@ -479,7 +479,7 @@ block_8007563C:
 #endif
     
 #ifdef PSX_ENABLE_BLOCK_CYCLES
-    psx_gte_stall(cpu);
+    psx_gte_stall_compiled(cpu);
 #endif
     cpu->gte_ctrl[14] = cpu->gpr[12];  /* ctc2 */
     PGXP_COP2(0x48CC7000u, cpu->gpr[12], 0u);  /* 0x80075674: 0x48CC7000 */
@@ -491,7 +491,7 @@ block_8007563C:
 #endif
     
 #ifdef PSX_ENABLE_BLOCK_CYCLES
-    psx_gte_stall(cpu);
+    psx_gte_stall_compiled(cpu);
 #endif
     cpu->gte_ctrl[15] = cpu->gpr[13];  /* ctc2 */
     PGXP_COP2(0x48CD7800u, cpu->gpr[13], 0u);  /* 0x80075678: 0x48CD7800 */
@@ -515,7 +515,7 @@ block_8007563C:
 #endif
     
 #ifdef PSX_ENABLE_BLOCK_CYCLES
-    psx_gte_stall(cpu);
+    psx_gte_stall_compiled(cpu);
 #endif
     cpu->gte_ctrl[0] = cpu->gpr[24];  /* ctc2 */
     PGXP_COP2(0x48D80000u, cpu->gpr[24], 0u);  /* 0x80075680: 0x48D80000 */
@@ -527,7 +527,7 @@ block_8007563C:
 #endif
     
 #ifdef PSX_ENABLE_BLOCK_CYCLES
-    psx_gte_stall(cpu);
+    psx_gte_stall_compiled(cpu);
 #endif
     cpu->gte_ctrl[1] = cpu->gpr[0];  /* ctc2 */
     PGXP_COP2(0x48C00800u, cpu->gpr[0], 0u);  /* 0x80075684: 0x48C00800 */
@@ -539,7 +539,7 @@ block_8007563C:
 #endif
     
 #ifdef PSX_ENABLE_BLOCK_CYCLES
-    psx_gte_stall(cpu);
+    psx_gte_stall_compiled(cpu);
 #endif
     cpu->gte_ctrl[2] = cpu->gpr[24];  /* ctc2 */
     PGXP_COP2(0x48D81000u, cpu->gpr[24], 0u);  /* 0x80075688: 0x48D81000 */
@@ -551,7 +551,7 @@ block_8007563C:
 #endif
     
 #ifdef PSX_ENABLE_BLOCK_CYCLES
-    psx_gte_stall(cpu);
+    psx_gte_stall_compiled(cpu);
 #endif
     cpu->gte_ctrl[3] = cpu->gpr[0];  /* ctc2 */
     PGXP_COP2(0x48C01800u, cpu->gpr[0], 0u);  /* 0x8007568C: 0x48C01800 */
@@ -567,7 +567,7 @@ block_8007563C:
 #endif
     
 #ifdef PSX_ENABLE_BLOCK_CYCLES
-    psx_gte_stall(cpu);
+    psx_gte_stall_compiled(cpu);
 #endif
     gte_write_ctrl(cpu, 4, cpu->gpr[24]);  /* ctc2 */
     PGXP_COP2(0x48D82000u, cpu->gpr[24], 0u);  /* 0x80075690: 0x48D82000 */
@@ -579,7 +579,7 @@ block_8007563C:
 #endif
     
 #ifdef PSX_ENABLE_BLOCK_CYCLES
-    psx_gte_stall(cpu);
+    psx_gte_stall_compiled(cpu);
 #endif
     cpu->gte_ctrl[5] = cpu->gpr[0];  /* ctc2 */
     PGXP_COP2(0x48C02800u, cpu->gpr[0], 0u);  /* 0x80075694: 0x48C02800 */
@@ -591,7 +591,7 @@ block_8007563C:
 #endif
     
 #ifdef PSX_ENABLE_BLOCK_CYCLES
-    psx_gte_stall(cpu);
+    psx_gte_stall_compiled(cpu);
 #endif
     cpu->gte_ctrl[6] = cpu->gpr[0];  /* ctc2 */
     PGXP_COP2(0x48C03000u, cpu->gpr[0], 0u);  /* 0x80075698: 0x48C03000 */
@@ -603,7 +603,7 @@ block_8007563C:
 #endif
     
 #ifdef PSX_ENABLE_BLOCK_CYCLES
-    psx_gte_stall(cpu);
+    psx_gte_stall_compiled(cpu);
 #endif
     cpu->gte_ctrl[7] = cpu->gpr[0];  /* ctc2 */
     PGXP_COP2(0x48C03800u, cpu->gpr[0], 0u);  /* 0x8007569C: 0x48C03800 */
@@ -925,7 +925,7 @@ block_80075704:
 #endif
     { int64_t result = (int64_t)(int32_t)cpu->gpr[2] * (int64_t)(int32_t)cpu->gpr[3]; cpu->lo = (uint32_t)result; cpu->hi = (uint32_t)(result >> 32); }
 #ifdef PSX_ENABLE_BLOCK_CYCLES
-    psx_muldiv_set(cpu, psx_mult_latency_s(cpu->gpr[2]));
+    psx_muldiv_set_compiled(cpu, psx_mult_latency_s(cpu->gpr[2]));
 #endif
     PGXP_MULDIV(0x00430018u, cpu->hi, cpu->lo, cpu->gpr[2], cpu->gpr[3]);  /* 0x80075714: 0x00430018 */
 #ifdef PSX_COSIM
@@ -944,7 +944,7 @@ block_80075704:
 #endif
     cpu->gpr[15] = cpu->hi;
 #ifdef PSX_ENABLE_BLOCK_CYCLES
-    psx_muldiv_stall(cpu);
+    psx_muldiv_stall_compiled(cpu);
 #endif
     PGXP_ALU(0x00007810u, cpu->gpr[15], cpu->hi, 0u);  /* 0x8007571C: 0x00007810 */
 #ifdef PSX_COSIM
@@ -1401,7 +1401,7 @@ block_80075788:
 #endif
     { int64_t result = (int64_t)(int32_t)cpu->gpr[2] * (int64_t)(int32_t)cpu->gpr[3]; cpu->lo = (uint32_t)result; cpu->hi = (uint32_t)(result >> 32); }
 #ifdef PSX_ENABLE_BLOCK_CYCLES
-    psx_muldiv_set(cpu, psx_mult_latency_s(cpu->gpr[2]));
+    psx_muldiv_set_compiled(cpu, psx_mult_latency_s(cpu->gpr[2]));
 #endif
     PGXP_MULDIV(0x00430018u, cpu->hi, cpu->lo, cpu->gpr[2], cpu->gpr[3]);  /* 0x8007579C: 0x00430018 */
 #ifdef PSX_COSIM
@@ -1424,7 +1424,7 @@ block_80075788:
 #endif
     cpu->gpr[15] = cpu->hi;
 #ifdef PSX_ENABLE_BLOCK_CYCLES
-    psx_muldiv_stall(cpu);
+    psx_muldiv_stall_compiled(cpu);
 #endif
     PGXP_ALU(0x00007810u, cpu->gpr[15], cpu->hi, 0u);  /* 0x800757A4: 0x00007810 */
 #ifdef PSX_COSIM
@@ -1788,7 +1788,7 @@ block_800757FC:
 #endif
     { int64_t result = (int64_t)(int32_t)cpu->gpr[2] * (int64_t)(int32_t)cpu->gpr[3]; cpu->lo = (uint32_t)result; cpu->hi = (uint32_t)(result >> 32); }
 #ifdef PSX_ENABLE_BLOCK_CYCLES
-    psx_muldiv_set(cpu, psx_mult_latency_s(cpu->gpr[2]));
+    psx_muldiv_set_compiled(cpu, psx_mult_latency_s(cpu->gpr[2]));
 #endif
     PGXP_MULDIV(0x00430018u, cpu->hi, cpu->lo, cpu->gpr[2], cpu->gpr[3]);  /* 0x80075810: 0x00430018 */
 #ifdef PSX_COSIM
@@ -1807,7 +1807,7 @@ block_800757FC:
 #endif
     cpu->gpr[15] = cpu->hi;
 #ifdef PSX_ENABLE_BLOCK_CYCLES
-    psx_muldiv_stall(cpu);
+    psx_muldiv_stall_compiled(cpu);
 #endif
     PGXP_ALU(0x00007810u, cpu->gpr[15], cpu->hi, 0u);  /* 0x80075818: 0x00007810 */
 #ifdef PSX_COSIM
@@ -2799,7 +2799,7 @@ block_80075938:
 #endif
     
 #ifdef PSX_ENABLE_BLOCK_CYCLES
-    psx_gte_stall(cpu);
+    psx_gte_stall_compiled(cpu);
 #endif
     cpu->gte_ctrl[0] = cpu->gpr[12];  /* ctc2 */
     PGXP_COP2(0x48CC0000u, cpu->gpr[12], 0u);  /* 0x80075944: 0x48CC0000 */
@@ -2811,7 +2811,7 @@ block_80075938:
 #endif
     
 #ifdef PSX_ENABLE_BLOCK_CYCLES
-    psx_gte_stall(cpu);
+    psx_gte_stall_compiled(cpu);
 #endif
     cpu->gte_ctrl[1] = cpu->gpr[13];  /* ctc2 */
     PGXP_COP2(0x48CD0800u, cpu->gpr[13], 0u);  /* 0x80075948: 0x48CD0800 */
@@ -2842,7 +2842,7 @@ block_80075938:
 #endif
     
 #ifdef PSX_ENABLE_BLOCK_CYCLES
-    psx_gte_stall(cpu);
+    psx_gte_stall_compiled(cpu);
 #endif
     cpu->gte_ctrl[2] = cpu->gpr[12];  /* ctc2 */
     PGXP_COP2(0x48CC1000u, cpu->gpr[12], 0u);  /* 0x80075958: 0x48CC1000 */
@@ -2854,7 +2854,7 @@ block_80075938:
 #endif
     
 #ifdef PSX_ENABLE_BLOCK_CYCLES
-    psx_gte_stall(cpu);
+    psx_gte_stall_compiled(cpu);
 #endif
     cpu->gte_ctrl[3] = cpu->gpr[13];  /* ctc2 */
     PGXP_COP2(0x48CD1800u, cpu->gpr[13], 0u);  /* 0x8007595C: 0x48CD1800 */
@@ -2870,7 +2870,7 @@ block_80075938:
 #endif
     
 #ifdef PSX_ENABLE_BLOCK_CYCLES
-    psx_gte_stall(cpu);
+    psx_gte_stall_compiled(cpu);
 #endif
     gte_write_ctrl(cpu, 4, cpu->gpr[14]);  /* ctc2 */
     PGXP_COP2(0x48CE2000u, cpu->gpr[14], 0u);  /* 0x80075960: 0x48CE2000 */
@@ -2892,7 +2892,7 @@ block_80075938:
 #endif
     
 #ifdef PSX_ENABLE_BLOCK_CYCLES
-    psx_gte_stall(cpu);
+    psx_gte_stall_compiled(cpu);
 #endif
     cpu->gte_ctrl[5] = cpu->gpr[12];  /* ctc2 */
     PGXP_COP2(0x48CC2800u, cpu->gpr[12], 0u);  /* 0x8007596C: 0x48CC2800 */
@@ -2913,7 +2913,7 @@ block_80075938:
 #endif
     
 #ifdef PSX_ENABLE_BLOCK_CYCLES
-    psx_gte_stall(cpu);
+    psx_gte_stall_compiled(cpu);
 #endif
     cpu->gte_ctrl[6] = cpu->gpr[13];  /* ctc2 */
     PGXP_COP2(0x48CD3000u, cpu->gpr[13], 0u);  /* 0x80075974: 0x48CD3000 */
@@ -2925,7 +2925,7 @@ block_80075938:
 #endif
     
 #ifdef PSX_ENABLE_BLOCK_CYCLES
-    psx_gte_stall(cpu);
+    psx_gte_stall_compiled(cpu);
 #endif
     cpu->gte_ctrl[7] = cpu->gpr[14];  /* ctc2 */
     PGXP_COP2(0x48CE3800u, cpu->gpr[14], 0u);  /* 0x80075978: 0x48CE3800 */
@@ -3559,7 +3559,7 @@ block_80075A38:
 #endif
     { int64_t result = (int64_t)(int32_t)cpu->gpr[3] * (int64_t)(int32_t)cpu->gpr[4]; cpu->lo = (uint32_t)result; cpu->hi = (uint32_t)(result >> 32); }
 #ifdef PSX_ENABLE_BLOCK_CYCLES
-    psx_muldiv_set(cpu, psx_mult_latency_s(cpu->gpr[3]));
+    psx_muldiv_set_compiled(cpu, psx_mult_latency_s(cpu->gpr[3]));
 #endif
     PGXP_MULDIV(0x00640018u, cpu->hi, cpu->lo, cpu->gpr[3], cpu->gpr[4]);  /* 0x80075A4C: 0x00640018 */
 #ifdef PSX_COSIM
@@ -3710,7 +3710,7 @@ block_80075A68:
 #endif
     { int64_t result = (int64_t)(int32_t)cpu->gpr[3] * (int64_t)(int32_t)cpu->gpr[2]; cpu->lo = (uint32_t)result; cpu->hi = (uint32_t)(result >> 32); }
 #ifdef PSX_ENABLE_BLOCK_CYCLES
-    psx_muldiv_set(cpu, psx_mult_latency_s(cpu->gpr[3]));
+    psx_muldiv_set_compiled(cpu, psx_mult_latency_s(cpu->gpr[3]));
 #endif
     PGXP_MULDIV(0x00620018u, cpu->hi, cpu->lo, cpu->gpr[3], cpu->gpr[2]);  /* 0x80075A78: 0x00620018 */
 #ifdef PSX_COSIM
@@ -3768,7 +3768,7 @@ block_80075A88:
 #endif
     cpu->gpr[15] = cpu->hi;
 #ifdef PSX_ENABLE_BLOCK_CYCLES
-    psx_muldiv_stall(cpu);
+    psx_muldiv_stall_compiled(cpu);
 #endif
     PGXP_ALU(0x00007810u, cpu->gpr[15], cpu->hi, 0u);  /* 0x80075A88: 0x00007810 */
 #ifdef PSX_COSIM
@@ -4627,7 +4627,7 @@ block_80075B70:
 #endif
     { int64_t result = (int64_t)(int32_t)cpu->gpr[16] * (int64_t)(int32_t)cpu->gpr[5]; cpu->lo = (uint32_t)result; cpu->hi = (uint32_t)(result >> 32); }
 #ifdef PSX_ENABLE_BLOCK_CYCLES
-    psx_muldiv_set(cpu, psx_mult_latency_s(cpu->gpr[16]));
+    psx_muldiv_set_compiled(cpu, psx_mult_latency_s(cpu->gpr[16]));
 #endif
     PGXP_MULDIV(0x02050018u, cpu->hi, cpu->lo, cpu->gpr[16], cpu->gpr[5]);  /* 0x80075B90: 0x02050018 */
 #ifdef PSX_COSIM
@@ -4669,7 +4669,7 @@ block_80075B94:
 #endif
     cpu->gpr[3] = cpu->lo;
 #ifdef PSX_ENABLE_BLOCK_CYCLES
-    psx_muldiv_stall(cpu);
+    psx_muldiv_stall_compiled(cpu);
 #endif
     PGXP_ALU(0x00001812u, cpu->gpr[3], cpu->lo, 0u);  /* 0x80075B94: 0x00001812 */
 #ifdef PSX_COSIM
@@ -4708,7 +4708,7 @@ block_80075B94:
 #endif
     { int64_t result = (int64_t)(int32_t)cpu->gpr[16] * (int64_t)(int32_t)cpu->gpr[2]; cpu->lo = (uint32_t)result; cpu->hi = (uint32_t)(result >> 32); }
 #ifdef PSX_ENABLE_BLOCK_CYCLES
-    psx_muldiv_set(cpu, psx_mult_latency_s(cpu->gpr[16]));
+    psx_muldiv_set_compiled(cpu, psx_mult_latency_s(cpu->gpr[16]));
 #endif
     PGXP_MULDIV(0x02020018u, cpu->hi, cpu->lo, cpu->gpr[16], cpu->gpr[2]);  /* 0x80075BA0: 0x02020018 */
 #ifdef PSX_COSIM
@@ -4756,7 +4756,7 @@ block_80075B94:
 #endif
     cpu->gpr[8] = cpu->lo;
 #ifdef PSX_ENABLE_BLOCK_CYCLES
-    psx_muldiv_stall(cpu);
+    psx_muldiv_stall_compiled(cpu);
 #endif
     PGXP_ALU(0x00004012u, cpu->gpr[8], cpu->lo, 0u);  /* 0x80075BB0: 0x00004012 */
 #ifdef PSX_COSIM
@@ -4810,7 +4810,7 @@ block_80075BC0:
 #endif
     { int64_t result = (int64_t)(int32_t)cpu->gpr[16] * (int64_t)(int32_t)cpu->gpr[5]; cpu->lo = (uint32_t)result; cpu->hi = (uint32_t)(result >> 32); }
 #ifdef PSX_ENABLE_BLOCK_CYCLES
-    psx_muldiv_set(cpu, psx_mult_latency_s(cpu->gpr[16]));
+    psx_muldiv_set_compiled(cpu, psx_mult_latency_s(cpu->gpr[16]));
 #endif
     PGXP_MULDIV(0x02050018u, cpu->hi, cpu->lo, cpu->gpr[16], cpu->gpr[5]);  /* 0x80075BC0: 0x02050018 */
 #ifdef PSX_COSIM
@@ -4821,7 +4821,7 @@ block_80075BC0:
 #endif
     cpu->gpr[3] = cpu->lo;
 #ifdef PSX_ENABLE_BLOCK_CYCLES
-    psx_muldiv_stall(cpu);
+    psx_muldiv_stall_compiled(cpu);
 #endif
     PGXP_ALU(0x00001812u, cpu->gpr[3], cpu->lo, 0u);  /* 0x80075BC4: 0x00001812 */
 #ifdef PSX_COSIM
@@ -4860,7 +4860,7 @@ block_80075BC0:
 #endif
     { int64_t result = (int64_t)(int32_t)cpu->gpr[16] * (int64_t)(int32_t)cpu->gpr[2]; cpu->lo = (uint32_t)result; cpu->hi = (uint32_t)(result >> 32); }
 #ifdef PSX_ENABLE_BLOCK_CYCLES
-    psx_muldiv_set(cpu, psx_mult_latency_s(cpu->gpr[16]));
+    psx_muldiv_set_compiled(cpu, psx_mult_latency_s(cpu->gpr[16]));
 #endif
     PGXP_MULDIV(0x02020018u, cpu->hi, cpu->lo, cpu->gpr[16], cpu->gpr[2]);  /* 0x80075BD0: 0x02020018 */
 #ifdef PSX_COSIM
@@ -4908,7 +4908,7 @@ block_80075BC0:
 #endif
     cpu->gpr[8] = cpu->lo;
 #ifdef PSX_ENABLE_BLOCK_CYCLES
-    psx_muldiv_stall(cpu);
+    psx_muldiv_stall_compiled(cpu);
 #endif
     PGXP_ALU(0x00004012u, cpu->gpr[8], cpu->lo, 0u);  /* 0x80075BE0: 0x00004012 */
 #ifdef PSX_COSIM
@@ -5472,7 +5472,7 @@ block_80075C98:
 #endif
     { int64_t result = (int64_t)(int32_t)cpu->gpr[2] * (int64_t)(int32_t)cpu->gpr[3]; cpu->lo = (uint32_t)result; cpu->hi = (uint32_t)(result >> 32); }
 #ifdef PSX_ENABLE_BLOCK_CYCLES
-    psx_muldiv_set(cpu, psx_mult_latency_s(cpu->gpr[2]));
+    psx_muldiv_set_compiled(cpu, psx_mult_latency_s(cpu->gpr[2]));
 #endif
     PGXP_MULDIV(0x00430018u, cpu->hi, cpu->lo, cpu->gpr[2], cpu->gpr[3]);  /* 0x80075C98: 0x00430018 */
 #ifdef PSX_COSIM
@@ -5495,7 +5495,7 @@ block_80075C98:
 #endif
     cpu->gpr[15] = cpu->hi;
 #ifdef PSX_ENABLE_BLOCK_CYCLES
-    psx_muldiv_stall(cpu);
+    psx_muldiv_stall_compiled(cpu);
 #endif
     PGXP_ALU(0x00007810u, cpu->gpr[15], cpu->hi, 0u);  /* 0x80075CA0: 0x00007810 */
 #ifdef PSX_COSIM
@@ -5780,7 +5780,7 @@ block_80075CD0:
 #endif
     { int64_t result = (int64_t)(int32_t)cpu->gpr[16] * (int64_t)(int32_t)cpu->gpr[5]; cpu->lo = (uint32_t)result; cpu->hi = (uint32_t)(result >> 32); }
 #ifdef PSX_ENABLE_BLOCK_CYCLES
-    psx_muldiv_set(cpu, psx_mult_latency_s(cpu->gpr[16]));
+    psx_muldiv_set_compiled(cpu, psx_mult_latency_s(cpu->gpr[16]));
 #endif
     PGXP_MULDIV(0x02050018u, cpu->hi, cpu->lo, cpu->gpr[16], cpu->gpr[5]);  /* 0x80075CF0: 0x02050018 */
 #ifdef PSX_COSIM
@@ -5822,7 +5822,7 @@ block_80075CF4:
 #endif
     cpu->gpr[3] = cpu->lo;
 #ifdef PSX_ENABLE_BLOCK_CYCLES
-    psx_muldiv_stall(cpu);
+    psx_muldiv_stall_compiled(cpu);
 #endif
     PGXP_ALU(0x00001812u, cpu->gpr[3], cpu->lo, 0u);  /* 0x80075CF4: 0x00001812 */
 #ifdef PSX_COSIM
@@ -5861,7 +5861,7 @@ block_80075CF4:
 #endif
     { int64_t result = (int64_t)(int32_t)cpu->gpr[16] * (int64_t)(int32_t)cpu->gpr[2]; cpu->lo = (uint32_t)result; cpu->hi = (uint32_t)(result >> 32); }
 #ifdef PSX_ENABLE_BLOCK_CYCLES
-    psx_muldiv_set(cpu, psx_mult_latency_s(cpu->gpr[16]));
+    psx_muldiv_set_compiled(cpu, psx_mult_latency_s(cpu->gpr[16]));
 #endif
     PGXP_MULDIV(0x02020018u, cpu->hi, cpu->lo, cpu->gpr[16], cpu->gpr[2]);  /* 0x80075D00: 0x02020018 */
 #ifdef PSX_COSIM
@@ -5909,7 +5909,7 @@ block_80075CF4:
 #endif
     cpu->gpr[8] = cpu->lo;
 #ifdef PSX_ENABLE_BLOCK_CYCLES
-    psx_muldiv_stall(cpu);
+    psx_muldiv_stall_compiled(cpu);
 #endif
     PGXP_ALU(0x00004012u, cpu->gpr[8], cpu->lo, 0u);  /* 0x80075D10: 0x00004012 */
 #ifdef PSX_COSIM
@@ -5963,7 +5963,7 @@ block_80075D20:
 #endif
     cpu->gpr[3] = cpu->lo;
 #ifdef PSX_ENABLE_BLOCK_CYCLES
-    psx_muldiv_stall(cpu);
+    psx_muldiv_stall_compiled(cpu);
 #endif
     PGXP_ALU(0x00001812u, cpu->gpr[3], cpu->lo, 0u);  /* 0x80075D20: 0x00001812 */
 #ifdef PSX_COSIM
@@ -5998,7 +5998,7 @@ block_80075D20:
 #endif
     { int64_t result = (int64_t)(int32_t)cpu->gpr[16] * (int64_t)(int32_t)cpu->gpr[2]; cpu->lo = (uint32_t)result; cpu->hi = (uint32_t)(result >> 32); }
 #ifdef PSX_ENABLE_BLOCK_CYCLES
-    psx_muldiv_set(cpu, psx_mult_latency_s(cpu->gpr[16]));
+    psx_muldiv_set_compiled(cpu, psx_mult_latency_s(cpu->gpr[16]));
 #endif
     PGXP_MULDIV(0x02020018u, cpu->hi, cpu->lo, cpu->gpr[16], cpu->gpr[2]);  /* 0x80075D2C: 0x02020018 */
 #ifdef PSX_COSIM
@@ -6046,7 +6046,7 @@ block_80075D20:
 #endif
     cpu->gpr[8] = cpu->lo;
 #ifdef PSX_ENABLE_BLOCK_CYCLES
-    psx_muldiv_stall(cpu);
+    psx_muldiv_stall_compiled(cpu);
 #endif
     PGXP_ALU(0x00004012u, cpu->gpr[8], cpu->lo, 0u);  /* 0x80075D3C: 0x00004012 */
 #ifdef PSX_COSIM
@@ -6289,7 +6289,7 @@ block_80075D80:
 #endif
     { int64_t result = (int64_t)(int32_t)cpu->gpr[16] * (int64_t)(int32_t)cpu->gpr[5]; cpu->lo = (uint32_t)result; cpu->hi = (uint32_t)(result >> 32); }
 #ifdef PSX_ENABLE_BLOCK_CYCLES
-    psx_muldiv_set(cpu, psx_mult_latency_s(cpu->gpr[16]));
+    psx_muldiv_set_compiled(cpu, psx_mult_latency_s(cpu->gpr[16]));
 #endif
     PGXP_MULDIV(0x02050018u, cpu->hi, cpu->lo, cpu->gpr[16], cpu->gpr[5]);  /* 0x80075D80: 0x02050018 */
 #ifdef PSX_COSIM
@@ -6300,7 +6300,7 @@ block_80075D80:
 #endif
     cpu->gpr[3] = cpu->lo;
 #ifdef PSX_ENABLE_BLOCK_CYCLES
-    psx_muldiv_stall(cpu);
+    psx_muldiv_stall_compiled(cpu);
 #endif
     PGXP_ALU(0x00001812u, cpu->gpr[3], cpu->lo, 0u);  /* 0x80075D84: 0x00001812 */
 #ifdef PSX_COSIM
@@ -6339,7 +6339,7 @@ block_80075D80:
 #endif
     { int64_t result = (int64_t)(int32_t)cpu->gpr[16] * (int64_t)(int32_t)cpu->gpr[2]; cpu->lo = (uint32_t)result; cpu->hi = (uint32_t)(result >> 32); }
 #ifdef PSX_ENABLE_BLOCK_CYCLES
-    psx_muldiv_set(cpu, psx_mult_latency_s(cpu->gpr[16]));
+    psx_muldiv_set_compiled(cpu, psx_mult_latency_s(cpu->gpr[16]));
 #endif
     PGXP_MULDIV(0x02020018u, cpu->hi, cpu->lo, cpu->gpr[16], cpu->gpr[2]);  /* 0x80075D90: 0x02020018 */
 #ifdef PSX_COSIM
@@ -6387,7 +6387,7 @@ block_80075D80:
 #endif
     cpu->gpr[8] = cpu->lo;
 #ifdef PSX_ENABLE_BLOCK_CYCLES
-    psx_muldiv_stall(cpu);
+    psx_muldiv_stall_compiled(cpu);
 #endif
     PGXP_ALU(0x00004012u, cpu->gpr[8], cpu->lo, 0u);  /* 0x80075DA0: 0x00004012 */
 #ifdef PSX_COSIM
@@ -6657,7 +6657,7 @@ block_80075DD8:
 #endif
     { int64_t result = (int64_t)(int32_t)cpu->gpr[4] * (int64_t)(int32_t)cpu->gpr[3]; cpu->lo = (uint32_t)result; cpu->hi = (uint32_t)(result >> 32); }
 #ifdef PSX_ENABLE_BLOCK_CYCLES
-    psx_muldiv_set(cpu, psx_mult_latency_s(cpu->gpr[4]));
+    psx_muldiv_set_compiled(cpu, psx_mult_latency_s(cpu->gpr[4]));
 #endif
     PGXP_MULDIV(0x00830018u, cpu->hi, cpu->lo, cpu->gpr[4], cpu->gpr[3]);  /* 0x80075DEC: 0x00830018 */
 #ifdef PSX_COSIM
@@ -6680,7 +6680,7 @@ block_80075DD8:
 #endif
     cpu->gpr[15] = cpu->hi;
 #ifdef PSX_ENABLE_BLOCK_CYCLES
-    psx_muldiv_stall(cpu);
+    psx_muldiv_stall_compiled(cpu);
 #endif
     PGXP_ALU(0x00007810u, cpu->gpr[15], cpu->hi, 0u);  /* 0x80075DF4: 0x00007810 */
 #ifdef PSX_COSIM
@@ -7119,7 +7119,7 @@ block_80075E44:
 #endif
     { int64_t result = (int64_t)(int32_t)cpu->gpr[4] * (int64_t)(int32_t)cpu->gpr[3]; cpu->lo = (uint32_t)result; cpu->hi = (uint32_t)(result >> 32); }
 #ifdef PSX_ENABLE_BLOCK_CYCLES
-    psx_muldiv_set(cpu, psx_mult_latency_s(cpu->gpr[4]));
+    psx_muldiv_set_compiled(cpu, psx_mult_latency_s(cpu->gpr[4]));
 #endif
     PGXP_MULDIV(0x00830018u, cpu->hi, cpu->lo, cpu->gpr[4], cpu->gpr[3]);  /* 0x80075E58: 0x00830018 */
 #ifdef PSX_COSIM
@@ -7142,7 +7142,7 @@ block_80075E44:
 #endif
     cpu->gpr[15] = cpu->hi;
 #ifdef PSX_ENABLE_BLOCK_CYCLES
-    psx_muldiv_stall(cpu);
+    psx_muldiv_stall_compiled(cpu);
 #endif
     PGXP_ALU(0x00007810u, cpu->gpr[15], cpu->hi, 0u);  /* 0x80075E60: 0x00007810 */
 #ifdef PSX_COSIM
@@ -7335,7 +7335,7 @@ block_80075E88:
 #endif
     { int64_t result = (int64_t)(int32_t)cpu->gpr[4] * (int64_t)(int32_t)cpu->gpr[3]; cpu->lo = (uint32_t)result; cpu->hi = (uint32_t)(result >> 32); }
 #ifdef PSX_ENABLE_BLOCK_CYCLES
-    psx_muldiv_set(cpu, psx_mult_latency_s(cpu->gpr[4]));
+    psx_muldiv_set_compiled(cpu, psx_mult_latency_s(cpu->gpr[4]));
 #endif
     PGXP_MULDIV(0x00830018u, cpu->hi, cpu->lo, cpu->gpr[4], cpu->gpr[3]);  /* 0x80075EA0: 0x00830018 */
 #ifdef PSX_COSIM
@@ -7354,7 +7354,7 @@ block_80075E88:
 #endif
     cpu->gpr[15] = cpu->hi;
 #ifdef PSX_ENABLE_BLOCK_CYCLES
-    psx_muldiv_stall(cpu);
+    psx_muldiv_stall_compiled(cpu);
 #endif
     PGXP_ALU(0x00007810u, cpu->gpr[15], cpu->hi, 0u);  /* 0x80075EA8: 0x00007810 */
 #ifdef PSX_COSIM
@@ -8202,7 +8202,7 @@ block_80075FA8:
 #endif
     { int64_t result = (int64_t)(int32_t)cpu->gpr[3] * (int64_t)(int32_t)cpu->gpr[2]; cpu->lo = (uint32_t)result; cpu->hi = (uint32_t)(result >> 32); }
 #ifdef PSX_ENABLE_BLOCK_CYCLES
-    psx_muldiv_set(cpu, psx_mult_latency_s(cpu->gpr[3]));
+    psx_muldiv_set_compiled(cpu, psx_mult_latency_s(cpu->gpr[3]));
 #endif
     PGXP_MULDIV(0x00620018u, cpu->hi, cpu->lo, cpu->gpr[3], cpu->gpr[2]);  /* 0x80075FB8: 0x00620018 */
 #ifdef PSX_COSIM
@@ -8213,7 +8213,7 @@ block_80075FA8:
 #endif
     cpu->gpr[2] = cpu->lo;
 #ifdef PSX_ENABLE_BLOCK_CYCLES
-    psx_muldiv_stall(cpu);
+    psx_muldiv_stall_compiled(cpu);
 #endif
     PGXP_ALU(0x00001012u, cpu->gpr[2], cpu->lo, 0u);  /* 0x80075FBC: 0x00001012 */
 #ifdef PSX_COSIM
@@ -8493,7 +8493,7 @@ block_80076004:
 #endif
     { int64_t result = (int64_t)(int32_t)cpu->gpr[5] * (int64_t)(int32_t)cpu->gpr[2]; cpu->lo = (uint32_t)result; cpu->hi = (uint32_t)(result >> 32); }
 #ifdef PSX_ENABLE_BLOCK_CYCLES
-    psx_muldiv_set(cpu, psx_mult_latency_s(cpu->gpr[5]));
+    psx_muldiv_set_compiled(cpu, psx_mult_latency_s(cpu->gpr[5]));
 #endif
     PGXP_MULDIV(0x00A20018u, cpu->hi, cpu->lo, cpu->gpr[5], cpu->gpr[2]);  /* 0x80076014: 0x00A20018 */
 #ifdef PSX_COSIM
@@ -8504,7 +8504,7 @@ block_80076004:
 #endif
     cpu->gpr[4] = cpu->lo;
 #ifdef PSX_ENABLE_BLOCK_CYCLES
-    psx_muldiv_stall(cpu);
+    psx_muldiv_stall_compiled(cpu);
 #endif
     PGXP_ALU(0x00002012u, cpu->gpr[4], cpu->lo, 0u);  /* 0x80076018: 0x00002012 */
 #ifdef PSX_COSIM
@@ -8606,7 +8606,7 @@ block_80076028:
 #endif
     { int64_t result = (int64_t)(int32_t)cpu->gpr[2] * (int64_t)(int32_t)cpu->gpr[3]; cpu->lo = (uint32_t)result; cpu->hi = (uint32_t)(result >> 32); }
 #ifdef PSX_ENABLE_BLOCK_CYCLES
-    psx_muldiv_set(cpu, psx_mult_latency_s(cpu->gpr[2]));
+    psx_muldiv_set_compiled(cpu, psx_mult_latency_s(cpu->gpr[2]));
 #endif
     PGXP_MULDIV(0x00430018u, cpu->hi, cpu->lo, cpu->gpr[2], cpu->gpr[3]);  /* 0x80076030: 0x00430018 */
 #ifdef PSX_COSIM
@@ -8654,7 +8654,7 @@ block_80076028:
 #endif
     cpu->gpr[15] = cpu->lo;
 #ifdef PSX_ENABLE_BLOCK_CYCLES
-    psx_muldiv_stall(cpu);
+    psx_muldiv_stall_compiled(cpu);
 #endif
     PGXP_ALU(0x00007812u, cpu->gpr[15], cpu->lo, 0u);  /* 0x80076040: 0x00007812 */
 #ifdef PSX_COSIM
@@ -8840,7 +8840,7 @@ block_80076070:
 #endif
     { int64_t result = (int64_t)(int32_t)cpu->gpr[2] * (int64_t)(int32_t)cpu->gpr[3]; cpu->lo = (uint32_t)result; cpu->hi = (uint32_t)(result >> 32); }
 #ifdef PSX_ENABLE_BLOCK_CYCLES
-    psx_muldiv_set(cpu, psx_mult_latency_s(cpu->gpr[2]));
+    psx_muldiv_set_compiled(cpu, psx_mult_latency_s(cpu->gpr[2]));
 #endif
     PGXP_MULDIV(0x00430018u, cpu->hi, cpu->lo, cpu->gpr[2], cpu->gpr[3]);  /* 0x80076078: 0x00430018 */
 #ifdef PSX_COSIM
@@ -8892,7 +8892,7 @@ block_80076070:
 #endif
     cpu->gpr[8] = cpu->hi;
 #ifdef PSX_ENABLE_BLOCK_CYCLES
-    psx_muldiv_stall(cpu);
+    psx_muldiv_stall_compiled(cpu);
 #endif
     PGXP_ALU(0x00004010u, cpu->gpr[8], cpu->hi, 0u);  /* 0x8007608C: 0x00004010 */
 #ifdef PSX_COSIM
@@ -8920,7 +8920,7 @@ block_80076070:
 #endif
     { int64_t result = (int64_t)(int32_t)cpu->gpr[5] * (int64_t)(int32_t)cpu->gpr[4]; cpu->lo = (uint32_t)result; cpu->hi = (uint32_t)(result >> 32); }
 #ifdef PSX_ENABLE_BLOCK_CYCLES
-    psx_muldiv_set(cpu, psx_mult_latency_s(cpu->gpr[5]));
+    psx_muldiv_set_compiled(cpu, psx_mult_latency_s(cpu->gpr[5]));
 #endif
     PGXP_MULDIV(0x00A40018u, cpu->hi, cpu->lo, cpu->gpr[5], cpu->gpr[4]);  /* 0x80076098: 0x00A40018 */
 #ifdef PSX_COSIM
@@ -9022,7 +9022,7 @@ block_80076070:
 #endif
     cpu->gpr[6] = cpu->hi;
 #ifdef PSX_ENABLE_BLOCK_CYCLES
-    psx_muldiv_stall(cpu);
+    psx_muldiv_stall_compiled(cpu);
 #endif
     PGXP_ALU(0x00003010u, cpu->gpr[6], cpu->hi, 0u);  /* 0x800760BC: 0x00003010 */
 #ifdef PSX_COSIM
@@ -10603,7 +10603,7 @@ block_800762C8:
 #endif
     { int64_t result = (int64_t)(int32_t)cpu->gpr[2] * (int64_t)(int32_t)cpu->gpr[3]; cpu->lo = (uint32_t)result; cpu->hi = (uint32_t)(result >> 32); }
 #ifdef PSX_ENABLE_BLOCK_CYCLES
-    psx_muldiv_set(cpu, psx_mult_latency_s(cpu->gpr[2]));
+    psx_muldiv_set_compiled(cpu, psx_mult_latency_s(cpu->gpr[2]));
 #endif
     PGXP_MULDIV(0x00430018u, cpu->hi, cpu->lo, cpu->gpr[2], cpu->gpr[3]);  /* 0x800762D4: 0x00430018 */
 #ifdef PSX_COSIM
@@ -10614,7 +10614,7 @@ block_800762C8:
 #endif
     cpu->gpr[15] = cpu->lo;
 #ifdef PSX_ENABLE_BLOCK_CYCLES
-    psx_muldiv_stall(cpu);
+    psx_muldiv_stall_compiled(cpu);
 #endif
     PGXP_ALU(0x00007812u, cpu->gpr[15], cpu->lo, 0u);  /* 0x800762D8: 0x00007812 */
 #ifdef PSX_COSIM
@@ -12465,7 +12465,7 @@ block_80076538:
 #endif
     { int64_t result = (int64_t)(int32_t)cpu->gpr[3] * (int64_t)(int32_t)cpu->gpr[4]; cpu->lo = (uint32_t)result; cpu->hi = (uint32_t)(result >> 32); }
 #ifdef PSX_ENABLE_BLOCK_CYCLES
-    psx_muldiv_set(cpu, psx_mult_latency_s(cpu->gpr[3]));
+    psx_muldiv_set_compiled(cpu, psx_mult_latency_s(cpu->gpr[3]));
 #endif
     PGXP_MULDIV(0x00640018u, cpu->hi, cpu->lo, cpu->gpr[3], cpu->gpr[4]);  /* 0x80076564: 0x00640018 */
 #ifdef PSX_COSIM
@@ -12602,7 +12602,7 @@ block_80076538:
 #endif
     cpu->gpr[21] = cpu->hi;
 #ifdef PSX_ENABLE_BLOCK_CYCLES
-    psx_muldiv_stall(cpu);
+    psx_muldiv_stall_compiled(cpu);
 #endif
     PGXP_ALU(0x0000A810u, cpu->gpr[21], cpu->hi, 0u);  /* 0x80076594: 0x0000A810 */
 #ifdef PSX_COSIM
@@ -14484,7 +14484,7 @@ block_8007670C:
 #endif
     { int64_t result = (int64_t)(int32_t)cpu->gpr[2] * (int64_t)(int32_t)cpu->gpr[17]; cpu->lo = (uint32_t)result; cpu->hi = (uint32_t)(result >> 32); }
 #ifdef PSX_ENABLE_BLOCK_CYCLES
-    psx_muldiv_set(cpu, psx_mult_latency_s(cpu->gpr[2]));
+    psx_muldiv_set_compiled(cpu, psx_mult_latency_s(cpu->gpr[2]));
 #endif
     PGXP_MULDIV(0x00510018u, cpu->hi, cpu->lo, cpu->gpr[2], cpu->gpr[17]);  /* 0x8007675C: 0x00510018 */
 #ifdef PSX_COSIM
@@ -14595,7 +14595,7 @@ block_8007670C:
 #endif
     cpu->gpr[15] = cpu->lo;
 #ifdef PSX_ENABLE_BLOCK_CYCLES
-    psx_muldiv_stall(cpu);
+    psx_muldiv_stall_compiled(cpu);
 #endif
     PGXP_ALU(0x00007812u, cpu->gpr[15], cpu->lo, 0u);  /* 0x80076788: 0x00007812 */
 #ifdef PSX_COSIM
@@ -14639,7 +14639,7 @@ block_8007670C:
 #endif
     { int64_t result = (int64_t)(int32_t)cpu->gpr[2] * (int64_t)(int32_t)cpu->gpr[5]; cpu->lo = (uint32_t)result; cpu->hi = (uint32_t)(result >> 32); }
 #ifdef PSX_ENABLE_BLOCK_CYCLES
-    psx_muldiv_set(cpu, psx_mult_latency_s(cpu->gpr[2]));
+    psx_muldiv_set_compiled(cpu, psx_mult_latency_s(cpu->gpr[2]));
 #endif
     PGXP_MULDIV(0x00450018u, cpu->hi, cpu->lo, cpu->gpr[2], cpu->gpr[5]);  /* 0x8007679C: 0x00450018 */
 #ifdef PSX_COSIM
@@ -14749,7 +14749,7 @@ block_8007670C:
 #endif
     cpu->gpr[15] = cpu->lo;
 #ifdef PSX_ENABLE_BLOCK_CYCLES
-    psx_muldiv_stall(cpu);
+    psx_muldiv_stall_compiled(cpu);
 #endif
     PGXP_ALU(0x00007812u, cpu->gpr[15], cpu->lo, 0u);  /* 0x800767C8: 0x00007812 */
 #ifdef PSX_COSIM
@@ -14898,7 +14898,7 @@ block_8007670C:
 #endif
     { int64_t result = (int64_t)(int32_t)cpu->gpr[2] * (int64_t)(int32_t)cpu->gpr[17]; cpu->lo = (uint32_t)result; cpu->hi = (uint32_t)(result >> 32); }
 #ifdef PSX_ENABLE_BLOCK_CYCLES
-    psx_muldiv_set(cpu, psx_mult_latency_s(cpu->gpr[2]));
+    psx_muldiv_set_compiled(cpu, psx_mult_latency_s(cpu->gpr[2]));
 #endif
     PGXP_MULDIV(0x00510018u, cpu->hi, cpu->lo, cpu->gpr[2], cpu->gpr[17]);  /* 0x80076808: 0x00510018 */
 #ifdef PSX_COSIM
@@ -15010,7 +15010,7 @@ block_8007670C:
 #endif
     cpu->gpr[15] = cpu->lo;
 #ifdef PSX_ENABLE_BLOCK_CYCLES
-    psx_muldiv_stall(cpu);
+    psx_muldiv_stall_compiled(cpu);
 #endif
     PGXP_ALU(0x00007812u, cpu->gpr[15], cpu->lo, 0u);  /* 0x80076834: 0x00007812 */
 #ifdef PSX_COSIM
@@ -15053,7 +15053,7 @@ block_8007670C:
 #endif
     { int64_t result = (int64_t)(int32_t)cpu->gpr[2] * (int64_t)(int32_t)cpu->gpr[5]; cpu->lo = (uint32_t)result; cpu->hi = (uint32_t)(result >> 32); }
 #ifdef PSX_ENABLE_BLOCK_CYCLES
-    psx_muldiv_set(cpu, psx_mult_latency_s(cpu->gpr[2]));
+    psx_muldiv_set_compiled(cpu, psx_mult_latency_s(cpu->gpr[2]));
 #endif
     PGXP_MULDIV(0x00450018u, cpu->hi, cpu->lo, cpu->gpr[2], cpu->gpr[5]);  /* 0x80076848: 0x00450018 */
 #ifdef PSX_COSIM
@@ -15165,7 +15165,7 @@ block_8007670C:
 #endif
     cpu->gpr[15] = cpu->lo;
 #ifdef PSX_ENABLE_BLOCK_CYCLES
-    psx_muldiv_stall(cpu);
+    psx_muldiv_stall_compiled(cpu);
 #endif
     PGXP_ALU(0x00007812u, cpu->gpr[15], cpu->lo, 0u);  /* 0x80076874: 0x00007812 */
 #ifdef PSX_COSIM
@@ -16906,7 +16906,7 @@ block_80076AE8:
 #endif
     
 #ifdef PSX_ENABLE_BLOCK_CYCLES
-    psx_gte_stall(cpu);
+    psx_gte_stall_compiled(cpu);
 #endif
     cpu->gte_ctrl[0] = cpu->gpr[12];  /* ctc2 */
     PGXP_COP2(0x48CC0000u, cpu->gpr[12], 0u);  /* 0x80076B0C: 0x48CC0000 */
@@ -16922,7 +16922,7 @@ block_80076AE8:
 #endif
     
 #ifdef PSX_ENABLE_BLOCK_CYCLES
-    psx_gte_stall(cpu);
+    psx_gte_stall_compiled(cpu);
 #endif
     cpu->gte_ctrl[1] = cpu->gpr[13];  /* ctc2 */
     PGXP_COP2(0x48CD0800u, cpu->gpr[13], 0u);  /* 0x80076B10: 0x48CD0800 */
@@ -16953,7 +16953,7 @@ block_80076AE8:
 #endif
     
 #ifdef PSX_ENABLE_BLOCK_CYCLES
-    psx_gte_stall(cpu);
+    psx_gte_stall_compiled(cpu);
 #endif
     cpu->gte_ctrl[2] = cpu->gpr[12];  /* ctc2 */
     PGXP_COP2(0x48CC1000u, cpu->gpr[12], 0u);  /* 0x80076B20: 0x48CC1000 */
@@ -16965,7 +16965,7 @@ block_80076AE8:
 #endif
     
 #ifdef PSX_ENABLE_BLOCK_CYCLES
-    psx_gte_stall(cpu);
+    psx_gte_stall_compiled(cpu);
 #endif
     cpu->gte_ctrl[3] = cpu->gpr[13];  /* ctc2 */
     PGXP_COP2(0x48CD1800u, cpu->gpr[13], 0u);  /* 0x80076B24: 0x48CD1800 */
@@ -16977,7 +16977,7 @@ block_80076AE8:
 #endif
     
 #ifdef PSX_ENABLE_BLOCK_CYCLES
-    psx_gte_stall(cpu);
+    psx_gte_stall_compiled(cpu);
 #endif
     gte_write_ctrl(cpu, 4, cpu->gpr[14]);  /* ctc2 */
     PGXP_COP2(0x48CE2000u, cpu->gpr[14], 0u);  /* 0x80076B28: 0x48CE2000 */
@@ -17011,7 +17011,7 @@ block_80076AE8:
 #endif
     
 #ifdef PSX_ENABLE_BLOCK_CYCLES
-    psx_gte_stall(cpu);
+    psx_gte_stall_compiled(cpu);
 #endif
     cpu->gte_ctrl[5] = cpu->gpr[12];  /* ctc2 */
     PGXP_COP2(0x48CC2800u, cpu->gpr[12], 0u);  /* 0x80076B38: 0x48CC2800 */
@@ -17032,7 +17032,7 @@ block_80076AE8:
 #endif
     
 #ifdef PSX_ENABLE_BLOCK_CYCLES
-    psx_gte_stall(cpu);
+    psx_gte_stall_compiled(cpu);
 #endif
     cpu->gte_ctrl[6] = cpu->gpr[13];  /* ctc2 */
     PGXP_COP2(0x48CD3000u, cpu->gpr[13], 0u);  /* 0x80076B40: 0x48CD3000 */
@@ -17044,7 +17044,7 @@ block_80076AE8:
 #endif
     
 #ifdef PSX_ENABLE_BLOCK_CYCLES
-    psx_gte_stall(cpu);
+    psx_gte_stall_compiled(cpu);
 #endif
     cpu->gte_ctrl[7] = cpu->gpr[14];  /* ctc2 */
     PGXP_COP2(0x48CE3800u, cpu->gpr[14], 0u);  /* 0x80076B44: 0x48CE3800 */
@@ -17119,7 +17119,7 @@ block_80076AE8:
 #endif
     { int64_t result = (int64_t)(int32_t)cpu->gpr[4] * (int64_t)(int32_t)cpu->gpr[3]; cpu->lo = (uint32_t)result; cpu->hi = (uint32_t)(result >> 32); }
 #ifdef PSX_ENABLE_BLOCK_CYCLES
-    psx_muldiv_set(cpu, psx_mult_latency_s(cpu->gpr[4]));
+    psx_muldiv_set_compiled(cpu, psx_mult_latency_s(cpu->gpr[4]));
 #endif
     PGXP_MULDIV(0x00830018u, cpu->hi, cpu->lo, cpu->gpr[4], cpu->gpr[3]);  /* 0x80076B64: 0x00830018 */
 #ifdef PSX_COSIM
@@ -17158,7 +17158,7 @@ block_80076AE8:
 #endif
     cpu->gpr[15] = cpu->hi;
 #ifdef PSX_ENABLE_BLOCK_CYCLES
-    psx_muldiv_stall(cpu);
+    psx_muldiv_stall_compiled(cpu);
 #endif
     PGXP_ALU(0x00007810u, cpu->gpr[15], cpu->hi, 0u);  /* 0x80076B70: 0x00007810 */
 #ifdef PSX_COSIM
@@ -17806,7 +17806,7 @@ block_80076C14:
 #endif
     { int64_t result = (int64_t)(int32_t)cpu->gpr[4] * (int64_t)(int32_t)cpu->gpr[9]; cpu->lo = (uint32_t)result; cpu->hi = (uint32_t)(result >> 32); }
 #ifdef PSX_ENABLE_BLOCK_CYCLES
-    psx_muldiv_set(cpu, psx_mult_latency_s(cpu->gpr[4]));
+    psx_muldiv_set_compiled(cpu, psx_mult_latency_s(cpu->gpr[4]));
 #endif
     PGXP_MULDIV(0x00890018u, cpu->hi, cpu->lo, cpu->gpr[4], cpu->gpr[9]);  /* 0x80076C34: 0x00890018 */
 #ifdef PSX_COSIM
@@ -17817,7 +17817,7 @@ block_80076C14:
 #endif
     cpu->gpr[3] = cpu->lo;
 #ifdef PSX_ENABLE_BLOCK_CYCLES
-    psx_muldiv_stall(cpu);
+    psx_muldiv_stall_compiled(cpu);
 #endif
     PGXP_ALU(0x00001812u, cpu->gpr[3], cpu->lo, 0u);  /* 0x80076C38: 0x00001812 */
 #ifdef PSX_COSIM
@@ -17846,7 +17846,7 @@ block_80076C14:
 #endif
     { int64_t result = (int64_t)(int32_t)cpu->gpr[3] * (int64_t)(int32_t)cpu->gpr[16]; cpu->lo = (uint32_t)result; cpu->hi = (uint32_t)(result >> 32); }
 #ifdef PSX_ENABLE_BLOCK_CYCLES
-    psx_muldiv_set(cpu, psx_mult_latency_s(cpu->gpr[3]));
+    psx_muldiv_set_compiled(cpu, psx_mult_latency_s(cpu->gpr[3]));
 #endif
     PGXP_MULDIV(0x00700018u, cpu->hi, cpu->lo, cpu->gpr[3], cpu->gpr[16]);  /* 0x80076C44: 0x00700018 */
 #ifdef PSX_COSIM
@@ -17865,7 +17865,7 @@ block_80076C14:
 #endif
     cpu->gpr[10] = cpu->hi;
 #ifdef PSX_ENABLE_BLOCK_CYCLES
-    psx_muldiv_stall(cpu);
+    psx_muldiv_stall_compiled(cpu);
 #endif
     PGXP_ALU(0x00005010u, cpu->gpr[10], cpu->hi, 0u);  /* 0x80076C4C: 0x00005010 */
 #ifdef PSX_COSIM
@@ -18159,7 +18159,7 @@ block_80076C8C:
 #endif
     { int64_t result = (int64_t)(int32_t)cpu->gpr[4] * (int64_t)(int32_t)cpu->gpr[9]; cpu->lo = (uint32_t)result; cpu->hi = (uint32_t)(result >> 32); }
 #ifdef PSX_ENABLE_BLOCK_CYCLES
-    psx_muldiv_set(cpu, psx_mult_latency_s(cpu->gpr[4]));
+    psx_muldiv_set_compiled(cpu, psx_mult_latency_s(cpu->gpr[4]));
 #endif
     PGXP_MULDIV(0x00890018u, cpu->hi, cpu->lo, cpu->gpr[4], cpu->gpr[9]);  /* 0x80076CAC: 0x00890018 */
 #ifdef PSX_COSIM
@@ -18174,7 +18174,7 @@ block_80076C8C:
 #endif
     cpu->gpr[3] = cpu->lo;
 #ifdef PSX_ENABLE_BLOCK_CYCLES
-    psx_muldiv_stall(cpu);
+    psx_muldiv_stall_compiled(cpu);
 #endif
     PGXP_ALU(0x00001812u, cpu->gpr[3], cpu->lo, 0u);  /* 0x80076CB0: 0x00001812 */
 #ifdef PSX_COSIM
@@ -18207,7 +18207,7 @@ block_80076C8C:
 #endif
     { int64_t result = (int64_t)(int32_t)cpu->gpr[3] * (int64_t)(int32_t)cpu->gpr[16]; cpu->lo = (uint32_t)result; cpu->hi = (uint32_t)(result >> 32); }
 #ifdef PSX_ENABLE_BLOCK_CYCLES
-    psx_muldiv_set(cpu, psx_mult_latency_s(cpu->gpr[3]));
+    psx_muldiv_set_compiled(cpu, psx_mult_latency_s(cpu->gpr[3]));
 #endif
     PGXP_MULDIV(0x00700018u, cpu->hi, cpu->lo, cpu->gpr[3], cpu->gpr[16]);  /* 0x80076CBC: 0x00700018 */
 #ifdef PSX_COSIM
@@ -18230,7 +18230,7 @@ block_80076C8C:
 #endif
     cpu->gpr[10] = cpu->hi;
 #ifdef PSX_ENABLE_BLOCK_CYCLES
-    psx_muldiv_stall(cpu);
+    psx_muldiv_stall_compiled(cpu);
 #endif
     PGXP_ALU(0x00005010u, cpu->gpr[10], cpu->hi, 0u);  /* 0x80076CC4: 0x00005010 */
 #ifdef PSX_COSIM
@@ -18533,7 +18533,7 @@ block_80076D04:
 #endif
     { int64_t result = (int64_t)(int32_t)cpu->gpr[4] * (int64_t)(int32_t)cpu->gpr[9]; cpu->lo = (uint32_t)result; cpu->hi = (uint32_t)(result >> 32); }
 #ifdef PSX_ENABLE_BLOCK_CYCLES
-    psx_muldiv_set(cpu, psx_mult_latency_s(cpu->gpr[4]));
+    psx_muldiv_set_compiled(cpu, psx_mult_latency_s(cpu->gpr[4]));
 #endif
     PGXP_MULDIV(0x00890018u, cpu->hi, cpu->lo, cpu->gpr[4], cpu->gpr[9]);  /* 0x80076D24: 0x00890018 */
 #ifdef PSX_COSIM
@@ -18544,7 +18544,7 @@ block_80076D04:
 #endif
     cpu->gpr[3] = cpu->lo;
 #ifdef PSX_ENABLE_BLOCK_CYCLES
-    psx_muldiv_stall(cpu);
+    psx_muldiv_stall_compiled(cpu);
 #endif
     PGXP_ALU(0x00001812u, cpu->gpr[3], cpu->lo, 0u);  /* 0x80076D28: 0x00001812 */
 #ifdef PSX_COSIM
@@ -18573,7 +18573,7 @@ block_80076D04:
 #endif
     { int64_t result = (int64_t)(int32_t)cpu->gpr[3] * (int64_t)(int32_t)cpu->gpr[16]; cpu->lo = (uint32_t)result; cpu->hi = (uint32_t)(result >> 32); }
 #ifdef PSX_ENABLE_BLOCK_CYCLES
-    psx_muldiv_set(cpu, psx_mult_latency_s(cpu->gpr[3]));
+    psx_muldiv_set_compiled(cpu, psx_mult_latency_s(cpu->gpr[3]));
 #endif
     PGXP_MULDIV(0x00700018u, cpu->hi, cpu->lo, cpu->gpr[3], cpu->gpr[16]);  /* 0x80076D34: 0x00700018 */
 #ifdef PSX_COSIM
@@ -18592,7 +18592,7 @@ block_80076D04:
 #endif
     cpu->gpr[10] = cpu->hi;
 #ifdef PSX_ENABLE_BLOCK_CYCLES
-    psx_muldiv_stall(cpu);
+    psx_muldiv_stall_compiled(cpu);
 #endif
     PGXP_ALU(0x00005010u, cpu->gpr[10], cpu->hi, 0u);  /* 0x80076D3C: 0x00005010 */
 #ifdef PSX_COSIM
@@ -19095,7 +19095,7 @@ block_80076D7C:
 #endif
     { int64_t result = (int64_t)(int32_t)cpu->gpr[15] * (int64_t)(int32_t)cpu->gpr[5]; cpu->lo = (uint32_t)result; cpu->hi = (uint32_t)(result >> 32); }
 #ifdef PSX_ENABLE_BLOCK_CYCLES
-    psx_muldiv_set(cpu, psx_mult_latency_s(cpu->gpr[15]));
+    psx_muldiv_set_compiled(cpu, psx_mult_latency_s(cpu->gpr[15]));
 #endif
     PGXP_MULDIV(0x01E50018u, cpu->hi, cpu->lo, cpu->gpr[15], cpu->gpr[5]);  /* 0x80076DF8: 0x01E50018 */
 #ifdef PSX_COSIM
@@ -19214,7 +19214,7 @@ block_80076D7C:
 #endif
     cpu->gpr[5] = cpu->lo;
 #ifdef PSX_ENABLE_BLOCK_CYCLES
-    psx_muldiv_stall(cpu);
+    psx_muldiv_stall_compiled(cpu);
 #endif
     PGXP_ALU(0x00002812u, cpu->gpr[5], cpu->lo, 0u);  /* 0x80076E28: 0x00002812 */
 #ifdef PSX_COSIM
@@ -21580,7 +21580,7 @@ block_8007719C:
 #endif
     
 #ifdef PSX_ENABLE_BLOCK_CYCLES
-    psx_gte_stall(cpu);
+    psx_gte_stall_compiled(cpu);
 #endif
     cpu->gte_ctrl[0] = cpu->gpr[12];  /* ctc2 */
     PGXP_COP2(0x48CC0000u, cpu->gpr[12], 0u);  /* 0x800771C0: 0x48CC0000 */
@@ -21592,7 +21592,7 @@ block_8007719C:
 #endif
     
 #ifdef PSX_ENABLE_BLOCK_CYCLES
-    psx_gte_stall(cpu);
+    psx_gte_stall_compiled(cpu);
 #endif
     cpu->gte_ctrl[1] = cpu->gpr[13];  /* ctc2 */
     PGXP_COP2(0x48CD0800u, cpu->gpr[13], 0u);  /* 0x800771C4: 0x48CD0800 */
@@ -21623,7 +21623,7 @@ block_8007719C:
 #endif
     
 #ifdef PSX_ENABLE_BLOCK_CYCLES
-    psx_gte_stall(cpu);
+    psx_gte_stall_compiled(cpu);
 #endif
     cpu->gte_ctrl[2] = cpu->gpr[12];  /* ctc2 */
     PGXP_COP2(0x48CC1000u, cpu->gpr[12], 0u);  /* 0x800771D4: 0x48CC1000 */
@@ -21635,7 +21635,7 @@ block_8007719C:
 #endif
     
 #ifdef PSX_ENABLE_BLOCK_CYCLES
-    psx_gte_stall(cpu);
+    psx_gte_stall_compiled(cpu);
 #endif
     cpu->gte_ctrl[3] = cpu->gpr[13];  /* ctc2 */
     PGXP_COP2(0x48CD1800u, cpu->gpr[13], 0u);  /* 0x800771D8: 0x48CD1800 */
@@ -21647,7 +21647,7 @@ block_8007719C:
 #endif
     
 #ifdef PSX_ENABLE_BLOCK_CYCLES
-    psx_gte_stall(cpu);
+    psx_gte_stall_compiled(cpu);
 #endif
     gte_write_ctrl(cpu, 4, cpu->gpr[14]);  /* ctc2 */
     PGXP_COP2(0x48CE2000u, cpu->gpr[14], 0u);  /* 0x800771DC: 0x48CE2000 */
@@ -21681,7 +21681,7 @@ block_8007719C:
 #endif
     
 #ifdef PSX_ENABLE_BLOCK_CYCLES
-    psx_gte_stall(cpu);
+    psx_gte_stall_compiled(cpu);
 #endif
     cpu->gte_ctrl[5] = cpu->gpr[12];  /* ctc2 */
     PGXP_COP2(0x48CC2800u, cpu->gpr[12], 0u);  /* 0x800771EC: 0x48CC2800 */
@@ -21702,7 +21702,7 @@ block_8007719C:
 #endif
     
 #ifdef PSX_ENABLE_BLOCK_CYCLES
-    psx_gte_stall(cpu);
+    psx_gte_stall_compiled(cpu);
 #endif
     cpu->gte_ctrl[6] = cpu->gpr[13];  /* ctc2 */
     PGXP_COP2(0x48CD3000u, cpu->gpr[13], 0u);  /* 0x800771F4: 0x48CD3000 */
@@ -21714,7 +21714,7 @@ block_8007719C:
 #endif
     
 #ifdef PSX_ENABLE_BLOCK_CYCLES
-    psx_gte_stall(cpu);
+    psx_gte_stall_compiled(cpu);
 #endif
     cpu->gte_ctrl[7] = cpu->gpr[14];  /* ctc2 */
     PGXP_COP2(0x48CE3800u, cpu->gpr[14], 0u);  /* 0x800771F8: 0x48CE3800 */
@@ -21910,7 +21910,7 @@ block_80077214:
 #endif
     { int64_t result = (int64_t)(int32_t)cpu->gpr[2] * (int64_t)(int32_t)cpu->gpr[2]; cpu->lo = (uint32_t)result; cpu->hi = (uint32_t)(result >> 32); }
 #ifdef PSX_ENABLE_BLOCK_CYCLES
-    psx_muldiv_set(cpu, psx_mult_latency_s(cpu->gpr[2]));
+    psx_muldiv_set_compiled(cpu, psx_mult_latency_s(cpu->gpr[2]));
 #endif
     PGXP_MULDIV(0x00420018u, cpu->hi, cpu->lo, cpu->gpr[2], cpu->gpr[2]);  /* 0x80077234: 0x00420018 */
 #ifdef PSX_COSIM
@@ -21935,7 +21935,7 @@ block_80077214:
 #endif
     cpu->gpr[5] = cpu->lo;
 #ifdef PSX_ENABLE_BLOCK_CYCLES
-    psx_muldiv_stall(cpu);
+    psx_muldiv_stall_compiled(cpu);
 #endif
     PGXP_ALU(0x00002812u, cpu->gpr[5], cpu->lo, 0u);  /* 0x80077240: 0x00002812 */
 #ifdef PSX_COSIM
@@ -21970,7 +21970,7 @@ block_80077214:
 #endif
     { int64_t result = (int64_t)(int32_t)cpu->gpr[2] * (int64_t)(int32_t)cpu->gpr[2]; cpu->lo = (uint32_t)result; cpu->hi = (uint32_t)(result >> 32); }
 #ifdef PSX_ENABLE_BLOCK_CYCLES
-    psx_muldiv_set(cpu, psx_mult_latency_s(cpu->gpr[2]));
+    psx_muldiv_set_compiled(cpu, psx_mult_latency_s(cpu->gpr[2]));
 #endif
     PGXP_MULDIV(0x00420018u, cpu->hi, cpu->lo, cpu->gpr[2], cpu->gpr[2]);  /* 0x8007724C: 0x00420018 */
 #ifdef PSX_COSIM
@@ -21985,7 +21985,7 @@ block_80077214:
 #endif
     cpu->gpr[3] = cpu->lo;
 #ifdef PSX_ENABLE_BLOCK_CYCLES
-    psx_muldiv_stall(cpu);
+    psx_muldiv_stall_compiled(cpu);
 #endif
     PGXP_ALU(0x00001812u, cpu->gpr[3], cpu->lo, 0u);  /* 0x80077250: 0x00001812 */
 #ifdef PSX_COSIM
@@ -23448,7 +23448,7 @@ block_800773D8:
 #endif
     { int64_t result = (int64_t)(int32_t)cpu->gpr[4] * (int64_t)(int32_t)cpu->gpr[3]; cpu->lo = (uint32_t)result; cpu->hi = (uint32_t)(result >> 32); }
 #ifdef PSX_ENABLE_BLOCK_CYCLES
-    psx_muldiv_set(cpu, psx_mult_latency_s(cpu->gpr[4]));
+    psx_muldiv_set_compiled(cpu, psx_mult_latency_s(cpu->gpr[4]));
 #endif
     PGXP_MULDIV(0x00830018u, cpu->hi, cpu->lo, cpu->gpr[4], cpu->gpr[3]);  /* 0x800773E8: 0x00830018 */
 #ifdef PSX_COSIM
@@ -23479,7 +23479,7 @@ block_800773D8:
 #endif
     cpu->gpr[8] = cpu->hi;
 #ifdef PSX_ENABLE_BLOCK_CYCLES
-    psx_muldiv_stall(cpu);
+    psx_muldiv_stall_compiled(cpu);
 #endif
     PGXP_ALU(0x00004010u, cpu->gpr[8], cpu->hi, 0u);  /* 0x800773F4: 0x00004010 */
 #ifdef PSX_COSIM
@@ -23518,7 +23518,7 @@ block_800773D8:
 #endif
     { int64_t result = (int64_t)(int32_t)cpu->gpr[3] * (int64_t)(int32_t)cpu->gpr[2]; cpu->lo = (uint32_t)result; cpu->hi = (uint32_t)(result >> 32); }
 #ifdef PSX_ENABLE_BLOCK_CYCLES
-    psx_muldiv_set(cpu, psx_mult_latency_s(cpu->gpr[3]));
+    psx_muldiv_set_compiled(cpu, psx_mult_latency_s(cpu->gpr[3]));
 #endif
     PGXP_MULDIV(0x00620018u, cpu->hi, cpu->lo, cpu->gpr[3], cpu->gpr[2]);  /* 0x80077400: 0x00620018 */
 #ifdef PSX_COSIM
@@ -23566,7 +23566,7 @@ block_800773D8:
 #endif
     cpu->gpr[5] = cpu->lo;
 #ifdef PSX_ENABLE_BLOCK_CYCLES
-    psx_muldiv_stall(cpu);
+    psx_muldiv_stall_compiled(cpu);
 #endif
     PGXP_ALU(0x00002812u, cpu->gpr[5], cpu->lo, 0u);  /* 0x80077410: 0x00002812 */
 #ifdef PSX_COSIM
@@ -23601,7 +23601,7 @@ block_800773D8:
 #endif
     { int64_t result = (int64_t)(int32_t)cpu->gpr[17] * (int64_t)(int32_t)cpu->gpr[2]; cpu->lo = (uint32_t)result; cpu->hi = (uint32_t)(result >> 32); }
 #ifdef PSX_ENABLE_BLOCK_CYCLES
-    psx_muldiv_set(cpu, psx_mult_latency_s(cpu->gpr[17]));
+    psx_muldiv_set_compiled(cpu, psx_mult_latency_s(cpu->gpr[17]));
 #endif
     PGXP_MULDIV(0x02220018u, cpu->hi, cpu->lo, cpu->gpr[17], cpu->gpr[2]);  /* 0x8007741C: 0x02220018 */
 #ifdef PSX_COSIM
@@ -23662,7 +23662,7 @@ block_800773D8:
 #endif
     cpu->gpr[8] = cpu->lo;
 #ifdef PSX_ENABLE_BLOCK_CYCLES
-    psx_muldiv_stall(cpu);
+    psx_muldiv_stall_compiled(cpu);
 #endif
     PGXP_ALU(0x00004012u, cpu->gpr[8], cpu->lo, 0u);  /* 0x80077430: 0x00004012 */
 #ifdef PSX_COSIM
@@ -23852,7 +23852,7 @@ block_80077464:
 #endif
     { int64_t result = (int64_t)(int32_t)cpu->gpr[2] * (int64_t)(int32_t)cpu->gpr[3]; cpu->lo = (uint32_t)result; cpu->hi = (uint32_t)(result >> 32); }
 #ifdef PSX_ENABLE_BLOCK_CYCLES
-    psx_muldiv_set(cpu, psx_mult_latency_s(cpu->gpr[2]));
+    psx_muldiv_set_compiled(cpu, psx_mult_latency_s(cpu->gpr[2]));
 #endif
     PGXP_MULDIV(0x00430018u, cpu->hi, cpu->lo, cpu->gpr[2], cpu->gpr[3]);  /* 0x8007746C: 0x00430018 */
 #ifdef PSX_COSIM
@@ -23908,7 +23908,7 @@ block_80077464:
 #endif
     cpu->gpr[8] = cpu->hi;
 #ifdef PSX_ENABLE_BLOCK_CYCLES
-    psx_muldiv_stall(cpu);
+    psx_muldiv_stall_compiled(cpu);
 #endif
     PGXP_ALU(0x00004010u, cpu->gpr[8], cpu->hi, 0u);  /* 0x80077480: 0x00004010 */
 #ifdef PSX_COSIM
@@ -23932,7 +23932,7 @@ block_80077464:
 #endif
     { int64_t result = (int64_t)(int32_t)cpu->gpr[5] * (int64_t)(int32_t)cpu->gpr[4]; cpu->lo = (uint32_t)result; cpu->hi = (uint32_t)(result >> 32); }
 #ifdef PSX_ENABLE_BLOCK_CYCLES
-    psx_muldiv_set(cpu, psx_mult_latency_s(cpu->gpr[5]));
+    psx_muldiv_set_compiled(cpu, psx_mult_latency_s(cpu->gpr[5]));
 #endif
     PGXP_MULDIV(0x00A40018u, cpu->hi, cpu->lo, cpu->gpr[5], cpu->gpr[4]);  /* 0x8007748C: 0x00A40018 */
 #ifdef PSX_COSIM
@@ -24039,7 +24039,7 @@ block_80077464:
 #endif
     cpu->gpr[6] = cpu->hi;
 #ifdef PSX_ENABLE_BLOCK_CYCLES
-    psx_muldiv_stall(cpu);
+    psx_muldiv_stall_compiled(cpu);
 #endif
     PGXP_ALU(0x00003010u, cpu->gpr[6], cpu->hi, 0u);  /* 0x800774B0: 0x00003010 */
 #ifdef PSX_COSIM
@@ -24280,7 +24280,7 @@ block_800774EC:
 #endif
     { int64_t result = (int64_t)(int32_t)cpu->gpr[2] * (int64_t)(int32_t)cpu->gpr[3]; cpu->lo = (uint32_t)result; cpu->hi = (uint32_t)(result >> 32); }
 #ifdef PSX_ENABLE_BLOCK_CYCLES
-    psx_muldiv_set(cpu, psx_mult_latency_s(cpu->gpr[2]));
+    psx_muldiv_set_compiled(cpu, psx_mult_latency_s(cpu->gpr[2]));
 #endif
     PGXP_MULDIV(0x00430018u, cpu->hi, cpu->lo, cpu->gpr[2], cpu->gpr[3]);  /* 0x800774F8: 0x00430018 */
 #ifdef PSX_COSIM
@@ -24345,7 +24345,7 @@ block_800774EC:
 #endif
     cpu->gpr[15] = cpu->hi;
 #ifdef PSX_ENABLE_BLOCK_CYCLES
-    psx_muldiv_stall(cpu);
+    psx_muldiv_stall_compiled(cpu);
 #endif
     PGXP_ALU(0x00007810u, cpu->gpr[15], cpu->hi, 0u);  /* 0x80077510: 0x00007810 */
 #ifdef PSX_COSIM
@@ -25012,7 +25012,7 @@ block_8007760C:
 #endif
     { int64_t result = (int64_t)(int32_t)cpu->gpr[3] * (int64_t)(int32_t)cpu->gpr[2]; cpu->lo = (uint32_t)result; cpu->hi = (uint32_t)(result >> 32); }
 #ifdef PSX_ENABLE_BLOCK_CYCLES
-    psx_muldiv_set(cpu, psx_mult_latency_s(cpu->gpr[3]));
+    psx_muldiv_set_compiled(cpu, psx_mult_latency_s(cpu->gpr[3]));
 #endif
     PGXP_MULDIV(0x00620018u, cpu->hi, cpu->lo, cpu->gpr[3], cpu->gpr[2]);  /* 0x80077618: 0x00620018 */
 #ifdef PSX_COSIM
@@ -25059,7 +25059,7 @@ block_8007760C:
 #endif
     cpu->gpr[15] = cpu->hi;
 #ifdef PSX_ENABLE_BLOCK_CYCLES
-    psx_muldiv_stall(cpu);
+    psx_muldiv_stall_compiled(cpu);
 #endif
     PGXP_ALU(0x00007810u, cpu->gpr[15], cpu->hi, 0u);  /* 0x80077628: 0x00007810 */
 #ifdef PSX_COSIM
@@ -25152,7 +25152,7 @@ block_8007760C:
 #endif
     { int64_t result = (int64_t)(int32_t)cpu->gpr[2] * (int64_t)(int32_t)cpu->gpr[5]; cpu->lo = (uint32_t)result; cpu->hi = (uint32_t)(result >> 32); }
 #ifdef PSX_ENABLE_BLOCK_CYCLES
-    psx_muldiv_set(cpu, psx_mult_latency_s(cpu->gpr[2]));
+    psx_muldiv_set_compiled(cpu, psx_mult_latency_s(cpu->gpr[2]));
 #endif
     PGXP_MULDIV(0x00450018u, cpu->hi, cpu->lo, cpu->gpr[2], cpu->gpr[5]);  /* 0x80077648: 0x00450018 */
 #ifdef PSX_COSIM
@@ -25175,7 +25175,7 @@ block_8007760C:
 #endif
     cpu->gpr[15] = cpu->hi;
 #ifdef PSX_ENABLE_BLOCK_CYCLES
-    psx_muldiv_stall(cpu);
+    psx_muldiv_stall_compiled(cpu);
 #endif
     PGXP_ALU(0x00007810u, cpu->gpr[15], cpu->hi, 0u);  /* 0x80077650: 0x00007810 */
 #ifdef PSX_COSIM
@@ -25626,7 +25626,7 @@ block_800776E8:
 #endif
     
 #ifdef PSX_ENABLE_BLOCK_CYCLES
-    psx_gte_stall(cpu);
+    psx_gte_stall_compiled(cpu);
 #endif
     cpu->gte_ctrl[0] = cpu->gpr[12];  /* ctc2 */
     PGXP_COP2(0x48CC0000u, cpu->gpr[12], 0u);  /* 0x800776F4: 0x48CC0000 */
@@ -25638,7 +25638,7 @@ block_800776E8:
 #endif
     
 #ifdef PSX_ENABLE_BLOCK_CYCLES
-    psx_gte_stall(cpu);
+    psx_gte_stall_compiled(cpu);
 #endif
     cpu->gte_ctrl[1] = cpu->gpr[13];  /* ctc2 */
     PGXP_COP2(0x48CD0800u, cpu->gpr[13], 0u);  /* 0x800776F8: 0x48CD0800 */
@@ -25669,7 +25669,7 @@ block_800776E8:
 #endif
     
 #ifdef PSX_ENABLE_BLOCK_CYCLES
-    psx_gte_stall(cpu);
+    psx_gte_stall_compiled(cpu);
 #endif
     cpu->gte_ctrl[2] = cpu->gpr[12];  /* ctc2 */
     PGXP_COP2(0x48CC1000u, cpu->gpr[12], 0u);  /* 0x80077708: 0x48CC1000 */
@@ -25681,7 +25681,7 @@ block_800776E8:
 #endif
     
 #ifdef PSX_ENABLE_BLOCK_CYCLES
-    psx_gte_stall(cpu);
+    psx_gte_stall_compiled(cpu);
 #endif
     cpu->gte_ctrl[3] = cpu->gpr[13];  /* ctc2 */
     PGXP_COP2(0x48CD1800u, cpu->gpr[13], 0u);  /* 0x8007770C: 0x48CD1800 */
@@ -25697,7 +25697,7 @@ block_800776E8:
 #endif
     
 #ifdef PSX_ENABLE_BLOCK_CYCLES
-    psx_gte_stall(cpu);
+    psx_gte_stall_compiled(cpu);
 #endif
     gte_write_ctrl(cpu, 4, cpu->gpr[14]);  /* ctc2 */
     PGXP_COP2(0x48CE2000u, cpu->gpr[14], 0u);  /* 0x80077710: 0x48CE2000 */
@@ -26035,7 +26035,7 @@ block_80077768:
 #endif
     { int64_t result = (int64_t)(int32_t)cpu->gpr[4] * (int64_t)(int32_t)cpu->gpr[3]; cpu->lo = (uint32_t)result; cpu->hi = (uint32_t)(result >> 32); }
 #ifdef PSX_ENABLE_BLOCK_CYCLES
-    psx_muldiv_set(cpu, psx_mult_latency_s(cpu->gpr[4]));
+    psx_muldiv_set_compiled(cpu, psx_mult_latency_s(cpu->gpr[4]));
 #endif
     PGXP_MULDIV(0x00830018u, cpu->hi, cpu->lo, cpu->gpr[4], cpu->gpr[3]);  /* 0x80077778: 0x00830018 */
 #ifdef PSX_COSIM
@@ -26066,7 +26066,7 @@ block_80077768:
 #endif
     cpu->gpr[8] = cpu->hi;
 #ifdef PSX_ENABLE_BLOCK_CYCLES
-    psx_muldiv_stall(cpu);
+    psx_muldiv_stall_compiled(cpu);
 #endif
     PGXP_ALU(0x00004010u, cpu->gpr[8], cpu->hi, 0u);  /* 0x80077784: 0x00004010 */
 #ifdef PSX_COSIM
@@ -26105,7 +26105,7 @@ block_80077768:
 #endif
     { int64_t result = (int64_t)(int32_t)cpu->gpr[3] * (int64_t)(int32_t)cpu->gpr[2]; cpu->lo = (uint32_t)result; cpu->hi = (uint32_t)(result >> 32); }
 #ifdef PSX_ENABLE_BLOCK_CYCLES
-    psx_muldiv_set(cpu, psx_mult_latency_s(cpu->gpr[3]));
+    psx_muldiv_set_compiled(cpu, psx_mult_latency_s(cpu->gpr[3]));
 #endif
     PGXP_MULDIV(0x00620018u, cpu->hi, cpu->lo, cpu->gpr[3], cpu->gpr[2]);  /* 0x80077790: 0x00620018 */
 #ifdef PSX_COSIM
@@ -26153,7 +26153,7 @@ block_80077768:
 #endif
     cpu->gpr[5] = cpu->lo;
 #ifdef PSX_ENABLE_BLOCK_CYCLES
-    psx_muldiv_stall(cpu);
+    psx_muldiv_stall_compiled(cpu);
 #endif
     PGXP_ALU(0x00002812u, cpu->gpr[5], cpu->lo, 0u);  /* 0x800777A0: 0x00002812 */
 #ifdef PSX_COSIM
@@ -26188,7 +26188,7 @@ block_80077768:
 #endif
     { int64_t result = (int64_t)(int32_t)cpu->gpr[17] * (int64_t)(int32_t)cpu->gpr[2]; cpu->lo = (uint32_t)result; cpu->hi = (uint32_t)(result >> 32); }
 #ifdef PSX_ENABLE_BLOCK_CYCLES
-    psx_muldiv_set(cpu, psx_mult_latency_s(cpu->gpr[17]));
+    psx_muldiv_set_compiled(cpu, psx_mult_latency_s(cpu->gpr[17]));
 #endif
     PGXP_MULDIV(0x02220018u, cpu->hi, cpu->lo, cpu->gpr[17], cpu->gpr[2]);  /* 0x800777AC: 0x02220018 */
 #ifdef PSX_COSIM
@@ -26249,7 +26249,7 @@ block_80077768:
 #endif
     cpu->gpr[8] = cpu->lo;
 #ifdef PSX_ENABLE_BLOCK_CYCLES
-    psx_muldiv_stall(cpu);
+    psx_muldiv_stall_compiled(cpu);
 #endif
     PGXP_ALU(0x00004012u, cpu->gpr[8], cpu->lo, 0u);  /* 0x800777C0: 0x00004012 */
 #ifdef PSX_COSIM
@@ -26439,7 +26439,7 @@ block_800777F4:
 #endif
     { int64_t result = (int64_t)(int32_t)cpu->gpr[2] * (int64_t)(int32_t)cpu->gpr[3]; cpu->lo = (uint32_t)result; cpu->hi = (uint32_t)(result >> 32); }
 #ifdef PSX_ENABLE_BLOCK_CYCLES
-    psx_muldiv_set(cpu, psx_mult_latency_s(cpu->gpr[2]));
+    psx_muldiv_set_compiled(cpu, psx_mult_latency_s(cpu->gpr[2]));
 #endif
     PGXP_MULDIV(0x00430018u, cpu->hi, cpu->lo, cpu->gpr[2], cpu->gpr[3]);  /* 0x800777FC: 0x00430018 */
 #ifdef PSX_COSIM
@@ -26483,7 +26483,7 @@ block_800777F4:
 #endif
     cpu->gpr[8] = cpu->hi;
 #ifdef PSX_ENABLE_BLOCK_CYCLES
-    psx_muldiv_stall(cpu);
+    psx_muldiv_stall_compiled(cpu);
 #endif
     PGXP_ALU(0x00004010u, cpu->gpr[8], cpu->hi, 0u);  /* 0x8007780C: 0x00004010 */
 #ifdef PSX_COSIM
@@ -26511,7 +26511,7 @@ block_800777F4:
 #endif
     { int64_t result = (int64_t)(int32_t)cpu->gpr[5] * (int64_t)(int32_t)cpu->gpr[4]; cpu->lo = (uint32_t)result; cpu->hi = (uint32_t)(result >> 32); }
 #ifdef PSX_ENABLE_BLOCK_CYCLES
-    psx_muldiv_set(cpu, psx_mult_latency_s(cpu->gpr[5]));
+    psx_muldiv_set_compiled(cpu, psx_mult_latency_s(cpu->gpr[5]));
 #endif
     PGXP_MULDIV(0x00A40018u, cpu->hi, cpu->lo, cpu->gpr[5], cpu->gpr[4]);  /* 0x80077818: 0x00A40018 */
 #ifdef PSX_COSIM
@@ -26613,7 +26613,7 @@ block_800777F4:
 #endif
     cpu->gpr[6] = cpu->hi;
 #ifdef PSX_ENABLE_BLOCK_CYCLES
-    psx_muldiv_stall(cpu);
+    psx_muldiv_stall_compiled(cpu);
 #endif
     PGXP_ALU(0x00003010u, cpu->gpr[6], cpu->hi, 0u);  /* 0x8007783C: 0x00003010 */
 #ifdef PSX_COSIM
@@ -26876,7 +26876,7 @@ block_80077878:
 #endif
     { int64_t result = (int64_t)(int32_t)cpu->gpr[3] * (int64_t)(int32_t)cpu->gpr[2]; cpu->lo = (uint32_t)result; cpu->hi = (uint32_t)(result >> 32); }
 #ifdef PSX_ENABLE_BLOCK_CYCLES
-    psx_muldiv_set(cpu, psx_mult_latency_s(cpu->gpr[3]));
+    psx_muldiv_set_compiled(cpu, psx_mult_latency_s(cpu->gpr[3]));
 #endif
     PGXP_MULDIV(0x00620018u, cpu->hi, cpu->lo, cpu->gpr[3], cpu->gpr[2]);  /* 0x8007788C: 0x00620018 */
 #ifdef PSX_COSIM
@@ -26989,7 +26989,7 @@ block_80077878:
 #endif
     cpu->gpr[20] = cpu->hi;
 #ifdef PSX_ENABLE_BLOCK_CYCLES
-    psx_muldiv_stall(cpu);
+    psx_muldiv_stall_compiled(cpu);
 #endif
     PGXP_ALU(0x0000A010u, cpu->gpr[20], cpu->hi, 0u);  /* 0x800778BC: 0x0000A010 */
 #ifdef PSX_COSIM
@@ -27404,7 +27404,7 @@ block_8007797C:
 #endif
     
 #ifdef PSX_ENABLE_BLOCK_CYCLES
-    psx_gte_stall(cpu);
+    psx_gte_stall_compiled(cpu);
 #endif
     cpu->gte_ctrl[0] = cpu->gpr[12];  /* ctc2 */
     PGXP_COP2(0x48CC0000u, cpu->gpr[12], 0u);  /* 0x80077988: 0x48CC0000 */
@@ -27416,7 +27416,7 @@ block_8007797C:
 #endif
     
 #ifdef PSX_ENABLE_BLOCK_CYCLES
-    psx_gte_stall(cpu);
+    psx_gte_stall_compiled(cpu);
 #endif
     cpu->gte_ctrl[1] = cpu->gpr[13];  /* ctc2 */
     PGXP_COP2(0x48CD0800u, cpu->gpr[13], 0u);  /* 0x8007798C: 0x48CD0800 */
@@ -27447,7 +27447,7 @@ block_8007797C:
 #endif
     
 #ifdef PSX_ENABLE_BLOCK_CYCLES
-    psx_gte_stall(cpu);
+    psx_gte_stall_compiled(cpu);
 #endif
     cpu->gte_ctrl[2] = cpu->gpr[12];  /* ctc2 */
     PGXP_COP2(0x48CC1000u, cpu->gpr[12], 0u);  /* 0x8007799C: 0x48CC1000 */
@@ -27463,7 +27463,7 @@ block_8007797C:
 #endif
     
 #ifdef PSX_ENABLE_BLOCK_CYCLES
-    psx_gte_stall(cpu);
+    psx_gte_stall_compiled(cpu);
 #endif
     cpu->gte_ctrl[3] = cpu->gpr[13];  /* ctc2 */
     PGXP_COP2(0x48CD1800u, cpu->gpr[13], 0u);  /* 0x800779A0: 0x48CD1800 */
@@ -27475,7 +27475,7 @@ block_8007797C:
 #endif
     
 #ifdef PSX_ENABLE_BLOCK_CYCLES
-    psx_gte_stall(cpu);
+    psx_gte_stall_compiled(cpu);
 #endif
     gte_write_ctrl(cpu, 4, cpu->gpr[14]);  /* ctc2 */
     PGXP_COP2(0x48CE2000u, cpu->gpr[14], 0u);  /* 0x800779A4: 0x48CE2000 */
@@ -28084,7 +28084,7 @@ block_80077A60:
 #endif
     { int64_t result = (int64_t)(int32_t)cpu->gpr[2] * (int64_t)(int32_t)cpu->gpr[3]; cpu->lo = (uint32_t)result; cpu->hi = (uint32_t)(result >> 32); }
 #ifdef PSX_ENABLE_BLOCK_CYCLES
-    psx_muldiv_set(cpu, psx_mult_latency_s(cpu->gpr[2]));
+    psx_muldiv_set_compiled(cpu, psx_mult_latency_s(cpu->gpr[2]));
 #endif
     PGXP_MULDIV(0x00430018u, cpu->hi, cpu->lo, cpu->gpr[2], cpu->gpr[3]);  /* 0x80077A68: 0x00430018 */
 #ifdef PSX_COSIM
@@ -28128,7 +28128,7 @@ block_80077A60:
 #endif
     cpu->gpr[8] = cpu->hi;
 #ifdef PSX_ENABLE_BLOCK_CYCLES
-    psx_muldiv_stall(cpu);
+    psx_muldiv_stall_compiled(cpu);
 #endif
     PGXP_ALU(0x00004010u, cpu->gpr[8], cpu->hi, 0u);  /* 0x80077A78: 0x00004010 */
 #ifdef PSX_COSIM
@@ -28156,7 +28156,7 @@ block_80077A60:
 #endif
     { int64_t result = (int64_t)(int32_t)cpu->gpr[5] * (int64_t)(int32_t)cpu->gpr[4]; cpu->lo = (uint32_t)result; cpu->hi = (uint32_t)(result >> 32); }
 #ifdef PSX_ENABLE_BLOCK_CYCLES
-    psx_muldiv_set(cpu, psx_mult_latency_s(cpu->gpr[5]));
+    psx_muldiv_set_compiled(cpu, psx_mult_latency_s(cpu->gpr[5]));
 #endif
     PGXP_MULDIV(0x00A40018u, cpu->hi, cpu->lo, cpu->gpr[5], cpu->gpr[4]);  /* 0x80077A84: 0x00A40018 */
 #ifdef PSX_COSIM
@@ -28265,7 +28265,7 @@ block_80077A60:
 #endif
     cpu->gpr[6] = cpu->hi;
 #ifdef PSX_ENABLE_BLOCK_CYCLES
-    psx_muldiv_stall(cpu);
+    psx_muldiv_stall_compiled(cpu);
 #endif
     PGXP_ALU(0x00003010u, cpu->gpr[6], cpu->hi, 0u);  /* 0x80077AA8: 0x00003010 */
 #ifdef PSX_COSIM
@@ -28613,7 +28613,7 @@ block_80077AF8:
 #endif
     if (cpu->gpr[3] != 0) { cpu->lo = (uint32_t)((int32_t)cpu->gpr[2] / (int32_t)cpu->gpr[3]); cpu->hi = (uint32_t)((int32_t)cpu->gpr[2] % (int32_t)cpu->gpr[3]); } else { cpu->lo = ((int32_t)cpu->gpr[2] >= 0) ? 0xFFFFFFFF : 1; cpu->hi = (uint32_t)cpu->gpr[2]; }
 #ifdef PSX_ENABLE_BLOCK_CYCLES
-    psx_muldiv_set(cpu, 37u);
+    psx_muldiv_set_compiled(cpu, 37u);
 #endif
     PGXP_MULDIV(0x0043001Au, cpu->hi, cpu->lo, cpu->gpr[2], cpu->gpr[3]);  /* 0x80077B10: 0x0043001A */
 #ifdef PSX_COSIM
@@ -28818,7 +28818,7 @@ block_80077B38:
 #endif
     cpu->gpr[18] = cpu->lo;
 #ifdef PSX_ENABLE_BLOCK_CYCLES
-    psx_muldiv_stall(cpu);
+    psx_muldiv_stall_compiled(cpu);
 #endif
     PGXP_ALU(0x00009012u, cpu->gpr[18], cpu->lo, 0u);  /* 0x80077B38: 0x00009012 */
 #ifdef PSX_COSIM
@@ -29074,7 +29074,7 @@ block_80077B3C:
 #endif
     { int64_t result = (int64_t)(int32_t)cpu->gpr[8] * (int64_t)(int32_t)cpu->gpr[11]; cpu->lo = (uint32_t)result; cpu->hi = (uint32_t)(result >> 32); }
 #ifdef PSX_ENABLE_BLOCK_CYCLES
-    psx_muldiv_set(cpu, psx_mult_latency_s(cpu->gpr[8]));
+    psx_muldiv_set_compiled(cpu, psx_mult_latency_s(cpu->gpr[8]));
 #endif
     PGXP_MULDIV(0x010B0018u, cpu->hi, cpu->lo, cpu->gpr[8], cpu->gpr[11]);  /* 0x80077BA4: 0x010B0018 */
 #ifdef PSX_COSIM
@@ -29208,7 +29208,7 @@ block_80077B3C:
 #endif
     cpu->gpr[15] = cpu->hi;
 #ifdef PSX_ENABLE_BLOCK_CYCLES
-    psx_muldiv_stall(cpu);
+    psx_muldiv_stall_compiled(cpu);
 #endif
     PGXP_ALU(0x00007810u, cpu->gpr[15], cpu->hi, 0u);  /* 0x80077BD8: 0x00007810 */
 #ifdef PSX_COSIM
@@ -29605,7 +29605,7 @@ block_80077C58:
 #endif
     
 #ifdef PSX_ENABLE_BLOCK_CYCLES
-    psx_gte_stall(cpu);
+    psx_gte_stall_compiled(cpu);
 #endif
     cpu->gte_ctrl[0] = cpu->gpr[12];  /* ctc2 */
     PGXP_COP2(0x48CC0000u, cpu->gpr[12], 0u);  /* 0x80077C7C: 0x48CC0000 */
@@ -29621,7 +29621,7 @@ block_80077C58:
 #endif
     
 #ifdef PSX_ENABLE_BLOCK_CYCLES
-    psx_gte_stall(cpu);
+    psx_gte_stall_compiled(cpu);
 #endif
     cpu->gte_ctrl[1] = cpu->gpr[13];  /* ctc2 */
     PGXP_COP2(0x48CD0800u, cpu->gpr[13], 0u);  /* 0x80077C80: 0x48CD0800 */
@@ -29652,7 +29652,7 @@ block_80077C58:
 #endif
     
 #ifdef PSX_ENABLE_BLOCK_CYCLES
-    psx_gte_stall(cpu);
+    psx_gte_stall_compiled(cpu);
 #endif
     cpu->gte_ctrl[2] = cpu->gpr[12];  /* ctc2 */
     PGXP_COP2(0x48CC1000u, cpu->gpr[12], 0u);  /* 0x80077C90: 0x48CC1000 */
@@ -29664,7 +29664,7 @@ block_80077C58:
 #endif
     
 #ifdef PSX_ENABLE_BLOCK_CYCLES
-    psx_gte_stall(cpu);
+    psx_gte_stall_compiled(cpu);
 #endif
     cpu->gte_ctrl[3] = cpu->gpr[13];  /* ctc2 */
     PGXP_COP2(0x48CD1800u, cpu->gpr[13], 0u);  /* 0x80077C94: 0x48CD1800 */
@@ -29676,7 +29676,7 @@ block_80077C58:
 #endif
     
 #ifdef PSX_ENABLE_BLOCK_CYCLES
-    psx_gte_stall(cpu);
+    psx_gte_stall_compiled(cpu);
 #endif
     gte_write_ctrl(cpu, 4, cpu->gpr[14]);  /* ctc2 */
     PGXP_COP2(0x48CE2000u, cpu->gpr[14], 0u);  /* 0x80077C98: 0x48CE2000 */
@@ -29710,7 +29710,7 @@ block_80077C58:
 #endif
     
 #ifdef PSX_ENABLE_BLOCK_CYCLES
-    psx_gte_stall(cpu);
+    psx_gte_stall_compiled(cpu);
 #endif
     cpu->gte_ctrl[5] = cpu->gpr[12];  /* ctc2 */
     PGXP_COP2(0x48CC2800u, cpu->gpr[12], 0u);  /* 0x80077CA8: 0x48CC2800 */
@@ -29731,7 +29731,7 @@ block_80077C58:
 #endif
     
 #ifdef PSX_ENABLE_BLOCK_CYCLES
-    psx_gte_stall(cpu);
+    psx_gte_stall_compiled(cpu);
 #endif
     cpu->gte_ctrl[6] = cpu->gpr[13];  /* ctc2 */
     PGXP_COP2(0x48CD3000u, cpu->gpr[13], 0u);  /* 0x80077CB0: 0x48CD3000 */
@@ -29743,7 +29743,7 @@ block_80077C58:
 #endif
     
 #ifdef PSX_ENABLE_BLOCK_CYCLES
-    psx_gte_stall(cpu);
+    psx_gte_stall_compiled(cpu);
 #endif
     cpu->gte_ctrl[7] = cpu->gpr[14];  /* ctc2 */
     PGXP_COP2(0x48CE3800u, cpu->gpr[14], 0u);  /* 0x80077CB4: 0x48CE3800 */

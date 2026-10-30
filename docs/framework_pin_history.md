@@ -218,11 +218,32 @@ Pin psxrecomp 69751f42942aea5061dc311779faeccb192c4b28 (fork r4/main merge of fi
 `ad0a2c42`, fork integration `ae0df75b`). Inline PGXP, compact shadow propagation,
 static timing continuation and alias-safe read-absorb storage retain exact
 guest and PGXP results. OpenBIOS and game output regenerated. The owner removed
-the inherited 37?38 ms interval as a G4 merge gate and requested immediate
+the inherited 37-38 ms interval as a G4 merge gate and requested immediate
 merge; framework topic and r4/main are pushed. Prior final-candidate checks:
 480 exact guest frames, 581,682 ordered triangle records, focused tests and
-zero-miss hidden smoke pass. The interrupted final build is being rerun with
+zero-miss hidden smoke pass. The interrupted final build was rerun successfully with
 the fork's production surface integration. Final integrated verification and
 the separate three-hour interval task are recorded in the framework's
 `docs/internal/GUEST_EXECUTION.md`; broader legacy source-guard failures are
 not represented as a green full framework suite.
+
+2026-10-29 interval investigation pin: `a0c824c6` on framework
+`fix/vblank-interval`, pushed for review, **not merged into r4/main and not a
+performance promotion**. G4 remains accepted on main at `dd5dca60`.
+Pre-edge event pacing, compact shared precision logic and admitted-block GTE
+and MULT/DIV timing reduced the observed maximum from the inherited roughly
+37-38 ms to a best/final **24.962 ms**. The requested **under-20-ms gate failed**.
+Final fresh supervisor slot11: harness59.98/cadence60.006 VBlanks/s, zero starved
+samples and packet allocations, mean guest-thread CPU8.934ms. Worst interval
+contains115365297 CPU cycles and only0.061ms native completion wait; active
+execution is the remaining bottleneck. Stop within the owner's approximately
+three-hour time box; larger mixed-load timing/GPR localization does not fit it.
+
+OpenBIOS stamp current and R4 regenerated with tools/regen.sh. Final build exits0;
+13 focused framework/22 permitted R4/3 emitter checks and native recorded-oracle
+fixtures pass.480 guest fingerprints and571890 ordered PGXP triangles match;
+40-step hidden smoke has zero dispatch/segment misses. The PGXP-off boot test
+is excluded; broader legacy framework failures are not claimed fixed.
+Detailed before/after table, root-cause limits, estimated remaining cost and
+numeric receipts: psxrecomp/docs/internal/GUEST_EXECUTION.md and
+psxrecomp/docs/internal/GUEST_EXECUTION_INTERVAL_RECEIPTS.json.
