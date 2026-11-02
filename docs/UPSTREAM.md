@@ -28,6 +28,7 @@ targeted pin; generated game C is unchanged. The fork-only changes below remain.
 | Keyboard seat adopts a pad; Steam desktop-layout echo guard for physical Valve pads | `fix/steam-controller-outside-steam` | none yet | local (`80b058e6`), not pushed; needs hands-on Steam Controller check |
 | Avoid postfx GL texture-size driver queries for known renderer surfaces | `fix/postfx-known-dims` | none yet | in `r4/main` (`8a3bf9f1`); exact GL pixels on Windows and Mac |
 | Avoid composition-context GL framebuffer-binding queries per queued output | `fix/presenter-fbo-bindings` | none yet | in `r4/main` (`e1f2e457`); exact present-thread pixels on Windows and Mac |
+| Hold the last enhanced image when a packet-gap restage leaves the shown buffer native-only | `fix/packet-gap-stale-present` | none yet | in `r4/main` (`7d0db027`); Mac autopilot laps 0 single-frame 4:3 drops (was 10-13/lap) |
 | Initialize fixed textured sampler uniforms once per shader program | `fix/gl-sampler-uniforms` | none yet | in `r4/main` (`6eead0f2`); exact direct/threaded GL pixels on Windows and Mac |
 | Publish the immutable PGXP seam baseline earlier during async reserve | `fix/seam-early-publish` | none yet | in `r4/main` (`c4eb8183`); more prepared seams consumed, exact PGXP verifier and Mac async timing passed |
 | Dynres: hold through savestate load | `r4/main` commit `ade1ecd3` | none yet | needs topic branch + PR |

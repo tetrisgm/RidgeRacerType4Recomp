@@ -298,3 +298,16 @@ packet path. Evidence: hidden boot with the menu opened at frame 1 and in a
 race shows the menu over a black or held frame; B and Return-on-Resume close
 it and the guest advances; 25/25 R4 CTest; hidden smoke to race with 0
 dispatch/segment misses; the framework regression test rejects the old code.
+
+## 2026-11-02: psxrecomp 66e06a96
+
+Races showed single 4:3, low-resolution frames with the stock HUD between
+widescreen frames (10-13 per lap on the Mac; the reported blinking and objects
+popping). The render thread's frame mailbox keeps only the latest packet, and
+the gap left by a replaced packet makes the next packet restage VRAM from its
+native seed, invalidating every enhanced surface. When the next present showed
+the buffer only the dropped packet had drawn, that surface was reseeded from 1x
+native VRAM. psxrecomp now skips that one present so the last enhanced image
+stays up; Load and Rewind epochs still present their restored image.
+Evidence: R4 autopilot laps (Mac, hidden window, every presented frame
+scanned) went from 10-13 drops per lap to 0 in 3 laps (27 held presents).
