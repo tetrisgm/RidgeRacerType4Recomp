@@ -571,6 +571,12 @@ static void r4_md_vsync(CPUState *cpu, uint32_t address)
      * the swap drifts across VBlank edges, so ticks alternate 1/2/3 VBlanks
      * on screen. Released at the second VBlank edge after the one the frame
      * started on (guest VBlank phase), the swap is VBlank-aligned. */
+    /* A save state or Rewind point taken inside the hold carries its sentinel
+     * in the guest s0, while the frame anchor that releases it is host state
+     * the load cleared. Release it as an overrun, or the spin never exits. */
+    if (cpu->gpr[31] == R4_MD_VSYNC_WAIT_RA && !s_frame.started &&
+        cpu->gpr[16] == 0x10000u)
+        cpu->gpr[16] = 0u;
     if (cpu->gpr[31] == R4_MD_VSYNC_WAIT_RA && s_frame.started &&
         psx_mod_guest_cycle_scale() != 1u && cpu->gpr[16] != 0u &&
         rd32(R4_MD_PACING_ADDR) == R4_MD_PACING_RACE)
