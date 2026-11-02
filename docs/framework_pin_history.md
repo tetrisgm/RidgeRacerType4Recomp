@@ -285,3 +285,16 @@ itself is never offered off. The previous recomp-ui pin c6ac60c had never been
 pushed; it is now on r4/main. Build, 25/25 R4 CTest (r4_pgxp_boot boots PGXP on
 only) and a hidden smoke with 0 dispatch/segment misses. Graphics screen not
 yet checked on screen.
+
+## 2026-11-02: psxrecomp a44c5467
+
+The in-game menu (also the launcher shown at boot) was black and ignored all
+input since the frame architecture: with the render thread, pause presents
+were records in a guest frame that a paused guest never closed, so neither
+the held frame nor the menu overlay reached the screen, and the menu's draw,
+which consumes its input, never ran. psxrecomp now closes the frame after
+each pause present (as rewind already did) and draws hold presents in the
+packet path. Evidence: hidden boot with the menu opened at frame 1 and in a
+race shows the menu over a black or held frame; B and Return-on-Resume close
+it and the guest advances; 25/25 R4 CTest; hidden smoke to race with 0
+dispatch/segment misses; the framework regression test rejects the old code.
