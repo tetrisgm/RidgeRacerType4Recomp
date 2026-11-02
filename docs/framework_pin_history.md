@@ -274,3 +274,14 @@ is excluded; broader legacy framework failures are not claimed fixed.
 Detailed before/after table, root-cause limits, estimated remaining cost and
 numeric receipts: psxrecomp/docs/internal/GUEST_EXECUTION.md and
 psxrecomp/docs/internal/GUEST_EXECUTION_INTERVAL_RECEIPTS.json.
+
+## 2026-11-02: psxrecomp e965d043, recomp-ui cb6989c
+
+psxrecomp: Steam Controller works when R4 is launched directly (SDL HIDAPI
+Steam driver on), and the presenter builds on macOS. recomp-ui: Graphics is
+plain named rows with no presets (Window mode, V-Sync, Resolution, filters,
+FPS, Aspect, Car effects, Distant detail, HD HUD, PGXP sub-options); PGXP
+itself is never offered off. The previous recomp-ui pin c6ac60c had never been
+pushed; it is now on r4/main. Build, 25/25 R4 CTest (r4_pgxp_boot boots PGXP on
+only) and a hidden smoke with 0 dispatch/segment misses. Graphics screen not
+yet checked on screen.

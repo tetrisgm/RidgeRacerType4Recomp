@@ -320,9 +320,10 @@ if(R4_BUILD_TESTS AND BUILD_TESTING)
                 WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}")
         endif()
         # PGXP at boot: the built runtime, headless, from an isolated copy of
-        # its directory: on by default (geometry, texture, culling), off when
-        # the Mods page says so, culling off on its own. Guards the framework's
-        # session-start arming end to end. Needs the debug server and the disc.
+        # its directory: on by default and when saved settings enable it
+        # (geometry, texture, culling). PGXP is never booted off, not even as
+        # a reference. Guards the framework's session-start arming end to end.
+        # Needs the debug server and the disc.
         file(GLOB _R4_DISC_CUES "${CMAKE_CURRENT_SOURCE_DIR}/disc/*.cue")
         if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_r4_pgxp_boot.py")
             if(_R4_DISC_CUES AND PSX_DEBUG_TOOLS)
