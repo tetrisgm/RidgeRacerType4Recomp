@@ -318,3 +318,15 @@ The launcher main menu now opens with Start Game focused by default
 (recomp-launcher `r4/main`), so a controller or Enter press launches the game
 instead of landing on another entry. Launcher-only change; no generated code
 or runtime behaviour moves.
+
+## 2026-11-02: psxrecomp 99dff1b2
+
+On screen (not in presenter dumps) races showed a lighter box over the left
+37% of the sky with a dark, small copy of the whole HUD inside it while
+driving. It was the bloom mask: the post-effect known-dimensions shortcut
+took s_hr_fbo as a surface spanning all of VRAM, but with retained
+presentation surfaces s_hr_fbo names a region-pool surface, so the displayed
+band mapped onto the whole VRAM width and the mask shrank to 382/1024 of the
+window. psxrecomp now resolves region-pool surfaces first, at their own
+allocation. Evidence: Mac screen video while driving (macOS screen capture),
+ghost frames 86 of 272 before and 0 after; bloom stays on.
