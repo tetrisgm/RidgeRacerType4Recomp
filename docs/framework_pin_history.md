@@ -311,3 +311,10 @@ native VRAM. psxrecomp now skips that one present so the last enhanced image
 stays up; Load and Rewind epochs still present their restored image.
 Evidence: R4 autopilot laps (Mac, hidden window, every presented frame
 scanned) went from 10-13 drops per lap to 0 in 3 laps (27 held presents).
+
+## 2026-11-02: recomp-ui 0b89a34
+
+The launcher main menu now opens with Start Game focused by default
+(recomp-launcher `r4/main`), so a controller or Enter press launches the game
+instead of landing on another entry. Launcher-only change; no generated code
+or runtime behaviour moves.
