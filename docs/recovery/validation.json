@@ -132,5 +132,19 @@
     "open_freezes_guest": true,
     "cancel_resumes": true,
     "implementation": "upstream filmstrip"
+  },
+  "owner_preview": {
+    "profile": "analysis/recovery/playtest/",
+    "pid": 48864,
+    "paused": true,
+    "window": [
+      1280,
+      720
+    ],
+    "audio_driver_override": null,
+    "audio_output_active": 1,
+    "dispatch_misses": 0,
+    "segment_misses": 0,
+    "note": "Normal audio, native game pause, Modern controls, independent saves/settings. Preserve owner progress and notes."
   }
 }
