@@ -342,3 +342,18 @@ position. Instances now keep the previous packet's ordinal of the nearest
 object translation. Evidence: Mac full-resolution present bursts on the same
 route, blinks 2-5 per burst against a 2-6 baseline, peak score 68 against
 140-200, no floating tree; interpolation audit 924 pairs, 0 failed.
+
+## 2026-11-02: psxrecomp 84d6ca22
+
+The render thread could not keep up with the guest on the owner's PC (about
+a quarter of all packets replaced) or on the Mac (a third). Each replaced
+packet restaged every enhanced surface from native VRAM and the presenter
+then drew in-between frames across the gap, so the race showed swimming
+textures, blinking panels and popping objects at a smooth frame rate. Two
+framework fixes: a replayed packet uploads only the native tiles it changed
+(the bounding box of scattered texture pages was 1.4 MB per packet and
+stalled the upload stream: PC replay 10 -> 2 ms), and the presenter
+interpolates only across the guest's own frame cadence, never across lost
+frames. Evidence: PC hidden run, replaced packets 25% -> 10%; Mac screen
+video, lap-timer steps continuous, no sliding billboards; unit tests pass.
+Mac packet cost is unchanged (Apple GL draw calls), so it still drops.
