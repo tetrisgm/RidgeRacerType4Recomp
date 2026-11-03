@@ -61,11 +61,10 @@ Checked in a Grand Prix race on the owner test build (OpenGL, Match display
 dispatch misses), stock and pack captured at the same moment:
 
 - HD: RANK / RECORD headings, rank digits, record and lap times, TIME LIMIT
-  counter, speed digits, gear digit, RPM ticks and red zone, course map and
-  its shadow.
-- Upscaled (Scale2x, not hand-drawn): `mph` and the `rpm` plate.
-- Still native: the RPM gauge numbers `0`-`10` and `x1000rpm` (a different
-  upload, no artwork), the start lights and countdown, menu and results
+  counter, speed digits, gear digit, RPM ticks, red zone and dial labels,
+  course map and its shadow.
+- Upscaled (Scale2x, not hand-drawn): `mph`.
+- Still native: the start lights and countdown, menu and results
   fonts (an English menu atlas has no upstream art), car and track textures.
 - Not yet checked: VS split screen and the other seven course maps (their
   upload CRCs are the JP ones, unverified in the US game).
@@ -74,3 +73,22 @@ Savestates: saving a slot writes the HUD's upload residency beside it
 (`*.hdres`); loading that slot restores it, so the HUD stays HD after a
 load. States saved without the sidecar show the original HUD until the next
 race loads it again.
+
+## Red-zone coverage correction, 2026-11-03
+
+The owner reported hollow, fragmented red RPM bars. The exact slot-4 scene
+matches both bundled keys: dial `2edf11dc-cf63f4a4` and red overlay
+`1477dbf9-38bfad7b`. The dial artwork contains solid red bars; the separate
+overlay is intentionally transparent. This was not a missing palette image.
+The renderer clipped replacement artwork against zero texels in the original
+texture, punching the native dial's stippled silhouette through the HD bars.
+
+Framework commit `3a0502c5` lets replacement alpha control coverage while
+retaining native STP for blending and unchanged guest VRAM. No artwork changed.
+The real GL fixture passes 233 full-surface, 219 windowed and 19 native-baseline
+checks, including opposite native/replacement coverage. The game build passes
+26/26 CTests and renders solid red bars at 4K internal resolution in 21:9 and
+4:3, stationary, accelerating and after current-build save/load. PGXP remains
+enabled; dispatch and segment misses remain zero. Ignored evidence is under
+`analysis/feedback/hud-redline/`; binary SHA-256 is
+`557e50bb2c61807c9f228b894b871d6c0861df979e9a7496992b4d93eb6aa47e`.

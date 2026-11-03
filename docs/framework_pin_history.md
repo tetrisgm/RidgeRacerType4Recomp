@@ -1,5 +1,17 @@
 # Framework pin history
 
+## 2026-11-03: solid HD RPM red-zone bars
+
+Pin the selected `tetrisgm/psxrecomp` recovery branch at `3a0502c5`.
+Beetle-keyed RGBA replacements now use their own coverage instead of being
+clipped to the original texture's transparent holes. This repairs the broken
+red RPM bars without changing the artwork, native VRAM or native STP blending.
+The GL HD-pack fixture passes 233 full-surface / 219 windowed / 19 native
+checks. Regeneration leaves all 52 shards and dispatch unchanged; configure,
+build and 26/26 CTests pass. Actual 4K gameplay passes at 21:9 and 4:3,
+accelerating and after save/load, with PGXP on and zero dispatch/segment misses.
+See HD_HUD.md and ignored `analysis/feedback/hud-redline/` for evidence.
+
 ## 2026-11-03: recovery rewind HD residency
 
 Pin the selected `tetrisgm/psxrecomp` recovery branch at `b9dcf919`.

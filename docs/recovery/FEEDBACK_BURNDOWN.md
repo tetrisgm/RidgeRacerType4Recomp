@@ -43,9 +43,13 @@ Do not publish a release, change default branches or merge upstream PRs.
 
 ## Current burndown
 
+The broader goal remains paused at the owner's request. Subsequent focused
+requests authorized the stationary slot-4 scenery fix and the HD RPM red-zone
+repair; they do not resume course-wide qualification or the loading stretch.
+
 | Order | Outcome | Current state | Completion evidence |
 | --- | --- | --- | --- |
-| 1 | Campaign buildings remain visible at the intended distance | Reported stationary case fixed by `98abdac`; wider course and uncontended performance qualification remain open | Stationary owner-slot replay plus moving coverage and per-course qualification |
+| 1 | Campaign buildings remain visible at the intended distance | Owner confirmed the stationary fix `98abdac`; wider course and uncontended performance qualification remain open | Stationary owner-slot replay plus moving coverage and per-course qualification |
 | 2 | Steering at 21:9 has comfortable camera motion | Level-horizon candidate passes automated moving checks; owner comfort pending | Matched steering samples plus owner comfort check |
 | 3 | Rewind preserves high-resolution gameplay presentation | Accepted for the tested R4 workload; final integrated restore retains HD HUD and scale 9 | Repeated both-camera restores, bounded metadata, neutral sampled cost, current-build save/load and final composed comparison |
 | 4 | Replace eligible CD-paced loads with resident assets and native loading | Stretch; gated by 1 and 2 | Cold/warm load timings and equivalent initialized resources and transitions |
@@ -72,6 +76,10 @@ jump crosses its narrow memory band. A control using the existing developer
 override of ten forward sections retains 36 blocks and both buildings.
 Its peak heap use is 101,916 of 135,192 bytes (75.4%), with zero limit hits.
 This establishes a governor issue; a larger RAM map is not needed for this case.
+
+The owner subsequently confirmed that the reported stationary pop appears fixed.
+The separate follow-up about fragmented red RPM bars is repaired by framework
+`3a0502c5`; see [HD_HUD.md](../HD_HUD.md) for its focused qualification.
 
 The candidate keeps growth below 65% heap use, holds the chosen reach through
 80%, reduces above 80%, and retreats two levels at 85%. CPU cutbacks remain
