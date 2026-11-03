@@ -499,21 +499,26 @@ static inline int r4_md_gov_update(R4MdGovernor *g, uint64_t busy)
     return g->level - before;
 }
 
-/* The primitive heap is the other limit: R4 never checks it, so Maximum
- * may not fill it. Heap use (permille of the heap) counts as frame load
- * scaled so that R4_MD_HEAP_TARGET permille of heap reads as the governor's
- * 930 permille "drop one level" line: the heap settles under about 65-70 %,
- * a level over 72 % is dropped at once (heap overflow corrupts the other
- * draw buffer, and a frame can add more than a level adds on average). With [timing] guest_cycle_scale the busy time
- * shrinks and the heap (and R4_MD_LEVEL_MAX) become the limit. */
-#define R4_MD_HEAP_TARGET 700u
+/* Heap pressure needs a wider dead band than CPU work. A new course section
+ * and passing full-detail cars can jump from ~64% to ~75% use. Mapping that
+ * through the CPU's narrow band repeatedly added/retracted the same buildings
+ * at a stationary camera. Grow below 65%, hold through 80%, reduce above 80%,
+ * and retreat two levels at 85%. The latter leaves a 15% emergency reserve;
+ * real CPU overload still takes precedence through max(busy, heap load). */
+#define R4_MD_HEAP_GROW     650u
+#define R4_MD_HEAP_REDUCE   800u
+#define R4_MD_HEAP_CRITICAL 850u
 static inline uint64_t r4_md_heap_load(uint32_t heap_pm)
 {
-    return (uint64_t)heap_pm * 930u / R4_MD_HEAP_TARGET;
+    if (heap_pm >= R4_MD_HEAP_CRITICAL) return 961u;
+    if (heap_pm > R4_MD_HEAP_REDUCE) return 931u;
+    if (heap_pm >= R4_MD_HEAP_GROW) return 860u;
+    return (uint64_t)heap_pm * 860u / R4_MD_HEAP_GROW;
 }
 static inline int r4_md_gov_update_heap(R4MdGovernor *g, uint64_t busy, uint32_t heap_pm)
 {
-    uint64_t h = r4_md_heap_load(heap_pm) * R4_MD_FRAME_BUDGET / 1000u;
+    /* Round up so conversion back to permille cannot erase a drop threshold. */
+    uint64_t h = (r4_md_heap_load(heap_pm) * R4_MD_FRAME_BUDGET + 999u) / 1000u;
     return r4_md_gov_update(g, busy > h ? busy : h);
 }
 

@@ -1003,11 +1003,38 @@ static void test_governor_pure(void) {
     CHECK(r4_md_gov_update_heap(&g, B / 10u, 850u) == -2,
           "heap 85 % drops two levels however idle the CPU");
     r4_md_gov_reset(&g, 10);
+    CHECK(r4_md_gov_update_heap(&g, B / 10u, 800u) == 0,
+          "heap 80 % holds without admitting more scenery");
+    CHECK(r4_md_gov_update_heap(&g, B / 10u, 801u) == -1,
+          "over 80 % drops one level without losing the threshold to rounding");
+    r4_md_gov_reset(&g, 10);
+    CHECK(r4_md_gov_update_heap(&g, B, 740u) == -2,
+          "the wider heap band never masks actual CPU overload");
+    r4_md_gov_reset(&g, 10);
     for (int i = 0; i < 40; i++) (void)r4_md_gov_update_heap(&g, B / 10u, 550u);
     CHECK(g.level > 10, "heap 55 %: still climbs");
     r4_md_gov_reset(&g, 10);
     for (int i = 0; i < 40; i++) (void)r4_md_gov_update_heap(&g, B / 10u, 670u);
     CHECK(g.level == 10, "heap 67 %: steady");
+}
+
+/* Owner's slot 4: a stationary camera repeatedly gains/loses distant
+ * buildings. Adding one section takes the heap from ~64% to ~74%; passing
+ * cars add a few points. There is still ample physical room, so that step
+ * must settle instead of repeatedly promoting and retracting the scenery. */
+static void test_governor_stationary_scenery(void) {
+    R4MdGovernor g;
+    int admitted = 0, retracted = 0;
+    r4_md_gov_reset(&g, 7);
+    for (unsigned frame = 0; frame < 600u; ++frame) {
+        uint32_t heap = g.level >= 8 ? 740u : 640u;
+        if (frame % 120u >= 60u) heap += 40u;
+        (void)r4_md_gov_update_heap(&g, R4_MD_FRAME_BUDGET / 2u, heap);
+        if (g.level >= 8) admitted = 1;
+        else if (admitted) retracted++;
+    }
+    CHECK(admitted && !retracted && g.level == 8,
+          "a safe section-cost step and passing cars do not oscillate the skyline");
 }
 
 /* One main-loop frame of the plugin: frame start, a course draw (section
@@ -1297,6 +1324,7 @@ int main(void) {
     test_far_xform_math();
     test_far_cars_pure();
     test_governor_pure();
+    test_governor_stationary_scenery();
     test_plugin_far();
     test_pacing_and_heap();
     test_pacing_idle_not_render_load();
