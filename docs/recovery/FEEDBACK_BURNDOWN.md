@@ -70,6 +70,17 @@ and holds distance level 30. This broad candidate is not promoted: it does not
 establish neutral 4K runtime cost and does not isolate the reported object.
 No RAM-default change is included. The exact scenery-pop diagnosis remains open.
 
+A follow-up hidden run on the final integrated binary compares the same
+current-build grid checkpoint at 4:3, 16:9 and 21:9. Fixed Cross input is
+sampled every 120 VBlanks for the first 600 (about ten seconds), with actual
+composed-present fences, RAM poses and visibility lists retained. The paired
+towers and distant overpass on this first straight remain visible in all
+three aspects. Positions differ by 0–3 game ticks, so the comparisons are
+near-matched rather than pixel-identical. All samples retain scale 9, with
+zero dispatch/segment misses. This is partial first-straight coverage and
+does not reproduce or close the reported building pop, the bends/tunnels or
+other courses. Evidence: `analysis/feedback/culling-aspects/`.
+
 The camera candidate clears only the transient race-view roll when the view
 is wider than 4:3. All 24 moving wide samples have roll zero; the baseline has
 both signs, up to 19 units. A native-aspect run retains stock roll (-17 to 13
