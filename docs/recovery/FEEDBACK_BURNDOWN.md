@@ -47,10 +47,10 @@ Do not publish a release, change default branches or merge upstream PRs.
 | --- | --- | --- | --- |
 | 1 | Campaign buildings remain visible at the intended distance | Governor defect corrected; expanded heap not promoted; exact reported pop unverified | Moving before/after coverage at the offending scenery and affected campaign courses |
 | 2 | Steering at 21:9 has comfortable camera motion | Level-horizon candidate passes automated moving checks; owner comfort pending | Matched steering samples plus owner comfort check |
-| 3 | Rewind preserves high-resolution gameplay presentation | HD HUD restore passes repeated runtime checks and neutral cost samples; final pin build and 26 tests pass | Composed images and effective-resolution readings before, during and after rewind |
+| 3 | Rewind preserves high-resolution gameplay presentation | Accepted for the tested R4 workload; final integrated restore retains HD HUD and scale 9 | Repeated both-camera restores, bounded metadata, neutral sampled cost, current-build save/load and final composed comparison |
 | 4 | Replace eligible CD-paced loads with resident assets and native loading | Stretch; gated by 1 and 2 | Cold/warm load timings and equivalent initialized resources and transitions |
 
-**Resolved outcomes: 0/4.** The owner's report establishes
+**Resolved outcomes: 1/4.** The owner's report establishes
 the symptoms, not their causes. Keep reproduction, prepared, built, tested
 and accepted states separate. Update each row with exact commits, results,
 remaining failures and retained evidence when its state changes.
@@ -103,6 +103,12 @@ attempt did not fence hidden-window resize presentation, and the next exposed
 an input-test release-edge timing error; neither is counted as a game defect
 or an accepted native-aspect sample. The corrected samples and the affected
 pause/resume recheck are retained in `combined-review/combined-checks.json`.
+The final integrated rewind smoke captures before/open/selection/restore/resume
+at effective scale 9, with 1,499,200 metadata bytes for 50 points. The static
+HD RANK glyph mask is identical before/after (0 changed mask pixels), and
+the composed restored frame was visually inspected. This closes item 3 for
+the tested R4 workload; it is not a claim of other-game or all-course coverage.
+Implementation is game commit `fddc0e2` with engine `b9dcf919`.
 
 Fixed-input runs on DESKTOP-HN15M1H use the same compiled native-overlay cache,
 4K/effective 9, 21:9, PGXP, HD HUD and approved detail settings. There is no TCP
