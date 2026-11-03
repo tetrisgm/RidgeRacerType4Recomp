@@ -26,6 +26,7 @@ The game and engine remotes are preserved, as are separate original game and lau
 | Fork launcher | Preserve original; use current shared UI for compatible current engine APIs. Custom R4 screens are not yet ported. |
 | Adaptive widescreen, PGXP, HD HUD, detail, camera, controls | Retain game-owned implementations. Unit/site checks and PGXP boot pass; moving visual checks determine preview acceptance. |
 | Car effects and HUD sampling | Retain guest-clock fixes and port off packet metadata. Fix the inherited unprotected payload copy; a contention/publication regression test passes. Effects alignment remains part of visual review. |
+| Rewind default integration | Replace the fork-only `video.rewind` behavior with a game-targeted override of upstream's supported `psx.feature.rewind` package. Verified enabled with 50 snapshots, guest frozen while open and resumed after cancel. |
 | Fork packet interpolation and draw-isolation tooling | Omit from this baseline, including their package controls. The developer's issue #106 also identifies the 60 FPS path as the remaining artifact source. Do not treat the original 30 Hz race cadence as recovered 60 FPS presentation. |
 | Fork native-authority/pooled-surface/hold-to-rewind architecture | Do not replay wholesale. Current upstream owns rendering and filmstrip rewind; the hold-to-rewind experience remains an unrecovered enhancement. |
 | Live Graphics WIP mentioned in new handoff | Preserve as a reference; do not integrate unverified WIP during baseline recovery. |
@@ -38,6 +39,32 @@ The game and engine remotes are preserved, as are separate original game and lau
 - Existing 40-step hidden smoke reaches race frame 8547 with zero dispatch or segment misses. Current-build save/load slot 8 succeeds. Host pause/resume and 1280x720, 1440x600 and 960x720 window resize requests succeed. A race capture was visually inspected, but this alone does not establish moving culling/seam correctness.
 - A first autopilot attempt remained at the grid because the guest-button script and Modern trigger mapping did not agree. Reject it as moving coverage. Subsequent automated comparisons explicitly select Classic only in their disposable profiles; human/player settings are not changed.
 - Further moving screenshots and original/recovery measurements are recorded in `analysis/recovery/compare/`. Final observations are appended below after inspection.
+- The supplied live Modern Controls test passes all eight applicable checks after preparing a checkpoint beyond the starting countdown: NeGcon identification, RT/LT sweeps, steering, R1 camera, Y rewind/cancel, pause-menu stock input and zero dispatch/segment misses. No physical-controller or manual-transmission claim follows from this virtual host-input test. The initial failed report is retained; its camera taps occurred during the countdown, its rewind package was disabled, and its maximum-steer yaw sample differed by one unit. Neither the strict test nor its thresholds was weakened.
+
+### Visual inspection completed so far
+
+The owner requested screenshots specifically for culling, draw distance and seams. Inspected composed-output screenshots from a moving 45-second route and a further 105-second route on Helter Skelter, including the starting straight, underpasses, construction/bridge scenery, tight tunnel bends and tunnel exits. Changed to the third-person camera to inspect the player model and its relation to the road. Later route samples approach the start section again; this is representative course coverage, not an all-track audit or an exit/finish test.
+
+Road and side walls remain continuous in the inspected captures, tunnel roofs stay closed, trackside trees and bridge supports remain visible, and extended distant buildings/structures are present. No large sky-coloured cracks or missing road panels were seen in these samples. The first resize check also includes real extra scenery in the wide margins and HUD anchors within the output.
+
+These are sampled images, so they cannot exclude single-frame pops between captures. The far-left background in detail-100 contains thin horizontal distant features; their fidelity is unclassified, not silently counted as a pass. Car Effects' exhaust/smoke/sparks are retained but their individual triggers have not been qualified. An HD-texture live on/off diagnostic is recorded separately: its first held-frame capture cannot demonstrate a changed texture, and subsequent images use native HUD textures after tracking reset. Do not count that later sequence as a full HD-HUD appearance test.
+
+Useful local images under `analysis/recovery/compare/recovery/` are `visual-24.png`, `detail-060.png`, `detail-080.png` and `detail-100.png`. Full PGXP remains enabled throughout; the route finishes with zero dispatch/segment misses. The original comparison build is retained for comparative checks.
+
+### Performance comparison
+
+Two 20-second moving arms per build on the same Windows PC, at the 1080p preset/effective 5x, supersample 1, 1280x720 window, full PGXP and original race cadence:
+
+| Build | Guest VBlanks/s | Process CPU seconds per arm |
+|---|---|---|
+| Original fork | 54.641, 52.534 | 30.078, 29.531 |
+| Recovery | 59.982, 58.592 | 27.266, 25.750 |
+
+This is an improvement in the tested package, with less process CPU time. It is not a locked-60 qualification: the second recovery arm still reports audio starvation. Original and recovery use different rewind implementations, so do not attribute the whole difference solely to native CPU spans. Checkpoints are independently prepared in the same race, not interchangeable save states. The two short ordered arms do not establish results at other resolutions, on other tracks or under other host loads. Ring-based aggregate frame-time percentiles include earlier activity and are not used as 20-second tail measurements.
+
+The developer's own `tools/perf/measure.py` also ran against the original fork at requested 60 FPS from a moving checkpoint: 254 of 550 packets replaced (46%), 12.1 ms prepare per consumed packet, 23.3 ms per draw and only 145 swap completions in its roughly ten-second sampled interval. This is a separate diagnostic configuration, not an equal-package comparison with the recovery. It supports withholding that interpolation path rather than importing it wholesale.
+
+Exact binary identities, per-arm numbers and limits are in [validation.json](validation.json); raw results, process ownership/capacity receipts and screenshots remain in the local `analysis/recovery/` directory.
 
 Do not infer physical scanout cadence, complete track coverage, netplay qualification, macOS/Linux qualification, release PGO gains or 8K/120 Hz capability from these checks. No shared engine patch was introduced, so a new consumer-title engine regression campaign is not required for this baseline.
 
