@@ -200,7 +200,8 @@ antialiasing_mode = "off"
 dynamic_resolution = false
 # Upstream rewind uses its filmstrip selector; the fork's hold-to-rewind
 # implementation is not carried by this recovery baseline.
-rewind = true
+# Enabled by R4's psx.feature.rewind catalog override, as current upstream
+# derives host enhancements from the active mod plan.
 dynamic_resolution_min = "1080p"
 # Render thread (psxrecomp docs/RENDER_THREAD.md): the OpenGL backend runs on
 # its own thread, so a frame costs max(game, GL) instead of game + GL. Nothing
