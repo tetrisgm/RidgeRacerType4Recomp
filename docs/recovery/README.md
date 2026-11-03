@@ -6,9 +6,10 @@ every fork enhancement has been recovered. Default branches remain unchanged.
 Start with [the collaborator rebuild handoff](COLLABORATOR_HANDOFF.md).
 
 Follow-up work from the owner's campaign playtest is tracked in the
-[feedback burndown](FEEDBACK_BURNDOWN.md): distant scenery culling,
-widescreen steering-camera comfort, high-resolution rewind, 8K performance
-and, last, Tomba-style resident loading. Those outcomes remain unvalidated.
+[feedback burndown and goal instructions](FEEDBACK_BURNDOWN.md): distant
+scenery culling, widescreen steering-camera comfort, high-resolution rewind
+and, last, Tomba-style resident loading. The owner excluded an 8K slowdown
+investigation. Those four outcomes remain unvalidated.
 
 On 2026-11-03 the owner reviewed the 4K internal-resolution / 8x anisotropic
 setup and said it looked pretty decent. That accepts the owner preview for

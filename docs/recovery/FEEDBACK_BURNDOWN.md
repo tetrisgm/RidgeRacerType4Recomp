@@ -1,9 +1,18 @@
 # Ridge Racer Type 4 feedback burndown
 
 Updated 2026-11-03. Address campaign scenery culling and steering-camera
-discomfort first, then high-resolution rewind. Investigate 8K slowdown without
-compromising the working 4K picture. Tomba-style resident loading is the final
-stretch goal and starts only after items 1 and 2 pass.
+discomfort first, then high-resolution rewind. Tomba-style resident loading is
+the final stretch goal and starts only after items 1 and 2 pass. The owner
+explicitly removed the 8K slowdown investigation; use the working 4K picture
+as the validation baseline and do not spend this goal on 8K performance.
+
+## Goal
+
+When invoked through `/goal`, implement and validate the four outcomes below
+in `F:/Projects/psxrecomp-ridgeracer`, in the stated order. Progress beyond
+planning and diagnosis to working changes, measured candidate decisions and
+the prepared owner handoff. Creating this file or returning its command does
+not activate the goal.
 
 ## Scope and branches
 
@@ -24,9 +33,13 @@ planned. Do not advance upstream pins or import parked experiments as setup.
 
 Read [COLLABORATOR_HANDOFF.md](COLLABORATOR_HANDOFF.md) and
 [README.md](README.md) before implementation. The historical fork architecture
-and its feature tables are not the current recovery baseline. This request
-creates the work queue; it does not qualify fixes, publish a release, change
-default branches or merge upstream PRs.
+and its feature tables are not the current recovery baseline. Read applicable
+AGENTS.md and CLAUDE.md instructions, with the owner's current scope taking
+precedence over historical workflows. Work solo. Commit and push validated
+changes only to the two selected recovery branches; this owner authorization
+supersedes the older recovery instruction against pushing. Preserve concurrent
+work and use normal fast-forward pushes, never force-push someone else's work.
+Do not publish a release, change default branches or merge upstream PRs.
 
 ## Current burndown
 
@@ -35,10 +48,9 @@ default branches or merge upstream PRs.
 | 1 | Campaign buildings remain visible at the intended distance | Reported; reproduction pending | Moving before/after coverage at the offending scenery and affected campaign courses |
 | 2 | Steering at 21:9 has comfortable camera motion | Reported; reproduction pending | Matched steering samples plus owner comfort check |
 | 3 | Rewind preserves high-resolution gameplay presentation | Reported; reproduction pending | Composed images and effective-resolution readings before, during and after rewind |
-| 4 | Explain and reduce 8K slowdown where practical | Reported; measurement pending | Matched 4K/8K runtime samples and an evidence-backed candidate decision |
-| 5 | Replace eligible CD-paced loads with resident assets and native loading | Stretch; gated by 1 and 2 | Cold/warm load timings and equivalent initialized resources and transitions |
+| 4 | Replace eligible CD-paced loads with resident assets and native loading | Stretch; gated by 1 and 2 | Cold/warm load timings and equivalent initialized resources and transitions |
 
-**Resolved outcomes: 0/5. Validated fixes: 0.** The owner's report establishes
+**Resolved outcomes: 0/4. Validated fixes: 0.** The owner's report establishes
 the symptoms, not their causes. Keep reproduction, prepared, built, tested
 and accepted states separate. Update each row with exact commits, results,
 remaining failures and retained evidence when its state changes.
@@ -148,45 +160,19 @@ separate presentation choice.
   commands against the recovery engine before reusing them.
 - [ ] Preserve or reconstruct the presentation data needed for the selected
   high-resolution view and resumed game. Bound CPU/GPU memory and capture
-  cost; keeping an unbounded collection of 4K/8K framebuffers is not acceptable.
+  cost; keeping an unbounded collection of high-resolution framebuffers is
+  not acceptable.
 - [ ] Check repeated open/cancel/restore, backward selections, timeline
   branching, pause and current-build save/load. Keep the existing two-player
   rewind restriction unless this task demonstrates a reason to change it.
-- [ ] Measure enabled-rewind gameplay overhead and restoration latency at 4K;
-  check 8K only where effective resolution and host capacity support it.
+- [ ] Measure enabled-rewind gameplay overhead and restoration latency at 4K.
 
 **Done:** the selected full-size rewind view and resumed gameplay preserve the
 chosen effective resolution, aspect, PGXP geometry and texture quality without
 stale frames or a persistent low-resolution fallback. No requirement to revive
 the historical hold-to-rewind architecture or load old-build states is implied.
 
-## 4 8K performance investigation
-
-**Report:** 8K slowed down on the owner's machine; 4K ran acceptably. This
-does not identify a CPU, GPU, transfer, memory or rewind bottleneck.
-
-- [ ] Record the actual host/GPU, output size, requested/effective 4K and 8K
-  scale, filtering, rewind settings and identical moving campaign workload.
-  Keep internal rendering resolution distinct from physical 8K output.
-- [ ] Collect short matched frame-time, guest-progress, CPU/GPU and audio
-  samples using existing telemetry. Select a candidate from the demonstrated
-  bottleneck, keeping 4K visuals and full PGXP intact.
-- [ ] Reuse relevant isolated work from the
-  [parked performance assessment](https://github.com/tetrisgm/psxrecomp/blob/review/r4-performance-candidates-20261102/docs/R4_PERFORMANCE_CANDIDATES.md)
-  only when it addresses that bottleneck. Qualify its actual built runtime;
-  component-test passes are not performance wins.
-- [ ] Accept a measured useful improvement or reject the candidate with its
-  raw results. Report a hardware-bound limit honestly if full-speed 8K remains
-  unavailable. Do not silently lower resolution and call that an 8K fix.
-
-**Done for investigation:** an evidence-backed bottleneck and candidate
-decision are recorded. **Fixed** requires verified acceptable 8K runtime on
-the reported host. Track those separately; 4K remains the working baseline.
-For shared optimizations, follow the central optimization campaign and retain
-per-game non-regression evidence before broader promotion. Neutral results are
-acceptable; aggregate gains cannot offset a reproducible individual regression.
-
-## 5 Tomba-style resident loading and native initialization
+## 4 Tomba-style resident loading and native initialization
 
 **Stretch gate:** items 1 and 2 must pass first. Begin with measured R4 loads,
 not a general CD subsystem rewrite or wholesale replay of disc-prefetch work.
@@ -220,6 +206,11 @@ may be selected at build time. No BIOS stubs, fake completion or global game
 speedup. Do not ship or expose `psx.enhancement.cd-speed` or
 `psx.enhancement.fast-loading`; development catalogs keep them hidden/disabled.
 Raw disc read-ahead alone does not establish removal of CD-paced guest waits.
+Follow the central optimization campaign for engine optimization work and
+retain per-game non-regression evidence before broader promotion. Neutral
+results are acceptable; aggregate gains cannot offset an individual regression.
+The separately parked performance branches are references, not dependencies
+or accepted implementations. Reuse only a candidate needed for this scope.
 
 ## Next action and reporting
 
@@ -234,6 +225,47 @@ decision, and remaining acceptance gaps here and in its owning tracker issue.
 Stop unproductive tuning after two failed experiments and reassess the cause.
 If test capacity is unavailable, prepare the next independent item while
 preserving the serial qualification gates. Prepared work is not a passed item.
+
+## Execution and handoff conditions
+
+1. Inspect the current worktree and remote heads before changes. Initialize
+   required submodules at the recorded pins, preserve existing work, and use
+   the fork's selected engine branch for shared changes. Locate the verified
+   local disc and prior useful evidence through known project paths and the
+   handoff; never crawl drives or unrelated project roots.
+2. Search and claim the owning central Beads issue before engineering; reuse
+   the existing R4 hierarchy and relate engine optimizations to the optimization
+   campaign. Consult the private pending tracker note at
+   `C:/Users/Matthew/.codex/memories/r4-feedback-burndown-tracker-pending.md`.
+   Do not duplicate historical performance work or force database locks.
+3. Reproduce and resolve culling, then camera comfort, then rewind. Once items
+   1 and 2 pass, attempt the loading stretch goal using measured R4 loader
+   contracts. Continue useful independent preparation while test capacity or
+   owner observations are pending; do not count that preparation as validation.
+4. Run the supported build/tests and meaningful current-build gameplay,
+   save/load, rewind and changed-feature checks. Measure runtime costs against
+   matched baselines. Fix objective failures before calling a change ready;
+   distinguish identical baseline failures from introduced regressions.
+5. Prepare a concise, reproducible camera-comfort/changed-visual handoff with
+   expected results and locally saved owner observations. Preserve earlier
+   cleared checks. Do not open or interrupt a visible game without a requested
+   owner handoff; use a normal window and normal audio for that handoff.
+6. Push validated engine changes to the selected engine recovery branch, then
+   update and validate the game gitlink and fork URL as needed. Record pin
+   changes in `docs/framework_pin_history.md`. Push the corresponding game
+   changes and this updated burndown to its selected recovery branch.
+7. Finish with actual accepted/rejected candidates, measured behavior, remaining
+   failures or unverified checks, exact commits and evidence locations. Retain
+   only deliverables and necessary ongoing evidence; clean owned disposable
+   data safely, preserving saves, settings and unrelated files.
+
+Complete the goal only when the required outcomes pass their acceptance checks
+and the loading stretch has either passed or received a concrete, evidence-backed
+disposition. A rejected loading experiment is not a fixed loading item. If an
+indispensable local asset, owner judgment or external service prevents further
+progress, preserve a ready-to-resume handoff with the exact missing prerequisite,
+continue independent authorized work where possible, and keep affected outcomes
+open. Do not stop merely because a build is slow or test capacity is occupied.
 
 Current evidence is the owner's report plus the linked recovery and Tomba
 sources. No new game build, gameplay test, screenshot, benchmark, disc copy or
