@@ -1022,9 +1022,23 @@ static void r4_car_effects_session_reset(void) {
     r4_car_effects_off_race();
 }
 
+/* In-game menu switch: off is the stock picture at once (particles dropped,
+ * lighting chain values neutral); on resumes from the live race state. */
+static int r4_car_effects_toggled(int enabled) {
+    if (enabled) {
+        g_restore.store(true);
+        s_enabled.store(true, std::memory_order_relaxed);
+    } else {
+        s_enabled.store(false, std::memory_order_relaxed);
+        r4_car_effects_off_race();
+    }
+    return 1;
+}
+
 PSX_MOD_CONSTRUCTOR(r4_register_car_effects) {
     (void)psx_mod_register_activation_plugin(PLUGIN_ID, r4_car_effects_activate);
     (void)psx_mod_register_savestate_plugin(PLUGIN_ID, r4_car_effects_restore);
     (void)psx_mod_register_session_reset_plugin(PLUGIN_ID, r4_car_effects_session_reset);
+    (void)psx_mod_register_feature_toggled_plugin(PLUGIN_ID, r4_car_effects_toggled);
     (void)psx_mod_register_command("r4.effects", effects_command);
 }

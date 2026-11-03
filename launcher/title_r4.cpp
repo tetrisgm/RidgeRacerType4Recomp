@@ -31,10 +31,17 @@ const ControllerProfile kControllers[] = {
      {"r4.compat.jogcon-input", "jogcon-input"}},
 };
 
+// Every graphics switch on the Graphics page, each applying at once where
+// the runtime can (owner, 2026-11-02): the frame rate, car effects and PGXP
+// flip live; Aspect, Distant detail and HD HUD wait for a restart (the
+// runtime says so with a chip).
 const FeatureRef kGraphicsFeatures[] = {
-    {"r4.enhancement.widescreen", "widescreen"},
-    {"r4.enhancement.max-detail", "max-detail"},
-    {"psx.enhancement.pgxp", "pgxp"},
+    {"r4.enhancement.frame-rate", "frame-rate", "Frame rate", kFeatureOptionsOnly},
+    {"r4.enhancement.widescreen", "widescreen", "Aspect", kFeatureOptionsOnly},
+    {"r4.enhancement.car-effects", "car-effects", "Car effects", kFeatureToggleOnly},
+    {"r4.enhancement.max-detail", "max-detail", "Distant detail", kFeatureToggleOnly},
+    {"r4.enhancement.ui-fonts", "ui-glyphs", "HD HUD", kFeatureToggleOnly},
+    {"psx.enhancement.pgxp", "pgxp", "PGXP"},
 };
 
 const TitleNotice kNotices[] = {
@@ -67,7 +74,18 @@ const SurfaceRule kSurface[] = {
     {"graphics.fullscreen", Vis::Shown, nullptr},
     {"graphics.dynamic_resolution", Vis::Auto, nullptr}, // the preset decides
     {"graphics.internal_resolution", Vis::Shown, nullptr}, // the preset seeds it; the row stays selectable
-    {"graphics.title_features", Vis::Hidden, nullptr},    // widescreen Fit / max detail stay on
+    // Owner 2026-11-02: every image switch in the menu, on/off, applying at
+    // once -- bloom, texture detail, dithering, the PGXP rows and the
+    // enhancement features (kGraphicsFeatures), PGXP itself included.
+    {"graphics.antialiasing", Vis::Shown, nullptr},
+    {"graphics.texture_filter", Vis::Shown, nullptr},
+    {"graphics.bloom", Vis::Shown, nullptr},
+    {"graphics.texture_lod", Vis::Shown, nullptr},
+    {"graphics.dithering", Vis::Shown, nullptr},
+    {"graphics.pgxp_depth", Vis::Shown, nullptr},
+    {"graphics.pgxp_color", Vis::Shown, nullptr},
+    {"graphics.pgxp_seam", Vis::Shown, nullptr},
+    {"graphics.title_features", Vis::Shown, nullptr},
     // Controls: Modern / Classic and rebinding.
     {"controls.scheme", Vis::Shown, nullptr},
     {"controls.bindings", Vis::Shown, nullptr},

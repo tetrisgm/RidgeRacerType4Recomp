@@ -19,8 +19,20 @@ static void activate(void) {
 }
 static void reset_history(void) {packet_interpolation_set_rate(0);}
 static void restored(void) {packet_interpolation_set_rate(active_rate);}
+/* In-game menu: the rate is presentation only, so a new choice or the
+ * feature switch applies at the next frame. Off shows the original frames. */
+static int option_changed(const char *option_id,const char *value) {
+    (void)option_id;(void)value;activate();return 1;
+}
+static int toggled(int enabled) {
+    if(enabled) activate();
+    else {active_rate=0;packet_interpolation_set_rate(0);}
+    return 1;
+}
 PSX_MOD_CONSTRUCTOR(r4_frame_rate_register) {
     psx_mod_register_activation_plugin("r4.framerate",activate);
     psx_mod_register_session_reset_plugin("r4.framerate",reset_history);
     psx_mod_register_savestate_plugin("r4.framerate",restored);
+    psx_mod_register_option_changed_plugin("r4.framerate",option_changed);
+    psx_mod_register_feature_toggled_plugin("r4.framerate",toggled);
 }
