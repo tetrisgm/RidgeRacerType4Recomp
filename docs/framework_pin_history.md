@@ -330,3 +330,15 @@ band mapped onto the whole VRAM width and the mask shrank to 382/1024 of the
 window. psxrecomp now resolves region-pool surfaces first, at their own
 allocation. Evidence: Mac screen video while driving (macOS screen capture),
 ghost frames 86 of 272 before and 0 after; bloom stays on.
+
+## 2026-11-02: psxrecomp 2bfbb6d0
+
+With 60 FPS on, a roadside tree floated mid-sky for single in-between frames
+on the open-air straight (owner: objects popping in and out). Interpolation
+identified an instance by its draw order among objects sharing one vertex
+origin, so culling or adding one tree renumbered the trees after it; they
+went through the retiring pass and were reprojected at another tree's
+position. Instances now keep the previous packet's ordinal of the nearest
+object translation. Evidence: Mac full-resolution present bursts on the same
+route, blinks 2-5 per burst against a 2-6 baseline, peak score 68 against
+140-200, no floating tree; interpolation audit 924 pairs, 0 failed.
