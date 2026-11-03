@@ -264,6 +264,14 @@ if(R4_BUILD_TESTS AND BUILD_TESTING)
         set_tests_properties(${name} PROPERTIES DEPENDS ${name}_build)
     endfunction()
     r4_plugin_test(r4_effects_clock "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_r4_effects_clock.cpp")
+    r4_plugin_test(r4_race_state "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_r4_race_state.c")
+    # Assertions are the checks even in a Release developer build.
+    if(MSVC)
+        target_compile_options(test_r4_race_state PRIVATE /UNDEBUG)
+    else()
+        target_compile_options(test_r4_race_state PRIVATE -UNDEBUG)
+        target_link_libraries(test_r4_race_state PRIVATE m)
+    endif()
     if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_r4_jogcon_compat.c")
         r4_plugin_test(r4_jogcon_compat
             "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_r4_jogcon_compat.c"
@@ -374,9 +382,6 @@ if(R4_BUILD_TESTS AND BUILD_TESTING)
                 WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}")
             set_tests_properties(r4_defaults PROPERTIES SKIP_RETURN_CODE 77)
         endif()
-        add_test(NAME r4_draw_iso_gate
-            COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_draw_iso_gate.py"
-            WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}")
         # The pinned psxrecomp reads every game.toml [video] key. Skipped
         # (with the list) while R4 is ahead of its pin; the strict form
         # refuses that state for a release (tools/package_release.sh).

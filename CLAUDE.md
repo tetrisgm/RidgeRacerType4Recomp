@@ -1,3 +1,12 @@
+# Recovery branch override, 2026-11-02
+
+The owner's current recovery task supersedes the historical fork workflow below.
+Use current RetroPortingToolKit/psxrecomp and recomp-ui as the baseline; selectively
+recover capabilities rather than merging the whole fork. The original game head
+is preserved at archive/original-20261102. See docs/recovery/README.md for actual
+acceptance status. Work solo, keep automated launches hidden/muted, preserve
+native saves and explicit settings, and do not publish, push or merge.
+
 # RidgeRacerType4Recomp Rules
 
 Static recompilation of **R4: Ridge Racer Type 4 (USA)** — serial

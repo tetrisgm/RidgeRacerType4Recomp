@@ -633,7 +633,7 @@ void quad(ImDrawList *dl, unsigned tex, ImVec2 c, float rx, float ry, float rot,
     const ImVec2 p2(c.x + ax.x * rx - ay.x * ry, c.y + ax.y * rx - ay.y * ry);
     const ImVec2 p3(c.x + ax.x * rx + ay.x * ry, c.y + ax.y * rx + ay.y * ry);
     const ImVec2 p4(c.x - ax.x * rx + ay.x * ry, c.y - ax.y * rx + ay.y * ry);
-    dl->AddImageQuad(ImTextureRef((ImTextureID)tex), p1, p2, p3, p4, ImVec2(0, 0), ImVec2(1, 0),
+    dl->AddImageQuad((ImTextureID)tex, p1, p2, p3, p4, ImVec2(0, 0), ImVec2(1, 0),
                      ImVec2(1, 1), ImVec2(0, 1), col);
 }
 
@@ -774,7 +774,11 @@ void draw_view(ImDrawList *dl, const R4RaceState &c, int view, const Screen &e) 
         quad(dl, g.tex_fire, a, w * 2.5f, w * 2.5f, 0.f, p.kind == EMBER ? fire_color(0.5f, 0.5f * (1.f - t))
                                                                          : rgba(1.f, 0.85f, 0.5f, 0.5f * (1.f - t)));
     }
+#if IMGUI_VERSION_NUM >= 19280
     dl->AddCallback(ImGui::GetPlatformIO().DrawCallback_ResetRenderState, nullptr);
+#else
+    dl->AddCallback(ImDrawCallback_ResetRenderState, nullptr);
+#endif
 
     if (g.debug) {   /* procedural textures, top left */
         for (int k = 0; k < SMOKE_TEXTURES; ++k)

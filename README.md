@@ -1,3 +1,14 @@
+# Local upstream recovery branch
+
+This checkout is a development recovery candidate, not a verified release.
+It uses current shared psxrecomp and recomp-ui, regenerated native CPU spans,
+and the original race cadence. Fork-only packet interpolation, draw-isolation
+tooling, custom launcher screens and hold-to-rewind are not recovered here.
+The historical feature descriptions below describe the original fork.
+See [recovery status](docs/recovery/README.md), the
+[technical assessment](docs/recovery/TECHNICAL_ASSESSMENT.md) and the
+[constructive assessment](docs/recovery/COLLABORATOR_ASSESSMENT.md).
+
 # RidgeRacerType4Recomp
 
 <p align="center">

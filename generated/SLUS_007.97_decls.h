@@ -17,6 +17,7 @@ extern uint32_t psx_mod_memory_address(const CPUState*, uint32_t, uint32_t, uint
 extern int psx_mod_function_entry(CPUState* cpu, uint32_t address);  /* trusted opt-in game-mod hook */
 extern int psx_ws_masked_reject(uint32_t flags, uint32_t mask); /* guarded packed-coordinate reject */
 extern int psx_ws_nclip_branch(uint32_t pc, uint32_t instr, int32_t mac0, int vanilla);
+extern int psx_mod_try_function_replacement(CPUState* cpu, uint32_t address);
 extern void psx_datashard_ret(CPUState* cpu);                  /* data-shard capture finalize */
 extern int  psx_vsync_query_hle_enter(CPUState* cpu, uint32_t func, uint32_t counter_addr, uint32_t gpustat_ptr_addr, uint32_t timer1_ptr_addr, uint32_t timer1_cache_addr);  /* load_accel.c */
 extern void psx_ws_sprite_tag(CPUState* cpu);  /* widescreen prim tag (gpu.c) */
@@ -95,14 +96,14 @@ static inline uint32_t psx_lwr(CPUState* cpu, uint32_t addr, uint32_t rt_value, 
 static inline void psx_swl(CPUState* cpu, uint32_t addr, uint32_t rt_value) {
     psx_store_cycle_barrier();
     uint32_t aligned_addr = addr & ~3u;
-    uint32_t word = psx_mem_read_word(cpu, aligned_addr);
+    uint32_t word = cpu->read_word(aligned_addr);
     switch (addr & 3u) {
         case 0: word = (word & 0xFFFFFF00u) | (rt_value >> 24); break;
         case 1: word = (word & 0xFFFF0000u) | (rt_value >> 16); break;
         case 2: word = (word & 0xFF000000u) | (rt_value >> 8); break;
         default: word = rt_value; break;
     }
-    psx_mem_write_word(cpu, aligned_addr, word);
+    cpu->write_word(aligned_addr, word);
 }
 
 /* SWR: Store Word Right - stores the low bytes of rt_value into memory.
@@ -112,14 +113,14 @@ static inline void psx_swl(CPUState* cpu, uint32_t addr, uint32_t rt_value) {
 static inline void psx_swr(CPUState* cpu, uint32_t addr, uint32_t rt_value) {
     psx_store_cycle_barrier();
     uint32_t aligned_addr = addr & ~3u;
-    uint32_t word = psx_mem_read_word(cpu, aligned_addr);
+    uint32_t word = cpu->read_word(aligned_addr);
     switch (addr & 3u) {
         case 0: word = rt_value; break;
         case 1: word = (word & 0x000000FFu) | (rt_value << 8); break;
         case 2: word = (word & 0x0000FFFFu) | (rt_value << 16); break;
         default: word = (word & 0x00FFFFFFu) | (rt_value << 24); break;
     }
-    psx_mem_write_word(cpu, aligned_addr, word);
+    cpu->write_word(aligned_addr, word);
 }
 
 /* Forward declarations for all recompiled functions */
