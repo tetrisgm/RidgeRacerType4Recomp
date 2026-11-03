@@ -45,7 +45,7 @@ Do not publish a release, change default branches or merge upstream PRs.
 
 | Order | Outcome | Current state | Completion evidence |
 | --- | --- | --- | --- |
-| 1 | Campaign buildings remain visible at the intended distance | Governor defect corrected; expanded heap not promoted; exact reported pop unverified | Moving before/after coverage at the offending scenery and affected campaign courses |
+| 1 | Campaign buildings remain visible at the intended distance | Reported stationary case fixed by `98abdac`; wider course and uncontended performance qualification remain open | Stationary owner-slot replay plus moving coverage and per-course qualification |
 | 2 | Steering at 21:9 has comfortable camera motion | Level-horizon candidate passes automated moving checks; owner comfort pending | Matched steering samples plus owner comfort check |
 | 3 | Rewind preserves high-resolution gameplay presentation | Accepted for the tested R4 workload; final integrated restore retains HD HUD and scale 9 | Repeated both-camera restores, bounded metadata, neutral sampled cost, current-build save/load and final composed comparison |
 | 4 | Replace eligible CD-paced loads with resident assets and native loading | Stretch; gated by 1 and 2 | Cold/warm load timings and equivalent initialized resources and transitions |
@@ -57,18 +57,75 @@ remaining failures and retained evidence when its state changes.
 
 ### Current implementation evidence
 
+The owner supplied the exact stationary reproduction: UI save slot 4 (TCP
+slot 3), chase camera, player stopped on the construction straight after
+the tunnel. The two distant buildings disappear and return as cars pass.
+The source state SHA-256 is
+`9d887967a41f73abf328131cc8208474d1bc24eebab67397a1c8606d225577f2`.
+The camera is identical in all 50 one-second observations; the scenery list
+varies from 24 to 36 blocks. The original repeatedly retracts the buildings
+after they have already become visible.
+
+Existing trace output identifies the cause: useful work remains below about
+52% of the guest budget, while the heap governor oscillates as a section-cost
+jump crosses its narrow memory band. A control using the existing developer
+override of ten forward sections retains 36 blocks and both buildings.
+Its peak heap use is 101,916 of 135,192 bytes (75.4%), with zero limit hits.
+This establishes a governor issue; a larger RAM map is not needed for this case.
+
+The candidate keeps growth below 65% heap use, holds the chosen reach through
+80%, reduces above 80%, and retreats two levels at 85%. CPU cutbacks remain
+unchanged. A 600-frame regression models the observed ~64% to ~74% section
+step plus passing-car fluctuations: the original fails by repeatedly
+retracting the skyline; the candidate settles at the newly admitted level.
+Threshold rounding, CPU overload and the existing pacing/heap tests pass.
+The candidate build and all 26 CTests pass.
+
+Candidate binary
+`9008493719bfdd36d935de8109bb8375a3a1972ac433cbb53d6246afa8e671ad`
+uses the normal adaptive governor, with no fixed-reach override and 2 MB RAM.
+After its initial distance expansion, it holds level 8 / 36 blocks and both
+buildings throughout the remaining stationary sample; the original retracts
+them repeatedly. Exact input/configuration, images and traces are retained
+under ignored `analysis/feedback/stationary-pop/`. The source owner slot is
+preserved; diagnostic copies use the same frozen state and an isolated profile.
+Implementation is `98abdac9473a3616beae0c4654763fddd5a618ca` on the selected
+game recovery branch; the engine pin remains `b9dcf919`. The short full-grid
+drive retains effective scale 9 and zero dispatch/segment misses. Its sampled
+heap peak is 111,372 bytes (82.38%), with zero limit hits; inspected road,
+mirror and tunnel surfaces remain intact.
+
+Two 20-second stationary samples per build use the same frozen slot, native
+overlay cache and 4K/21:9 settings, with tracing disabled and no screenshots
+during timing. The original owner window is host-paused during each sample
+and then restored. Host CPU pressure is high and differs between runs.
+
+| Build | VBlanks/s | CPU ms per game tick | Host CPU % |
+| --- | --- | --- | --- |
+| Original `296672e7…` | 33.52 / 32.85 | 81.05 / 84.16 | 92.0 / 95.3 |
+| Fix `90084937…` | 34.09 / 35.92 | 92.43 / 89.24 | 88.6 / 84.7 |
+
+Frame-rate differences are inconclusive under this changing contention.
+Observed CPU work per game tick is about 10% higher with the additional
+geometry continuously present. This is a correctness result with a measured
+resource cost, not a performance-win or locked-60 claim. Uncontended 4K and
+full campaign qualification remain open. Raw samples are each profile's
+`stationary-cost-trace0.json`. The source owner slot retains its original hash.
+
 The owner identified the default first campaign race, Helter Skelter. The
 draw-distance governor counted its own pacing wait as rendering work. The new
 actual-plugin regression fails against the original and passes with sampling
 before that wait. All 26 supported CTests pass, including actual PGXP boot.
 New 48-second moving samples retain effective 2160/9 at 21:9 with zero dispatch
-and segment misses. Sampled road, tunnel and scenery surfaces remain intact;
-the exact reported building pop and complete course coverage are still open.
+and segment misses. Sampled road, tunnel and scenery surfaces remain intact.
+The later stationary owner slot above reproduces the reported pop; complete
+course coverage remains open.
 Retail primitive-heap pressure can independently reduce distance. An isolated
 trial of the existing 8 MB RAM enhancement enables R4's existing larger heaps
 and holds distance level 30. This broad candidate is not promoted: it does not
 establish neutral 4K runtime cost and does not isolate the reported object.
-No RAM-default change is included. The exact scenery-pop diagnosis remains open.
+No RAM-default change is included. The later owner-provided slot above
+supersedes the earlier incomplete scenery-pop diagnosis.
 
 A follow-up hidden run on the final integrated binary compares the same
 current-build grid checkpoint at 4:3, 16:9 and 21:9. Fixed Cross input is
@@ -80,6 +137,33 @@ near-matched rather than pixel-identical. All samples retain scale 9, with
 zero dispatch/segment misses. This is partial first-straight coverage and
 does not reproduce or close the reported building pop, the bends/tunnels or
 other courses. Evidence: `analysis/feedback/culling-aspects/`.
+
+Moving follow-up runs retain 25 native, 24 16:9 and 25 21:9 composed samples
+over roughly 48 wall-clock seconds per aspect from the same checkpoint.
+The inspected first bends, tunnel walls/exit and following city surfaces are
+intact. All runs retain scale 9 with zero dispatch/segment misses; widened
+views retain zero roll. Their poses differ with the closed-loop driver and
+host pacing, so these are nearby-section comparisons, not exact-frame pairs
+or performance measurements. Those route samples did not reproduce the
+disappearance; the later stationary owner slot above does.
+Raw poses/images are `culling-aspects/route-{800,1067,1400}/`.
+
+Course coverage is derived from the game's eight 24-byte titles at
+`0x800A19E8`; title renderers at `0x8005A430`/`0x8005A8A4` read the signed
+course index at `0x800F3AC4`. The default campaign checkpoint has index 0.
+This identifies the coverage below; reading the table does not qualify a
+course's rendering or resource initialization.
+
+| Type | Course | Scenery qualification |
+| --- | --- | --- |
+| 0 | Helter Skelter | Owner slot-4 pop fixed; straight/bends/tunnel/city sampled; full course remains open |
+| 1 | Out of Blue | Unverified |
+| 2 | Edge of the Earth | Unverified |
+| 3 | Brightest Nite | Unverified |
+| 4 | Wonderhill | Unverified |
+| 5 | Heaven and Hell | Unverified |
+| 6 | Phantomile | Unverified |
+| 7 | Shooting Hoops | Unverified |
 
 The camera candidate clears only the transient race-view roll when the view
 is wider than 4:3. All 24 moving wide samples have roll zero; the baseline has
@@ -191,8 +275,9 @@ a hypothesis. Maximum draw distance is already selected in the approved
 profile, so selecting it again is not a demonstrated fix. The exact reported
 course, camera and position remain to be identified.
 
-- [ ] Reproduce in a real campaign race and retain a current-build checkpoint
-  and short moving route through the disappearance. Record whether the object
+- [x] Reproduce in a real campaign race and retain the owner's checkpoint
+  and stationary observation through the disappearance (the owner's later
+  slot-4 clarification supersedes the moving-player-route assumption). Record whether the object
   vanishes at screen edges, with distance, at section boundaries or under load.
 - [ ] Compare matched 4:3, 16:9 and 21:9/adaptive views and relevant existing
   detail choices. Separate a guest visibility-list/LOD cutoff from frustum
@@ -200,7 +285,7 @@ course, camera and position remain to be identified.
 - [x] Inspect the existing implementation before adding another distance
   control: `src/mods/r4_max_detail_plugin.c`, `r4_pvs.h`, the widescreen scene
   code, `game.toml` cull/draw-distance sites and `docs/MAX_DETAIL.md`.
-- [ ] Implement the demonstrated cause at the owning layer. Reuse the existing
+- [x] Implement the demonstrated cause at the owning layer. Reuse the existing
   scanners/tests and add only a regression check that detects the actual defect.
 - [ ] Validate moving scenery through the affected campaign courses and bends,
   including extra wide margins, tunnel transitions, mirrors, road/sky seams
