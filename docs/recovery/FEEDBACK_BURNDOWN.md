@@ -45,15 +45,96 @@ Do not publish a release, change default branches or merge upstream PRs.
 
 | Order | Outcome | Current state | Completion evidence |
 | --- | --- | --- | --- |
-| 1 | Campaign buildings remain visible at the intended distance | Reported; reproduction pending | Moving before/after coverage at the offending scenery and affected campaign courses |
-| 2 | Steering at 21:9 has comfortable camera motion | Reported; reproduction pending | Matched steering samples plus owner comfort check |
-| 3 | Rewind preserves high-resolution gameplay presentation | Reported; reproduction pending | Composed images and effective-resolution readings before, during and after rewind |
+| 1 | Campaign buildings remain visible at the intended distance | Governor defect corrected; expanded heap not promoted; exact reported pop unverified | Moving before/after coverage at the offending scenery and affected campaign courses |
+| 2 | Steering at 21:9 has comfortable camera motion | Level-horizon candidate passes automated moving checks; owner comfort pending | Matched steering samples plus owner comfort check |
+| 3 | Rewind preserves high-resolution gameplay presentation | HD HUD restore passes repeated runtime checks and neutral cost samples; final pin build and 26 tests pass | Composed images and effective-resolution readings before, during and after rewind |
 | 4 | Replace eligible CD-paced loads with resident assets and native loading | Stretch; gated by 1 and 2 | Cold/warm load timings and equivalent initialized resources and transitions |
 
-**Resolved outcomes: 0/4. Validated fixes: 0.** The owner's report establishes
+**Resolved outcomes: 0/4.** The owner's report establishes
 the symptoms, not their causes. Keep reproduction, prepared, built, tested
 and accepted states separate. Update each row with exact commits, results,
 remaining failures and retained evidence when its state changes.
+
+### Current implementation evidence
+
+The owner identified the default first campaign race, Helter Skelter. The
+draw-distance governor counted its own pacing wait as rendering work. The new
+actual-plugin regression fails against the original and passes with sampling
+before that wait. All 26 supported CTests pass, including actual PGXP boot.
+New 48-second moving samples retain effective 2160/9 at 21:9 with zero dispatch
+and segment misses. Sampled road, tunnel and scenery surfaces remain intact;
+the exact reported building pop and complete course coverage are still open.
+Retail primitive-heap pressure can independently reduce distance. An isolated
+trial of the existing 8 MB RAM enhancement enables R4's existing larger heaps
+and holds distance level 30. This broad candidate is not promoted: it does not
+establish neutral 4K runtime cost and does not isolate the reported object.
+No RAM-default change is included. The exact scenery-pop diagnosis remains open.
+
+The camera candidate clears only the transient race-view roll when the view
+is wider than 4:3. All 24 moving wide samples have roll zero; the baseline has
+both signs, up to 19 units. A native-aspect run retains stock roll (-17 to 13
+over 163 samples). Steering, yaw and deliberate look remain active. Actual
+owner comfort and the combined handoff remain required.
+
+Rewind retains effective scale 9, but the original loses HD HUD upload
+provenance after restore. The framework candidate retains the existing
+pack/VRAM-validated residency metadata per point and restores it after the
+frontend restage. Eight actual cockpit restores and four chase restores retain
+the HD glyphs; the chase camera was switched with actual Triangle input and
+verified. Current-build slot 9 save/load passes. Fifty points use 1,499,200 bytes
+of metadata, capped at 32 MiB by retiring oldest complete points. Rejected
+loads, branching, duplicate ticks, depth/budget eviction, discard and shutdown
+pass the existing actual-ring context test. The no-rbengine path compiles and
+the real GL HD-pack fixture passes its pack/VRAM guards. Engine fix `b9dcf919`
+is pushed to the selected fork branch. The game pin and fork URL are updated.
+Supported regeneration emits 52 unchanged shards and an unchanged dispatch
+table; the integrated binary is
+`296672e7ff72267fe6db7d6eaa7b4dbc45d21690c07260cfa7d4cbf0ee754b22`.
+Its build and all 26 CTests pass. Three timed restores take 62–78 ms through
+the host input/TCP path, returning to demonstrably earlier guest ticks while
+retaining effective scale 9. The integrated binary also passes both cameras
+with digital left/right and analog left/right at 4:3, 16:9 and 21:9. Every
+wide sample has roll zero and retains nonzero steering; native samples retain
+stock roll. Actual composed presents fence each adaptive resize. Pause/resume,
+current-build save/load and rewind open/cancel pass, with PGXP and scale 9
+retained, native overlays loaded and zero dispatch/segment misses.
+Owner review and complete course coverage remain open. The first combined
+attempt did not fence hidden-window resize presentation, and the next exposed
+an input-test release-edge timing error; neither is counted as a game defect
+or an accepted native-aspect sample. The corrected samples and the affected
+pause/resume recheck are retained in `combined-review/combined-checks.json`.
+
+Fixed-input runs on DESKTOP-HN15M1H use the same compiled native-overlay cache,
+4K/effective 9, 21:9, PGXP, HD HUD and approved detail settings. There is no TCP
+polling during each 20-second sample. These initial runs have diagnostic
+`R4_MD_TRACE=2` enabled in both arms. Each configuration uses its own
+current-build state and two samples; this is a focused decision, not an
+all-course performance qualification.
+
+| Configuration | Binary SHA-256 | VBlanks/s | Game ticks/s | Process CPU seconds per 20 s | Host CPU % |
+| --- | --- | --- | --- | --- | --- |
+| Before rewind fix, retail heap | `6432e1747de8f33cc4d97a9a8159d3f0aa0a836ccd599dfada84bae6ec13c272` | 59.95 / 59.30 | 29.98 / 29.65 | 26.66 / 29.28 | 48.0 / 68.7 |
+| Rewind fix, retail heap | `5639a5a00f4e7f5b8f0ccc60dfe4cdc4f854d35b6bd62727879588b8ff671a34` | 60.00 / 59.40 | 30.05 / 29.70 | 27.69 / 29.02 | 49.6 / 55.3 |
+| Rewind fix, expanded heap | same candidate binary | 54.40 / 55.71 | 27.20 / 27.88 | 33.59 / 32.17 | 54.8 / 54.9 |
+
+The rewind candidate is neutral within observed variation, with bounded
+metadata and no demonstrated gameplay-rate regression. The expanded heap
+falls below the working cadence in both traced samples. A follow-up with
+tracing disabled gives 56.85/56.86 VBlanks/s for the retail heap (host CPU
+61.8/64.8%) and 40.32/42.40 for the expanded heap (83.3/77.6%). The changing
+host pressure makes that follow-up's wall-time difference inconclusive; it
+does not establish a release-path regression or a neutral result. Stop this
+broad all-geometry expansion rather than tuning it further before reproducing
+the specific building. Earlier samples at 86–89% host CPU and TCP-driven
+autopilot timings are diagnostic only. Raw samples remain in each profile's
+`fixed-input-results.json` and `fixed-input-no-trace.json`; the second traced
+expanded-heap run supersedes its first.
+
+Raw identities, captures, settings and results are under ignored
+`analysis/feedback/{baseline,detail-candidate,camera-candidate,rewind-candidate,heap-candidate}`.
+The first unprofiled launch and an initial guest-layer rewind accept attempt
+were rejected as setup evidence. Raw moving samples do not establish
+all-course acceptance.
 
 ## Baseline and shared acceptance
 
@@ -99,7 +180,7 @@ course, camera and position remain to be identified.
 - [ ] Compare matched 4:3, 16:9 and 21:9/adaptive views and relevant existing
   detail choices. Separate a guest visibility-list/LOD cutoff from frustum
   culling, far-transform precision, primitive limits and renderer rejection.
-- [ ] Inspect the existing implementation before adding another distance
+- [x] Inspect the existing implementation before adding another distance
   control: `src/mods/r4_max_detail_plugin.c`, `r4_pvs.h`, the widescreen scene
   code, `game.toml` cull/draw-distance sites and `docs/MAX_DETAIL.md`.
 - [ ] Implement the demonstrated cause at the owning layer. Reuse the existing
@@ -267,6 +348,7 @@ progress, preserve a ready-to-resume handoff with the exact missing prerequisite
 continue independent authorized work where possible, and keep affected outcomes
 open. Do not stop merely because a build is slow or test capacity is occupied.
 
-Current evidence is the owner's report plus the linked recovery and Tomba
-sources. No new game build, gameplay test, screenshot, benchmark, disc copy or
-runtime fix was produced while creating this burndown.
+The burndown was initially created without runtime changes. Implementation
+evidence above supersedes that initial planning-only state; unchecked criteria
+and owner observations remain open. Central tracking uses `beads-r4recomp.4`
+and framework HD-residency bug `beads-eio.3.433`.

@@ -4,5 +4,5 @@
 	branch = master
 [submodule "psxrecomp"]
 	path = psxrecomp
-	url = https://github.com/RetroPortingToolKit/psxrecomp.git
-	branch = master
+	url = https://github.com/tetrisgm/psxrecomp.git
+	branch = recovery/upstream-20261102

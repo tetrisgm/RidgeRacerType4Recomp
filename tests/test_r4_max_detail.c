@@ -1179,6 +1179,28 @@ static void test_pacing_and_heap(void) {
     s_ram8 = 0;
 }
 
+/* Maximum must measure rendering before the VSync hook's idle pacing. */
+static void test_pacing_idle_not_render_load(void) {
+    set_options(NULL, NULL, NULL, NULL);
+    s_activate();
+    build_course(2);
+    put_centreline(NSEC * 5u);
+    wr32(R4_MD_PACING_ADDR, R4_MD_PACING_RACE);
+    s_gcs = 2u;
+    s_vb_origin = 0;
+    for (unsigned f = 0; f < 20u; ++f) {
+        psx_cycle_count = (uint64_t)(100u + 3u * f) * VB_PERIOD;
+        s_cpu.gpr[16] = 0x180u;
+        plugin_frame(R4_MD_FRAME_BUDGET * 85u / 100u);
+    }
+    load_list(5, 0, 2);
+    course_draw(5, 0, 0x8006F02Cu);
+    CHECK(rd32(R4_PVS_LIST_ADDR) == 10u && list_has(block_ptr(2, 0, 0)),
+          "85% rendering work retains and expands scenery; pacing idle is not load");
+    s_gcs = 1u;
+    wr32(R4_MD_PACING_ADDR, 0x80u);
+}
+
 /* Regression (0.8 on the owner's Mac and PC): the hold targeted a cycle
  * count from the frame start, so the spin released at whatever VBlank phase
  * that frame started on; VSync(0) then returned at once or waited a third
@@ -1277,6 +1299,7 @@ int main(void) {
     test_governor_pure();
     test_plugin_far();
     test_pacing_and_heap();
+    test_pacing_idle_not_render_load();
     test_pacing_vblank_aligned();
     test_rand_guard();
     if (failures) {
