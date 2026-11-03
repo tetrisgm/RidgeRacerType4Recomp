@@ -1,4 +1,4 @@
-# Local upstream recovery branch
+# Upstream recovery branch
 
 This checkout is a development recovery candidate, not a verified release.
 It uses current shared psxrecomp and recomp-ui, regenerated native CPU spans,
@@ -8,6 +8,10 @@ The historical feature descriptions below describe the original fork.
 See [recovery status](docs/recovery/README.md), the
 [technical assessment](docs/recovery/TECHNICAL_ASSESSMENT.md) and the
 [constructive assessment](docs/recovery/COLLABORATOR_ASSESSMENT.md).
+
+For the owner-reviewed 4K/8x setup, start with the
+[collaborator checkout/build handoff](docs/recovery/COLLABORATOR_HANDOFF.md).
+It includes the exact engine/UI pins and an optional saved graphics profile.
 
 # RidgeRacerType4Recomp
 

@@ -1,6 +1,19 @@
 # Upstream recovery and owner preview
 
-This is a local development recovery on `recovery/upstream-20261102`. It is not a release or a claim that every fork enhancement has been recovered. Nothing has been pushed or merged remotely.
+This is a development recovery on `recovery/upstream-20261102`, published to a
+remote topic branch at the owner's request. It is not a release or a claim that
+every fork enhancement has been recovered. Default branches remain unchanged.
+Start with [the collaborator rebuild handoff](COLLABORATOR_HANDOFF.md).
+
+On 2026-11-03 the owner reviewed the 4K internal-resolution / 8x anisotropic
+setup and said it looked pretty decent. That accepts the owner preview for
+this recovery; it does not qualify the separately parked performance topics.
+The portable settings are in [approved-4k.toml](approved-4k.toml), applied to a
+built runtime by `tools/apply_recovery_4k.py`. The helper's preservation,
+backup, repeat-application and invalid-schema checks pass; four existing static
+configuration checks also pass. Runtime code and submodule pins are unchanged
+from the owner-reviewed build, so that playtest was not repeated for this
+documentation/profile handoff.
 
 ## Frozen identities
 
@@ -70,7 +83,7 @@ Exact binary identities, per-arm numbers and limits are in [validation.json](val
 
 The recovery preview is open in a normal 1280x720 window, paused in the game's own Pause menu in third-person view. Press Start to resume; Modern controls use RT for acceleration and R1 for the camera. Normal audio is enabled, with no dummy-driver override. The private profile uses 1080p/1x supersampling and Fit to screen, and has its own settings and saves under `analysis/recovery/playtest/`. Its setup screenshot is `ready.png`; observations can be saved in `owner-notes.txt`. Read those notes before any follow-up work, and do not interrupt a live owner playtest.
 
-The original game and UI are preserved in the `RidgeRacerType4Recomp-original` worktree. The standalone engine clone is left on the frozen upstream recovery branch; switch it to `archive/r4-original-20261102` before rebuilding the original comparison tree, which was configured against that clone. The game recovery has its own independent upstream submodule checkout.
+The original game and UI are preserved in the `RidgeRacerType4Recomp-original` worktree. The standalone engine clone also has the parked performance/review branches; switch it to `archive/r4-original-20261102` before rebuilding the original comparison tree, which was configured against that clone. The game recovery has its own independent upstream submodule checkout.
 
 Do not infer physical scanout cadence, complete track coverage, netplay qualification, macOS/Linux qualification, release PGO gains or 8K/120 Hz capability from these checks. No shared engine patch was introduced, so a new consumer-title engine regression campaign is not required for this baseline.
 
