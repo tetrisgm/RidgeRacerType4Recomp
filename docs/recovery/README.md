@@ -5,6 +5,11 @@ remote topic branch at the owner's request. It is not a release or a claim that
 every fork enhancement has been recovered. Default branches remain unchanged.
 Start with [the collaborator rebuild handoff](COLLABORATOR_HANDOFF.md).
 
+Follow-up work from the owner's campaign playtest is tracked in the
+[feedback burndown](FEEDBACK_BURNDOWN.md): distant scenery culling,
+widescreen steering-camera comfort, high-resolution rewind, 8K performance
+and, last, Tomba-style resident loading. Those outcomes remain unvalidated.
+
 On 2026-11-03 the owner reviewed the 4K internal-resolution / 8x anisotropic
 setup and said it looked pretty decent. That accepts the owner preview for
 this recovery; it does not qualify the separately parked performance topics.
