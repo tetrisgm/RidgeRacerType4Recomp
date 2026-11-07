@@ -13,9 +13,10 @@ from pad import mask
 from r4_online_battle_regression import Driver,find_course,PHASE,car_state,CAR_SEGMENT
 from draw_iso_gate import savestate
 from measure_interpolation_ab import runtimes,live_runtime_ids
-ap=argparse.ArgumentParser();ap.add_argument('--build',default='build');ap.add_argument('--name',default='baseline');ap.add_argument('--port',type=int,default=4858);ap.add_argument('--profile');ap.add_argument('--seconds',type=float,default=0);ap.add_argument('--disable',default='');ap.add_argument('--no-rewind',action='store_true');ap.add_argument('--load-grid',action='store_true');a=ap.parse_args()
+ap=argparse.ArgumentParser();ap.add_argument('--build',default='build');ap.add_argument('--name',default='baseline');ap.add_argument('--port',type=int,default=4858);ap.add_argument('--profile');ap.add_argument('--seconds',type=float,default=0);ap.add_argument('--disable',default='');ap.add_argument('--no-rewind',action='store_true');ap.add_argument('--load-grid',action='store_true');ap.add_argument('--owner-8k',action='store_true');a=ap.parse_args()
 out=ROOT/'analysis/present-guest-clock'/a.name;out.mkdir(parents=True,exist_ok=True)
 build=ROOT/a.build
+framework=next(Path(line.split('=',1)[1]) for line in (build/'CMakeCache.txt').read_text().splitlines() if line.startswith('PSXRECOMP_ROOT:PATH='))
 if a.profile:
  subprocess.run([r'C:\Users\Shokunin\AppData\Local\retcomm\toolchains\cmake-clang-v1\latest\bin\cmake.exe','--build',str(build),'--parallel','4','--target','psx-runtime'],check=True)
 class Peer:
@@ -27,7 +28,7 @@ class Peer:
 p=Peer();ask=lambda name,**kw:p.ask(0,name,**kw)
 state=build/'mods/state.toml';saved=state.read_bytes() if state.exists() else None
 gamefile=build/'game.toml';saved_game=gamefile.read_bytes()
-proc=None
+proc=None;gpu_monitor=None
 lock=ROOT.parent/'perf.lock'
 while True:
  if not runtimes():
@@ -39,15 +40,17 @@ while True:
  print('Waiting for exclusive measurement slot',flush=True);time.sleep(10)
 (lock/'owner.json').write_text(json.dumps(dict(pid=os.getpid(),worktree=str(ROOT))))
 try:
+ gpu_monitor=subprocess.Popen(['nvidia-smi','--query-gpu=timestamp,utilization.gpu,utilization.memory,memory.used','--format=csv','-l','1'],stdout=(out/'gpu-load.csv').open('wb'),stderr=subprocess.DEVNULL,creationflags=subprocess.CREATE_NO_WINDOW)
  subprocess.run([sys.executable,str(ROOT/'tools/mod_state.py'),str(build),'--defaults'],check=True)
  subprocess.run([sys.executable,str(ROOT/'tools/mod_state.py'),str(build),'--enable','r4.enhancement.frame-rate/frame-rate','rate=60'],check=True)
+ if a.owner_8k: gamefile.write_bytes(saved_game.replace(b'match_display_max_lines = 2160',b'match_display_max_lines = 4320'))
  if a.no_rewind: gamefile.write_bytes(saved_game.replace(b'rewind = true',b'rewind = false'))
- env=dict(os.environ,SDL_AUDIODRIVER='dummy',PSX_PRESENT_TRACE=str(out/'present.csv'),PSX_PRESENT_SLOT_TRACE=str(out/'slots.csv'),PSX_PRESENT_IMAGE_RING='0',PSX_PACKET_INTERPOLATION_AUDIT='0',PSX_GL_ASYNC_GPU_TIMER='1')
+ env=dict(os.environ,SDL_AUDIODRIVER='dummy',PSX_HLE_SCHEDULER='0',PSX_BIOS_HLE='0',PSX_PRESENT_TRACE=str(out/'present.csv'),PSX_PRESENT_SLOT_TRACE=str(out/'slots.csv'),PSX_PRESENT_IMAGE_RING='0',PSX_PACKET_INTERPOLATION_AUDIT='0',PSX_GL_ASYNC_GPU_TIMER='1')
  env['PATH']=r'C:\Users\Shokunin\AppData\Local\retcomm\toolchains\cmake-clang-v1\latest\bin;C:\msys64\mingw64\bin;'+env['PATH']
  if a.profile:env['LLVM_PROFILE_FILE']=str(Path(a.profile).resolve())
  if a.disable: subprocess.run([sys.executable,str(ROOT/'tools/mod_state.py'),str(build),'--disable',a.disable],check=True)
  # A private working directory and memory-card path preserve personal saves.
- (out/'provenance.json').write_text(json.dumps(dict(executable=str(build/'r4-runtime.exe'),sha256=hashlib.sha256((build/'r4-runtime.exe').read_bytes()).hexdigest(),framework=subprocess.check_output(['git','-C',str(ROOT/'psxrecomp'),'rev-parse','HEAD'],text=True).strip(),framework_dirty=bool(subprocess.check_output(['git','-C',str(ROOT/'psxrecomp'),'status','--porcelain'],text=True).strip()),environment={k:env[k] for k in ('SDL_AUDIODRIVER','PSX_HLE_SCHEDULER','PSX_BIOS_HLE','PSX_BIOS_HLE_KEEP_INTRO','PSX_HOST_SAMPLER','PSX_PACKET_HD_CACHE','PSX_INTERPOLATION_REUSE','PSX_SURFACE_REUSE','PSX_AUDIO_ADAPTIVE','PSX_PRESENT_DELAY_MS','PSX_PRESENT_GUEST_CLOCK','PSX_GL_LEGACY_SURFACE_TEST','PSX_RENDER_OP_PROFILE','PSX_GL_ASYNC_GPU_TIMER','PSX_PACKET_INTERPOLATION_AUDIT') if k in env},hidden=True,audio_driver='dummy',pgo_profile=a.profile),indent=2))
+ (out/'provenance.json').write_text(json.dumps(dict(executable=str(build/'r4-runtime.exe'),sha256=hashlib.sha256((build/'r4-runtime.exe').read_bytes()).hexdigest(),framework=subprocess.check_output(['git','-C',str(framework),'rev-parse','HEAD'],text=True).strip(),framework_dirty=bool(subprocess.check_output(['git','-C',str(framework),'status','--porcelain'],text=True).strip()),environment={k:env[k] for k in ('PSX_HOST_SCHEDULING','SDL_AUDIODRIVER','PSX_HLE_SCHEDULER','PSX_BIOS_HLE','PSX_BIOS_HLE_KEEP_INTRO','PSX_HOST_SAMPLER','PSX_PACKET_HD_CACHE','PSX_INTERPOLATION_REUSE','PSX_SURFACE_REUSE','PSX_AUDIO_ADAPTIVE','PSX_PRESENT_DELAY_MS','PSX_PRESENT_GUEST_CLOCK','PSX_GL_LEGACY_SURFACE_TEST','PSX_RENDER_OP_PROFILE','PSX_GL_ASYNC_GPU_TIMER','PSX_PACKET_INTERPOLATION_AUDIT') if k in env},hidden=True,audio_driver='dummy',pgo_profile=a.profile),indent=2))
  proc=subprocess.Popen([str(build/'r4-runtime.exe'),'--game',str(build/'game.toml'),'--disc',str(ROOT/'disc/R4 - Ridge Racer Type 4 (USA).cue'),'--no-launcher','--hidden-window','--debug-port',str(a.port),'--memcard-dir',str(out/'saves')],cwd=out,env=env,stdout=(out/'runtime.log').open('wb'),stderr=subprocess.STDOUT,creationflags=subprocess.CREATE_NO_WINDOW)
  deadline=time.monotonic()+180
  while True:
@@ -84,8 +87,12 @@ try:
   ask('turbo',enabled=0);ask('set_input',buttons='0xFFFF')
   # Course data is present on the grid; save that fresh state before driving.
   savestate(a.port,'save',9)
+ if a.owner_8k: ask('window_size',w=7680,h=4320)
  base,pts=find_course(p)
  config={k:ask(k) for k in ['video_info','pgxp','rewind_status','packet_interpolation','mod_counters','dispatch_stats']}
+ if a.owner_8k:
+  assert config['video_info']['effective_scale']==18,config['video_info']
+  assert config['video_info']['drawable_w']==7680 and config['video_info']['drawable_h']==4320,config['video_info']
  (out/'config.json').write_text(json.dumps(config,indent=2))
  assert config['dispatch_stats'].get('miss_total',0)==0,config['dispatch_stats']
  print('Fresh grid',len(pts),'segments',json.dumps(config['pgxp']),flush=True)
@@ -144,6 +151,8 @@ try:
  (out/'timeline.json').write_text(json.dumps(dict(start_ns=start,end_ns=end,inputs=inputs,samples=rows,presents=presented)))
 
 finally:
+ if gpu_monitor and gpu_monitor.poll() is None:
+  gpu_monitor.terminate();gpu_monitor.wait(timeout=10)
  if proc and proc.poll() is None:
   try:ask('quit');proc.wait(timeout=20)
   except Exception:proc.terminate();proc.wait(timeout=20)
