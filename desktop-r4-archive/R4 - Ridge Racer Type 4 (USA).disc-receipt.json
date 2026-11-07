@@ -1,0 +1,17 @@
+{
+  "schema": "psxrecomp-disc-preparation-v1",
+  "source_image": "C:\\Users\\Shokunin\\Desktop\\R4 - Ridge Racer Type 4 (USA)\\R4 - Ridge Racer Type 4 (USA).cue",
+  "source_data_track": {
+    "path": "C:\\Users\\Shokunin\\Desktop\\R4 - Ridge Racer Type 4 (USA)\\R4 - Ridge Racer Type 4 (USA).bin",
+    "size": 621421920,
+    "sha1": "75f0dab5c1f71ba80f3d1e2fefd043f3f2b9ee2e",
+    "md5": "bf1d92037b1b2be83b459c11f0b89eb6"
+  },
+  "output_cue": "C:\\Users\\Shokunin\\Desktop\\R4 - Ridge Racer Type 4 (USA)\\R4 - Ridge Racer Type 4 (USA).cue",
+  "subchannel": {
+    "status": "unknown",
+    "required": false,
+    "revision": null,
+    "expected_path": "C:\\Users\\Shokunin\\Desktop\\R4 - Ridge Racer Type 4 (USA)\\R4 - Ridge Racer Type 4 (USA).sbi"
+  }
+}

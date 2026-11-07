@@ -93,7 +93,99 @@ The original game and UI are preserved in the `RidgeRacerType4Recomp-original` w
 
 Do not infer physical scanout cadence, complete track coverage, netplay qualification, macOS/Linux qualification, release PGO gains or 8K/120 Hz capability from these checks. No shared engine patch was introduced, so a new consumer-title engine regression campaign is not required for this baseline.
 
+### Owner race validation, 2026-11-05
+
+The owner's phone recordings show a displayed race view returning to an older
+road/car position immediately after a newer one (clear examples near 6.4 s and
+9.6 s in the longer clip). This is a temporal presentation fault, not evidence
+of packet interpolation: the playable profile has frame generation and frame
+interpolation off. Hidden 12-second moving checks at 4K and 1080p, with the
+presentation thread on and off, did not reproduce the reversal in the
+pre-swap thumbnail ring; captured frame identifiers remained monotonic.
+
+The owner then completed a full race with `present_thread = false` and reported
+no visual issue. The live runtime confirms the render thread remains active,
+the presentation thread is inactive and render backpressure waits are zero.
+Keep that player setting for now. This A/B result localizes the issue to the
+presentation path, but does not identify a framework code defect or establish
+that re-enabling the presentation thread is safe. Do not overwrite the owner's
+settings or treat the hidden thumbnail ring as physical scanout proof.
+
+The owner also reports slowdowns in crowded race scenes with the working
+presentation-thread-off profile. A hidden, muted 18-second Helter Skelter
+first-section run from an isolated checkpoint at 4K measured 58.6 produced
+guest frames/s, zero render backpressure waits and 30.6 host swap completions/s
+(the race's normal visual cadence is about 30 Hz). Repeating at 1080p did not
+improve the result (56.0 guest frames/s, 29.0 swaps/s); one extra-detail-off
+trial also failed to improve it, under variable host load. The phase sampler
+attributed about 90% of emulation-thread active samples to static recompiled
+game code, but that coarse stamp does not identify an optimization target.
+These short and nonidentical routes do not reproduce or explain the owner's
+specific slowdown. Preserve the player's 4K/detail choices pending a matched
+crowded-scene checkpoint and host-versus-guest timing diagnosis. Raw diagnostic
+snapshots are local in ignored `analysis/temporal-check/crowd-*.json`.
+
+The owner clarified that music, effects and overall game speed slow together.
+With explicit permission to control the PC, a visible runtime was launched
+from the playable build with normal audio, the player's current 4K/detail
+settings, presentation thread off, and a 3840x2160 window. Only isolated
+diagnostic memory-card state was used. A virtual host pad drove from the
+red-light grid checkpoint around the 523-segment Helter Skelter course and
+across the start again. The 131-second main trace retains 130 one-second
+samples: guest VBlanks/s min 54, median 60, max 66; host swap completion
+median 30.06/s, min 27.4/s; zero audio-output underruns and zero render
+backpressure waits. Five sampled intervals had a maximum host swap gap above
+60 ms (largest 67.4 ms). The audio buffer remained filled (minimum 59.8 ms,
+median 173.45 ms). The automated driver then continued across the start line.
+Raw results are `analysis/temporal-check/visible-full-lap.json` and
+`visible-lap-finish-attempt.json`. This direct-executable run does not include
+Steam launch/overlay overhead and did not reproduce the owner's sustained
+audio-and-game slowdown. It does not justify changing visual settings or
+closing the reported performance issue.
+
+The desktop shortcut was also launched through Steam's actual non-Steam game
+entry, with its launcher and connected Steam Controller visible. The same
+opening race was driven at 3840x2160 with normal audio for twelve sampled
+seconds: guest VBlanks were 59-64 per second, host swap completions 28.7-30.8
+per second, and audio underruns remained zero. This also did not reproduce the
+reported audio slowdown. The Steam run stopped before campaign completion;
+the player's card files were not deliberately saved or replaced. Its raw
+one-second samples are `analysis/temporal-check/steam-start-telemetry.json`.
+
 ## Reproduction and retained data
+
+### Owner race hang, 2026-11-05
+
+The owner's race window became unresponsive at rank 8. The live debug server
+reported a fail-fast dispatch at `0x800600D0` in frame 3030. That address is
+already generated, but its first instruction had been overwritten. The freeze
+write trace identifies a polygon/list write at `0x800600D3`; preceding polygon
+writes reached `0x800F2F98`, 1272 bytes beyond the retail buffer 1 primitive
+heap end (`0x800F2AA0`). The overwritten word was then used as a pointer.
+Thus the dispatch miss was a consequence of primitive heap overflow, not a
+missing generated block. Copies of the crash report and freeze dump are in
+ignored `analysis/temporal-check/user-hang-20261105-*`.
+
+Max Detail now requires the bundled 8 MB RAM feature. The resolver activates
+it implicitly when Max Detail is selected; the existing Max Detail plugin
+then relocates each primitive heap to a 1 MiB region in expanded RAM. The
+isolated clean-boot smoke reached an active race with zero dispatch and segment
+misses. A live heap pointer was `0x80304D8C`, confirming that the expanded
+heap path was used. CTest passed 28/28. The specific owner crash route has
+not been replayed under normal pacing; test that route before declaring the
+hang fully resolved. Savestates made under 2 MB cannot load in the 8 MB
+session; native memory-card saves remain separate and were not changed.
+
+In a separate hidden, muted, normally paced 25-second race sample with the
+expanded heap active, guest frames advanced 48-63 per wall-clock second
+(median 56), with zero dispatch and segment misses. This confirms remaining
+speed variation; the heap change addresses the corruption, not the owner's
+slowdown report. The diagnostic was stopped after sampling.
+
+The subsequent near-full automated lap and visible 4K profiler run are recorded
+in [the performance handoff](PERFORMANCE_HANDOFF_20261105.md). They reproduce
+slow game speed but do not establish a safe performance fix. The owner requires
+the current graphics quality to be preserved.
 
 Configure with Release, `R4_BUILD_TESTS=ON`, `PSX_DEBUG_TOOLS=ON` and the current supported compiler. Regenerate through `tools/regen.sh` / `psxrecomp_cli.py generate`; do not turn off native spans to bypass stale generated sources. Run CTest and `tools/smoke.py` against an isolated hidden/muted runtime. `tools/perf/autopilot.py` from the developer's handoff supplies the moving route. Its packet-specific `measure.py` is appropriate to the original fork; current upstream's telemetry has a different contract.
 
