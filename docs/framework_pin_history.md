@@ -1,5 +1,15 @@
 # Framework pin history
 
+## 2026-11-07: master adopts the recovery line; rewind XA density
+
+`master` now carries `recovery/upstream-20261102` (owner-reviewed 2026-11-03)
+plus the PC's uncommitted 2026-11-05 work, rescued before the PC wipe. Pin
+`tetrisgm/psxrecomp` `006fb5bb` (`fix/rewind-xa-not-movie`, also the new tip
+of `recovery/upstream-20261102`): rewind no longer densifies snapshots while
+only an XA stream plays, which quartered the window and forced a VRAM read
+per capture during R4 races. recomp-ui stays at `817c2985`. Mac build + CTest
+in this change; Windows qualification waits for the rebuilt PC.
+
 ## 2026-11-03: solid HD RPM red-zone bars
 
 Pin the selected `tetrisgm/psxrecomp` recovery branch at `3a0502c5`.

@@ -21,6 +21,13 @@ group = "Detail"
 channel = "experimental"
 default_enabled = true
 
+# Full-detail race scenes can overflow the retail primitive heap. The plugin
+# relocates both primitive heaps into expanded RAM when this feature is active.
+[[requirement]]
+feature = "max-detail"
+package = "psx.enhancement.8mb-ram"
+requires_feature = "8mb-ram"
+
 [[option]]
 feature = "max-detail"
 id = "draw_distance"
