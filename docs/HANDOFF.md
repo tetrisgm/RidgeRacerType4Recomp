@@ -1,3 +1,45 @@
+## Phase 3 production cutover IN PROGRESS (2026-10-29)
+
+Framework pushed499a12ab; uncommitted continuation now activates the pool in
+production and removes the full-VRAM HR allocation from the production build.
+Raw raster fixtures alone compile PSX_GL_TEST_REFERENCE_TARGET=1; dedicated
+production fixture selects0. Full old HiW/mirror code cleanup is still pending,
+as are remaining legacy consumers and correctness/performance acceptance.
+The separate phase4 branch remains unaccepted (latest remote8d412798); forkmain
+still d2185504. Do not do phase4 or merge it opportunistically.
+
+New production fixture test_gl_surface_pipeline.c passes1/4/9/18x:
+phase3-production-regions/rth-mjn8pw1u. It checks native-only initial coverage,
+no full-HR FBO, fills without enhanced allocations, two426x240 direct-wide
+bands, four offscreen64x64 tiles, enhanced copies to display, cropped readback
+and4:3 present. Feedback cross-band/same-target narrow scratch and context
+recreation pass phase3-feedback-lifecycle/rth-towuc8ry. Rescale colour/mask/depth
+regions pass phase3-pool-rescale/rth-67d90bzy. Feedback shader's old lazy program
+handle survived context teardown; fixed release. Display metadata now carries
+baseX independently of physical X. Pass capture/backup wide Y offsets adapted;
+legacy transaction selection/journal assumptions still need checking.
+
+Production dev build succeeded; tools/smoke.py completed with0 dispatch and
+segment misses (phase3-production-gates, ownedPID16672 exited). Turbo smoke
+race capture showed duplicated HUD: NOT visual acceptance. Real-time fixed
+slot10 preview is clean; packet-gap/native-restage versus legacy pass/capture
+needs isolation, don't assume it is harmless. No feature was disabled.
+
+phase3-production-race18 (30s,18x all-on,dummy,host sampler):60.016Hz,
+max29.503ms,zero starved/misses,29.994 whole-image distinct/s (zero missing),
+GPU7.392ms inclusive packet/3.652ms present. Surface telemetry:2 allocations,
+66,251,520 pixels total,530,012,160 declared colour+depth bytes,largest33,125,760
+pixels (426*240*18^2). Extra frame passes refused1082/1083 (budget709/backlog373),
+first admitted pass15.305ms; GPU improvement is NOT all-on60 acceptance.
+Owner process48232 exited. Release build currently running in session88144;
+poll it before another build/run. Planned next: Release fixed-state measurement,
+continue production alias/lifecycle cleanup and diagnose turbo HUD artifact.
+
+Latest uncommitted code also adds atomic surface allocation telemetry, collects
+unowned targets at packet end, maps diagnostic canonical reads through region
+coverage, adapts4:3 presentation, dynamic rescale and some legacy pass consumers.
+Root gitlink remains acceptedphase2; do not bump/promote untilphase3gate.
+
 ## Phase 3 active continuation: event pacing and routed tiles (2026-10-29)
 
 Phase3 only; no promotion. Framework cadence commit6f0dabcc moves the existing
