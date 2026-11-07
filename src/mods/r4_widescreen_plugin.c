@@ -11,10 +11,12 @@
  *     the compositor moves them to the true window edges;
  *   - course visibility: neighbouring heading octants' blocks are added to the
  *     frame's course list so the wide edges do not lose road and scenery.
+ *   - camera comfort: keep the horizon level in widened race views instead
+ *     of amplifying the stock camera's steering-induced roll.
  *
  * The screen-X culls themselves are widened by game.toml [widescreen.cull]
- * (tools/r4_ws_scan.py). No guest code is patched; the only guest-RAM write
- * is the per-frame course list, which the game rebuilds every frame.
+ * (tools/r4_ws_scan.py). No guest code is patched. Writes affect the per-frame
+ * course list and camera roll input, both rebuilt by the game every frame.
  *
  * Everything is inert unless the package is enabled: the entry hooks run only
  * while the mod plan activates this plugin, activation is the only thing that
@@ -65,6 +67,8 @@ static int s_hooks_registered;
 #define R4_BUF_TAIL_END     0x22778u      /* persistent HUD packets */
 #define R4_CLEAR_OTAG_FN    0x80093418u
 #define R4_DRAW_OTAG_FN     0x80093520u
+#define R4_VIEW_BUILD_FN    0x8006E4D0u
+#define R4_CAMERA_ROLL_ADDR 0x1F800020u
 
 #ifndef R4_WS_PVS_UNION
 #define R4_WS_PVS_UNION 1
@@ -227,8 +231,15 @@ static void r4_hud_enter(CPUState *cpu, uint32_t address)
 static void r4_hud_closer(CPUState *cpu, uint32_t address)
 {
     (void)cpu;
-    (void)address;
-    if (s_enabled) r4_hud_close();
+    if (!s_enabled) return;
+    r4_hud_close();
+    /* The stock follow camera rolls with left/right steering. At ultrawide
+     * aspect the tilted horizon moves much farther at the edges. This is
+     * only the view builder's transient input, never the car's physics or
+     * steering state. Native-aspect views and non-race scenes keep stock roll.
+     * The view build is already one of this plugin's registered closers. */
+    if (address == R4_VIEW_BUILD_FN && ws_margin() > 0 && r4_race_scene_live())
+        wr32(R4_CAMERA_ROLL_ADDR, 0u);
 }
 
 static void r4_hud_tag(void *ctx, uint32_t key, int edge)

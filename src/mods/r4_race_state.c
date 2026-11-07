@@ -11,8 +11,6 @@
 #include "cpu_state.h"
 #include "mod_plugins.h"
 #include "r4_race_state.h"
-#include "packet_metadata.h"
-#define R4_RACE_METADATA UINT64_C(0x5234524143450001)
 
 /* The car effects are the only reader, so the hook belongs to their plugin. */
 #define PLUGIN_ID "r4.car-effects"
@@ -35,7 +33,10 @@
 
 static R4RaceState s_states[2];
 static atomic_uint s_current;      /* index of the published state */
-static atomic_uint s_version;      /* odd: write in progress */
+/* Optional presentation samples may be skipped under contention. Protect the
+ * payload itself: a version counter does not make concurrent struct copies
+ * valid C, and the old unconditional fallback could return a torn state. */
+static atomic_flag s_state_lock = ATOMIC_FLAG_INIT;
 static int s_published;
 /* Full states of the last frames (the game draws frame N while the screen
  * shows N - 1): r4_race_state_read_delayed returns the one on screen. */
@@ -263,13 +264,13 @@ static void view_build(struct CPUState *cpu, uint32_t address)
     psx_mod_counter_add("r4.race.view", 1);
     { const int v = r16(CURRENT_VIEW); if (v < 0 || v >= R4_RACE_VIEWS || v == 0) lab_camera(); }
     stabilize_camera(r16(CURRENT_VIEW));
+    if (atomic_flag_test_and_set_explicit(&s_state_lock, memory_order_acquire)) return;
     const unsigned cur = atomic_load_explicit(&s_current, memory_order_relaxed);
     const R4RaceState *prev = &s_states[cur];
     R4RaceState *e = &s_states[cur ^ 1u];
     const uint32_t frame = (uint32_t)r32(FRAMES);
     const int new_frame = !s_published || frame != prev->frame;
 
-    atomic_fetch_add_explicit(&s_version, 1u, memory_order_acq_rel);
     if (!s_published) memset(e, 0, sizeof *e);
     else *e = *prev;
     if (s_published && new_frame) s_history[s_history_n++ % HISTORY] = *prev;
@@ -315,8 +316,8 @@ static void view_build(struct CPUState *cpu, uint32_t address)
     { const int32_t h = (int32_t)(cpu->gte_ctrl[26] & 0xFFFFu); if (h > 16) c->h = h; c->h_table = r32(VIEW_H + 4u * (uint32_t)view); }
 
     atomic_store_explicit(&s_current, cur ^ 1u, memory_order_release);
-    atomic_fetch_add_explicit(&s_version, 1u, memory_order_acq_rel);
     s_published = 1;
+    atomic_flag_clear_explicit(&s_state_lock, memory_order_release);
 }
 
 static const R4RaceState *state_at(int delay)
@@ -330,18 +331,11 @@ static const R4RaceState *state_at(int delay)
 
 int r4_race_state_read_delayed(R4RaceState *out, int delay)
 {
-    if(packet_metadata_read(R4_RACE_METADATA,out,sizeof *out)) return 1;
-    for (int attempt = 0; attempt < 4; ++attempt) {
-        const unsigned v0 = atomic_load_explicit(&s_version, memory_order_acquire);
-        if (!v0) return 0;
-        if (v0 & 1u) continue;
-        *out = *state_at(delay);
-        if (atomic_load_explicit(&s_version, memory_order_acquire) == v0) return 1;
-    }
-    /* Continuous writes: the published state stays readable (the writer
-     * fills the other one). */
-    *out = *state_at(delay);
-    return 1;
+    if (atomic_flag_test_and_set_explicit(&s_state_lock, memory_order_acquire)) return 0;
+    const int ready = s_published;
+    if (ready) *out = *state_at(delay);
+    atomic_flag_clear_explicit(&s_state_lock, memory_order_release);
+    return ready;
 }
 
 int r4_race_state_read(R4RaceState *out) { return r4_race_state_read_delayed(out, 0); }
@@ -363,39 +357,8 @@ int r4_race_project(const R4RaceState *s, int view, float wx, float wy, float wz
     return 1;
 }
 
-static int packet_capture(void *out) {
-    memset(out,0,sizeof(R4RaceState));
-    (void)r4_race_state_read_delayed(out,0);
-    return 1; /* An empty captured state must not fall back to live guest state. */
-}
-static int32_t lerp_i(int32_t a,int32_t b,double t) {return (int32_t)llround(a+t*((double)b-a));}
-static int32_t lerp_angle(int32_t a,int32_t b,double t) {return (a+(int32_t)llround(t*angle_diff(a,b)))&4095;}
-static void packet_blend(const void *older,const void *newer,double t,void *output) {
-    const R4RaceState *a=older,*b=newer;R4RaceState *o=output;*o=*b;
-    if(!a->in_race || !b->in_race || a->car_count!=b->car_count) return;
-    for(int i=0;i<b->car_count && i<R4_RACE_CARS;++i) {
-        const R4RaceCar *ac=&a->cars[i],*bc=&b->cars[i];R4RaceCar *c=&o->cars[i];
-#define LINEAR(f) c->f=lerp_i(ac->f,bc->f,t)
-#define ANGLE(f) c->f=lerp_angle(ac->f,bc->f,t)
-        LINEAR(x);LINEAR(y);LINEAR(z);LINEAR(vx);LINEAR(vz);LINEAR(speed);LINEAR(rpm);LINEAR(slip);
-        ANGLE(heading);ANGLE(pitch);ANGLE(roll);ANGLE(motion_heading);
-#undef LINEAR
-#undef ANGLE
-    }
-    for(int i=0;i<R4_RACE_VIEWS;++i) {
-        const R4RaceCamera *ac=&a->cameras[i],*bc=&b->cameras[i];R4RaceCamera *c=&o->cameras[i];
-        if(!ac->valid || !bc->valid) continue;
-        for(int k=0;k<3;++k)c->eye[k]=lerp_i(ac->eye[k],bc->eye[k],t);
-        c->pitch=lerp_angle(ac->pitch,bc->pitch,t);c->yaw=lerp_angle(ac->yaw,bc->yaw,t);
-        c->roll=lerp_angle(ac->roll,bc->roll,t);rotations(c->matrix,c->pitch,c->yaw,c->roll);
-        c->h=lerp_i(ac->h,bc->h,t);c->ofx=lerp_i(ac->ofx,bc->ofx,t);c->ofy=lerp_i(ac->ofy,bc->ofy,t);
-    }
-    for(int k=0;k<3;++k)o->light_dir[k]=(float)(a->light_dir[k]+t*(b->light_dir[k]-a->light_dir[k]));
-}
-
 PSX_MOD_CONSTRUCTOR(r4_register_race_state)
 {
-    (void)packet_metadata_register(R4_RACE_METADATA,sizeof(R4RaceState),packet_capture,packet_blend);
     (void)psx_mod_register_function_entry_plugin(PLUGIN_ID, VIEW_BUILD, view_build);
     (void)psx_mod_register_command("r4.camera", camera_command);
 }

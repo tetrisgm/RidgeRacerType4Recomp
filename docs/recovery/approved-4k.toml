@@ -1,0 +1,69 @@
+# Owner-reviewed recovery preview, 2026-11-03. Apply with tools/apply_recovery_4k.py.
+# This is an offline development profile, not a release configuration.
+format_version = 2
+
+[video]
+fullscreen = "windowed"
+internal_resolution = "4k"
+supersample = 1.0
+dynamic_resolution = false
+anisotropic_filtering = 8
+antialiasing_mode = "fxaa_hq"
+texture_lod = "mipmap"
+fmv_chroma_smoothing = true
+fmv_filter = "bicubic"
+bloom = 2.0
+dithering = "off"
+pgxp_depth_buffer = true
+pgxp_color_correction = true
+pgxp_seam = "fine"
+
+[[feature]]
+package_id = "psx.enhancement.internal-resolution"
+id = "internal-resolution"
+enabled = true
+[feature.values]
+resolution = "4k"
+
+[[feature]]
+package_id = "psx.enhancement.enhanced-audio"
+id = "enhanced-audio"
+enabled = true
+
+[[feature]]
+package_id = "psx.enhancement.image-filtering"
+id = "image-filtering"
+enabled = true
+[feature.values]
+smoothing = "smooth"
+texture_filtering = "xbr"
+fmv_filtering = "bicubic"
+
+[[feature]]
+package_id = "psx.enhancement.pgxp"
+id = "pgxp"
+enabled = true
+
+[[feature]]
+package_id = "r4.enhancement.max-detail"
+id = "max-detail"
+enabled = true
+[feature.values]
+draw_distance = "maximum"
+course = "full"
+cars = "full"
+split_screen = "same"
+reflections = "on"
+mirror = "full"
+
+[[feature]]
+package_id = "r4.enhancement.hide-rear-view-mirror"
+id = "hide-mirror"
+enabled = false
+
+[[feature]]
+package_id = "r4.enhancement.ui-fonts"
+id = "ui-glyphs"
+enabled = true
+[feature.values]
+replacements = "true"

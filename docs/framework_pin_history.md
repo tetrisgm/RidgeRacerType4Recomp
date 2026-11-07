@@ -1,5 +1,38 @@
 # Framework pin history
 
+## 2026-11-03: solid HD RPM red-zone bars
+
+Pin the selected `tetrisgm/psxrecomp` recovery branch at `3a0502c5`.
+Beetle-keyed RGBA replacements now use their own coverage instead of being
+clipped to the original texture's transparent holes. This repairs the broken
+red RPM bars without changing the artwork, native VRAM or native STP blending.
+The GL HD-pack fixture passes 233 full-surface / 219 windowed / 19 native
+checks. Regeneration leaves all 52 shards and dispatch unchanged; configure,
+build and 26/26 CTests pass. Actual 4K gameplay passes at 21:9 and 4:3,
+accelerating and after save/load, with PGXP on and zero dispatch/segment misses.
+See HD_HUD.md and ignored `analysis/feedback/hud-redline/` for evidence.
+
+## 2026-11-03: recovery rewind HD residency
+
+Pin the selected `tetrisgm/psxrecomp` recovery branch at `b9dcf919`.
+Rewind now retains bounded upload-residency metadata alongside each point,
+then restores it after the frontend's VRAM restage. The existing pack identity
+and VRAM checks remain authoritative. This fixes the HD HUD becoming native
+resolution after a restore; the effective rendering scale was already 9.
+The metadata budget is 32 MiB, retiring oldest complete points when needed.
+
+R4 qualification includes eight cockpit and four chase restores, current-build
+save/load, 26 supported CTests, the actual-ring rejection/eviction tests, the
+real GL HD-pack fixture and the no-rbengine compile. Matched 4K fixed-input
+samples are neutral within observed variation (original 59.30–59.95,
+candidate 59.40–60.00 VBlanks/s). See recovery/FEEDBACK_BURNDOWN.md for the
+remaining visual and integration gates. The submodule URL now resolves this
+fork-only pin from the owner's selected fork; the UI pin is unchanged.
+Supported regeneration leaves all 52 shards and the dispatch table unchanged.
+The integrated build passes 26/26 CTests and both-camera steering at native,
+16:9 and 21:9, plus pause/resume, save/load and rewind open/cancel. No expanded
+RAM default is introduced; its broad scenery experiment is not qualified.
+
 The `psxrecomp` and `recomp-ui` submodule gitlinks are the pins. Bump them
 deliberately and record each bump here with the reason and what was verified.
 

@@ -5,16 +5,11 @@ R4 turns its enhancements on by default (README "On by default"):
   - r4.enhancement.widescreen: on, View = Fit to Window;
   - game.toml [video] internal_resolution = Match display, at the display's
     resolution, capped at 4K/9x (match_display_max_lines = 2160; owner 2026-10-28),
-    supersample 1.5 and no post AA filter, with dynamic resolution on and
-    floored at 1080p (owner, 2026-10-22; Ultra since 2026-10-08: Ultra by default, the dynamic
-    systems are the safety net; "display" or another preset
-    is accepted too) so the default holds full speed; the Display row turns
-    it off;
+    supersample 1.5 and no post AA filter, with dynamic resolution off;
   - game.toml [video] fullscreen = borderless (desktop) by default;
   - game.toml [video] render_thread and present_thread on
     (PSX_RENDER_THREAD=0, PSX_PRESENT_THREAD=0 turn them off for a run);
-    Smooth motion (frame_generation) off in [video] and every preset, and
-    its launcher row hidden (removed from R4, owner 2026-10-20);
+    Smooth motion (frame_generation) off in [video];
   - PGXP extras: depth buffer, colour correction, fine seams (inert while
     the PGXP package is off);
   - [timing] guest_cycle_scale = 2, gated to races with Max Detail.
@@ -82,19 +77,6 @@ def test_manifests():
     check('Fit' in option_values(ws, 'widescreen', 'aspect'),
           'widescreen: Fit is a declared choice')
 
-    fr = manifest('r4.enhancement.frame-rate')
-    check(feature(fr, 'frame-rate').get('default_enabled') is True,
-          'frame rate: on by default (phase 5 owner defaults)')
-    check(option_default(fr, 'frame-rate', 'rate') == '60',
-          'frame rate: 60 FPS by default')
-    check(set(option_values(fr, 'frame-rate', 'rate')) == {'auto', '30', '60', '90', '100', '120', '144', 'display'},
-          'frame rate: auto, fixed rates, display refresh and original 30 FPS')
-    plugin = open(os.path.join(ROOT, 'src', 'mods', 'r4_frame_rate_plugin.c'), encoding='utf-8').read()
-    check('packet_interpolation_set_rate(active_rate)' in plugin and 'r4_interp' not in plugin,
-          'frame rate: generic packet presenter at every internal scale')
-    check(not any(o['id'] in ('method', 'blend') for o in fr.get('option', [])),
-          'frame rate: no crossfade or image-warp option')
-
     # A release zip carries no loose boot EXE, so psxrecomp hashes nothing
     # and an exe_sha256 target never matches: a default-on package with one
     # would refuse to launch the game. game_id targets only.
@@ -134,12 +116,12 @@ def test_game_toml():
           'game.toml: dynamic resolution has a floor ("native", "display" or a preset)')
     check(floor == '1080p',
           'game.toml: dynamic resolution never drops below 1080p (owner, 2026-10-22)')
-    check(video.get('dynamic_resolution_start_min') is False,
-          'game.toml: no floor start while dynamic resolution is off')
     check(video.get('supersample') == 1.5, 'game.toml: supersample = 1.5')
     check(video.get('antialiasing_mode') == 'off',
           'game.toml: no post-process AA filter (antialiasing_mode = "off")')
-    check(video.get('rewind') is True, 'game.toml: per-frame native rewind on by default')
+    rw = manifest('psx.feature.rewind')
+    check(feature(rw, 'rewind').get('default_enabled') is True,
+          'upstream filmstrip rewind on by default through the mod catalog')
     pg = manifest('psx.enhancement.pgxp')
     check(option_default(pg, 'pgxp', 'cpu_mode') == 'true',
           'PGXP: CPU-mode propagation on by default (owner 2026-10-27)')
@@ -154,8 +136,6 @@ def test_game_toml():
           'game.toml: borderless (desktop) fullscreen by default')
     for k in ('render_thread', 'present_thread'):
         check(video.get(k) is True, f'game.toml: {k} on by default')
-    check(video.get('present_thread_slots') == 8,
-          'game.toml: eight bounded presenter slots for 60 Hz output')
     check(video.get('frame_generation') is False,
           'game.toml: Smooth motion (frame_generation) off: removed from R4')
     check(video.get('pgxp_depth_buffer') is True and
@@ -183,48 +163,6 @@ def test_idle_skip():
           'game.toml: idle_skip with store-counter loops (PsyQ v_wait)')
     check(runtime.get('idle_skip_store_counter_sites') == ['0x8008B4D0', '0x8008B518'],
           'game.toml: store-counter skips only at the audited v_wait site')
-
-
-def test_quality_presets():
-    with open(os.path.join(ROOT, 'game.toml'), 'rb') as fh:
-        cfg = tomllib.load(fh)
-    video, q = cfg.get('video', {}), cfg.get('quality', {})
-    check(sorted(q) == ['high', 'low', 'medium', 'ultra'],
-          'game.toml: Low, Medium, High and Ultra graphics presets')
-    check(q.get('ultra') == {'frame_generation': False}, 'game.toml: Ultra is the shipped [video] block')
-    low = q.get('low', {})
-    check(low.get('supersample') == 1.0 and low.get('dynamic_resolution_min') == '1080p',
-          'game.toml: Low drops supersampling, floor Native')
-    check(all(q[n].get('frame_generation') is False for n in q),
-          'game.toml: every preset keeps Smooth motion off')
-    surface = open(os.path.join(ROOT, 'launcher', 'title_r4.cpp'), encoding='utf-8').read()
-    check('{"graphics.frame_generation", Vis::Auto, "0"}' in surface,
-          'launcher: the Smooth motion row is hidden and pinned off')
-    check(low.get('pgxp_color_correction') is False and low.get('pgxp_seam') == 'off',
-          'game.toml: Low turns colour correction and seam expansion off (PGXP itself stays on)')
-    check(all('pgxp_depth_buffer' not in q[n] for n in q) and video.get('pgxp_depth_buffer') is True,
-          'game.toml: the PGXP depth buffer stays on in every preset (Max Detail + reprojection need depth)')
-    check(all('pgxp' not in k for n in ('ultra', 'high', 'medium') for k in q[n]),
-          'game.toml: Medium and up keep the PGXP extras')
-    check(all(p.get('dynamic_resolution', True) is True for p in q.values()),
-          'game.toml: dynamic resolution stays on in every preset')
-    check(video.get('texture_lod') == 'mipmap' and video.get('anisotropic_filtering') == 16
-          and video.get('fmv_chroma_smoothing') is True and video.get('bloom') == 1.0
-          and video.get('dithering') == 'off' and video.get('texture_filtering') != 'xbr'
-          and 'accurate_blending' not in video,
-          'game.toml: Ultra turns on mipmaps + 16x aniso, FMV chroma, bloom 1; dithering off; no xBR/accurate blending')
-    check(low.get('texture_lod') == 'off' and low.get('bloom') == 0.0,
-          'game.toml: Low turns the new visual features off')
-    check(all('dithering' not in p for p in q.values()),
-          'game.toml: dithering stays off in every preset')
-    check(all('bloom' not in q[n] for n in ('ultra', 'high', 'medium')),
-          'game.toml: bloom stays on (1.0) in every preset but Low')
-    check(all(isinstance(v, (bool, int, float, str)) for p in q.values() for v in p.values()),
-          'game.toml: presets hold plain [video] values')
-    ss = [video.get('supersample'), q['high'].get('supersample', video.get('supersample')),
-          q['medium'].get('supersample'), low.get('supersample')]
-    check(ss == sorted(ss, reverse=True),
-          'game.toml: supersample never rises from Ultra down to Low')
 
 
 def test_mod_state():
@@ -284,7 +222,6 @@ def main():
     test_manifests()
     test_game_toml()
     test_idle_skip()
-    test_quality_presets()
     test_mod_state()
     if FAILS:
         print(f'{len(FAILS)} failure(s)')

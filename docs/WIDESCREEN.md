@@ -10,6 +10,9 @@ ends short of the right edge: see [Limitations](#limitations)), **16:9**,
 Races render wider than 4:3 with real extra pixels: the game submits the
 geometry beyond the 4:3 edges and the HUD sits at the window edges. Menus, the
 garage, results, replays after the finish and movies stay 4:3 with side bars.
+Widened race views keep the camera horizon level to remove the stock
+steering-induced roll. Steering, car physics and deliberate camera look remain
+active; native-aspect views retain their original camera roll.
 Online, it applies to your own view only (Link Battle draws each player's own
 view; see `docs/ONLINE_BATTLE.md`): the shared race stays stock 4:3 on every
 peer and each player keeps their own View.

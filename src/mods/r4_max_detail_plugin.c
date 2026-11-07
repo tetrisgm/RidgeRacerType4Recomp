@@ -552,11 +552,36 @@ static void r4_md_frame_start(CPUState *cpu, uint32_t address)
     s_frame.measured = 0;
 }
 
+/* Sample completed rendering work before the pacing hook advances idle time.
+ * Counting that wait as work can lower Maximum's reach despite spare budget. */
+static void r4_md_measure_frame(CPUState *cpu)
+{
+    if (!s_enabled || !s_frame.started || s_frame.measured ||
+        cpu->gpr[31] != R4_MD_VSYNC_WAIT_RA)
+        return;
+    s_frame.measured = 1;
+    if (s_opt.draw != R4_MD_DRAW_MAXIMUM || !s_frame_has_course) return;
+    s_frame_has_course = 0;
+    psx_cyc_batch_flush();
+    uint64_t busy = psx_cycle_count - s_frame.start;
+    (void)r4_md_gov_update_heap(&s_gov, busy, s_frame.heap_pm);
+    s_frame.heap_pm = 0;
+    if (s_trace) {
+        uint32_t pm = (uint32_t)(busy * 1000u / R4_MD_FRAME_BUDGET);
+        if (pm > s_stat.busy_max_pm) s_stat.busy_max_pm = pm;
+        if (!s_stat.gov_frames || s_gov.level < (int)s_stat.level_min) s_stat.level_min = (uint32_t)(s_gov.level + 100);
+        if (!s_stat.gov_frames || s_gov.level + 100 > (int)s_stat.level_max) s_stat.level_max = (uint32_t)(s_gov.level + 100);
+        s_stat.level_sum += s_gov.level;
+        s_stat.gov_frames++;
+    }
+}
+
 /* VSync from the main loop's floor wait: the frame's work (handler, DrawSync)
  * is done. The first call of the frame ends the measurement. */
 static void r4_md_vsync(CPUState *cpu, uint32_t address)
 {
     (void)address;
+    r4_md_measure_frame(cpu);
     /* [timing] guest_cycle_scale: R4's race pacing (pacing word 0x180) spins on
      * VSync(1) until 384 hblanks have passed since the last VSync, then
      * calls VSync(0), which returns at once when a VBlank went by meanwhile.
@@ -603,23 +628,6 @@ static void r4_md_vsync(CPUState *cpu, uint32_t address)
                 psx_advance_cycles(step);
             }
         }
-    }
-    if (!s_enabled || !s_frame.started || s_frame.measured ||
-        cpu->gpr[31] != R4_MD_VSYNC_WAIT_RA)
-        return;
-    s_frame.measured = 1;
-    if (s_opt.draw != R4_MD_DRAW_MAXIMUM || !s_frame_has_course) return;
-    s_frame_has_course = 0;
-    uint64_t busy = psx_cycle_count - s_frame.start;
-    (void)r4_md_gov_update_heap(&s_gov, busy, s_frame.heap_pm);
-    s_frame.heap_pm = 0;
-    if (s_trace) {
-        uint32_t pm = (uint32_t)(busy * 1000u / R4_MD_FRAME_BUDGET);
-        if (pm > s_stat.busy_max_pm) s_stat.busy_max_pm = pm;
-        if (!s_stat.gov_frames || s_gov.level < (int)s_stat.level_min) s_stat.level_min = (uint32_t)(s_gov.level + 100);
-        if (!s_stat.gov_frames || s_gov.level + 100 > (int)s_stat.level_max) s_stat.level_max = (uint32_t)(s_gov.level + 100);
-        s_stat.level_sum += s_gov.level;
-        s_stat.gov_frames++;
     }
 }
 

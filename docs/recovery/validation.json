@@ -1,0 +1,150 @@
+{
+  "game": "R4: Ridge Racer Type 4 (USA), SLUS-00797",
+  "source_commit": "12e8870db5f8e92a3e2a460de538060232c2b978",
+  "engine_commit": "c1f5cafd4102daa57b7342bec7c432aaca8981ce",
+  "ui_commit": "817c2985d371f8d19d70d9d1d9629425ed6cfd68",
+  "executable_sha256": "01fc459537544035302817c8c644840fcb7df265bfc864004a41646c8458463a",
+  "build": "Windows x64 GCC 15.2 Release diagnostic; native CPU spans and PGXP enabled; no PGO claim",
+  "ctest": {
+    "passed": 26,
+    "failed": 0
+  },
+  "smoke": {
+    "steps": 40,
+    "final_frame": 8547,
+    "dispatch_misses": 0,
+    "segment_misses": 0
+  },
+  "current_build_save_load": {
+    "save_last_ok": 1,
+    "load_last_ok": 1
+  },
+  "window_requests": [
+    [
+      1280,
+      720
+    ],
+    [
+      1440,
+      600
+    ],
+    [
+      960,
+      720
+    ]
+  ],
+  "visuals": {
+    "moving_capture_route_seconds": [
+      45,
+      105
+    ],
+    "course": "Helter Skelter",
+    "cameras": [
+      "cockpit",
+      "third-person"
+    ],
+    "sampled_geometry": "no large road/wall/roof holes seen",
+    "temporal_exhaustive": false,
+    "all_tracks": false
+  },
+  "performance_comparison": {
+    "seconds_per_arm": 20,
+    "runs_per_build": 2,
+    "host": "same Windows PC, normal background load",
+    "presentation": "original race cadence, optional interpolation off",
+    "settings": "1080p preset, effective scale 5, supersample 1, window 1280x720, PGXP on, Classic for digital autopilot",
+    "package_difference": "Original per-frame hold rewind versus recovered upstream filmstrip rewind; whole-package comparison, not isolated attribution to upstream CPU changes",
+    "arms": [
+      {
+        "build": "original",
+        "run": 0,
+        "exe_sha256": "ec9eefb7928f0d93673bac8843402c371b662a9cf6c7c2ec3cfdd0ecdf8b5118",
+        "seconds": 20.405999999959022,
+        "vblanks_per_s": 54.640791924053666,
+        "process_cpu_seconds": 30.078125,
+        "effective_scale": 5,
+        "audio_starvation_counter_delta": 69551,
+        "dispatch_misses": 0,
+        "segment_misses": 0
+      },
+      {
+        "build": "original",
+        "run": 1,
+        "exe_sha256": "ec9eefb7928f0d93673bac8843402c371b662a9cf6c7c2ec3cfdd0ecdf8b5118",
+        "seconds": 20.40600000001723,
+        "vblanks_per_s": 52.53356855822282,
+        "process_cpu_seconds": 29.53125,
+        "effective_scale": 5,
+        "audio_starvation_counter_delta": 98450,
+        "dispatch_misses": 0,
+        "segment_misses": 0
+      },
+      {
+        "build": "recovery",
+        "run": 0,
+        "exe_sha256": "01fc459537544035302817c8c644840fcb7df265bfc864004a41646c8458463a",
+        "seconds": 20.40600000001723,
+        "vblanks_per_s": 59.982358129911134,
+        "process_cpu_seconds": 27.265625,
+        "effective_scale": 5,
+        "audio_starvation_counter_delta": 0,
+        "dispatch_misses": 0,
+        "segment_misses": 0
+      },
+      {
+        "build": "recovery",
+        "run": 1,
+        "exe_sha256": "01fc459537544035302817c8c644840fcb7df265bfc864004a41646c8458463a",
+        "seconds": 20.34399999998277,
+        "vblanks_per_s": 58.59221392061588,
+        "process_cpu_seconds": 25.75,
+        "effective_scale": 5,
+        "audio_starvation_counter_delta": 16179,
+        "dispatch_misses": 0,
+        "segment_misses": 0
+      }
+    ],
+    "limits": "Two short ordered runs each; independently prepared checkpoints of same race; no quiet-host or pixel-exact A/B assertion; ring aggregate percentiles include pre-measurement time and are not used as 20-second tail statistics. One recovery arm still reports audio starvation."
+  },
+  "raw_evidence": "analysis/recovery/ (local, ignored)",
+  "not_recovered": [
+    "packet interpolation at 60+ output FPS",
+    "custom launcher screens",
+    "hold-to-rewind"
+  ],
+  "qualification_limits": [
+    "individual Car Effects triggers",
+    "netplay",
+    "other operating systems",
+    "8K/high-refresh physical scanout",
+    "all draw-distance transitions"
+  ],
+  "live_modern_controls": {
+    "checks_passed": 8,
+    "checks_failed": 0,
+    "checkpoint": "active race after countdown",
+    "physical_controller": false,
+    "manual_shifting": false
+  },
+  "rewind": {
+    "enabled": true,
+    "snapshots": 50,
+    "open_freezes_guest": true,
+    "cancel_resumes": true,
+    "implementation": "upstream filmstrip"
+  },
+  "owner_preview": {
+    "profile": "analysis/recovery/playtest/",
+    "pid": 48864,
+    "paused": true,
+    "window": [
+      1280,
+      720
+    ],
+    "audio_driver_override": null,
+    "audio_output_active": 1,
+    "dispatch_misses": 0,
+    "segment_misses": 0,
+    "note": "Normal audio, native game pause, Modern controls, independent saves/settings. Preserve owner progress and notes."
+  }
+}

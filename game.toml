@@ -198,11 +198,11 @@ antialiasing_mode = "off"
 # selected internal resolution is rendered as is; frame rate gives way, not
 # resolution. The 1080p floor stays as the limit if a player turns it on.
 dynamic_resolution = false
-# Hold Y (Modern controls), Select + Y (Classic), or F8 to rewind.
-# Per-frame native snapshots; saved player preferences still win.
-rewind = true
+# Upstream rewind uses its filmstrip selector; the fork's hold-to-rewind
+# implementation is not carried by this recovery baseline.
+# Enabled by R4's psx.feature.rewind catalog override, as current upstream
+# derives host enhancements from the active mod plan.
 dynamic_resolution_min = "1080p"
-dynamic_resolution_start_min = false
 # Render thread (psxrecomp docs/RENDER_THREAD.md): the OpenGL backend runs on
 # its own thread, so a frame costs max(game, GL) instead of game + GL. Nothing
 # the guest reads back changes. Off for one run: PSX_RENDER_THREAD=0. Smooth
@@ -211,11 +211,9 @@ render_thread = true
 # Present thread (docs/RENDER_THREAD.md "Present thread"): the window swap
 # leaves the render thread. Off for one run: PSX_PRESENT_THREAD=0.
 present_thread = true
-present_thread_slots = 8
 # Smooth motion (psxrecomp frame generation) is off in R4 and not offered
 # (owner, 2026-10-20): its generated frames showed artifacts in races. Every
-# graphics preset below keeps it off too, and the launcher hides the row
-# (launcher/title_r4.cpp).
+# recovery baseline keeps it off. The shared launcher owns its settings UI.
 frame_generation = false
 # VS split screen draws its far road through per-primitive texture windows
 # (about 515 GP0(E2h) changes a game frame). Let the OpenGL renderer batch
@@ -258,53 +256,7 @@ fmv_filter = "bicubic"
 bloom = 1.0
 dithering = "off"
 
-# Graphics presets (psxrecomp docs/QUALITY_PRESETS.md). Ultra is the default;
-# on first launch, and when the machine changes, psxrecomp steps down only a
-# machine whose GPU class cannot hold 60 Hz even at the dynamic floor (Steam
-# Deck, small iGPUs, software GL); Settings -> Display -> Graphics preset shows it, offers
-# Re-detect, and becomes Custom once the player changes a setting a preset
-# sets (Custom is never overridden). Presets set detail, never the frame rate;
-# Smooth motion is off in every preset (owner, 2026-10-20: removed from R4).
-# Each table is [video] keys laid over the
-# [video] block above, which is Ultra. Dynamic resolution stays on in every
-# preset as the safety net. Measured on R4 races (analysis/lowend-perf):
-# Smooth motion is the largest render-thread cost (~60-70 % of it), the
-# supersample factor the largest GPU cost; PGXP's depth/colour/seam extras
-# cost ~0.7 ms of render-thread CPU and no measurable GPU time; Low drops them.
-[quality.ultra]
-frame_generation = false
-# The [video] block as shipped and the first-launch default: Match display
-# x1.5 floored at 1080p, Smooth motion from surplus, PGXP extras, mipmaps +
-# 16x aniso, FMV chroma smoothing, bloom.
-
-[quality.high]
-frame_generation = false
-supersample = 1.25
-
-[quality.medium]
-frame_generation = false
-supersample = 1.0
-texture_lod = "off"
-anisotropic_filtering = 1
-# Bloom stays on: R4 opts in (owner, 2026-10-13); only Low drops it.
-
-[quality.low]
-frame_generation = false
-# Detected low-end machines: Steam Deck, integrated GPUs, Apple M1/M2 base. PGXP
-# itself stays on (it closes the seams), and so does its depth buffer: Max
-# Detail's far sections and Smooth motion's reprojection need real depth, or
-# distant scenery draws over walls and swims when turning (owner, 2026-10-20).
-# Its other renderer extras go: colour correction, seam expansion. In R4 they only move polygon
-# silhouette edges by one output pixel (0.02 % of a road frame, 0 pixels in
-# the tunnel at 10x; analysis/lowend-perf/seams), no cracks.
-supersample = 1.0
-dynamic_resolution_min = "1080p"
-pgxp_color_correction = false
-pgxp_seam = "off"
-texture_lod = "off"
-anisotropic_filtering = 1
-fmv_chroma_smoothing = false
-bloom = 0.0
+# Current upstream uses [video] settings directly; quality presets were retired.
 
 # Native-wide rendering for r4.enhancement.widescreen (docs/WIDESCREEN.md).
 # Inert at 4:3: every cull site below is the identity while the margin is 0.
