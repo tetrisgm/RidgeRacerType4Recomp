@@ -1,12 +1,3 @@
-# Recovery branch override, 2026-11-02
-
-The owner's current recovery task supersedes the historical fork workflow below.
-Use current RetroPortingToolKit/psxrecomp and recomp-ui as the baseline; selectively
-recover capabilities rather than merging the whole fork. The original game head
-is preserved at archive/original-20261102. See docs/recovery/README.md for actual
-acceptance status. Work solo, keep automated launches hidden/muted, preserve
-native saves and explicit settings, and do not publish, push or merge.
-
 # RidgeRacerType4Recomp Rules
 
 Static recompilation of **R4: Ridge Racer Type 4 (USA)** — serial
@@ -56,60 +47,36 @@ This project inherits, in order:
 - Disc identity and hashes live in `DISC.md`; verify a dump against them before
   blaming a regression.
 
-## Feature workflow (owner rules)
+## Workflow (owner rules)
 
-- Fork model (owner, 2026-10-22, agreed with the psxrecomp maintainer):
-  R4 pins the fork `tetrisgm/psxrecomp`, branch `r4/main` (upstream master
-  plus our topic branches). Framework work lands there first, so R4 never
-  waits on upstream review. Each change stays a separate topic branch
-  (`fix/<name>`, `feat/<name>`) off upstream master, framework-generic, never
-  R4-only hacks, so it can go upstream unchanged. `docs/UPSTREAM.md` lists
-  every fork delta and its upstream PR state.
-- Sync: merge upstream master into `r4/main` at least weekly and before every
-  release, so R4 keeps the maintainer's fixes.
-- Upstream: open PRs in batches at milestones (not one per prompt), each
-  small, tested, with evidence; address review on the topic branch and merge
-  the fix into `r4/main`. Never ask the maintainer for fast turnaround.
-- End state: when the fork's delta is merged upstream, re-pin R4 to
-  upstream master, point `.gitmodules` back at RetroPortingToolKit/psxrecomp,
-  and archive the fork. Game-specific work stays in this repo.
-- recomp-launcher is our own repo (`tetrisgm/recomp-launcher`), pinned at
-  its `r4/main`.
-- psxrecomp's default behaviour stays faithful for every PS1 title. Enhancements
-  are elective and opt-in (off by default, enabled by config or a mod), never a
-  change to the base path.
-- Each feature set is developed in a worktree pair (this repo + psxrecomp, plus
-  recomp-ui when touched) on matching `feat/<name>` branches, and lands as small
-  PRs in every repo it touches. Each PR body says what the feature does and
-  links its sibling PRs.
-- A local integration branch that bundles several features for building and
-  playtesting is fine, but it is never the source of truth and never merged;
-  the per-repo PRs are what gets reviewed and landed.
-- Widescreen and similar presentation work use a custom renderer in the
-  MMX6/Tomba pattern: a mod package (R4's widescreen is on by default,
-  owner 2026-10-01) plus a trusted plugin in `src/mods/` on psxrecomp's native-wide
-  renderer (see `docs/WIDESCREEN.md`).
-
-## Verification scale (owner, 2026-10-27)
-
-Test in proportion to the change; a full gate only before a release.
-
-- Docs, pins or config only: build + ctest + one headless smoke (`tools/smoke.py`).
-- Game code: the above plus one on-screen check of the feature touched.
-- Release: the on-screen sweep only for features whose code moved since their
-  last verified entry in `docs/VERIFIED.md`; everything else is a ledger row.
-- One shared dev build (`build/`, debug tools on) in this checkout; agents reuse
-  it. A fresh clone only when an agent must edit code concurrently.
-- Package once, from the final commit, after docs and notes are in.
-- Mechanical steps (build, package, audit, smoke) go to cheaper agents; keep
-  the expensive model for review and on-screen judgment.
-- Smoke once per build, not once per agent.
+- Develop on `master` in `~/dev/ridgeracertype4` on the Mac. Pull before
+  editing, coordinate dirty work, and commit small, coherent changes.
+- Use short-lived topic branches and PRs only when review needs isolation.
+  No worktree pairs or integration branches. Delete landed topic branches.
+- Until the three R4 engine fixes merge upstream, pin `tetrisgm/psxrecomp`
+  on its single development branch `master`, with one upstream PR per fix.
+  Then pin verified upstream master, change `.gitmodules` to
+  `RetroPortingToolKit/psxrecomp`, and archive the fork. Track PRs in
+  `docs/UPSTREAM.md` and pin changes in `docs/framework_pin_history.md`.
+- Use upstream `recomp-ui`; the old custom `recomp-launcher` is retired.
+- Engine enhancements remain elective and opt-in. Preserve the faithful
+  base path; game-owned enhancements belong in this repository.
+- Build and test only on the Mac. Before every push, pass a Release build,
+  CTest and `tools/smoke.py` against an isolated hidden runtime with dummy
+  audio. Preserve native saves and explicit player settings.
+- Cross-build Windows on the Mac using `docs/WINDOWS_BUILD.md`. Deliver
+  portable, checksummed builds to a fresh `builds/r4/<version>/` folder on
+  the NAS. Never reuse a version folder, bundle game data, or publish a
+  release/feed. If the share is unavailable, retain the build locally.
+- STEAMBOX is a gaming console: never connect to or operate it, and never
+  install development tools there. The owner tests finished builds by hand.
+- Never force-push. Backup, archive and recovery branch deletion requires
+  the owner's explicit approval of the exact deletion list.
 
 ## Screen rules (owner, 2026-10-27)
 
-- Never open a visible game window or change the display mode while the
-  owner may be at the PC. Use `--hidden-window` and debug-server dumps.
-  Physical on-screen captures only when the owner says the PC is free.
+- Automated Mac runs use `--hidden-window`, dummy audio and debug-server
+  dumps. Windows playtest results come only from the owner.
 - PGXP (geometry correction + perspective texturing) is never turned off or
   made a fallback, and is never run off even as a test reference (owner,
   2026-10-27). Bisect among its sub-features; fix or disable the faulty one.

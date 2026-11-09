@@ -1,0 +1,480 @@
+{
+  "date": "2026-11-09",
+  "approval": "Owner approved listed branch deletions including public EXE, conditional on NAS preservation.",
+  "nas_verified_repo": "/volume2/homes/theadminaccount/r4-consolidation-20261109/verified.git",
+  "verification": "All 36 tips fetched from NAS bundles into a new bare repository on NAS; git fsck --full --no-reflogs exited 0. Public EXE blob is present at 92fd8d2a and is 641024 bytes.",
+  "branches": [
+    {
+      "repo": "tetrisgm/RidgeRacerType4Recomp",
+      "branch": "archive/original-20261102",
+      "sha": "14d7981918525080892730712979d8fc9e339db9",
+      "bundles": [
+        "/volume3/pcbackup/pc-20261106/bundles/push__ridgeracertype4.bundle",
+        "/volume3/pcbackup/pc-20261106/bundles/ridgeracertype4.bundle"
+      ],
+      "verified_bundle": "/volume3/pcbackup/pc-20261106/bundles/push__ridgeracertype4.bundle"
+    },
+    {
+      "repo": "tetrisgm/RidgeRacerType4Recomp",
+      "branch": "backup/pc-20261106/launcher-xnet-20261008-r4/feat/launcher-surface",
+      "sha": "023ac471e8f32d4620dc15fafb91d4d5c516c828",
+      "bundles": [
+        "/volume3/pcbackup/pc-20261106/bundles/launcher-xnet-20261008__r4.bundle",
+        "/volume3/pcbackup/pc-20261106/bundles/launcher-xnet-20261008__r4.bundle",
+        "/volume3/pcbackup/pc-20261106/bundles/launcher-xnet-20261008__r4.bundle",
+        "/volume3/pcbackup/pc-20261106/bundles/push__launcher-xnet-20261008__r4.bundle",
+        "/volume3/pcbackup/pc-20261106/bundles/push__launcher-xnet-20261008__r4.bundle",
+        "/volume3/pcbackup/pc-20261106/bundles/push__launcher-xnet-20261008__r4.bundle"
+      ],
+      "verified_bundle": "/volume3/pcbackup/pc-20261106/bundles/launcher-xnet-20261008__r4.bundle"
+    },
+    {
+      "repo": "tetrisgm/RidgeRacerType4Recomp",
+      "branch": "backup/pc-20261106/launcher-xnet-20261008-r4/pc-wip/launcher-xnet-20261008__r4",
+      "sha": "6b28f63198f9f26c77e188cb1d0afdb7b6264867",
+      "bundles": [
+        "/volume3/pcbackup/pc-20261106/bundles/launcher-xnet-20261008__r4.bundle",
+        "/volume3/pcbackup/pc-20261106/bundles/push__launcher-xnet-20261008__r4.bundle"
+      ],
+      "verified_bundle": "/volume3/pcbackup/pc-20261106/bundles/launcher-xnet-20261008__r4.bundle"
+    },
+    {
+      "repo": "tetrisgm/RidgeRacerType4Recomp",
+      "branch": "backup/pc-20261106/perf-lowend-20261008-r4/pc-wip/perf-lowend-20261008__r4",
+      "sha": "f64a12f90a38c78716bb52e2af5b65f2137eadc3",
+      "bundles": [
+        "/volume3/pcbackup/pc-20261106/bundles/perf-lowend-20261008__r4.bundle",
+        "/volume3/pcbackup/pc-20261106/bundles/push__perf-lowend-20261008__r4.bundle"
+      ],
+      "verified_bundle": "/volume3/pcbackup/pc-20261106/bundles/perf-lowend-20261008__r4.bundle"
+    },
+    {
+      "repo": "tetrisgm/RidgeRacerType4Recomp",
+      "branch": "backup/pc-20261106/ridgeracertype4/fix/race-real-time",
+      "sha": "2d322b5e511de54a3c79f8642751047582a4e7fa",
+      "bundles": [
+        "/volume3/pcbackup/pc-20261106/bundles/push__ridgeracertype4.bundle",
+        "/volume3/pcbackup/pc-20261106/bundles/push__ridgeracertype4.bundle",
+        "/volume3/pcbackup/pc-20261106/bundles/ridgeracertype4.bundle",
+        "/volume3/pcbackup/pc-20261106/bundles/ridgeracertype4.bundle"
+      ],
+      "verified_bundle": "/volume3/pcbackup/pc-20261106/bundles/push__ridgeracertype4.bundle"
+    },
+    {
+      "repo": "tetrisgm/RidgeRacerType4Recomp",
+      "branch": "backup/pc-20261106/ridgeracertype4/pc-wip-tracked/r4-wt-release-lap",
+      "sha": "287a7795ddad5f4e75107cc47622590748888447",
+      "bundles": [
+        "/volume3/pcbackup/pc-20261106/bundles/push__ridgeracertype4.bundle"
+      ],
+      "verified_bundle": "/volume3/pcbackup/pc-20261106/bundles/push__ridgeracertype4.bundle"
+    },
+    {
+      "repo": "tetrisgm/RidgeRacerType4Recomp",
+      "branch": "backup/pc-20261106/ridgeracertype4/pc-wip/r4-mstan-validation",
+      "sha": "92fd8d2ad0ffed04fa70242a96447e28e9856e7f",
+      "bundles": [
+        "/volume3/pcbackup/pc-20261106/bundles/push__ridgeracertype4.bundle",
+        "/volume3/pcbackup/pc-20261106/bundles/ridgeracertype4.bundle"
+      ],
+      "verified_bundle": "/volume3/pcbackup/pc-20261106/bundles/push__ridgeracertype4.bundle"
+    },
+    {
+      "repo": "tetrisgm/RidgeRacerType4Recomp",
+      "branch": "backup/pc-20261106/ridgeracertype4/pc-wip/r4-wt-final",
+      "sha": "f3428f3c9097802a859fefcce104a4b191a4242b",
+      "bundles": [
+        "/volume3/pcbackup/pc-20261106/bundles/push__ridgeracertype4.bundle",
+        "/volume3/pcbackup/pc-20261106/bundles/ridgeracertype4.bundle"
+      ],
+      "verified_bundle": "/volume3/pcbackup/pc-20261106/bundles/push__ridgeracertype4.bundle"
+    },
+    {
+      "repo": "tetrisgm/RidgeRacerType4Recomp",
+      "branch": "backup/pc-20261106/ridgeracertype4/pc-wip/r4-wt-interp",
+      "sha": "8e4f79c9859a6f6eb9ad6bcca2d0997f24d2ba54",
+      "bundles": [
+        "/volume3/pcbackup/pc-20261106/bundles/push__ridgeracertype4.bundle",
+        "/volume3/pcbackup/pc-20261106/bundles/ridgeracertype4.bundle"
+      ],
+      "verified_bundle": "/volume3/pcbackup/pc-20261106/bundles/push__ridgeracertype4.bundle"
+    },
+    {
+      "repo": "tetrisgm/RidgeRacerType4Recomp",
+      "branch": "backup/pc-20261106/ridgeracertype4/pc-wip/r4-wt-pgxp-audit",
+      "sha": "7ea239c0c10430aaa2e3f25ca98d7902a2d81046",
+      "bundles": [
+        "/volume3/pcbackup/pc-20261106/bundles/push__ridgeracertype4.bundle",
+        "/volume3/pcbackup/pc-20261106/bundles/ridgeracertype4.bundle"
+      ],
+      "verified_bundle": "/volume3/pcbackup/pc-20261106/bundles/push__ridgeracertype4.bundle"
+    },
+    {
+      "repo": "tetrisgm/RidgeRacerType4Recomp",
+      "branch": "backup/pc-20261106/ridgeracertype4/pc-wip/ridgeracertype4",
+      "sha": "b9c7d7c1d88358a31ab769cfba41ca5a94b293f3",
+      "bundles": [
+        "/volume3/pcbackup/pc-20261106/bundles/push__ridgeracertype4.bundle",
+        "/volume3/pcbackup/pc-20261106/bundles/ridgeracertype4.bundle"
+      ],
+      "verified_bundle": "/volume3/pcbackup/pc-20261106/bundles/push__ridgeracertype4.bundle"
+    },
+    {
+      "repo": "tetrisgm/RidgeRacerType4Recomp",
+      "branch": "recovery/upstream-20261102",
+      "sha": "568eee5214aa74fbfdcd5cff3604dee19c32af01",
+      "bundles": [
+        "/volume3/pcbackup/pc-20261106/bundles/push__ridgeracertype4.bundle",
+        "/volume3/pcbackup/pc-20261106/bundles/push__ridgeracertype4.bundle",
+        "/volume3/pcbackup/pc-20261106/bundles/ridgeracertype4.bundle",
+        "/volume3/pcbackup/pc-20261106/bundles/ridgeracertype4.bundle"
+      ],
+      "verified_bundle": "/volume3/pcbackup/pc-20261106/bundles/push__ridgeracertype4.bundle"
+    },
+    {
+      "repo": "tetrisgm/psxrecomp",
+      "branch": "archive/r4-original-20261102",
+      "sha": "84d6ca22259ad16d9dd5e13f390514e575cb8d10",
+      "bundles": [
+        "/volume3/pcbackup/pc-20261106/bundles/push__ridgeracertype4__mod__psxrecomp.bundle",
+        "/volume3/pcbackup/pc-20261106/bundles/push__ridgeracertype4__mod__psxrecomp.bundle",
+        "/volume3/pcbackup/pc-20261106/bundles/push__ridgeracertype4__mod__psxrecomp.bundle",
+        "/volume3/pcbackup/pc-20261106/bundles/push__ridgeracertype4__wt__r4-mstan-validation__modules__psxrecomp.bundle",
+        "/volume3/pcbackup/pc-20261106/bundles/push__ridgeracertype4__wt__r4-mstan-validation__modules__psxrecomp.bundle",
+        "/volume3/pcbackup/pc-20261106/bundles/push__ridgeracertype4__wt__r4-mstan-validation__modules__psxrecomp.bundle",
+        "/volume3/pcbackup/pc-20261106/bundles/push__ridgeracertype4__wt__r4-wt-final__modules__psxrecomp.bundle",
+        "/volume3/pcbackup/pc-20261106/bundles/push__ridgeracertype4__wt__r4-wt-final__modules__psxrecomp.bundle",
+        "/volume3/pcbackup/pc-20261106/bundles/ridgeracertype4__.git__worktrees__r4-mstan-validation__modules__psxrecomp.bundle",
+        "/volume3/pcbackup/pc-20261106/bundles/ridgeracertype4__.git__worktrees__r4-mstan-validation__modules__psxrecomp.bundle",
+        "/volume3/pcbackup/pc-20261106/bundles/ridgeracertype4__.git__worktrees__r4-mstan-validation__modules__psxrecomp.bundle",
+        "/volume3/pcbackup/pc-20261106/bundles/ridgeracertype4__.git__worktrees__r4-wt-final__modules__psxrecomp.bundle",
+        "/volume3/pcbackup/pc-20261106/bundles/ridgeracertype4__.git__worktrees__r4-wt-final__modules__psxrecomp.bundle",
+        "/volume3/pcbackup/pc-20261106/bundles/ridgeracertype4__mod__psxrecomp.bundle",
+        "/volume3/pcbackup/pc-20261106/bundles/ridgeracertype4__mod__psxrecomp.bundle",
+        "/volume3/pcbackup/pc-20261106/bundles/ridgeracertype4__mod__psxrecomp.bundle"
+      ],
+      "verified_bundle": "/volume3/pcbackup/pc-20261106/bundles/push__ridgeracertype4__mod__psxrecomp.bundle"
+    },
+    {
+      "repo": "tetrisgm/psxrecomp",
+      "branch": "backup/pc-20261106/ridgeracertype4-wt-r4-mstan-validation-psxrecomp/pc-wip/r4-mstan-validation__psxrecomp",
+      "sha": "73e3626048062704ac096e87647a6d413a2abf97",
+      "bundles": [
+        "/volume3/pcbackup/pc-20261106/bundles/push__ridgeracertype4__wt__r4-mstan-validation__modules__psxrecomp.bundle",
+        "/volume3/pcbackup/pc-20261106/bundles/ridgeracertype4__.git__worktrees__r4-mstan-validation__modules__psxrecomp.bundle"
+      ],
+      "verified_bundle": "/volume3/pcbackup/pc-20261106/bundles/push__ridgeracertype4__wt__r4-mstan-validation__modules__psxrecomp.bundle"
+    },
+    {
+      "repo": "tetrisgm/psxrecomp",
+      "branch": "backup/pc-20261106/ridgeracertype4-wt-r4-wt-interp-psxrecomp/pc-wip/r4-wt-interp__psxrecomp",
+      "sha": "6e58b8bfcfdb00b210238a40aa91b8aec3489caf",
+      "bundles": [
+        "/volume3/pcbackup/pc-20261106/bundles/push__ridgeracertype4__wt__r4-wt-interp__modules__psxrecomp.bundle",
+        "/volume3/pcbackup/pc-20261106/bundles/ridgeracertype4__.git__worktrees__r4-wt-interp__modules__psxrecomp.bundle"
+      ],
+      "verified_bundle": "/volume3/pcbackup/pc-20261106/bundles/push__ridgeracertype4__wt__r4-wt-interp__modules__psxrecomp.bundle"
+    },
+    {
+      "repo": "tetrisgm/psxrecomp",
+      "branch": "backup/pc-20261106/ridgeracertype4-wt-r4-wt-pgxp-audit-psxrecomp/fix/pooled-restage-validation",
+      "sha": "935347567358ae705b52365cea7180254fd26f04",
+      "bundles": [
+        "/volume3/pcbackup/pc-20261106/bundles/push__ridgeracertype4__wt__r4-wt-pgxp-audit__modules__psxrecomp.bundle",
+        "/volume3/pcbackup/pc-20261106/bundles/push__ridgeracertype4__wt__r4-wt-pgxp-audit__modules__psxrecomp.bundle",
+        "/volume3/pcbackup/pc-20261106/bundles/ridgeracertype4__.git__worktrees__r4-wt-pgxp-audit__modules__psxrecomp.bundle",
+        "/volume3/pcbackup/pc-20261106/bundles/ridgeracertype4__.git__worktrees__r4-wt-pgxp-audit__modules__psxrecomp.bundle"
+      ],
+      "verified_bundle": "/volume3/pcbackup/pc-20261106/bundles/push__ridgeracertype4__wt__r4-wt-pgxp-audit__modules__psxrecomp.bundle"
+    },
+    {
+      "repo": "tetrisgm/psxrecomp",
+      "branch": "backup/pc-20261106/ridgeracertype4-wt-r4-wt-pgxp-audit-psxrecomp/pc-wip/psx-wt-restage-validation",
+      "sha": "5d360862e0ba37f9d476939a58cc9e1818395e4a",
+      "bundles": [
+        "/volume3/pcbackup/pc-20261106/bundles/push__ridgeracertype4__wt__r4-wt-pgxp-audit__modules__psxrecomp.bundle",
+        "/volume3/pcbackup/pc-20261106/bundles/ridgeracertype4__.git__worktrees__r4-wt-pgxp-audit__modules__psxrecomp.bundle"
+      ],
+      "verified_bundle": "/volume3/pcbackup/pc-20261106/bundles/push__ridgeracertype4__wt__r4-wt-pgxp-audit__modules__psxrecomp.bundle"
+    },
+    {
+      "repo": "tetrisgm/psxrecomp",
+      "branch": "backup/pc-20261106/ridgeracertype4-wt-r4-wt-pgxp-audit-psxrecomp/pc-wip/r4-wt-pgxp-audit__psxrecomp",
+      "sha": "7e4aa83428083a8ea1a8fb4713f64f554912826b",
+      "bundles": [
+        "/volume3/pcbackup/pc-20261106/bundles/push__ridgeracertype4__wt__r4-wt-pgxp-audit__modules__psxrecomp.bundle",
+        "/volume3/pcbackup/pc-20261106/bundles/ridgeracertype4__.git__worktrees__r4-wt-pgxp-audit__modules__psxrecomp.bundle"
+      ],
+      "verified_bundle": "/volume3/pcbackup/pc-20261106/bundles/push__ridgeracertype4__wt__r4-wt-pgxp-audit__modules__psxrecomp.bundle"
+    },
+    {
+      "repo": "tetrisgm/psxrecomp",
+      "branch": "recovery/upstream-20261102",
+      "sha": "006fb5bb425baf0310bc199eed618133d3ad3792",
+      "bundles": [],
+      "verified_bundle": "/volume2/homes/theadminaccount/r4-consolidation-20261109/engine-recovery.bundle"
+    },
+    {
+      "repo": "RetroPortingToolKit/psxrecomp",
+      "branch": "backup/pc-20261106/ridgeracertype4-psxrecomp/feat/frame-arch-1-native-authority",
+      "sha": "464bc104797bb880d2bba62f9694f53d2345d2ea",
+      "bundles": [
+        "/volume3/pcbackup/pc-20261106/bundles/push__ridgeracertype4__mod__psxrecomp.bundle",
+        "/volume3/pcbackup/pc-20261106/bundles/push__ridgeracertype4__mod__psxrecomp.bundle",
+        "/volume3/pcbackup/pc-20261106/bundles/push__ridgeracertype4__wt__r4-mstan-validation__modules__psxrecomp.bundle",
+        "/volume3/pcbackup/pc-20261106/bundles/push__ridgeracertype4__wt__r4-wt-final__modules__psxrecomp.bundle",
+        "/volume3/pcbackup/pc-20261106/bundles/push__ridgeracertype4__wt__r4-wt-interp__modules__psxrecomp.bundle",
+        "/volume3/pcbackup/pc-20261106/bundles/push__ridgeracertype4__wt__r4-wt-pgxp-audit__modules__psxrecomp.bundle",
+        "/volume3/pcbackup/pc-20261106/bundles/ridgeracertype4__.git__worktrees__r4-mstan-validation__modules__psxrecomp.bundle",
+        "/volume3/pcbackup/pc-20261106/bundles/ridgeracertype4__.git__worktrees__r4-wt-final__modules__psxrecomp.bundle",
+        "/volume3/pcbackup/pc-20261106/bundles/ridgeracertype4__.git__worktrees__r4-wt-interp__modules__psxrecomp.bundle",
+        "/volume3/pcbackup/pc-20261106/bundles/ridgeracertype4__.git__worktrees__r4-wt-pgxp-audit__modules__psxrecomp.bundle",
+        "/volume3/pcbackup/pc-20261106/bundles/ridgeracertype4__mod__psxrecomp.bundle",
+        "/volume3/pcbackup/pc-20261106/bundles/ridgeracertype4__mod__psxrecomp.bundle"
+      ],
+      "verified_bundle": "/volume3/pcbackup/pc-20261106/bundles/push__ridgeracertype4__mod__psxrecomp.bundle"
+    },
+    {
+      "repo": "RetroPortingToolKit/psxrecomp",
+      "branch": "backup/pc-20261106/ridgeracertype4-psxrecomp/feat/frame-arch-2-mailbox",
+      "sha": "27d6d16796c725f1e0816c0c4d4eb307618dd9ea",
+      "bundles": [
+        "/volume3/pcbackup/pc-20261106/bundles/push__ridgeracertype4__mod__psxrecomp.bundle",
+        "/volume3/pcbackup/pc-20261106/bundles/push__ridgeracertype4__mod__psxrecomp.bundle",
+        "/volume3/pcbackup/pc-20261106/bundles/push__ridgeracertype4__wt__r4-mstan-validation__modules__psxrecomp.bundle",
+        "/volume3/pcbackup/pc-20261106/bundles/push__ridgeracertype4__wt__r4-wt-final__modules__psxrecomp.bundle",
+        "/volume3/pcbackup/pc-20261106/bundles/push__ridgeracertype4__wt__r4-wt-interp__modules__psxrecomp.bundle",
+        "/volume3/pcbackup/pc-20261106/bundles/push__ridgeracertype4__wt__r4-wt-pgxp-audit__modules__psxrecomp.bundle",
+        "/volume3/pcbackup/pc-20261106/bundles/ridgeracertype4__.git__worktrees__r4-mstan-validation__modules__psxrecomp.bundle",
+        "/volume3/pcbackup/pc-20261106/bundles/ridgeracertype4__.git__worktrees__r4-wt-final__modules__psxrecomp.bundle",
+        "/volume3/pcbackup/pc-20261106/bundles/ridgeracertype4__.git__worktrees__r4-wt-interp__modules__psxrecomp.bundle",
+        "/volume3/pcbackup/pc-20261106/bundles/ridgeracertype4__.git__worktrees__r4-wt-pgxp-audit__modules__psxrecomp.bundle",
+        "/volume3/pcbackup/pc-20261106/bundles/ridgeracertype4__mod__psxrecomp.bundle",
+        "/volume3/pcbackup/pc-20261106/bundles/ridgeracertype4__mod__psxrecomp.bundle"
+      ],
+      "verified_bundle": "/volume3/pcbackup/pc-20261106/bundles/push__ridgeracertype4__mod__psxrecomp.bundle"
+    },
+    {
+      "repo": "RetroPortingToolKit/psxrecomp",
+      "branch": "backup/pc-20261106/ridgeracertype4-psxrecomp/feat/frame-arch-3-surfaces",
+      "sha": "499a12abd0afcef31357a10674a9340b06c1e5f4",
+      "bundles": [
+        "/volume3/pcbackup/pc-20261106/bundles/push__ridgeracertype4__mod__psxrecomp.bundle",
+        "/volume3/pcbackup/pc-20261106/bundles/push__ridgeracertype4__mod__psxrecomp.bundle",
+        "/volume3/pcbackup/pc-20261106/bundles/push__ridgeracertype4__mod__psxrecomp.bundle",
+        "/volume3/pcbackup/pc-20261106/bundles/push__ridgeracertype4__wt__r4-mstan-validation__modules__psxrecomp.bundle",
+        "/volume3/pcbackup/pc-20261106/bundles/push__ridgeracertype4__wt__r4-wt-final__modules__psxrecomp.bundle",
+        "/volume3/pcbackup/pc-20261106/bundles/push__ridgeracertype4__wt__r4-wt-interp__modules__psxrecomp.bundle",
+        "/volume3/pcbackup/pc-20261106/bundles/push__ridgeracertype4__wt__r4-wt-pgxp-audit__modules__psxrecomp.bundle",
+        "/volume3/pcbackup/pc-20261106/bundles/ridgeracertype4__.git__worktrees__r4-mstan-validation__modules__psxrecomp.bundle",
+        "/volume3/pcbackup/pc-20261106/bundles/ridgeracertype4__.git__worktrees__r4-wt-final__modules__psxrecomp.bundle",
+        "/volume3/pcbackup/pc-20261106/bundles/ridgeracertype4__.git__worktrees__r4-wt-interp__modules__psxrecomp.bundle",
+        "/volume3/pcbackup/pc-20261106/bundles/ridgeracertype4__.git__worktrees__r4-wt-pgxp-audit__modules__psxrecomp.bundle",
+        "/volume3/pcbackup/pc-20261106/bundles/ridgeracertype4__mod__psxrecomp.bundle",
+        "/volume3/pcbackup/pc-20261106/bundles/ridgeracertype4__mod__psxrecomp.bundle",
+        "/volume3/pcbackup/pc-20261106/bundles/ridgeracertype4__mod__psxrecomp.bundle"
+      ],
+      "verified_bundle": "/volume3/pcbackup/pc-20261106/bundles/push__ridgeracertype4__mod__psxrecomp.bundle"
+    },
+    {
+      "repo": "RetroPortingToolKit/psxrecomp",
+      "branch": "backup/pc-20261106/ridgeracertype4-psxrecomp/feat/menu-main-screen",
+      "sha": "cc3a08b402a7442690ce39d6a5f4f4dd7fe26617",
+      "bundles": [
+        "/volume3/pcbackup/pc-20261106/bundles/push__ridgeracertype4__mod__psxrecomp.bundle",
+        "/volume3/pcbackup/pc-20261106/bundles/push__ridgeracertype4__mod__psxrecomp.bundle",
+        "/volume3/pcbackup/pc-20261106/bundles/push__ridgeracertype4__wt__r4-mstan-validation__modules__psxrecomp.bundle",
+        "/volume3/pcbackup/pc-20261106/bundles/push__ridgeracertype4__wt__r4-wt-final__modules__psxrecomp.bundle",
+        "/volume3/pcbackup/pc-20261106/bundles/push__ridgeracertype4__wt__r4-wt-interp__modules__psxrecomp.bundle",
+        "/volume3/pcbackup/pc-20261106/bundles/push__ridgeracertype4__wt__r4-wt-pgxp-audit__modules__psxrecomp.bundle",
+        "/volume3/pcbackup/pc-20261106/bundles/ridgeracertype4__.git__worktrees__r4-mstan-validation__modules__psxrecomp.bundle",
+        "/volume3/pcbackup/pc-20261106/bundles/ridgeracertype4__.git__worktrees__r4-wt-final__modules__psxrecomp.bundle",
+        "/volume3/pcbackup/pc-20261106/bundles/ridgeracertype4__.git__worktrees__r4-wt-interp__modules__psxrecomp.bundle",
+        "/volume3/pcbackup/pc-20261106/bundles/ridgeracertype4__.git__worktrees__r4-wt-pgxp-audit__modules__psxrecomp.bundle",
+        "/volume3/pcbackup/pc-20261106/bundles/ridgeracertype4__mod__psxrecomp.bundle",
+        "/volume3/pcbackup/pc-20261106/bundles/ridgeracertype4__mod__psxrecomp.bundle"
+      ],
+      "verified_bundle": "/volume3/pcbackup/pc-20261106/bundles/push__ridgeracertype4__mod__psxrecomp.bundle"
+    },
+    {
+      "repo": "RetroPortingToolKit/psxrecomp",
+      "branch": "backup/pc-20261106/ridgeracertype4-psxrecomp/feat/render-pass-fps-internal-scale",
+      "sha": "b55487ffe32f83ef2a578e69f3f6b69cd6b6995d",
+      "bundles": [
+        "/volume3/pcbackup/pc-20261106/bundles/push__ridgeracertype4__mod__psxrecomp.bundle",
+        "/volume3/pcbackup/pc-20261106/bundles/push__ridgeracertype4__mod__psxrecomp.bundle",
+        "/volume3/pcbackup/pc-20261106/bundles/push__ridgeracertype4__wt__r4-mstan-validation__modules__psxrecomp.bundle",
+        "/volume3/pcbackup/pc-20261106/bundles/push__ridgeracertype4__wt__r4-wt-final__modules__psxrecomp.bundle",
+        "/volume3/pcbackup/pc-20261106/bundles/push__ridgeracertype4__wt__r4-wt-interp__modules__psxrecomp.bundle",
+        "/volume3/pcbackup/pc-20261106/bundles/push__ridgeracertype4__wt__r4-wt-pgxp-audit__modules__psxrecomp.bundle",
+        "/volume3/pcbackup/pc-20261106/bundles/ridgeracertype4__.git__worktrees__r4-mstan-validation__modules__psxrecomp.bundle",
+        "/volume3/pcbackup/pc-20261106/bundles/ridgeracertype4__.git__worktrees__r4-wt-final__modules__psxrecomp.bundle",
+        "/volume3/pcbackup/pc-20261106/bundles/ridgeracertype4__.git__worktrees__r4-wt-interp__modules__psxrecomp.bundle",
+        "/volume3/pcbackup/pc-20261106/bundles/ridgeracertype4__.git__worktrees__r4-wt-pgxp-audit__modules__psxrecomp.bundle",
+        "/volume3/pcbackup/pc-20261106/bundles/ridgeracertype4__mod__psxrecomp.bundle",
+        "/volume3/pcbackup/pc-20261106/bundles/ridgeracertype4__mod__psxrecomp.bundle"
+      ],
+      "verified_bundle": "/volume3/pcbackup/pc-20261106/bundles/push__ridgeracertype4__mod__psxrecomp.bundle"
+    },
+    {
+      "repo": "RetroPortingToolKit/psxrecomp",
+      "branch": "backup/pc-20261106/ridgeracertype4-psxrecomp/feat/rewind-title-default",
+      "sha": "be636e415dc681ea7aeeeed4cfe05eb8f7e29d95",
+      "bundles": [
+        "/volume3/pcbackup/pc-20261106/bundles/push__ridgeracertype4__mod__psxrecomp.bundle",
+        "/volume3/pcbackup/pc-20261106/bundles/push__ridgeracertype4__mod__psxrecomp.bundle",
+        "/volume3/pcbackup/pc-20261106/bundles/push__ridgeracertype4__wt__r4-mstan-validation__modules__psxrecomp.bundle",
+        "/volume3/pcbackup/pc-20261106/bundles/push__ridgeracertype4__wt__r4-wt-final__modules__psxrecomp.bundle",
+        "/volume3/pcbackup/pc-20261106/bundles/push__ridgeracertype4__wt__r4-wt-interp__modules__psxrecomp.bundle",
+        "/volume3/pcbackup/pc-20261106/bundles/push__ridgeracertype4__wt__r4-wt-pgxp-audit__modules__psxrecomp.bundle",
+        "/volume3/pcbackup/pc-20261106/bundles/ridgeracertype4__.git__worktrees__r4-mstan-validation__modules__psxrecomp.bundle",
+        "/volume3/pcbackup/pc-20261106/bundles/ridgeracertype4__.git__worktrees__r4-wt-final__modules__psxrecomp.bundle",
+        "/volume3/pcbackup/pc-20261106/bundles/ridgeracertype4__.git__worktrees__r4-wt-interp__modules__psxrecomp.bundle",
+        "/volume3/pcbackup/pc-20261106/bundles/ridgeracertype4__.git__worktrees__r4-wt-pgxp-audit__modules__psxrecomp.bundle",
+        "/volume3/pcbackup/pc-20261106/bundles/ridgeracertype4__mod__psxrecomp.bundle",
+        "/volume3/pcbackup/pc-20261106/bundles/ridgeracertype4__mod__psxrecomp.bundle"
+      ],
+      "verified_bundle": "/volume3/pcbackup/pc-20261106/bundles/push__ridgeracertype4__mod__psxrecomp.bundle"
+    },
+    {
+      "repo": "RetroPortingToolKit/psxrecomp",
+      "branch": "backup/pc-20261106/ridgeracertype4-psxrecomp/fix/async-expiry",
+      "sha": "35b3849e127c59e335ba8a7c71e5afef2fa937bb",
+      "bundles": [
+        "/volume3/pcbackup/pc-20261106/bundles/push__ridgeracertype4__mod__psxrecomp.bundle",
+        "/volume3/pcbackup/pc-20261106/bundles/ridgeracertype4__mod__psxrecomp.bundle"
+      ],
+      "verified_bundle": "/volume3/pcbackup/pc-20261106/bundles/push__ridgeracertype4__mod__psxrecomp.bundle"
+    },
+    {
+      "repo": "RetroPortingToolKit/psxrecomp",
+      "branch": "backup/pc-20261106/ridgeracertype4-psxrecomp/fix/display-playtest-20261028",
+      "sha": "a7122c591ed27dfa17639096ed4db48a0dd8d3f7",
+      "bundles": [
+        "/volume3/pcbackup/pc-20261106/bundles/push__ridgeracertype4__mod__psxrecomp.bundle",
+        "/volume3/pcbackup/pc-20261106/bundles/ridgeracertype4__mod__psxrecomp.bundle"
+      ],
+      "verified_bundle": "/volume3/pcbackup/pc-20261106/bundles/push__ridgeracertype4__mod__psxrecomp.bundle"
+    },
+    {
+      "repo": "RetroPortingToolKit/psxrecomp",
+      "branch": "backup/pc-20261106/ridgeracertype4-psxrecomp/fix/gl-sampler-uniforms",
+      "sha": "6eead0f2ad2d17d6214cc3800c76647ec31d626f",
+      "bundles": [
+        "/volume3/pcbackup/pc-20261106/bundles/push__ridgeracertype4__mod__psxrecomp.bundle",
+        "/volume3/pcbackup/pc-20261106/bundles/ridgeracertype4__mod__psxrecomp.bundle"
+      ],
+      "verified_bundle": "/volume3/pcbackup/pc-20261106/bundles/push__ridgeracertype4__mod__psxrecomp.bundle"
+    },
+    {
+      "repo": "RetroPortingToolKit/psxrecomp",
+      "branch": "backup/pc-20261106/ridgeracertype4-psxrecomp/fix/launcher-playtest-20261027",
+      "sha": "90800120592c2abf28eece0d4b89b4119f2cec6c",
+      "bundles": [
+        "/volume3/pcbackup/pc-20261106/bundles/push__ridgeracertype4__mod__psxrecomp.bundle",
+        "/volume3/pcbackup/pc-20261106/bundles/push__ridgeracertype4__mod__psxrecomp.bundle",
+        "/volume3/pcbackup/pc-20261106/bundles/push__ridgeracertype4__wt__r4-mstan-validation__modules__psxrecomp.bundle",
+        "/volume3/pcbackup/pc-20261106/bundles/push__ridgeracertype4__wt__r4-wt-final__modules__psxrecomp.bundle",
+        "/volume3/pcbackup/pc-20261106/bundles/push__ridgeracertype4__wt__r4-wt-interp__modules__psxrecomp.bundle",
+        "/volume3/pcbackup/pc-20261106/bundles/push__ridgeracertype4__wt__r4-wt-pgxp-audit__modules__psxrecomp.bundle",
+        "/volume3/pcbackup/pc-20261106/bundles/ridgeracertype4__.git__worktrees__r4-mstan-validation__modules__psxrecomp.bundle",
+        "/volume3/pcbackup/pc-20261106/bundles/ridgeracertype4__.git__worktrees__r4-wt-final__modules__psxrecomp.bundle",
+        "/volume3/pcbackup/pc-20261106/bundles/ridgeracertype4__.git__worktrees__r4-wt-interp__modules__psxrecomp.bundle",
+        "/volume3/pcbackup/pc-20261106/bundles/ridgeracertype4__.git__worktrees__r4-wt-pgxp-audit__modules__psxrecomp.bundle",
+        "/volume3/pcbackup/pc-20261106/bundles/ridgeracertype4__mod__psxrecomp.bundle",
+        "/volume3/pcbackup/pc-20261106/bundles/ridgeracertype4__mod__psxrecomp.bundle"
+      ],
+      "verified_bundle": "/volume3/pcbackup/pc-20261106/bundles/push__ridgeracertype4__mod__psxrecomp.bundle"
+    },
+    {
+      "repo": "RetroPortingToolKit/psxrecomp",
+      "branch": "backup/pc-20261106/ridgeracertype4-psxrecomp/fix/prefer-steam-virtual-pad",
+      "sha": "487ec0422d23554d88379cd169894e732450bc3b",
+      "bundles": [
+        "/volume3/pcbackup/pc-20261106/bundles/push__ridgeracertype4__mod__psxrecomp.bundle",
+        "/volume3/pcbackup/pc-20261106/bundles/ridgeracertype4__mod__psxrecomp.bundle"
+      ],
+      "verified_bundle": "/volume3/pcbackup/pc-20261106/bundles/push__ridgeracertype4__mod__psxrecomp.bundle"
+    },
+    {
+      "repo": "RetroPortingToolKit/psxrecomp",
+      "branch": "backup/pc-20261106/ridgeracertype4-psxrecomp/fix/queued-vram-snapshot",
+      "sha": "1efd81f9c4600c6cbc9d8b8c3b0544f72ed198b5",
+      "bundles": [
+        "/volume3/pcbackup/pc-20261106/bundles/push__ridgeracertype4__mod__psxrecomp.bundle",
+        "/volume3/pcbackup/pc-20261106/bundles/ridgeracertype4__mod__psxrecomp.bundle"
+      ],
+      "verified_bundle": "/volume3/pcbackup/pc-20261106/bundles/push__ridgeracertype4__mod__psxrecomp.bundle"
+    },
+    {
+      "repo": "RetroPortingToolKit/psxrecomp",
+      "branch": "backup/pc-20261106/ridgeracertype4-psxrecomp/fix/race-cadence-metrics",
+      "sha": "ac65fcf5aa135e7d0a801b91d66fb7c6f96fa4a8",
+      "bundles": [
+        "/volume3/pcbackup/pc-20261106/bundles/push__ridgeracertype4__mod__psxrecomp.bundle",
+        "/volume3/pcbackup/pc-20261106/bundles/push__ridgeracertype4__mod__psxrecomp.bundle",
+        "/volume3/pcbackup/pc-20261106/bundles/push__ridgeracertype4__wt__r4-mstan-validation__modules__psxrecomp.bundle",
+        "/volume3/pcbackup/pc-20261106/bundles/push__ridgeracertype4__wt__r4-wt-final__modules__psxrecomp.bundle",
+        "/volume3/pcbackup/pc-20261106/bundles/push__ridgeracertype4__wt__r4-wt-interp__modules__psxrecomp.bundle",
+        "/volume3/pcbackup/pc-20261106/bundles/push__ridgeracertype4__wt__r4-wt-pgxp-audit__modules__psxrecomp.bundle",
+        "/volume3/pcbackup/pc-20261106/bundles/ridgeracertype4__.git__worktrees__r4-mstan-validation__modules__psxrecomp.bundle",
+        "/volume3/pcbackup/pc-20261106/bundles/ridgeracertype4__.git__worktrees__r4-wt-final__modules__psxrecomp.bundle",
+        "/volume3/pcbackup/pc-20261106/bundles/ridgeracertype4__.git__worktrees__r4-wt-interp__modules__psxrecomp.bundle",
+        "/volume3/pcbackup/pc-20261106/bundles/ridgeracertype4__.git__worktrees__r4-wt-pgxp-audit__modules__psxrecomp.bundle",
+        "/volume3/pcbackup/pc-20261106/bundles/ridgeracertype4__mod__psxrecomp.bundle",
+        "/volume3/pcbackup/pc-20261106/bundles/ridgeracertype4__mod__psxrecomp.bundle"
+      ],
+      "verified_bundle": "/volume3/pcbackup/pc-20261106/bundles/push__ridgeracertype4__mod__psxrecomp.bundle"
+    },
+    {
+      "repo": "RetroPortingToolKit/psxrecomp",
+      "branch": "backup/pc-20261106/ridgeracertype4-psxrecomp/fix/steam-controller-outside-steam",
+      "sha": "80b058e6e13387658d959fd0d7b6e70e4d6ed443",
+      "bundles": [
+        "/volume3/pcbackup/pc-20261106/bundles/push__ridgeracertype4__mod__psxrecomp.bundle",
+        "/volume3/pcbackup/pc-20261106/bundles/push__ridgeracertype4__mod__psxrecomp.bundle",
+        "/volume3/pcbackup/pc-20261106/bundles/push__ridgeracertype4__wt__r4-mstan-validation__modules__psxrecomp.bundle",
+        "/volume3/pcbackup/pc-20261106/bundles/push__ridgeracertype4__wt__r4-wt-final__modules__psxrecomp.bundle",
+        "/volume3/pcbackup/pc-20261106/bundles/push__ridgeracertype4__wt__r4-wt-interp__modules__psxrecomp.bundle",
+        "/volume3/pcbackup/pc-20261106/bundles/push__ridgeracertype4__wt__r4-wt-pgxp-audit__modules__psxrecomp.bundle",
+        "/volume3/pcbackup/pc-20261106/bundles/ridgeracertype4__.git__worktrees__r4-mstan-validation__modules__psxrecomp.bundle",
+        "/volume3/pcbackup/pc-20261106/bundles/ridgeracertype4__.git__worktrees__r4-wt-final__modules__psxrecomp.bundle",
+        "/volume3/pcbackup/pc-20261106/bundles/ridgeracertype4__.git__worktrees__r4-wt-interp__modules__psxrecomp.bundle",
+        "/volume3/pcbackup/pc-20261106/bundles/ridgeracertype4__.git__worktrees__r4-wt-pgxp-audit__modules__psxrecomp.bundle",
+        "/volume3/pcbackup/pc-20261106/bundles/ridgeracertype4__mod__psxrecomp.bundle",
+        "/volume3/pcbackup/pc-20261106/bundles/ridgeracertype4__mod__psxrecomp.bundle"
+      ],
+      "verified_bundle": "/volume3/pcbackup/pc-20261106/bundles/push__ridgeracertype4__mod__psxrecomp.bundle"
+    },
+    {
+      "repo": "RetroPortingToolKit/psxrecomp",
+      "branch": "backup/pc-20261106/ridgeracertype4-psxrecomp/int/threaded-rendering",
+      "sha": "040cb5592b80aa52856713bc605651b1d3f2eee3",
+      "bundles": [
+        "/volume3/pcbackup/pc-20261106/bundles/push__ridgeracertype4__mod__psxrecomp.bundle",
+        "/volume3/pcbackup/pc-20261106/bundles/ridgeracertype4__mod__psxrecomp.bundle"
+      ],
+      "verified_bundle": "/volume3/pcbackup/pc-20261106/bundles/push__ridgeracertype4__mod__psxrecomp.bundle"
+    },
+    {
+      "repo": "RetroPortingToolKit/psxrecomp",
+      "branch": "backup/pc-20261106/ridgeracertype4-psxrecomp/pc-wip/ridgeracertype4__psxrecomp",
+      "sha": "23698e8ec000c11a1a135b5ce3160d5cc602fa8e",
+      "bundles": [
+        "/volume3/pcbackup/pc-20261106/bundles/push__ridgeracertype4__mod__psxrecomp.bundle",
+        "/volume3/pcbackup/pc-20261106/bundles/ridgeracertype4__mod__psxrecomp.bundle"
+      ],
+      "verified_bundle": "/volume3/pcbackup/pc-20261106/bundles/push__ridgeracertype4__mod__psxrecomp.bundle"
+    },
+    {
+      "repo": "RetroPortingToolKit/psxrecomp",
+      "branch": "backup/pc-20261106/ridgeracertype4-psxrecomp/r4/main",
+      "sha": "a8a62e54a73f9809f86eddecadadec7966a0d943",
+      "bundles": [
+        "/volume3/pcbackup/pc-20261106/bundles/push__ridgeracertype4__mod__psxrecomp.bundle",
+        "/volume3/pcbackup/pc-20261106/bundles/ridgeracertype4__mod__psxrecomp.bundle"
+      ],
+      "verified_bundle": "/volume3/pcbackup/pc-20261106/bundles/push__ridgeracertype4__mod__psxrecomp.bundle"
+    }
+  ]
+}
