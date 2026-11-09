@@ -31,6 +31,11 @@ project(RidgeRacerType4Recomp LANGUAGES C CXX)
 option(R4_BUILD_TESTS "Register R4's developer tests (needs tests/ and tools/)" OFF)
 if(R4_BUILD_TESTS)
     include(CTest)
+    find_package(Python3 3.11 REQUIRED COMPONENTS Interpreter)
+    add_test(NAME r4_windows_delivery
+        COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_windows_delivery.py")
+    add_test(NAME r4_static_overlays
+        COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/tools/check_static_overlays.py")
 endif()
 
 # --- Opt-in product surfaces (OFF by default in the framework) -------------
@@ -149,6 +154,7 @@ if(PSX_SETUP_WIZARD)
         CODEGEN_SETUP_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/codegen_setup.c")
 endif()
 psxrecomp_add_game_runtime(psx-runtime
+    GAME_OVERLAY_STATIC_C "${CMAKE_CURRENT_SOURCE_DIR}/generated/overlays_static.c"
     ${R4_RUNTIME_FLAVOR}
     PRELOADED_MODS_DIR "${R4_PRELOADED_MODS}"
     ENABLE_NETPLAY_IF_PRESENT

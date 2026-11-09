@@ -15,7 +15,7 @@ screens and hold-to-rewind implementation are not included.
 The engine is pinned to `tetrisgm/psxrecomp` master at `006fb5bb`, consisting
 of upstream `c1f5cafd` plus three fixes under [upstream review](docs/UPSTREAM.md).
 The shared UI is upstream `817c2985`. Always use the recorded submodule pins.
-Mac Release, 26 CTests and hidden boot-to-race smoke pass. These checks do
+Mac Release, 28 CTests and hidden boot-to-race smoke pass. These checks do
 not qualify Windows play, all tracks, netplay or the owner's reported slowdown.
 
 Max Detail requires expanded 8 MB RAM to prevent primitive heap corruption.
@@ -46,20 +46,16 @@ ctest --test-dir build --output-on-failure
 Tests that inspect disc sites require the USA disc in `disc/`; CMake warns
 when it is absent. Select your disc in `build/r4-runtime`, or place the
 BIN/CUE at `disc/R4 - Ridge Racer Type 4 (USA).{bin,cue}` and use the helper.
-For native development overlay compilation, build the Mac emitters first:
+The nine distinct code-overlay images are compiled into the executable from
+committed generated C; no runtime compiler or cache preparation is needed.
+See [native overlay evidence](aot/README.md).
+
+Automated verification uses an isolated runtime/profile and never copies
+player settings or saves back:
 
 ```sh
-bash psxrecomp/tools/ci/build_emitters.sh --framework psxrecomp --build-dir build-recompiler --jobs 2
-SDL_AUDIODRIVER=dummy bash tools/run_r4.sh build --hidden-window
-# In another shell, while the isolated runtime is running:
-python3 tools/smoke.py /tmp/r4-smoke
+python3 tools/verify_native_overlays.py analysis/native-check-unique-name
 ```
-
-Automated runs must use a separate runtime/profile directory to preserve
-player settings and saves. `tools/run_r4.sh` uses its selected build folder;
-do not use the player's folder for automated testing. The engine's dynamic
-code overlays need native cache preparation; launching without a cache or
-compiler uses the existing dirty-RAM fallback for those regions.
 
 An ordinary clone/build needs no regeneration. Only after seed, annotation,
 recompiler configuration or engine pin changes, run `tools/regen.sh` and

@@ -1,0 +1,123 @@
+{
+  "schema": "psxrecomp AOT methods v1",
+  "game_id": "SLUS-00797",
+  "disc_hashes": {
+    "sha1": "75f0dab5c1f71ba80f3d1e2fefd043f3f2b9ee2e"
+  },
+  "static_output": "generated/overlays_static.c",
+  "strict_bounds": true,
+  "bios_resident": false,
+  "generic_exclude_files": [
+    {
+      "files": [
+        "R4.BIN",
+        "SLUS_007.97"
+      ],
+      "reason": "Boot EXE already statically linked; R4.BIN sector-indexed code entries are declared explicitly below."
+    }
+  ],
+  "images": [
+    {
+      "method": "fixed_address_extents",
+      "extents": [
+        {
+          "file": "R4.BIN",
+          "address": "0x261c000",
+          "size": 8192,
+          "sha256": "892bc68f211b70ea3d197e946f1ad45bd80fc57a1a7624559039a734da29c772",
+          "load_addr": "0x801149a8",
+          "allow_missing": true
+        },
+        {
+          "file": "R4.BIN",
+          "address": "0x261e000",
+          "size": 14336,
+          "sha256": "0c920d7e51feb35dfac56ae97dffa77a5f5b1347b447ef0f28719119c182a288",
+          "load_addr": "0x801149a8",
+          "allow_missing": true
+        },
+        {
+          "file": "R4.BIN",
+          "address": "0x2621800",
+          "size": 16384,
+          "sha256": "12584283639ab6f9269c697abe49106b515ad957c47bb531c3a90657c87c03d1",
+          "load_addr": "0x801149a8",
+          "allow_missing": true
+        },
+        {
+          "file": "R4.BIN",
+          "address": "0x2625800",
+          "size": 77824,
+          "sha256": "f71ad127a60ef79c242a61a9977189a588da69e9f993eea8c4decb8b70f7a384",
+          "load_addr": "0x801149a8",
+          "allow_missing": true
+        },
+        {
+          "file": "R4.BIN",
+          "address": "0x2638800",
+          "size": 10240,
+          "sha256": "ca09e224dd95d737bf4f6384988af52363a2b1743c2208eb87666bd581f06cdd",
+          "load_addr": "0x801149a8",
+          "allow_missing": true
+        },
+        {
+          "file": "R4.BIN",
+          "address": "0x263f000",
+          "size": 20480,
+          "sha256": "d8f81461c4e910a0d103034c50a99624b15b1f06183c6bd0dc04440d43deea83",
+          "load_addr": "0x801149a8",
+          "allow_missing": true
+        },
+        {
+          "file": "R4.BIN",
+          "address": "0x2644000",
+          "size": 10240,
+          "sha256": "ca522acedda7eada6fa363ac48843bc95d253a59d4068550ca7b05fbe4edba4d",
+          "load_addr": "0x801149a8",
+          "allow_missing": true
+        },
+        {
+          "file": "R4.BIN",
+          "address": "0x2646800",
+          "size": 18432,
+          "sha256": "bf1c8c52e0a19609ccbcc0ee9989cb7307bb9b6bc4a1fc64b137bb5bdfb75eae",
+          "load_addr": "0x801149a8",
+          "allow_missing": true
+        },
+        {
+          "file": "R4.BIN",
+          "address": "0x264b000",
+          "size": 79872,
+          "sha256": "a47f8a074ca5189c63732287d4e215bb1dda9cf298b0812cfe481884d9496232",
+          "load_addr": "0x801149a8",
+          "allow_missing": true
+        }
+      ]
+    }
+  ],
+  "checks": [
+    {
+      "method": "words",
+      "file": "R4.BIN",
+      "values": {
+        "0x0": "0x3a6",
+        "0xa50": "0x4c38",
+        "0xa54": "0x4c3c",
+        "0xa58": "0x4c43",
+        "0xa5c": "0x4c4b",
+        "0xa60": "0x4c71",
+        "0xa64": "0x4c76",
+        "0xa68": "0x4c7e",
+        "0xa6c": "0x4c88",
+        "0xa70": "0x4c8d",
+        "0xa74": "0x4c96",
+        "0xa78": "0x4cbd",
+        "0xa7c": "0x4cc4",
+        "0xa80": "0x4cc8",
+        "0xa84": "0x4cd0",
+        "0xa88": "0x4cd9"
+      }
+    }
+  ],
+  "expected_records": 9
+}

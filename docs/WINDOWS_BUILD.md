@@ -1,29 +1,27 @@
 # Windows builds from the Mac
 
-## Verified route and remaining blocker
+## Verified route
 
 macOS arm64 → Windows x86-64 works with **llvm-mingw 20261104 UCRT**.
-The pinned engine/UI and generated R4 C compiled and linked successfully on
-2026-11-08. No MSVC, Windows VM or GitHub Actions is needed. PE inspection
-found only Windows system and UCRT imports, no VC++ redistributable or compiler
-DLL dependency. Windows execution is **not** verified; only the owner operates
-STEAMBOX.
+No MSVC, Windows VM or GitHub Actions is needed. The executable links all nine
+distinct USA R4.BIN code-overlay images (13 archive slots) directly into native
+code: 7,459 original-byte-guarded variants. No runtime compiler, Python, SDK,
+overlay DLL cache or captured game bytes are packaged.
 
-The local candidate is not yet a completed compiler-free game package:
-R4's dynamically loaded `R4.BIN` code overlays need a complete, validated native
-cache. The old packager supplies a runtime compiler; that is prohibited on
-STEAMBOX. The new script intentionally includes no compiler or captured disc
-bytes. Without prepared native shards the existing runtime falls back for
-uncached overlay regions. This is a delivery blocker, not a proposed solution.
-Prepare original-disc overlay inventories and compile all required shards on
-the Mac using the framework's `aot_overlay_pipeline.py` / `compile_overlays.py`
-(`--target-os win --arch-abi win-x64`), then prove cache identity/coverage and
-native loading on the Mac counterpart before removing the delivery block.
-Do not ship the capture JSON: it contains original game bytes.
+The [overlay profile and regeneration instructions](../aot/README.md) describe
+the disc extraction, duplicate slots and audit. Mac hidden smoke exercises the
+linked code with no R4-overlay interpreter PCs, dispatch misses or segment
+misses on its boot-to-race route. PGXP remains enabled. This is not exhaustive
+mode/indirect-target coverage; the generator explicitly retains
+`full_static_coverage_proven: false`. Windows execution remains owner-only.
 
-On 2026-11-08, read-only `ssh nas` inspection confirmed the PC archive at
-`/volume3/pcbackup/pc-20261106/` and found no visible `/volume*/builds` directory.
-No share or permission was created. Output therefore stays local.
+PE checks verify AMD64, all 7,459 linked variant symbols and system/UCRT-only
+imports. Source files must match the original-disc audit before staging.
+Each package records that evidence in `NATIVE-OVERLAYS.json` and `BUILD.json`.
+
+On 2026-11-09, no `/volume*/builds` directory was visible through the existing
+NAS connection. No share or permission was created. The final package stays
+local until the owner-created share is available.
 
 ## Toolchain setup (Mac only)
 
@@ -49,14 +47,15 @@ uses `std::terminate` without declaring it under libc++.
 From a recursively initialized `master` checkout:
 
 ```sh
-JOBS=2 bash tools/build_windows.sh 2026-11-08-local-01
+JOBS=2 bash tools/build_windows.sh 2026-11-09-native-02
 ```
 
 Use a **new version every time**. Output is `dist/windows/<version>/` with
 `BUILD.json`, PE imports, runtime assets, OpenBIOS, license notices and
-`SHA256SUMS`. The script refuses an existing version or unexpected DLL imports
-and rechecks every manifest entry. `DELIVERY_BLOCKED.txt` prevents confusing
-this candidate with a qualified game package. No Windows binary is executed.
+`SHA256SUMS`. The script refuses an existing version, stale overlay output,
+missing linked variants or unexpected DLL imports, and rechecks every manifest
+entry. No Windows binary is executed. Earlier `2026-11-08-local-*` candidates
+remain blocked and must not be delivered.
 
 No game disc, boot EXE, retail BIOS, player saves/settings, SDK or overlay
 compiler is copied. The executable accepts the owner's disc by path:
@@ -70,16 +69,20 @@ provides UCRT. There is no installer, administrator requirement or system
 change. A writable local folder holds the game's own state. Do not reuse the
 legacy `tools/package_release.sh` for STEAMBOX: it bundles an overlay compiler.
 
-## NAS delivery after qualification
+## NAS delivery
 
-First resolve native overlay coverage and verify a new final candidate.
-Before copying, confirm the owner-created `builds` share exists and is mounted
-writable on the Mac; never create the share or change NAS permissions.
-Create exactly one new `builds/r4/<version>/` directory with exclusive creation
-(`mkdir` without `-p` for the version). Copy the candidate's contents, including
-`SHA256SUMS`, and run `shasum -a 256 -c SHA256SUMS` in the destination.
-If creation fails or the folder exists, stop: never overwrite or reuse it.
-A failed/incomplete upload keeps that version reserved; retry under a new one.
+After the final Mac checks, use a package built from committed source. Mount
+the owner-created NAS `builds` share, then run:
+
+```sh
+python3 tools/deliver_windows.py dist/windows/2026-11-09-native-02 --share /Volumes/builds
+```
+
+The helper refuses an absent share, dirty source build, checksum discrepancy,
+missing native variants or reused version. It reserves `r4/<version>/` with
+exclusive directory creation, copies the package, then verifies every SHA256
+at the destination. It never creates a share or changes permissions. Failed
+uploads keep their version reserved; retry under a new version.
 STEAMBOX reads via NAS user `pc` on B:; the owner copies the folder locally.
 Do not connect to or operate STEAMBOX from the Mac.
 

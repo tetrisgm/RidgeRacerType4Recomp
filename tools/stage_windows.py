@@ -8,6 +8,8 @@ import re
 import shutil
 import subprocess
 
+from check_static_overlays import check as check_static_overlays
+
 ROOT = Path(__file__).resolve().parents[1]
 SYSTEM_DLLS = set('''advapi32.dll bcrypt.dll comdlg32.dll d2d1.dll dbghelp.dll
     dwrite.dll gdi32.dll imm32.dll iphlpapi.dll kernel32.dll ole32.dll oleaut32.dll
@@ -41,6 +43,14 @@ def main():
                   and not re.fullmatch(r'api-ms-win-crt-[a-z0-9-]+\.dll', name.lower())]
     if unexpected:
         raise SystemExit(f'Unexpected DLL imports: {unexpected}')
+    audit = check_static_overlays()
+    symbols = subprocess.check_output([str(args.toolchain / 'bin/llvm-nm'),
+                                      '--defined-only', str(build / 'r4-runtime.exe')], text=True)
+    if not re.search(r'\bT psx_overlay_dispatch$', symbols, re.M):
+        raise SystemExit('Windows executable does not link the native overlay dispatcher')
+    variants = re.findall(r'\bT ov_[A-Fa-f0-9_]+_func_[A-Fa-f0-9]+$', symbols, re.M)
+    if len(variants) != audit['published_variants']:
+        raise SystemExit(f'Linked overlay count mismatch: {len(variants)}')
     stage.mkdir(parents=True)  # Atomic refusal if another build reserves this version.
     for name in ('r4-runtime.exe', 'game.toml', 'game_options.toml', 'assets', 'mods', 'postfx'):
         src = build / name
@@ -59,6 +69,12 @@ def main():
         elif src.exists():
             shutil.copy2(src, stage / name)
     notices = {
+        ROOT / 'psxrecomp/LICENSE': 'psxrecomp-LICENSE',
+        build / '_deps/sdl3-src/LICENSE.txt': 'SDL3-LICENSE.txt',
+        build / '_deps/psx_zlib-src/LICENSE': 'zlib-LICENSE',
+        build / '_deps/psx_libwebp-src/COPYING': 'libwebp-COPYING',
+        build / '_deps/psx_libchdr-src/LICENSE.txt': 'libchdr-LICENSE.txt',
+        build / '_deps/libjuice-src/LICENSE': 'libjuice-LICENSE',
         ROOT / 'recomp-ui/LICENSE': 'recomp-ui-LICENSE',
         ROOT / 'recomp-ui/src/third_party/imgui/LICENSE.txt': 'imgui-LICENSE.txt',
         ROOT / 'psxrecomp/lib/recomp-net/LICENSE': 'recomp-net-LICENSE',
@@ -71,6 +87,11 @@ def main():
             raise SystemExit(f'Missing license: {src}')
         shutil.copy2(src, stage / 'licenses' / name)
     (stage / 'PE-IMPORTS.txt').write_text(report)
+    overlay_receipt = {key: audit[key] for key in ('game_id', 'recipe_count',
+        'published_variants', 'all_guards_match_known_input_bytes', 'full_static_coverage_proven',
+        'profile_sha256', 'original_disc_sha256', 'image_coverage', 'files')}
+    overlay_receipt['linked_variants'] = len(variants)
+    (stage / 'NATIVE-OVERLAYS.json').write_text(json.dumps(overlay_receipt, indent=2) + '\n')
     revisions = {name: subprocess.check_output(['git', '-C', str(path), 'rev-parse', 'HEAD'],
                   text=True).strip() for name, path in
                  [('game', ROOT), ('engine', ROOT / 'psxrecomp'), ('ui', ROOT / 'recomp-ui')]}
@@ -78,7 +99,7 @@ def main():
         ['git', '-C', str(ROOT), 'status', '--porcelain', '--untracked-files=no'], text=True))
     revisions['toolchain'] = args.toolchain.name
     (stage / 'BUILD.json').write_text(json.dumps(revisions, indent=2) + '\n')
-    (stage / 'README.txt').write_text('''R4 Windows x64 — LOCAL VALIDATION CANDIDATE, not a qualified delivery.
+    (stage / 'README.txt').write_text('''R4 Windows x64 — portable owner playtest build.
 
 Built on the Mac; no Windows execution has been performed. Windows 11 supplies
 all imported system/UCRT DLLs; no VC++ redistributable is imported. No installer,
@@ -89,19 +110,18 @@ Use your own USA BIN/CUE by path. From this folder:
 OpenBIOS is bundled; no retail BIOS or game data is included. Do not copy SDKs,
 Git, compilers or agents to STEAMBOX. No overlay toolchain is packaged.
 
-BLOCKER: complete native R4.BIN overlay cache coverage has not been prepared
-and validated on the Mac. Without it, the existing runtime uses its dirty-RAM
-fallback for uncached menu overlays. This candidate does not satisfy the final
-fully native, compiler-free delivery goal. Do not promote it as a finished build.
+All nine distinct R4.BIN code-overlay images (13 archive slots) are compiled
+into the executable. No cache preparation, compiler, Python or SDK is needed
+on Windows. Original-disc guards protect each native variant. Mac smoke checks
+native overlay execution with no interpreted R4 overlay PCs on that route;
+this is not an exhaustive proof for every mode or self-modified code path.
 
-After that blocker is resolved, owner-only STEAMBOX checks:
+Owner-only STEAMBOX checks:
 1. Boot to an active race using your own disc path.
 2. Replay the rank-8 crash route at normal pacing with Max Detail / 8 MB RAM.
 3. Check crowded-race game/audio speed at 4K/Max Detail, presentation thread off.
 Report build version, route and observations. Preserve native saves/settings.
 ''')
-    (stage / 'DELIVERY_BLOCKED.txt').write_text(
-        'Native overlay coverage is unqualified. See README.txt and docs/WINDOWS_BUILD.md.\n')
     files = sorted(p for p in stage.rglob('*') if p.is_file())
     manifest = ''.join(f'{digest(p)}  {p.relative_to(stage).as_posix()}\n' for p in files)
     (stage / 'SHA256SUMS').write_text(manifest)
@@ -110,7 +130,7 @@ Report build version, route and observations. Preserve native saves/settings.
         if digest(stage / name) != expected:
             raise SystemExit(f'Manifest verification failed: {name}')
     print(f'Local candidate: {stage}\nVerified {len(files)} SHA256 entries; system DLLs only.')
-    print('Delivery remains blocked; no NAS writes or Windows execution performed.')
+    print('Ready for owner playtest; no Windows execution performed on the Mac.')
 
 
 if __name__ == '__main__':

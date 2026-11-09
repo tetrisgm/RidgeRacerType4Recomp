@@ -476,5 +476,6 @@
       ],
       "verified_bundle": "/volume3/pcbackup/pc-20261106/bundles/push__ridgeracertype4__mod__psxrecomp.bundle"
     }
-  ]
+  ],
+  "deletion_verified": "All 36 approved refs absent from git ls-remote after atomic deletion batches (12 game, 7 fork, 17 upstream)."
 }

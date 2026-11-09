@@ -1,3 +1,11 @@
+2026-11-09 native overlay packaging: engine/UI pins remain `006fb5bb` /
+`817c2985`. The framework's supported static AOT pipeline generated nine
+original-disc code images into ten committed C units, with 7,459 guarded
+variants. Game boot-EXE generated sources are unchanged. Mac Release, CTest
+28/28 and isolated compiler-free native overlay smoke pass; Windows x64 links
+all variants with system/UCRT imports. See `aot/README.md` and the validation
+receipt `docs/archive/VALIDATION_20261109.md` for scope and evidence.
+
 2026-11-08 consolidation: engine gitlink remains `006fb5bb`; fork `master`
 fast-forwarded to this exact pin, and `.gitmodules` now names `master`.
 No seed, recompiler, configuration or pin change occurred, so no regeneration

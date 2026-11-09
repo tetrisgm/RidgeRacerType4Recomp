@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Cross-compile on macOS and stage an immutable LOCAL validation candidate.
+# Cross-compile on macOS and stage an immutable portable owner playtest build.
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 [[ "$(uname -s)" == Darwin ]] || { echo 'Run this on the Mac.' >&2; exit 2; }

@@ -1,43 +1,44 @@
 # Handoff
 
-## Current — 2026-11-08
+## Current — 2026-11-09
 
-Work on game `master` on the Mac only. Engine fork `master` now points to the
-unchanged verified pin `006fb5bb`; UI remains upstream `817c2985`. Three fixes
-are in [upstream PRs #860–#862](UPSTREAM.md). No regeneration or pin bump.
-Mac Release, CTest 26/26, hidden/dummy-audio 40-step smoke (zero misses),
-rewind ownership regression and real-GL HD fixture (19 checks) pass.
+Mac-only development on game `master`; engine remains fork master `006fb5bb`,
+UI upstream `817c2985`. [Upstream PRs #860–#862](UPSTREAM.md) remain the path
+back to upstream. The owner-approved `CLAUDE.md` workflow is applied.
 
-Windows x64 cross-compilation and linking succeeded with llvm-mingw on the
-Mac; PE imports are Windows/UCRT only. See [build instructions and limits](WINDOWS_BUILD.md).
-No Windows execution, STEAMBOX access or NAS delivery occurred.
+All **36 approved backup/archive/recovery branches are deleted**, including
+the public-EXE branch and our 17 maintainer-repo backups. [NAS preservation
+receipt](archive/BRANCH_PRESERVATION_20261109.json): all tips reconstructed and
+full Git integrity verified; EXE preserved. Original PC archive is unchanged.
 
-## Blockers / owner review
+Native overlay packaging is implemented: nine distinct original-disc images,
+7,459 guarded variants linked into the game, committed generated output and
+identity checks. No runtime compiler/cache is needed. See [overlay evidence](../aot/README.md)
+and [Windows build/delivery instructions](WINDOWS_BUILD.md).
 
-- Complete native R4.BIN overlay cache coverage must replace the legacy
-  runtime compiler before a finished compiler-free Windows delivery. Local
-  candidates carry `DELIVERY_BLOCKED.txt`. No `builds` share was visible on NAS.
-- [Branch dispositions and exact delete commands](archive/BRANCH_DISPOSITION_20261108.md)
-  await approval. The public game EXE on `backup/.../pc-wip/r4-mstan-validation`
-  remains untouched pending the owner's separate decision.
-- Proposed workflow diff: [CLAUDE patch](archive/CLAUDE-proposed-20261108.patch).
-  `CLAUDE.md` is unchanged until approved. The current owner's task supersedes
-  its stale recovery/fork/PC instructions.
-- 45 old game worktrees and old topic branches still exist; none was removed.
-  Preserve their local data before retiring them. Existing untracked
-  `recomp-ui/third_party/imgui` is untouched.
+## Verification and delivery
+
+Mac Release/CTest and isolated hidden smoke pass. Native smoke records 7.19M
+overlay dispatches, zero dispatch/segment misses and no interpreted R4-overlay
+PCs on the tested route. Windows x64 links all variants; imports are system/UCRT
+only, with checksummed versioned folders. Windows execution is not claimed.
+No STEAMBOX connection or operation occurred.
+
+The NAS `builds` share remains unavailable; retain the final package under
+`dist/windows/` locally. Once the share exists, use `tools/deliver_windows.py`
+with a fresh version. The owner tests race boot, the normal-paced rank-8 route,
+and 4K/Max Detail slowdown, preserving `present_thread = false`.
 
 ## Next
 
-1. Resolve native overlay packaging, then deliver a fresh checksummed version
-   when the owner-created NAS share is available. Owner validates race boot,
-   the normal-paced rank-8 route and 4K/Max Detail slowdown on STEAMBOX.
-2. Follow upstream PR review; once merged, qualify/record a new upstream pin,
-   change the URL and archive the fork.
-3. Apply approved contract/deletions. Research leads live in game issues
-   [#108](https://github.com/tetrisgm/RidgeRacerType4Recomp/issues/108) and
-   [#109](https://github.com/tetrisgm/RidgeRacerType4Recomp/issues/109).
+- Follow upstream review, then qualify/record the upstream pin and archive the fork.
+- Owner Windows playtest after NAS delivery; exhaustive mode/indirect-target
+  coverage is not established by the smoke route.
+- Old topic branches and 45 worktrees were outside the approved deletion list
+  and remain. Preserve their local data before retirement. Existing untracked
+  `recomp-ui/third_party/imgui` was left untouched.
+- Research leads: game issues [#108](https://github.com/tetrisgm/RidgeRacerType4Recomp/issues/108)
+  and [#109](https://github.com/tetrisgm/RidgeRacerType4Recomp/issues/109).
 
-Historical handoff: [archive](archive/HANDOFF-before-consolidation-20261108.md).
-Current performance evidence: [race investigation](recovery/PERFORMANCE_HANDOFF_20261105.md).
-Full PC copy: NAS `/volume3/pcbackup/pc-20261106/`.
+Full PC archive: NAS `/volume3/pcbackup/pc-20261106/`. Additional verified
+preservation: `/volume2/homes/theadminaccount/r4-consolidation-20261109/`.

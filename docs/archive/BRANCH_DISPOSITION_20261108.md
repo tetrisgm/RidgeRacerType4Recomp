@@ -1,6 +1,6 @@
 # Branch disposition — 2026-11-08
 
-No branches in this inventory have been deleted. Counts are ancestry counts, not a claim that every unique patch belongs in the current architecture. Game base: `87fc0234`; fork master after fast-forward: `006fb5bb`; upstream master: `9b914263`. The full PC copy remains at NAS `/volume3/pcbackup/pc-20261106/` (directory confirmed present).
+All 36 listed branches were deleted on 2026-11-09 after owner approval and NAS preservation verification; see [receipt](BRANCH_PRESERVATION_20261109.json). Counts are ancestry counts, not a claim that every unique patch belongs in the current architecture. Game base: `87fc0234`; fork master after fast-forward: `006fb5bb`; upstream master: `9b914263`. The full PC copy remains at NAS `/volume3/pcbackup/pc-20261106/` (directory confirmed present).
 
 | Repository | Branch | Unique commits vs master | Contents / reference | Verdict |
 |---|---|---:|---|---|
@@ -10,7 +10,7 @@ No branches in this inventory have been deleted. Counts are ancestry counts, not
 | `tetrisgm/RidgeRacerType4Recomp` | `backup/pc-20261106/perf-lowend-20261008-r4/pc-wip/perf-lowend-20261008__r4` | 1 | Idle-wait/store-counter lead; [#108](https://github.com/tetrisgm/RidgeRacerType4Recomp/issues/108), `f64a12f90a38` | worth reviving |
 | `tetrisgm/RidgeRacerType4Recomp` | `backup/pc-20261106/ridgeracertype4/fix/race-real-time` | 12 | Superseded frame-architecture plans/evidence and pin changes | superseded |
 | `tetrisgm/RidgeRacerType4Recomp` | `backup/pc-20261106/ridgeracertype4/pc-wip-tracked/r4-wt-release-lap` | 8 | Performance/audit research only; [#109](https://github.com/tetrisgm/RidgeRacerType4Recomp/issues/109); `287a7795ddad` | worth reviving |
-| `tetrisgm/RidgeRacerType4Recomp` | `backup/pc-20261106/ridgeracertype4/pc-wip/r4-mstan-validation` | 1 | Recovered Max Detail/performance notes; PUBLIC game EXE remains, owner decision required | on master |
+| `tetrisgm/RidgeRacerType4Recomp` | `backup/pc-20261106/ridgeracertype4/pc-wip/r4-mstan-validation` | 1 | Recovered Max Detail/performance notes; Public-EXE branch deleted after NAS preservation | on master |
 | `tetrisgm/RidgeRacerType4Recomp` | `backup/pc-20261106/ridgeracertype4/pc-wip/r4-wt-final` | 1 | Old pin changes only | superseded |
 | `tetrisgm/RidgeRacerType4Recomp` | `backup/pc-20261106/ridgeracertype4/pc-wip/r4-wt-interp` | 1 | Empty WIP snapshot | superseded |
 | `tetrisgm/RidgeRacerType4Recomp` | `backup/pc-20261106/ridgeracertype4/pc-wip/r4-wt-pgxp-audit` | 8 | Performance/audit research only; [#109](https://github.com/tetrisgm/RidgeRacerType4Recomp/issues/109); `7ea239c0c104` | worth reviving |
@@ -43,9 +43,9 @@ No branches in this inventory have been deleted. Counts are ancestry counts, not
 
 “On master” for the game mstan-validation row refers only to useful source/docs fixes. The EXE and disc-side files deliberately remain excluded from master. Branch deletion does not guarantee removal of public GitHub object caches; no history rewrite is authorized.
 
-## Deletion commands — awaiting owner approval
+## Approved deletion commands — completed 2026-11-09
 
-These are exact remote commands, **not an executable cleanup script**. Before approval/execution, recheck each remote tip against this inventory and verify the NAS bundles preserve the PC refs. No upstream maintainer branch other than our `backup/pc-20261106/*` refs is included.
+These are the exact commands approved by the owner; deletion was batched atomically per repository after every tip was rechecked and its NAS history verified. No upstream maintainer branch other than our `backup/pc-20261106/*` refs is included.
 
 ```sh
 git push https://github.com/tetrisgm/RidgeRacerType4Recomp.git --delete 'archive/original-20261102'
