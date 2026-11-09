@@ -70,7 +70,9 @@ elseif(R4_REGION STREQUAL "USA")
 else()
     message(FATAL_ERROR "R4_REGION must be USA or PAL, not '${R4_REGION}'")
 endif()
-# R4 owns its in-game settings surface; the UI model and renderer are upstream.
+# R4 owns the title layer of its custom in-game menu.
+set(R4L_TITLE_SOURCE "${CMAKE_CURRENT_SOURCE_DIR}/launcher/title_r4.cpp" CACHE FILEPATH
+    "R4 custom menu title layer" FORCE)
 include("${PSXRECOMP_ROOT}/runtime/runtime.cmake")
 
 # This project's own mod catalog. The FRAMEWORK stages it -- together with its
@@ -169,7 +171,7 @@ psxrecomp_add_game_runtime(psx-runtime
     GEN_MARKER "${R4_GEN_STEM}_dispatch.c"
     GEN_FULL_GLOB "${R4_GEN_STEM}_full_*.c"
     ${R4_WIZARD_ARGS}
-    EXTRAS_SOURCES ${R4_MOD_PLUGIN_SOURCES} "${CMAKE_CURRENT_SOURCE_DIR}/launcher/r4_menu.cpp"
+    EXTRAS_SOURCES ${R4_MOD_PLUGIN_SOURCES}
 )
 
 if(R4_REGION STREQUAL "PAL")

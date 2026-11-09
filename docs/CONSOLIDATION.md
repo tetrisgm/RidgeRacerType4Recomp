@@ -5,7 +5,7 @@ the owner’s custom-menu requirement. Branch preservation is valid, but it did
 not establish a complete feature audit. See the subsequent
 [history audit](recovery/HISTORY_AUDIT_20261109.md) for source comparisons,
 retained work, missing behavior and the restoration contract. The following
-records the `f9643421` package, not the target finalization state.
+records the `f9643421` package. The [completed custom-menu restoration](archive/CUSTOM_MENU_20261109.md) supersedes its menu implementation.
 
 Development is on game `master` in the Mac checkout. There is one local and
 one remote game branch, and one registered game worktree. No NAS or Windows

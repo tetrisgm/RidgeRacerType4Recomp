@@ -2,23 +2,26 @@
 
 R4: Ridge Racer Type 4 (USA, **SLUS-00797**), statically recompiled to a
 native runtime using [psxrecomp](https://github.com/RetroPortingToolKit/psxrecomp)
-and [recomp-ui](https://github.com/RetroPortingToolKit/recomp-ui).
+and [our custom menu](https://github.com/tetrisgm/recomp-launcher).
 This is an in-development preview, not a finished port.
 
 ## Current status
 
 `master` is the single game development line. It contains the owner-reviewed
 recovery and the rescued Max Detail / rewind XA fixes. Races retain the
-original cadence; the old fork's packet interpolation, custom launcher
-screens and hold-to-rewind implementation are not included.
+original cadence; the old fork's packet interpolation and hold-to-rewind
+implementation are not included.
 
-The engine is pinned to `tetrisgm/psxrecomp` master at `ae3eae8f`, consisting
-of upstream `c1f5cafd` plus five fixes under [upstream review](docs/UPSTREAM.md).
-The shared UI is upstream `817c2985`. Always use the recorded submodule pins.
-R4 selects an in-game settings menu on that UI: Esc/F10, Guide or Start+Back
-opens it over the race. Full rebinding and disc/card setup remain in the launcher.
-Mac Release, 29 CTests and hidden boot-to-race smoke pass. These checks do
-not qualify Windows play, all tracks, netplay or the owner's reported slowdown.
+The custom R4 menu opens at startup and over the game with **Select/Back**
+(or Esc/Guide). Options includes display settings, Modern/Classic controls,
+keyboard/gamepad bindings, input devices, deadzones, mods and volume. Save/Load
+State is on the main menu. Live settings apply immediately; restart-only changes
+are saved and labelled without restarting the race when you resume. PGXP stays on.
+
+The engine retains the upstream-based recovery and Steam Controller fixes.
+Always use the recorded submodule pins; see [upstream review](docs/UPSTREAM.md).
+Mac verification does not qualify Windows hardware, all tracks, netplay or the
+owner's reported crowded-race slowdown.
 
 Max Detail requires expanded 8 MB RAM to prevent primitive heap corruption.
 The owner's rank-8 crash route still needs manual normal-paced validation.
@@ -107,12 +110,9 @@ The bundled HD HUD pack is Kuid0us's artwork of the HUD (see
 
 The compiled game needs your own disc to run.
 
-### Hold to rewind
+### Rewind
 
-Hold F8 or the configured controller shortcut to play backwards, and release
-it to continue from that point. Modern controls use Y; Classic uses Select + Y.
-There is no snapshot selection menu. Reverse playback presents native PS1
-scanout and mutes audio; enhanced rendering resumes on release with PGXP still
-on. History captures every guest frame and stores changed native-state pages.
-See [phase-5 verification](docs/REWIND_PHASE5.md) for timing and reproducible
-TCP checks. Split-screen and netplay restrictions remain in force.
+The current recovery uses upstream's filmstrip selector with HD residency
+preserved across restore. It does not use the old fork's hold-to-rewind pipeline.
+Rewind is unavailable in netplay. Historical phase-5 reports describe the old
+architecture and are not current instructions.

@@ -7,6 +7,8 @@ from pathlib import Path
 import shutil
 import subprocess
 import sys
+import time
+import tomllib
 
 from dbg import cmd
 from check_ingame_menu import check_menu
@@ -20,6 +22,7 @@ def main():
     parser.add_argument('--build', type=Path, default=ROOT / 'build')
     parser.add_argument('--disc', type=Path, default=ROOT / 'disc/R4 - Ridge Racer Type 4 (USA).cue')
     parser.add_argument('--port', type=int, default=4798)
+    parser.add_argument('--menu-script', type=Path, help='exercise the custom boot menu before smoke')
     args = parser.parse_args()
     stage = args.output.resolve()
     stage.mkdir(parents=True, exist_ok=False)
@@ -32,13 +35,48 @@ def main():
     shutil.copytree(args.build.resolve() / 'mods/bundled', stage / 'mods/bundled')
     env = {k: v for k, v in os.environ.items() if not k.startswith('PSX_OVERLAY_')}
     env['SDL_AUDIODRIVER'] = 'dummy'
+    if args.menu_script:
+        env['R4L_OVERLAY_SCRIPT'] = str(args.menu_script.resolve())
     (stage / 'settings.toml').write_text('[video]\npresent_thread = false\n')
     launch = [str(stage / 'r4-runtime'), '--game', str(stage / 'game.toml'),
-              '--disc', str(args.disc.resolve()), '--no-launcher', '--hidden-window',
+              '--disc', str(args.disc.resolve()), '--hidden-window',
               '--debug-port', str(args.port), '--memcard-dir', str(stage / 'memcards')]
+    if not args.menu_script:
+        launch.append('--no-launcher')
     with (stage / 'runtime.log').open('w') as log:
         process = subprocess.Popen(launch, cwd=stage, env=env, stdout=log, stderr=subprocess.STDOUT)
         try:
+            if args.menu_script:
+                deadline = time.monotonic() + 180
+                captured = set()
+                while time.monotonic() < deadline:
+                    content = (stage / 'runtime.log').read_text(errors='replace')
+                    if process.poll() is not None:
+                        raise RuntimeError('Runtime exited during menu checks')
+                    for n in range(1, 6):
+                        marker = f'[r4l-script] sleep 3.0{n}'
+                        if marker in content and n not in captured:
+                            captured.add(n)
+                            cmd({'cmd': 'present_shot', 'path': str(stage / f'menu-{n}.png')}, port=args.port)
+                            (stage / f'menu-{n}.json').write_text(json.dumps(cmd({'cmd': 'menu_host'}, port=args.port), indent=2))
+                    if 'overlay script done' in content:
+                        if '[r4l-script] FAIL' in content or 'overlay script done, failures=0' not in content:
+                            raise RuntimeError('Custom menu script failed; inspect runtime.log')
+                        break
+                    time.sleep(.15)
+                else:
+                    raise RuntimeError('Custom menu script timed out')
+            if args.menu_script:
+                controls = json.loads((stage / 'menu-3.json').read_text())
+                volume = json.loads((stage / 'menu-5.json').read_text())
+                settings = tomllib.loads((stage / 'settings.toml').read_text())
+                assert controls['p2_device'] == 1 and controls['p1_deadzone'] == 8191, controls
+                assert 0 < volume['volume'] < 100, volume
+                assert settings['audio']['volume'] == volume['volume'], settings
+                assert settings['controller']['p2_device'] == 'keyboard', settings
+                assert settings['video']['present_thread'] is False, settings
+                assert 'cross = K' in (stage / 'keybinds.ini').read_text()
+                assert 'cross = x' in (stage / 'input.ini').read_text()
             with (stage / 'smoke.log').open('w') as log:
                 subprocess.run([sys.executable, str(ROOT / 'tools/smoke.py'),
                                 str(stage / 'shots'), '--port', str(args.port)],
@@ -69,6 +107,38 @@ def main():
             except subprocess.TimeoutExpired:
                 process.kill()
                 process.wait()
+
+    if args.menu_script:
+        env.pop('R4L_OVERLAY_SCRIPT', None)
+        with (stage / 'restart.log').open('w') as log:
+            process = subprocess.Popen(launch + ['--no-launcher'], cwd=stage, env=env,
+                                       stdout=log, stderr=subprocess.STDOUT)
+            try:
+                deadline = time.monotonic() + 45
+                while time.monotonic() < deadline:
+                    try:
+                        restored = cmd({'cmd': 'menu_host'}, port=args.port)
+                        if restored.get('attached'):
+                            break
+                    except (OSError, RuntimeError):
+                        pass
+                    if process.poll() is not None:
+                        raise RuntimeError('Isolated persistence restart exited')
+                    time.sleep(.2)
+                else:
+                    raise RuntimeError('Isolated persistence restart timed out')
+                assert restored['volume'] == volume['volume'], restored
+                assert restored['p2_device'] == 1 and restored['p1_deadzone'] == 8191, restored
+                assert restored['internal_resolution'] == -105, restored
+                assert restored['p1_cross_scancode'] == 14 and restored['p1_cross_button'] == 2, restored
+                (stage / 'restart-check.json').write_text(json.dumps(restored, indent=2) + '\n')
+            finally:
+                process.terminate()
+                try:
+                    process.wait(timeout=10)
+                except subprocess.TimeoutExpired:
+                    process.kill()
+                    process.wait()
 
 
 if __name__ == '__main__':

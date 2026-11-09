@@ -1,0 +1,66 @@
+# Actual custom overlay over the game; an isolated profile is required.
+wait 12
+open 1
+seen nav:Start Game
+seen nav:Options
+focused nav:Start Game
+expect disc_verified 1
+sleep 3.01
+tap nav:Options
+wait 6
+seen Resolution
+unseen Ultra
+tap Resolution
+wait 4
+tap 5x
+wait 6
+sleep 3.02
+tap nav:Controls
+wait 6
+seen Modern
+seen Classic
+tap Classic
+wait 5
+tap P2
+wait 3
+tap Input device
+wait 3
+tap Keyboard
+wait 5
+tap P1
+wait 3
+tap Stick deadzone
+wait 4
+sleep 3.03
+tap bind:k:Cross
+wait 3
+key K
+wait 5
+tap bind:p:Cross
+wait 3
+pad x
+wait 5
+sleep 3.04
+tap nav:Settings
+wait 4
+tap Volume
+wait 5
+sleep 3.05
+tap nav:Back
+wait 4
+seen nav:Start Game
+pad back
+wait 5
+open 0
+pad back
+wait 5
+open 1
+seen nav:Resume Game
+tap nav:Options
+wait 5
+pad back
+wait 5
+seen nav:Resume Game
+tap nav:Resume Game
+wait 6
+open 0

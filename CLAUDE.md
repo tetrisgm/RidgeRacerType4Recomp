@@ -58,8 +58,9 @@ This project inherits, in order:
   Then pin verified upstream master, change `.gitmodules` to
   `RetroPortingToolKit/psxrecomp`, and archive the fork. Track PRs in
   `docs/UPSTREAM.md` and pin changes in `docs/framework_pin_history.md`.
-- Use upstream `recomp-ui`; R4 selects its in-game menu in `launcher/r4_menu.cpp`.
-  The old custom `recomp-launcher` is retired.
+- Use the custom `recomp-launcher` menu through `launcher/title_r4.cpp`,
+  integrated into the game with Select/Back access. Keep its engine adapter
+  compatible with the upstream-based performance baseline.
 - Engine enhancements remain elective and opt-in. Preserve the faithful
   base path; game-owned enhancements belong in this repository.
 - Build and test only on the Mac. Before every push, pass a Release build,

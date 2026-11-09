@@ -1,3 +1,13 @@
+2026-11-09 custom menu restoration: engine `d585a728` retains the prior
+`ae3eae8f` performance/Steam Controller baseline and adds full menu settings,
+save-state operations, persistent volume and synchronized debug resizing.
+Custom UI `ef8150f` on recomp-launcher `r4/main` restores the original R4 skin,
+Select/Back navigation and controls/settings over the game. Required PGXP
+cannot be disabled; Resume preserves a race when restart-only edits are pending.
+Supported game and OpenBIOS regeneration leave generated C unchanged; audit
+metadata and the BIOS emitter fingerprint are refreshed. See
+[restoration validation](archive/CUSTOM_MENU_20261109.md).
+
 2026-11-09 native overlay packaging: engine/UI pins remain `006fb5bb` /
 `817c2985`. The framework's supported static AOT pipeline generated nine
 original-disc code images into ten committed C units, with 7,459 guarded

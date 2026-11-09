@@ -76,7 +76,7 @@ def main():
         build / '_deps/psx_libchdr-src/LICENSE.txt': 'libchdr-LICENSE.txt',
         build / '_deps/libjuice-src/LICENSE': 'libjuice-LICENSE',
         ROOT / 'recomp-ui/LICENSE': 'recomp-ui-LICENSE',
-        ROOT / 'recomp-ui/src/third_party/imgui/LICENSE.txt': 'imgui-LICENSE.txt',
+        ROOT / 'recomp-ui/third_party/imgui/LICENSE.txt': 'imgui-LICENSE.txt',
         ROOT / 'psxrecomp/lib/recomp-net/LICENSE': 'recomp-net-LICENSE',
         ROOT / 'psxrecomp/lib/retcomm-rbengine/LICENSE': 'rbengine-LICENSE',
         args.toolchain / 'LICENSE.TXT': 'llvm-mingw-LICENSE.txt',
@@ -106,7 +106,9 @@ all imported system/UCRT DLLs; no VC++ redistributable is imported. No installer
 admin rights or system changes are required. Keep this folder writable.
 
 Use your own USA BIN/CUE by path. From this folder:
-  r4-runtime.exe --disc "D:\\your-disc\\R4.cue" --no-launcher
+  r4-runtime.exe --disc "D:\\your-disc\\R4.cue"
+The custom game menu opens at startup. Select/Back opens it during play;
+Options includes controls, bindings, display and settings. Esc also opens it.
 OpenBIOS is bundled; no retail BIOS or game data is included. Do not copy SDKs,
 Git, compilers or agents to STEAMBOX. No overlay toolchain is packaged.
 
@@ -116,8 +118,8 @@ on Windows. Original-disc guards protect each native variant. Mac smoke checks
 native overlay execution with no interpreted R4 overlay PCs on that route;
 this is not an exhaustive proof for every mode or self-modified code path.
 
-In-game settings: Esc/F10, Guide or Start+Back. Arrows/D-pad navigate;
-Enter/A selects, Esc/B goes back. Full launcher ends the current session.
+In-game settings: Select/Back, Esc or Guide. Arrows/D-pad navigate;
+Enter/A selects; Back/B/Esc returns. Resume keeps your current race.
 
 Owner-only STEAMBOX checks:
 1. Boot to an active race using your own disc path.

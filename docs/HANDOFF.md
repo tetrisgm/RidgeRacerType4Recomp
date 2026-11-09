@@ -2,49 +2,34 @@
 
 ## Current — 2026-11-09
 
-The owner requires the original custom R4 menu integrated over the game,
-including controls and settings, accessible with Select/Back alone. Keep
-MStan’s recovery/performance work and the Steam Controller fixes. The generic
-menu in committed `f9643421` does not satisfy this requirement.
+The original custom R4 menu is restored through `launcher/title_r4.cpp` and
+custom UI `ef8150f`. Select/Back alone opens it over the game. Controls,
+bindings, device/deadzone settings, display, volume and save/load are wired to
+the current runtime. Engine `d585a728` preserves the MStan recovery and Steam
+Controller baseline. PGXP remains required; Resume keeps restart-only edits
+pending without discarding the race.
 
-The [history audit](recovery/HISTORY_AUDIT_20261109.md) records the chronological
-and source analysis, keep/restore/rework decisions, measurement limits and
-execution order. Its [scope receipt](recovery/HISTORY_AUDIT_20261109.json)
-identifies all indexed history, compared topics and unavailable old pins.
-The original [consolidation record](CONSOLIDATION.md) is historical.
+[Restoration validation](archive/CUSTOM_MENU_20261109.md) records the Mac
+Release, 29 CTests, UI fixtures, actual menu/save-load/persistence checks and
+native boot-to-race smoke. Local evidence is
+`analysis/custom-menu-20261109/qualified-02/`. The portable Windows candidate is
+`dist/windows/2026-11-09-custom-menu-01/`, cross-built on the Mac; use its
+checksums and BUILD.json. Prior consolidated packages have the generic menu.
 
-## Provisional restoration — not qualified
+## Remaining qualification
 
-Uncommitted work currently selects custom UI `0b89a344`, restores
-`launcher/title_r4.cpp` and its CMake integration, adds three launcher-header
-compatibility fields, and ports the old menu save-state host API. The initial
-custom-menu build passed before the save-state host port; no complete custom
-menu runtime qualification has been performed. The build directory is not the
-committed baseline binary. Patches are saved in
-`analysis/history-audit-20261109/provisional-*`.
-
-Do not call compilation restoration complete. Audit findings require adapting
-controls/device settings, host-owned graphics schemas, state operations,
-mounted-disc/artwork information, and lifecycle/input behavior. Follow the
-restoration contract in the audit before choosing further changes.
-
-## Preserved baseline and remaining work
-
-Game `f9643421` pins engine `ae3eae8f` and upstream UI `817c2985`. Its recorded
-Mac Release/29 CTest/native-overlay checks passed; evidence is
-`analysis/consolidation-20261109/consolidated-final/`. The portable
-`dist/windows/2026-11-09-consolidated-01/` contains the generic menu. Rebuild a
-new version after custom-menu qualification; do not relabel that package.
-
-Development has one local/remote game branch and one registered worktree.
-Historical sources and 44 old worktree directories are preserved locally at
-`/Users/shokunin/dev-archives/r4-20261109/`. Missing historical submodule objects
-and raw Windows recovery traces are documented in the audit; do not claim they
-were independently verified. NAS is unrelated; never access it for this work.
-Never connect to or operate STEAMBOX.
-
-The crowded-race 4K slowdown is unresolved. Normal-paced rank-8 crash regression,
+The crowded-race 4K slowdown is unresolved. Normal-paced rank-8 regression,
 physical Steam Controller/Steam Input, effects alignment, camera comfort,
-all-course and multiplayer qualification remain separate from menu acceptance.
-[Upstream review](UPSTREAM.md) and [Windows packaging](WINDOWS_BUILD.md) remain
-the applicable references. Preserve owner saves, PGXP and explicit settings.
+all-course and multiplayer play still need qualification. Windows execution
+is owner-only. Never access STEAMBOX or the unrelated NAS for development.
+
+## References
+
+- [History audit and unavailable evidence](recovery/HISTORY_AUDIT_20261109.md)
+- [Upstream review](UPSTREAM.md) and [pin history](framework_pin_history.md)
+- [Windows packaging](WINDOWS_BUILD.md)
+- [Historical consolidation](CONSOLIDATION.md)
+
+Game development remains on one local/remote master branch and one working
+checkout. Historical sources/old worktree directories remain locally preserved
+at `/Users/shokunin/dev-archives/r4-20261109/`.
