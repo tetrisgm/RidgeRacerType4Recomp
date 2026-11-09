@@ -2,39 +2,49 @@
 
 ## Current — 2026-11-09
 
-Game development is on `master`, with one local/remote game branch and one
-registered worktree. Engine fork master is `ae3eae8f`; UI remains upstream
-`817c2985`. All changes are intended for the consolidated finalization baseline.
+The owner requires the original custom R4 menu integrated over the game,
+including controls and settings, accessible with Select/Back alone. Keep
+MStan’s recovery/performance work and the Steam Controller fixes. The generic
+menu in committed `f9643421` does not satisfy this requirement.
 
-[Consolidation decisions and recovery](CONSOLIDATION.md) explain the retained
-MStan/upstream performance work, replaced inactive menu integration, recovered
-Steam Controller fixes and deferred renderer experiments. The 62 additional
-game topics and 44 old worktrees are preserved locally and retired from active
-work. The earlier 36 approved deletions remain in the historical receipts.
+The [history audit](recovery/HISTORY_AUDIT_20261109.md) records the chronological
+and source analysis, keep/restore/rework decisions, measurement limits and
+execution order. Its [scope receipt](recovery/HISTORY_AUDIT_20261109.json)
+identifies all indexed history, compared topics and unavailable old pins.
+The original [consolidation record](CONSOLIDATION.md) is historical.
 
-R4 now has a shared-UI in-game menu over the running game. Keyboard, controller
-menu events, mouse resume, pause/resume, mod persistence/restart notices and
-PGXP's locked enable switch have been checked. Full rebinding, disc/card and
-online setup remain in the full launcher, which ends the current session.
+## Provisional restoration — not qualified
 
-## Verification and package
+Uncommitted work currently selects custom UI `0b89a344`, restores
+`launcher/title_r4.cpp` and its CMake integration, adds three launcher-header
+compatibility fields, and ports the old menu save-state host API. The initial
+custom-menu build passed before the save-state host port; no complete custom
+menu runtime qualification has been performed. The build directory is not the
+committed baseline binary. Patches are saved in
+`analysis/history-audit-20261109/provisional-*`.
 
-Mac Release and 29 CTests pass. Hidden/dummy-audio smoke with
-`present_thread = false` records 7,203,494 native overlay dispatches, no R4
-interpreted overlay PCs and zero dispatch/segment misses. Evidence:
-`analysis/consolidation-20261109/consolidated-final/`.
+Do not call compilation restoration complete. Audit findings require adapting
+controls/device settings, host-owned graphics schemas, state operations,
+mounted-disc/artwork information, and lifecycle/input behavior. Follow the
+restoration contract in the audit before choosing further changes.
 
-The portable package is `dist/windows/2026-11-09-consolidated-01/`, built using [WINDOWS_BUILD.md](WINDOWS_BUILD.md),
-with 7,459 linked variants, system/UCRT-only imports and checksums. The NAS is
-unrelated to development and delivery. Never connect to or operate STEAMBOX.
-The owner chooses how to transfer the portable folder and tests it by hand.
+## Preserved baseline and remaining work
 
-## Remaining finalization
+Game `f9643421` pins engine `ae3eae8f` and upstream UI `817c2985`. Its recorded
+Mac Release/29 CTest/native-overlay checks passed; evidence is
+`analysis/consolidation-20261109/consolidated-final/`. The portable
+`dist/windows/2026-11-09-consolidated-01/` contains the generic menu. Rebuild a
+new version after custom-menu qualification; do not relabel that package.
 
-- Owner Windows race/menu/physical Steam Controller playtest, including the
-  normal-paced rank-8 route and 4K/Max Detail slowdown. Synthetic controller
-  events and turbo smoke do not prove those outcomes.
-- Review [upstream fixes](UPSTREAM.md), then qualify and record an upstream pin
-  before archiving the engine fork. PR branches are review artifacts.
-- Exhaustive game-mode/indirect-target coverage is not established by smoke.
-  Research leads remain game issues #106, #108 and #109.
+Development has one local/remote game branch and one registered worktree.
+Historical sources and 44 old worktree directories are preserved locally at
+`/Users/shokunin/dev-archives/r4-20261109/`. Missing historical submodule objects
+and raw Windows recovery traces are documented in the audit; do not claim they
+were independently verified. NAS is unrelated; never access it for this work.
+Never connect to or operate STEAMBOX.
+
+The crowded-race 4K slowdown is unresolved. Normal-paced rank-8 crash regression,
+physical Steam Controller/Steam Input, effects alignment, camera comfort,
+all-course and multiplayer qualification remain separate from menu acceptance.
+[Upstream review](UPSTREAM.md) and [Windows packaging](WINDOWS_BUILD.md) remain
+the applicable references. Preserve owner saves, PGXP and explicit settings.

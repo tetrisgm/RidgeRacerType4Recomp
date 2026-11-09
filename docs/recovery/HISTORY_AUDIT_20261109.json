@@ -1,0 +1,760 @@
+{
+  "date": "2026-11-09",
+  "baseline_game": "f9643421299ddc54d53d7661215aa04fbfe0f5d8",
+  "baseline_engine": "ae3eae8fbe24dc7b21b8fb9ac2b63fcc0eba35c2",
+  "baseline_ui": "817c2985d371f8d19d70d9d1d9629425ed6cfd68",
+  "scope": "Inventory and workstream/source/evidence review; not line-by-line review or runtime reproduction of every historical commit.",
+  "local_evidence": "/Users/shokunin/dev/ridgeracertype4/analysis/history-audit-20261109",
+  "indices": {
+    "game-index.json": "110945ea21bf6d487f57f3aa5f1940672090d86e2f4265d2ed07e920d4c033dc",
+    "submodule-pin-index.json": "ef43bb67aa99bd81b1f5f3f77c89998f563a69d4aba8fee918a8825578af74c9",
+    "topic-paths.json": "b08cb59a05836ac10dea9c8a1445bdca8634f88de2b8f0cf7ac6f30a235ba0bd",
+    "topic-content-comparison.json": "ffcf9d8acd705a7196a547f40ffb7c5168010211d3df5917e675d324a6bfd2f8",
+    "issue-106.json": "3911fdaa8c868deffb343e47204aa8b51f57545a89e29bf900082d3c9654cb95"
+  },
+  "game_commits_including_merges": 979,
+  "historical_pins": {
+    "psxrecomp": 252,
+    "recomp-ui": 41
+  },
+  "missing_pins": {
+    "psxrecomp": [
+      "6ce844f35ea1dca5850e321df415165e002c645d",
+      "56acf0593adccc7d61c2852edb9a24368b411885",
+      "7008eded35ac7a78848a4249ae3c392a1fdd2e92",
+      "ff3c0e160f3f0b3d0788481aaee7c8f82d76641e",
+      "c042434ce4329a891d4e1a4123d8e8e5e4bf5b2f",
+      "cc12e5025ba2c383742ca9ef89e7ee0018c1739d",
+      "5fe981b31accf2084aa0790e004c66accc5138a7",
+      "debaf870f487a7c0324059183d5797c595eba27c",
+      "3424e73e94484c7536aad2fcdf8b58e12cf9a163",
+      "402bd1b870e0c9fdcdd44918ac9712cccf666c42",
+      "7463cbd37235962b8ec14d0aebaa463d9b3df999",
+      "f70e3af0d29c60321f5cdc468468825d8e338d81",
+      "6df21f9013e19f76e68a50568b5e058a4e67d984",
+      "06e5fe32fff5139dac3b7995f2a68d7db2b6b0d0",
+      "b03023c519e6ef6d606a401a044496cad134a0d2",
+      "c9af9df65128e5ea26b16dc02bd4a93be7dbf5b4",
+      "e5e63a5b23d2413d1d697e3c06001a2fe406043d",
+      "3b8ec66e0898e1b85352306ac3e6b1ee58a04abe",
+      "bdbd3061200cae278d0fe7c9ae79c8985e452887",
+      "f66f7a4a7541a59cadc9a1ee1349d84f1d22462b",
+      "7e69a45c7762656c719b6463e5039f218e72531b",
+      "58b00b0af7cb268ac6b7f66b842d605375e493b2",
+      "1271208c7f433dbe5a27ffda2d22ab9c7068ea82",
+      "76649877cb9dd08c6e5f78ff1dd53b6bc2c4fd21",
+      "6d853e989f189d3e63ddd8050d47f56d2c9d6355",
+      "0e095422793ed04efbf0c6e53a3f7aa839404640",
+      "906f452fd04e105d54063adf755f90a2c4f91cda",
+      "3bc2ab023f4d68fa446c9c00113e0dfc52aab5a3",
+      "2cf5275a25ccd56158715a2f6fafcf35c0695123"
+    ],
+    "recomp-ui": [
+      "118320a808b10e1ec0b296447ba16a93cc96e47b",
+      "da0928f70eb1be0bee1cc0a2bdb2558e6c318717",
+      "287682db0c54efda36bfc1b942a5948080ca3045"
+    ]
+  },
+  "topic_comparisons": [
+    {
+      "ref": "refs/heads/backup/migrate-tool-commit-0930",
+      "tip": "e14a9c9b13dc1d752464f9d799b3d66681f78810",
+      "file_status_counts": {
+        "identical": 0,
+        "differs": 0,
+        "absent_current": 0
+      },
+      "meaning": "Compared changed implementation file blobs with baseline; differing blobs require workstream interpretation, not automatic rejection."
+    },
+    {
+      "ref": "refs/heads/backup/r3-pre-round5",
+      "tip": "2d24b076487c4afaf5457311d1e2bac101d96871",
+      "file_status_counts": {
+        "identical": 0,
+        "differs": 2,
+        "absent_current": 0
+      },
+      "meaning": "Compared changed implementation file blobs with baseline; differing blobs require workstream interpretation, not automatic rejection."
+    },
+    {
+      "ref": "refs/heads/backup/r3-pre-squash-0928",
+      "tip": "3b31ad80098ace4ce135a99edcb31206c5182483",
+      "file_status_counts": {
+        "identical": 0,
+        "differs": 2,
+        "absent_current": 0
+      },
+      "meaning": "Compared changed implementation file blobs with baseline; differing blobs require workstream interpretation, not automatic rejection."
+    },
+    {
+      "ref": "refs/heads/backup/r4-ws-ed0dc31",
+      "tip": "ed0dc319e25a2ed134436e80f2f1429074ed0303",
+      "file_status_counts": {
+        "identical": 2,
+        "differs": 13,
+        "absent_current": 1
+      },
+      "meaning": "Compared changed implementation file blobs with baseline; differing blobs require workstream interpretation, not automatic rejection."
+    },
+    {
+      "ref": "refs/heads/backup/ws-r4-7139de6",
+      "tip": "7139de655dd45a90afd51adde66e179ba4216e63",
+      "file_status_counts": {
+        "identical": 2,
+        "differs": 13,
+        "absent_current": 1
+      },
+      "meaning": "Compared changed implementation file blobs with baseline; differing blobs require workstream interpretation, not automatic rejection."
+    },
+    {
+      "ref": "refs/heads/codex/dynres-vs-verify",
+      "tip": "e0c8cd95e00a12ed95c6826f08f4b3104f91c663",
+      "file_status_counts": {
+        "identical": 8,
+        "differs": 23,
+        "absent_current": 9
+      },
+      "meaning": "Compared changed implementation file blobs with baseline; differing blobs require workstream interpretation, not automatic rejection."
+    },
+    {
+      "ref": "refs/heads/codex/frame-pr-r4",
+      "tip": "0a89793fb3a5d65d1628e1c20e2544abc93f37ff",
+      "file_status_counts": {
+        "identical": 4,
+        "differs": 12,
+        "absent_current": 8
+      },
+      "meaning": "Compared changed implementation file blobs with baseline; differing blobs require workstream interpretation, not automatic rejection."
+    },
+    {
+      "ref": "refs/heads/codex/package-first-run",
+      "tip": "bb9ce09341e23e7b5c529553db6f46bb9457cb38",
+      "file_status_counts": {
+        "identical": 8,
+        "differs": 23,
+        "absent_current": 9
+      },
+      "meaning": "Compared changed implementation file blobs with baseline; differing blobs require workstream interpretation, not automatic rejection."
+    },
+    {
+      "ref": "refs/heads/codex/perf-docs",
+      "tip": "8ccb4d04fb7934231bebf24d0425918d6e22c9a0",
+      "file_status_counts": {
+        "identical": 8,
+        "differs": 23,
+        "absent_current": 9
+      },
+      "meaning": "Compared changed implementation file blobs with baseline; differing blobs require workstream interpretation, not automatic rejection."
+    },
+    {
+      "ref": "refs/heads/codex/pgxp-delta-cost",
+      "tip": "2c3d343009e1519b8a32ec4d298e2e12c03e5bec",
+      "file_status_counts": {
+        "identical": 8,
+        "differs": 23,
+        "absent_current": 13
+      },
+      "meaning": "Compared changed implementation file blobs with baseline; differing blobs require workstream interpretation, not automatic rejection."
+    },
+    {
+      "ref": "refs/heads/codex/pgxp-emitter-r4",
+      "tip": "bfe584886f78dba9b4c48f68dc8cbcb2b40f324a",
+      "file_status_counts": {
+        "identical": 8,
+        "differs": 23,
+        "absent_current": 9
+      },
+      "meaning": "Compared changed implementation file blobs with baseline; differing blobs require workstream interpretation, not automatic rejection."
+    },
+    {
+      "ref": "refs/heads/codex/pgxp-fifo-r4",
+      "tip": "520eb4d51dda85909d937af63396968a25fbe9b7",
+      "file_status_counts": {
+        "identical": 3,
+        "differs": 11,
+        "absent_current": 0
+      },
+      "meaning": "Compared changed implementation file blobs with baseline; differing blobs require workstream interpretation, not automatic rejection."
+    },
+    {
+      "ref": "refs/heads/codex/pgxp-provenance-r4",
+      "tip": "80ec5c701b3919c1c07b56c68a975fb4ae1fa47d",
+      "file_status_counts": {
+        "identical": 3,
+        "differs": 11,
+        "absent_current": 0
+      },
+      "meaning": "Compared changed implementation file blobs with baseline; differing blobs require workstream interpretation, not automatic rejection."
+    },
+    {
+      "ref": "refs/heads/codex/r4-latest-visual-validation",
+      "tip": "b622cb86e3349e9195e1e27763bdd58788fc6b7b",
+      "file_status_counts": {
+        "identical": 8,
+        "differs": 23,
+        "absent_current": 9
+      },
+      "meaning": "Compared changed implementation file blobs with baseline; differing blobs require workstream interpretation, not automatic rejection."
+    },
+    {
+      "ref": "refs/heads/codex/r4-pass-wire",
+      "tip": "532d2225324016c6c1d99e45018eb71b557e905d",
+      "file_status_counts": {
+        "identical": 8,
+        "differs": 23,
+        "absent_current": 12
+      },
+      "meaning": "Compared changed implementation file blobs with baseline; differing blobs require workstream interpretation, not automatic rejection."
+    },
+    {
+      "ref": "refs/heads/codex/r4-visual-validation",
+      "tip": "7f31f4706876cc21a33cb8094277ca4aa821024e",
+      "file_status_counts": {
+        "identical": 8,
+        "differs": 23,
+        "absent_current": 9
+      },
+      "meaning": "Compared changed implementation file blobs with baseline; differing blobs require workstream interpretation, not automatic rejection."
+    },
+    {
+      "ref": "refs/heads/codex/snapshot-cost-r4",
+      "tip": "204a8e13630342d03b9dd09f49e00f4c3715ac4d",
+      "file_status_counts": {
+        "identical": 8,
+        "differs": 23,
+        "absent_current": 12
+      },
+      "meaning": "Compared changed implementation file blobs with baseline; differing blobs require workstream interpretation, not automatic rejection."
+    },
+    {
+      "ref": "refs/heads/feat/adaptive-widescreen",
+      "tip": "acc85e30723da66b5b08ea779287499a36b18b7a",
+      "file_status_counts": {
+        "identical": 3,
+        "differs": 12,
+        "absent_current": 1
+      },
+      "meaning": "Compared changed implementation file blobs with baseline; differing blobs require workstream interpretation, not automatic rejection."
+    },
+    {
+      "ref": "refs/heads/feat/bundled-releases",
+      "tip": "eb9fee3b678e0a99262a26484d2a9bf7b7503f85",
+      "file_status_counts": {
+        "identical": 6,
+        "differs": 6,
+        "absent_current": 0
+      },
+      "meaning": "Compared changed implementation file blobs with baseline; differing blobs require workstream interpretation, not automatic rejection."
+    },
+    {
+      "ref": "refs/heads/feat/dynamic-resolution",
+      "tip": "350ec8081bff14193d78e96781a6e4c6531d86a7",
+      "file_status_counts": {
+        "identical": 4,
+        "differs": 12,
+        "absent_current": 8
+      },
+      "meaning": "Compared changed implementation file blobs with baseline; differing blobs require workstream interpretation, not automatic rejection."
+    },
+    {
+      "ref": "refs/heads/feat/frame-rate",
+      "tip": "70b6554fd0949d70a79aef591103569b3f709c55",
+      "file_status_counts": {
+        "identical": 0,
+        "differs": 2,
+        "absent_current": 13
+      },
+      "meaning": "Compared changed implementation file blobs with baseline; differing blobs require workstream interpretation, not automatic rejection."
+    },
+    {
+      "ref": "refs/heads/feat/frame-rate-async",
+      "tip": "3bf4c9f6e8d6fbc03a744df39ee097fe819df54e",
+      "file_status_counts": {
+        "identical": 4,
+        "differs": 12,
+        "absent_current": 8
+      },
+      "meaning": "Compared changed implementation file blobs with baseline; differing blobs require workstream interpretation, not automatic rejection."
+    },
+    {
+      "ref": "refs/heads/feat/frame-rate-pass-cost",
+      "tip": "62795b9dfbbd9d5e0ca33960768e5493b61ddb6e",
+      "file_status_counts": {
+        "identical": 4,
+        "differs": 12,
+        "absent_current": 8
+      },
+      "meaning": "Compared changed implementation file blobs with baseline; differing blobs require workstream interpretation, not automatic rejection."
+    },
+    {
+      "ref": "refs/heads/feat/hide-rear-view-mirror",
+      "tip": "b51eed20094442f268312bc86bb4a681014f1d7d",
+      "file_status_counts": {
+        "identical": 2,
+        "differs": 5,
+        "absent_current": 0
+      },
+      "meaning": "Compared changed implementation file blobs with baseline; differing blobs require workstream interpretation, not automatic rejection."
+    },
+    {
+      "ref": "refs/heads/feat/internal-resolution",
+      "tip": "0bfc822710ce81dc9ba59c876e750ca1ba2652d2",
+      "file_status_counts": {
+        "identical": 0,
+        "differs": 2,
+        "absent_current": 0
+      },
+      "meaning": "Compared changed implementation file blobs with baseline; differing blobs require workstream interpretation, not automatic rejection."
+    },
+    {
+      "ref": "refs/heads/feat/jogcon",
+      "tip": "a83ab31ac26ede0c5ccbc6bbeaeca611d1694018",
+      "file_status_counts": {
+        "identical": 4,
+        "differs": 2,
+        "absent_current": 0
+      },
+      "meaning": "Compared changed implementation file blobs with baseline; differing blobs require workstream interpretation, not automatic rejection."
+    },
+    {
+      "ref": "refs/heads/feat/jogcon-force-feedback",
+      "tip": "9c31d8cedc58b0af3aa23b8a99c4fe02888e7f61",
+      "file_status_counts": {
+        "identical": 0,
+        "differs": 1,
+        "absent_current": 0
+      },
+      "meaning": "Compared changed implementation file blobs with baseline; differing blobs require workstream interpretation, not automatic rejection."
+    },
+    {
+      "ref": "refs/heads/feat/launcher-surface",
+      "tip": "70b9fa9867d426d1a39b1a85ac6e8deebbec43e1",
+      "file_status_counts": {
+        "identical": 2,
+        "differs": 4,
+        "absent_current": 1
+      },
+      "meaning": "Compared changed implementation file blobs with baseline; differing blobs require workstream interpretation, not automatic rejection."
+    },
+    {
+      "ref": "refs/heads/feat/link-input-proof",
+      "tip": "50d75a5a50c378052320660a51fb48d3a2e54880",
+      "file_status_counts": {
+        "identical": 5,
+        "differs": 6,
+        "absent_current": 1
+      },
+      "meaning": "Compared changed implementation file blobs with baseline; differing blobs require workstream interpretation, not automatic rejection."
+    },
+    {
+      "ref": "refs/heads/feat/live-mod-options",
+      "tip": "8ffac496f2ce5f9355574b8e6fdf2d201b6ac8b7",
+      "file_status_counts": {
+        "identical": 2,
+        "differs": 3,
+        "absent_current": 0
+      },
+      "meaning": "Compared changed implementation file blobs with baseline; differing blobs require workstream interpretation, not automatic rejection."
+    },
+    {
+      "ref": "refs/heads/feat/max-detail",
+      "tip": "83957d56f1f43521296ea7086266142e8b9728af",
+      "file_status_counts": {
+        "identical": 4,
+        "differs": 18,
+        "absent_current": 0
+      },
+      "meaning": "Compared changed implementation file blobs with baseline; differing blobs require workstream interpretation, not automatic rejection."
+    },
+    {
+      "ref": "refs/heads/feat/max-detail-pr",
+      "tip": "66e7d571df7aa327abb8b6b34d1e5a38ce207ab1",
+      "file_status_counts": {
+        "identical": 2,
+        "differs": 14,
+        "absent_current": 0
+      },
+      "meaning": "Compared changed implementation file blobs with baseline; differing blobs require workstream interpretation, not automatic rejection."
+    },
+    {
+      "ref": "refs/heads/feat/modern-controls",
+      "tip": "9f00894ad63c99e5d0cd472a5e8e9322d78ceb7d",
+      "file_status_counts": {
+        "identical": 4,
+        "differs": 7,
+        "absent_current": 0
+      },
+      "meaning": "Compared changed implementation file blobs with baseline; differing blobs require workstream interpretation, not automatic rejection."
+    },
+    {
+      "ref": "refs/heads/feat/modern-rumble",
+      "tip": "6a782bb0e09c454f09efd2598dea2ab72982e0a1",
+      "file_status_counts": {
+        "identical": 3,
+        "differs": 2,
+        "absent_current": 0
+      },
+      "meaning": "Compared changed implementation file blobs with baseline; differing blobs require workstream interpretation, not automatic rejection."
+    },
+    {
+      "ref": "refs/heads/feat/pgxp",
+      "tip": "76f3df78f70cac59f03e8c326495d9d1e8f0ee28",
+      "file_status_counts": {
+        "identical": 3,
+        "differs": 11,
+        "absent_current": 0
+      },
+      "meaning": "Compared changed implementation file blobs with baseline; differing blobs require workstream interpretation, not automatic rejection."
+    },
+    {
+      "ref": "refs/heads/feat/r4-defaults",
+      "tip": "e6795cb74f4be099e1cadda248065334d604152a",
+      "file_status_counts": {
+        "identical": 4,
+        "differs": 12,
+        "absent_current": 8
+      },
+      "meaning": "Compared changed implementation file blobs with baseline; differing blobs require workstream interpretation, not automatic rejection."
+    },
+    {
+      "ref": "refs/heads/feat/r4-font-enhancement",
+      "tip": "1ea671f80fe7adfb24f418536105126707b9e7e8",
+      "file_status_counts": {
+        "identical": 8,
+        "differs": 25,
+        "absent_current": 16
+      },
+      "meaning": "Compared changed implementation file blobs with baseline; differing blobs require workstream interpretation, not automatic rejection."
+    },
+    {
+      "ref": "refs/heads/feat/recomp-launcher",
+      "tip": "c955169f1dce99cc83b45f6c90e4b3eac8514287",
+      "file_status_counts": {
+        "identical": 0,
+        "differs": 1,
+        "absent_current": 0
+      },
+      "meaning": "Compared changed implementation file blobs with baseline; differing blobs require workstream interpretation, not automatic rejection."
+    },
+    {
+      "ref": "refs/heads/feat/vs-split",
+      "tip": "2b9ace74fc1a24d2aa38ead897e5f3686ebfff65",
+      "file_status_counts": {
+        "identical": 3,
+        "differs": 7,
+        "absent_current": 4
+      },
+      "meaning": "Compared changed implementation file blobs with baseline; differing blobs require workstream interpretation, not automatic rejection."
+    },
+    {
+      "ref": "refs/heads/feat/vs-split-pr",
+      "tip": "1424ffa019b690826928ac4a046e270fb9e2fa7e",
+      "file_status_counts": {
+        "identical": 0,
+        "differs": 1,
+        "absent_current": 4
+      },
+      "meaning": "Compared changed implementation file blobs with baseline; differing blobs require workstream interpretation, not automatic rejection."
+    },
+    {
+      "ref": "refs/heads/fix/widescreen-near-plane",
+      "tip": "21ca77cea9cff0931c6b93cad73546cad7060cd7",
+      "file_status_counts": {
+        "identical": 0,
+        "differs": 1,
+        "absent_current": 0
+      },
+      "meaning": "Compared changed implementation file blobs with baseline; differing blobs require workstream interpretation, not automatic rejection."
+    },
+    {
+      "ref": "refs/heads/integ/enhancements",
+      "tip": "b70d517c3d960247c67e4e6879593f9007090e21",
+      "file_status_counts": {
+        "identical": 3,
+        "differs": 13,
+        "absent_current": 14
+      },
+      "meaning": "Compared changed implementation file blobs with baseline; differing blobs require workstream interpretation, not automatic rejection."
+    },
+    {
+      "ref": "refs/heads/integ/jogcon-hd-ui-font",
+      "tip": "358279c304875d5a500f61762989a6387aae3288",
+      "file_status_counts": {
+        "identical": 12,
+        "differs": 25,
+        "absent_current": 16
+      },
+      "meaning": "Compared changed implementation file blobs with baseline; differing blobs require workstream interpretation, not automatic rejection."
+    },
+    {
+      "ref": "refs/heads/rc/0.8-master-local",
+      "tip": "3310b245addabbf7ba224045c8606ba21fc3aec8",
+      "file_status_counts": {
+        "identical": 1,
+        "differs": 0,
+        "absent_current": 0
+      },
+      "meaning": "Compared changed implementation file blobs with baseline; differing blobs require workstream interpretation, not automatic rejection."
+    },
+    {
+      "ref": "refs/heads/test/framerate-int",
+      "tip": "fa2ac0be4a8ebfea2dad96aab4d2bef8f271c005",
+      "file_status_counts": {
+        "identical": 5,
+        "differs": 20,
+        "absent_current": 9
+      },
+      "meaning": "Compared changed implementation file blobs with baseline; differing blobs require workstream interpretation, not automatic rejection."
+    },
+    {
+      "ref": "refs/heads/test/mod-session-hygiene",
+      "tip": "ca422346d942973915e4a206cb1830446af94f05",
+      "file_status_counts": {
+        "identical": 0,
+        "differs": 2,
+        "absent_current": 4
+      },
+      "meaning": "Compared changed implementation file blobs with baseline; differing blobs require workstream interpretation, not automatic rejection."
+    },
+    {
+      "ref": "refs/heads/test/overlay-compile-arch",
+      "tip": "774d82ef94d18d49757709e11f7ca551210c869c",
+      "file_status_counts": {
+        "identical": 3,
+        "differs": 7,
+        "absent_current": 0
+      },
+      "meaning": "Compared changed implementation file blobs with baseline; differing blobs require workstream interpretation, not automatic rejection."
+    },
+    {
+      "ref": "refs/heads/test/r4-defaults-cap-pin",
+      "tip": "8299492d45092c80ba46497037ff6a9529dc1f25",
+      "file_status_counts": {
+        "identical": 4,
+        "differs": 12,
+        "absent_current": 4
+      },
+      "meaning": "Compared changed implementation file blobs with baseline; differing blobs require workstream interpretation, not automatic rejection."
+    },
+    {
+      "ref": "refs/heads/test/segment-rollout",
+      "tip": "8af4cc0423f339b81749c25faac9caed29aec580",
+      "file_status_counts": {
+        "identical": 0,
+        "differs": 0,
+        "absent_current": 0
+      },
+      "meaning": "Compared changed implementation file blobs with baseline; differing blobs require workstream interpretation, not automatic rejection."
+    },
+    {
+      "ref": "refs/remotes/origin/audit/integrated-presentation-evidence",
+      "tip": "86da0485d669ad6c16ee4f5828dd5207d6337383",
+      "file_status_counts": {
+        "identical": 4,
+        "differs": 3,
+        "absent_current": 3
+      },
+      "meaning": "Compared changed implementation file blobs with baseline; differing blobs require workstream interpretation, not automatic rejection."
+    },
+    {
+      "ref": "refs/remotes/origin/feat/display-defaults",
+      "tip": "c1c039377c7966c71d8b9fd7c4ef6bdf005bc6ef",
+      "file_status_counts": {
+        "identical": 1,
+        "differs": 9,
+        "absent_current": 8
+      },
+      "meaning": "Compared changed implementation file blobs with baseline; differing blobs require workstream interpretation, not automatic rejection."
+    },
+    {
+      "ref": "refs/remotes/origin/feat/dynamic-resolution",
+      "tip": "8aa509b45aae5cfce64df202fe66eb8445a6ad73",
+      "file_status_counts": {
+        "identical": 0,
+        "differs": 1,
+        "absent_current": 0
+      },
+      "meaning": "Compared changed implementation file blobs with baseline; differing blobs require workstream interpretation, not automatic rejection."
+    },
+    {
+      "ref": "refs/remotes/origin/feat/frame-arch-3b-pgxp-audit",
+      "tip": "8debe2f8cc8803bfea478c2e18ca6e831685aa7d",
+      "file_status_counts": {
+        "identical": 3,
+        "differs": 4,
+        "absent_current": 1
+      },
+      "meaning": "Compared changed implementation file blobs with baseline; differing blobs require workstream interpretation, not automatic rejection."
+    },
+    {
+      "ref": "refs/remotes/origin/feat/frame-rate-leftover",
+      "tip": "d46ec97e19e9cbf7c7cd638c8fdb04486d2f7687",
+      "file_status_counts": {
+        "identical": 0,
+        "differs": 3,
+        "absent_current": 8
+      },
+      "meaning": "Compared changed implementation file blobs with baseline; differing blobs require workstream interpretation, not automatic rejection."
+    },
+    {
+      "ref": "refs/remotes/origin/feat/gcs-batch",
+      "tip": "1a653ed6243959616480fdb98273debd79b0d661",
+      "file_status_counts": {
+        "identical": 0,
+        "differs": 2,
+        "absent_current": 0
+      },
+      "meaning": "Compared changed implementation file blobs with baseline; differing blobs require workstream interpretation, not automatic rejection."
+    },
+    {
+      "ref": "refs/remotes/origin/feat/idle-skip-store-counters",
+      "tip": "fd77a9106f7c8fa1ceccf81be91b27062f2f6a9f",
+      "file_status_counts": {
+        "identical": 0,
+        "differs": 2,
+        "absent_current": 0
+      },
+      "meaning": "Compared changed implementation file blobs with baseline; differing blobs require workstream interpretation, not automatic rejection."
+    },
+    {
+      "ref": "refs/remotes/origin/feat/jogcon-force-feedback",
+      "tip": "4b00340551025948156aec351d7bdd174b8ed793",
+      "file_status_counts": {
+        "identical": 0,
+        "differs": 1,
+        "absent_current": 0
+      },
+      "meaning": "Compared changed implementation file blobs with baseline; differing blobs require workstream interpretation, not automatic rejection."
+    },
+    {
+      "ref": "refs/remotes/origin/feat/launcher-surface",
+      "tip": "2467c5b41a91f75590c74c48e4b0a4e34d48c481",
+      "file_status_counts": {
+        "identical": 2,
+        "differs": 4,
+        "absent_current": 1
+      },
+      "meaning": "Compared changed implementation file blobs with baseline; differing blobs require workstream interpretation, not automatic rejection."
+    },
+    {
+      "ref": "refs/remotes/origin/feat/live-graphics-menu",
+      "tip": "6c1a040f10c674ea4e348cc28253b90b96b07b70",
+      "file_status_counts": {
+        "identical": 0,
+        "differs": 1,
+        "absent_current": 2
+      },
+      "meaning": "Compared changed implementation file blobs with baseline; differing blobs require workstream interpretation, not automatic rejection."
+    },
+    {
+      "ref": "refs/remotes/origin/feat/live-mod-options",
+      "tip": "ba35590ea0bc86f7b8bf45de6608f35ad6ef1a03",
+      "file_status_counts": {
+        "identical": 2,
+        "differs": 3,
+        "absent_current": 0
+      },
+      "meaning": "Compared changed implementation file blobs with baseline; differing blobs require workstream interpretation, not automatic rejection."
+    },
+    {
+      "ref": "refs/remotes/origin/feat/quality-presets",
+      "tip": "9779b098095e5cc93ad8ac0ad9603f569e0ec62e",
+      "file_status_counts": {
+        "identical": 0,
+        "differs": 2,
+        "absent_current": 0
+      },
+      "meaning": "Compared changed implementation file blobs with baseline; differing blobs require workstream interpretation, not automatic rejection."
+    },
+    {
+      "ref": "refs/remotes/origin/feat/recomp-launcher",
+      "tip": "5c8bc5223063d3c46db434274bbaa754d12c92b5",
+      "file_status_counts": {
+        "identical": 0,
+        "differs": 1,
+        "absent_current": 0
+      },
+      "meaning": "Compared changed implementation file blobs with baseline; differing blobs require workstream interpretation, not automatic rejection."
+    },
+    {
+      "ref": "refs/remotes/origin/fix/draw-distance",
+      "tip": "da09faca8b28f43ea3b71b3eaf7a8273d6f8f603",
+      "file_status_counts": {
+        "identical": 0,
+        "differs": 10,
+        "absent_current": 7
+      },
+      "meaning": "Compared changed implementation file blobs with baseline; differing blobs require workstream interpretation, not automatic rejection."
+    },
+    {
+      "ref": "refs/remotes/origin/fix/online-desync",
+      "tip": "19c684786b296aa014f79142ad190f801a263dd0",
+      "file_status_counts": {
+        "identical": 7,
+        "differs": 8,
+        "absent_current": 1
+      },
+      "meaning": "Compared changed implementation file blobs with baseline; differing blobs require workstream interpretation, not automatic rejection."
+    },
+    {
+      "ref": "refs/remotes/origin/fix/present-no-drop",
+      "tip": "fb9e6d0f75c2dfb3a5017bbc8161e67032f05b3c",
+      "file_status_counts": {
+        "identical": 0,
+        "differs": 19,
+        "absent_current": 22
+      },
+      "meaning": "Compared changed implementation file blobs with baseline; differing blobs require workstream interpretation, not automatic rejection."
+    },
+    {
+      "ref": "refs/remotes/origin/fix/race-real-time",
+      "tip": "77d6ec9c4b72d263ee2b70ce79616f62a1ce9400",
+      "file_status_counts": {
+        "identical": 0,
+        "differs": 3,
+        "absent_current": 1
+      },
+      "meaning": "Compared changed implementation file blobs with baseline; differing blobs require workstream interpretation, not automatic rejection."
+    },
+    {
+      "ref": "refs/remotes/origin/fix/release-blocking-waits",
+      "tip": "97407750b421d68b8463603f4d28013d5d950894",
+      "file_status_counts": {
+        "identical": 5,
+        "differs": 3,
+        "absent_current": 4
+      },
+      "meaning": "Compared changed implementation file blobs with baseline; differing blobs require workstream interpretation, not automatic rejection."
+    },
+    {
+      "ref": "refs/remotes/origin/fix/repin-psxrecomp-9fe89fd7",
+      "tip": "86c7945990611c3427d26f4a26e80294ce513fb2",
+      "file_status_counts": {
+        "identical": 0,
+        "differs": 0,
+        "absent_current": 0
+      },
+      "meaning": "Compared changed implementation file blobs with baseline; differing blobs require workstream interpretation, not automatic rejection."
+    },
+    {
+      "ref": "refs/remotes/origin/fix/slowdowns",
+      "tip": "63554161469f3238bf355ea16662ca752943e5d0",
+      "file_status_counts": {
+        "identical": 0,
+        "differs": 2,
+        "absent_current": 5
+      },
+      "meaning": "Compared changed implementation file blobs with baseline; differing blobs require workstream interpretation, not automatic rejection."
+    },
+    {
+      "ref": "refs/remotes/origin/integrate/frame-arch-4-3",
+      "tip": "2875e38bc72521a12f74512a0536efbedbc943a6",
+      "file_status_counts": {
+        "identical": 4,
+        "differs": 3,
+        "absent_current": 1
+      },
+      "meaning": "Compared changed implementation file blobs with baseline; differing blobs require workstream interpretation, not automatic rejection."
+    }
+  ]
+}
