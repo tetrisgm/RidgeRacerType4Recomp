@@ -1,63 +1,29 @@
-# Upstream ledger
+# Upstream fixes
 
-R4 pins `tetrisgm/psxrecomp` `r4/main` (CLAUDE.md, fork model). Every change
-that fork carries over upstream master is listed here with its upstream PR.
-When this table is empty, re-pin to upstream master and archive the fork.
+R4 pins fork master `006fb5bb` (upstream `c1f5cafd` plus the three changes below).
+The fork master was fast-forwarded without rewriting history on 2026-11-08.
+Its old recovery/integration/topic refs are pending retirement; they are not
+additional development lines.
 
-Architecture phase-1 topic `feat/frame-arch-1-native-authority` through
-`464bc104` is merged to fork `r4/main` at `4f893c1a`. No upstream or R4 PR was
-opened. Native-authority verification and the remaining ownership/packet work
-are recorded in VERIFIED and FRAME_ARCHITECTURE. The old queued-VRAM-snapshot
-branch remains unmerged; native CPU snapshots supersede its authority path.
+| Fix | Upstream PR | Original commit |
+|---|---|---|
+| HD upload residency across rewind | [#860](https://github.com/RetroPortingToolKit/psxrecomp/pull/860) | `b9dcf919` |
+| HD replacement coverage over transparent native texels | [#861](https://github.com/RetroPortingToolKit/psxrecomp/pull/861) | `3a0502c5` |
+| XA music alone is not a rewind movie | [#862](https://github.com/RetroPortingToolKit/psxrecomp/pull/862) | `006fb5bb` |
 
-The latest full upstream-master sync is `d108e9a0` (2026-10-24). The current
-fork pin `e4efba40` (on `0bcc5a49`, below) additionally backports merged #761, #769–#772, #727's
-final pixel fixture, and #773's restore-scope repair. Full master sync was
-tested locally but cannot be promoted as a pin bump: upstream #766 removes
-Graphics presets and launcher settings still used by R4. A mechanical merge
-failed the R4 build. The fork retains those controls while their replacement
-is designed and verified. Windows R4 32/32 and Mac R4 29/29 tests pass on the
-targeted pin; generated game C is unchanged. The fork-only changes below remain.
+Each PR contains one fix over `c1f5cafd`. Mac integration validation uses all
+three together: Release, CTest 26/26, 40-step hidden/dummy-audio smoke with zero
+dispatch/segment misses; actual-ring rewind test passes and real-GL HD fixture
+passes 19 checks. PRs state this scope explicitly. Current upstream `9b914263`
+was inspected but not adopted without regeneration and full game validation.
 
-| Change | Topic branch | Upstream PR | State |
-|---|---|---|---|
-| Native authoritative VRAM, original GP0 capture, queued renderer controls and diagnostics | `feat/frame-arch-1-native-authority` | none | in fork `r4/main` via `4f893c1a`; phase-2 backpressure remains |
-| Opt-in main VBlank wall cadence and pre-wait pacing debt (`main_cadence`) | `fix/race-cadence-metrics` | none yet | `ac65fcf5`; live hidden-window diagnosis, no guest timing changes |
-| Live internal resolution, Windows borderless popup, pixel labels | `fix/display-playtest-20261028` | none yet | `a7122c59`; existing display playtest fixes carried by the performance pin |
-| Prefer Steam's active virtual pad over a silent physical Valve pad | `fix/prefer-steam-virtual-pad` | none yet | `487ec042`; carried by the performance pin |
-| Keyboard seat adopts a pad; Steam desktop-layout echo guard for physical Valve pads | `fix/steam-controller-outside-steam` | none yet | local (`80b058e6`), not pushed; needs hands-on Steam Controller check |
-| Avoid postfx GL texture-size driver queries for known renderer surfaces | `fix/postfx-known-dims` | none yet | in `r4/main` (`8a3bf9f1`); exact GL pixels on Windows and Mac |
-| Avoid composition-context GL framebuffer-binding queries per queued output | `fix/presenter-fbo-bindings` | none yet | in `r4/main` (`e1f2e457`); exact present-thread pixels on Windows and Mac |
-| Hold the last enhanced image when a packet-gap restage leaves the shown buffer native-only | `fix/packet-gap-stale-present` | none yet | in `r4/main` (`7d0db027`); Mac autopilot laps 0 single-frame 4:3 drops (was 10-13/lap) |
-| Map the bloom mask from region-pool surfaces at their own size | `fix/postfx-pool-surface-mask` | none yet | in `r4/main` (`91b54cd2`); Mac screen video while driving: ghost HUD frames 86/272 before, 0 after |
-| Keep interpolation instance identity stable across culled billboards | `fix/interp-stable-instances` | none yet | in `r4/main` (`8d14308b`); Mac full-res present bursts: floating-tree pop gone, 2-5 blinks/burst vs 2-6 baseline, peak 68 vs 140-200 |
-| Initialize fixed textured sampler uniforms once per shader program | `fix/gl-sampler-uniforms` | none yet | in `r4/main` (`6eead0f2`); exact direct/threaded GL pixels on Windows and Mac |
-| Publish the immutable PGXP seam baseline earlier during async reserve | `fix/seam-early-publish` | none yet | in `r4/main` (`c4eb8183`); more prepared seams consumed, exact PGXP verifier and Mac async timing passed |
-| Dynres: hold through savestate load | `r4/main` commit `ade1ecd3` | none yet | needs topic branch + PR |
-| Transactional render passes (60 fps) | `feat/render-pass-hd` | #727 | merged upstream; final HD pixel fixture backported to `r4/main`, full master sync pending #766 migration |
-| Queued render passes, 60 FPS pacing (docs/RENDER_PASSES.md) | `feat/render-pass-queued` | none yet | in `r4/main` |
-| MinGW test link fixes | `fix/mingw-test-link` | none yet | in `r4/main` (+2 r4/main-only commits) |
-| PGXP seam snapping (gaps sub-pixel positions open at crests / T-junctions) | `fix/pgxp-tjunction-seams` | none yet | in `r4/main` (`3c2e76f5`) |
-| Lazy seam normals (pure optimization of the fork's seam snapping) | `fix/pgxp-snap-lazy-normals` | none yet (depends on seam snapping) | in `r4/main` via fork PR #1 (`c8641551`) |
-| Queued-pass seam preparation on a persistent worker (depends on seam snapping and queued passes) | `feat/pgxp-seam-batch-prep` | none yet | in `r4/main` via fork PR #2 (`0421f31e`); ordered fallback remains serial when late |
-| Queued-interpolation postfx source mask/depth provenance | `feat/queued-postfx-provenance` | none yet | in `r4/main` (`990ffb00`); restores configured bloom on generated frames |
-| Host threading: cached GL blend/stencil state, batched render-thread ring, disc read-ahead worker (docs/HOST_THREADING.md) | `feat/host-threading` | none yet | in `r4/main` (`ba0a839e`) |
-| Threaded draw contexts, lean clones, OpenBIOS qualification and bounded worker pool | `feat/threaded-contexts` | none yet | in `r4/main`; private draw verified at 60 Hz |
-| Draw-isolation gate (debug only) | `feat/draw-isolation-gate` | none yet | in `r4/main` via `6f8b4621`; R4 PR #65 merged |
-| Timestamped async output, ordered presentation, depth/seam checkpoints and private GPU replay | `feat/output-timestamp-plan`, `feat/async-render-admission`, `fix/async-output-grid`, `fix/async-presentation-ownership`, `fix/async-untracked-copy` | none yet | in `r4/main`; pixel/ordering receipts in `docs/HANDOFF.md` |
-| HD provenance leases and async backup transfer | `fix/hd-tracking-generation`, `perf/async-backup-transfer` | none yet | in `r4/main`; PC/Mac component checks and R4 race probe |
-| Bounded presenter capacity and per-title slots | `feat/bounded-present-capacity` | none yet | in `r4/main`; eight slots at R4's 8K budget, direct fallback on allocation failure |
-| Dynamic-resolution variable-work verification and optional floor start | `fix/dynres-variable-output-work`, `feat/dynres-start-floor` | none yet | in `r4/main`; R4 selects the 1080p floor start |
-| Presenter cadence diagnostics and OpenBIOS stamp refresh | `feat/present-cadence-stats`, `fix/openbios-stamp-current` | none yet | in `r4/main`; stamp checked on PC/Mac |
-| Windows render-thread scheduling under host load | `fix/render-thread-priority` | none yet | in `r4/main` (`688380ef`); `PSX_RENDER_THREAD_PRIORITY=0` disables it |
-| Abort already-expired async GPU replay and roll back its private transaction | `fix/async-expiry` | none yet | in `r4/main` (`35b3849e`); Windows/Mac GL pixel and stencil parity, short R4 race with zero dispatch misses |
-| GL fixture harness repair: shared stubs, `run_gl_render_thread.py --compare-env` | `fix/gl-fixture-harness` | none yet | in `r4/main` (`c6c0c62b`); all 18 GL fixtures pass on the PC |
-| Exact texture modulation in the accurate blend basis ((texel8*colour8)>>7; was *2/255, +1/255 on modulated texels) | `fix/gl-fixture-harness` | none yet | in `r4/main` (`54369270`); mask-mode scale fixture, blend-accuracy oracle 0 mismatches |
-| HD texture-pack tracking: allocation-free miss path, index-driven invalidation test, CLUT hashed only for replaceable candidates | `perf/render-thread-cpu-hd-tracking` | none yet | in `r4/main` (`dfc39ed6`, `78ce6940`); identical render-thread digests, R4 HD_NOTE replay 944 -> 71 ms per 15 s |
-| Presenter: wait up to `PSX_PRESENT_ADMIT_WAIT_MS` (25) for a slot before refusing a timed output | `perf/render-thread-cpu-hd-tracking` | none yet | in `r4/main` (`0bcc5a49`); present_thread_test 123/123, R4 refusals 62-200 -> 3 per 15 s |
-| Dynamic resolution: CPU cost (GPU span excluded), queued-output cost, output-cadence guard; async GPU timer diagnostic | `feat/dynres-gpu-busy` | none yet | in `r4/main` (`e4efba40`); R4 8K/60 climbs 5 -> 13x, fixtures pass |
-| Caller-chosen render-pass rate activation and the resolved internal scale as mod API (`psx_mod_activate_render_pass_fps`, `psx_mod_internal_scale`) | `feat/render-pass-fps-internal-scale` | none yet | in `r4/main` (`e887344e`); render_pass_motion_test; R4 Auto rate (30 at 18x) |
-| Enable SDL's HIDAPI Steam Controller driver so the pad works without Steam Input | `fix/steam-controller-hidapi` | none yet | in `r4/main` (`389addf3`, merge `703f55f4`); build + hidden smoke, 0 misses |
-| Presenter `index` renamed `display_index` (collides with Darwin `index(3)`) | `fix/presenter-darwin-index` | none yet (folds into the frame-architecture PR) | in `r4/main` (`e965d043`); same rename built on the Mac |
-| Close the render-thread frame after each host-pause present (in-game menu / launcher at boot / savestate menu were black and ignored input) | `fix/paused-menu-present` | none yet | in `r4/main` (`a44c5467`); host_pause_first_present_test rejects an unclosed pause present; hidden boot menu draws and resumes |
-| Replay only the native tiles a packet changed (not their bounding box) and never draw in-between frames across packets the mailbox replaced; packet_cpu phase/tri/prep timers | `fix/packet-drop-presentation` | none yet | in `r4/main` (`734794d5`, merge `84d6ca22`); packet_presenter_test, packet_interpolation_stream_test, R4 ctest 25/25; PC replay 10 -> 2 ms per packet, replaced packets 25% -> 10% |
+Once all three merge, test the new upstream pin, regenerate as required,
+record it in `framework_pin_history.md`, switch `.gitmodules` upstream and
+archive the fork. Retire the three PR branches after landing. Do not merge
+unrelated upstream changes merely to remove the fork early.
+
+Recovered research leads now have durable game issues:
+[#108 idle-wait](https://github.com/tetrisgm/RidgeRacerType4Recomp/issues/108)
+and [#109 renderer/rewind/audit experiments](https://github.com/tetrisgm/RidgeRacerType4Recomp/issues/109).
+See [branch dispositions](archive/BRANCH_DISPOSITION_20261108.md).
+The [old ledger](archive/UPSTREAM-before-consolidation-20261108.md) is historical.

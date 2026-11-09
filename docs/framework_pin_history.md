@@ -1,3 +1,12 @@
+2026-11-08 consolidation: engine gitlink remains `006fb5bb`; fork `master`
+fast-forwarded to this exact pin, and `.gitmodules` now names `master`.
+No seed, recompiler, configuration or pin change occurred, so no regeneration
+was run. Upstream PRs #860–#862 carry the three fixes independently. Current
+upstream `9b914263` was not adopted without its required qualification.
+Mac Release, CTest 26/26 and 40-step hidden/dummy-audio smoke pass (race frame
+8497, zero dispatch/segment misses); rewind ownership test and 19 GL HD checks
+pass. UI remains upstream `817c2985`.
+
 # Framework pin history
 
 ## 2026-11-07: master adopts the recovery line; rewind XA density

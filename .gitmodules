@@ -5,4 +5,4 @@
 [submodule "psxrecomp"]
 	path = psxrecomp
 	url = https://github.com/tetrisgm/psxrecomp.git
-	branch = recovery/upstream-20261102
+	branch = master

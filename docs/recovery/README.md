@@ -1,9 +1,10 @@
 # Upstream recovery and owner preview
 
-This is a development recovery on `recovery/upstream-20261102`, published to a
-remote topic branch at the owner's request. It is not a release or a claim that
-every fork enhancement has been recovered. Default branches remain unchanged.
-Start with [the collaborator rebuild handoff](COLLABORATOR_HANDOFF.md).
+The owner-reviewed recovery is merged into `master`. This document retains
+historical validation evidence; it does not authorize old PC access, worktrees
+or branch workflows. All development is now on the Mac; Windows playtests are
+manual owner checks on STEAMBOX. Start with the [current README](../../README.md)
+and [handoff](../HANDOFF.md).
 
 Follow-up work from the owner's campaign playtest is tracked in the
 [feedback burndown and goal instructions](FEEDBACK_BURNDOWN.md): distant

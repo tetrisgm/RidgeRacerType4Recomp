@@ -1,0 +1,22 @@
+# macOS host, Windows x86-64 target; use tools/build_windows.sh.
+set(CMAKE_SYSTEM_NAME Windows)
+set(CMAKE_SYSTEM_PROCESSOR x86_64)
+if(NOT DEFINED ENV{LLVM_MINGW_ROOT})
+    message(FATAL_ERROR "Set LLVM_MINGW_ROOT to the extracted macOS llvm-mingw toolchain")
+endif()
+file(TO_CMAKE_PATH "$ENV{LLVM_MINGW_ROOT}" _llvm_mingw)
+set(CMAKE_C_COMPILER "${_llvm_mingw}/bin/x86_64-w64-mingw32-clang")
+set(CMAKE_CXX_COMPILER "${_llvm_mingw}/bin/x86_64-w64-mingw32-clang++")
+set(CMAKE_RC_COMPILER "${_llvm_mingw}/bin/x86_64-w64-mingw32-windres")
+set(CMAKE_AR "${_llvm_mingw}/bin/llvm-ar")
+set(CMAKE_RANLIB "${_llvm_mingw}/bin/llvm-ranlib")
+set(CMAKE_FIND_ROOT_PATH "${_llvm_mingw}/x86_64-w64-mingw32")
+set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
+set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
+set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
+set(CMAKE_FIND_ROOT_PATH_MODE_PACKAGE ONLY)
+set(ENV{PKG_CONFIG_PATH} "")
+set(ENV{PKG_CONFIG_LIBDIR} "${_llvm_mingw}/x86_64-w64-mingw32/lib/pkgconfig")
+# Pinned toml11 uses std::terminate without including <exception>.
+# libc++ does not expose it through the transitive headers used by libstdc++.
+set(CMAKE_CXX_FLAGS_INIT "-include exception")
