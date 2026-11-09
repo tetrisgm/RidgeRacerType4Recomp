@@ -1,6 +1,6 @@
 {
   "game_id": "SLUS-00797",
-  "recipe_input_sha256": "de5a4cc711086487b31c6c25fd52d2224ca9d6865e8d6c6034fbbac2ab58cd01",
+  "recipe_input_sha256": "04917b82ae43b43849ce25e9f5724b891e16cb7a895c6af2e9dd616bb66cc6b5",
   "recipe_count": 9,
   "all_pairs_valid": true,
   "all_guards_match_known_input_bytes": true,
@@ -37397,7 +37397,7 @@
     "recompiler_sha256": "81e9d479fe443959e4508d5f6be325c5fe6942ce970a3308b60e841cc586eaac",
     "cache_tag": "cg18_e060fa62_gc32b49b96_f0",
     "cps": true,
-    "gcc": "gcc",
+    "gcc": "/usr/bin/gcc",
     "tools": {
       "tools/aligned_lzss_banks.py": "21ce38804ebfca2cc323956172d0aa38fccf24a19e203f56056e2a1b6d71a012",
       "tools/aot_overlay_pipeline.py": "ddb3ad61b49a79ef0f826b5d0193a35a26efd55a4f330609196dcb5c99dec2dd",
@@ -37416,5 +37416,5 @@
     },
     "mod_packages": {}
   },
-  "generation_inputs_sha256": "ca766cecfee90ffbf37b793e65c09e98b694952e4e8f8ab76747dbf5ad4c40af"
+  "generation_inputs_sha256": "cde481f63e3604317edc41f2bc3903046e2e8496f1fdf433382e1dbb20a7bb1d"
 }

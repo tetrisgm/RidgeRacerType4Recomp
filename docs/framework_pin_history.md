@@ -417,3 +417,13 @@ interpolates only across the guest's own frame cadence, never across lost
 frames. Evidence: PC hidden run, replaced packets 25% -> 10%; Mac screen
 video, lap-timer steps continuous, no sliding billboards; unit tests pass.
 Mac packet cost is unchanged (Apple GL draw calls), so it still drops.
+
+## 2026-11-09 — consolidated controls and in-game UI
+
+Engine `ae3eae8f` retains the upstream-based performance baseline and the three
+HD/rewind fixes. It recovers direct-launch Steam Controller support (`fb34f318`)
+and connects session volume through the in-game host (`ae3eae8f`). UI remains
+upstream `817c2985`; R4 explicitly registers its shared-model menu. Full supported
+regeneration was run: boot-game and overlay C are unchanged; the overlay audit
+records the generator invocation's compiler-path identity. See
+[consolidation decisions](CONSOLIDATION.md) and [upstream tracking](UPSTREAM.md).

@@ -34,7 +34,7 @@ regenerate (`tools/regen.sh`).
 ```
 game.toml                 all per-title config: [video], [quality.*], mods, widescreen cull lists
 generated/                recompiled game C (committed); psxrecomp/generated/ holds OpenBIOS C
-launcher/title_r4.cpp     R4's layer on the launcher: which menu rows show, feature list, credits
+launcher/r4_menu.cpp      R4 in-game settings using the shared UI and menu-host contract
 src/mods/                 R4's trusted plugins (C/C++): widescreen renderer, frame-rate,
                           car effects, max-detail, race HUD, modern controls, camera look
 mods/preloaded/packages/  the mod manifests (options, defaults) shipped with the game

@@ -12,10 +12,12 @@ recovery and the rescued Max Detail / rewind XA fixes. Races retain the
 original cadence; the old fork's packet interpolation, custom launcher
 screens and hold-to-rewind implementation are not included.
 
-The engine is pinned to `tetrisgm/psxrecomp` master at `006fb5bb`, consisting
-of upstream `c1f5cafd` plus three fixes under [upstream review](docs/UPSTREAM.md).
+The engine is pinned to `tetrisgm/psxrecomp` master at `ae3eae8f`, consisting
+of upstream `c1f5cafd` plus five fixes under [upstream review](docs/UPSTREAM.md).
 The shared UI is upstream `817c2985`. Always use the recorded submodule pins.
-Mac Release, 28 CTests and hidden boot-to-race smoke pass. These checks do
+R4 selects an in-game settings menu on that UI: Esc/F10, Guide or Start+Back
+opens it over the race. Full rebinding and disc/card setup remain in the launcher.
+Mac Release, 29 CTests and hidden boot-to-race smoke pass. These checks do
 not qualify Windows play, all tracks, netplay or the owner's reported slowdown.
 
 Max Detail requires expanded 8 MB RAM to prevent primitive heap corruption.
@@ -67,14 +69,14 @@ All development stays on the Mac. Follow [WINDOWS_BUILD.md](docs/WINDOWS_BUILD.m
 for cross-compilation status, the build command and delivery checks.
 STEAMBOX is only a gaming console; the owner tests completed portable builds
 by hand. Never install Git, SDKs, compilers or agents there or connect to it.
-Delivery uses a new checksummed `builds/r4/<version>/` NAS folder. No public
+Builds stay in new checksummed `dist/windows/<version>/` folders on the Mac. No public
 release, installer or system configuration change is part of this workflow.
 
 ## References
 
 - [Workflow](CLAUDE.md), [pin history](docs/framework_pin_history.md),
   [upstream PRs](docs/UPSTREAM.md).
-- [Branch audit and pending deletions](docs/archive/BRANCH_DISPOSITION_20261108.md).
+- [Consolidation decisions and recovery](docs/CONSOLIDATION.md).
 - [Historical fork README](docs/archive/README-before-consolidation-20261108.md)
   records the old feature set; it is not a current feature claim.
 - [Widescreen](docs/WIDESCREEN.md), [disc identity](DISC.md),

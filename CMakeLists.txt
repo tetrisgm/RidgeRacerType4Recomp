@@ -31,6 +31,10 @@ project(RidgeRacerType4Recomp LANGUAGES C CXX)
 option(R4_BUILD_TESTS "Register R4's developer tests (needs tests/ and tools/)" OFF)
 if(R4_BUILD_TESTS)
     include(CTest)
+    add_executable(r4_controller_policy_test "${PSXRECOMP_ROOT}/runtime/tests/test_controller_type.cpp")
+    target_include_directories(r4_controller_policy_test PRIVATE "${PSXRECOMP_ROOT}/runtime/include")
+    target_compile_features(r4_controller_policy_test PRIVATE cxx_std_17)
+    add_test(NAME r4_controller_policy COMMAND r4_controller_policy_test)
     find_package(Python3 3.11 REQUIRED COMPONENTS Interpreter)
     add_test(NAME r4_windows_delivery
         COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_windows_delivery.py")
@@ -66,11 +70,7 @@ elseif(R4_REGION STREQUAL "USA")
 else()
     message(FATAL_ERROR "R4_REGION must be USA or PAL, not '${R4_REGION}'")
 endif()
-# R4 owns its launcher title layer: what the menus show, hide or automate,
-# the credits, and the disc-sourced menu art (launcher/title_r4.cpp,
-# recomp-launcher docs/SUPPORTED.md). It serves both regions (R4_REGION_PAL).
-set(R4L_TITLE_SOURCE "${CMAKE_CURRENT_SOURCE_DIR}/launcher/title_r4.cpp" CACHE FILEPATH
-    "recomp-launcher title layer for R4")
+# R4 owns its in-game settings surface; the UI model and renderer are upstream.
 include("${PSXRECOMP_ROOT}/runtime/runtime.cmake")
 
 # This project's own mod catalog. The FRAMEWORK stages it -- together with its
@@ -169,7 +169,7 @@ psxrecomp_add_game_runtime(psx-runtime
     GEN_MARKER "${R4_GEN_STEM}_dispatch.c"
     GEN_FULL_GLOB "${R4_GEN_STEM}_full_*.c"
     ${R4_WIZARD_ARGS}
-    EXTRAS_SOURCES ${R4_MOD_PLUGIN_SOURCES}
+    EXTRAS_SOURCES ${R4_MOD_PLUGIN_SOURCES} "${CMAKE_CURRENT_SOURCE_DIR}/launcher/r4_menu.cpp"
 )
 
 if(R4_REGION STREQUAL "PAL")

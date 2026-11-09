@@ -116,10 +116,15 @@ on Windows. Original-disc guards protect each native variant. Mac smoke checks
 native overlay execution with no interpreted R4 overlay PCs on that route;
 this is not an exhaustive proof for every mode or self-modified code path.
 
+In-game settings: Esc/F10, Guide or Start+Back. Arrows/D-pad navigate;
+Enter/A selects, Esc/B goes back. Full launcher ends the current session.
+
 Owner-only STEAMBOX checks:
 1. Boot to an active race using your own disc path.
 2. Replay the rank-8 crash route at normal pacing with Max Detail / 8 MB RAM.
 3. Check crowded-race game/audio speed at 4K/Max Detail, presentation thread off.
+4. Check in-game menus and the physical Steam Controller, both direct launch
+   and Steam Input launch. Synthetic Mac button events do not qualify these.
 Report build version, route and observations. Preserve native saves/settings.
 ''')
     files = sorted(p for p in stage.rglob('*') if p.is_file())

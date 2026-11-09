@@ -2,43 +2,39 @@
 
 ## Current — 2026-11-09
 
-Mac-only development on game `master`; engine remains fork master `006fb5bb`,
-UI upstream `817c2985`. [Upstream PRs #860–#862](UPSTREAM.md) remain the path
-back to upstream. The owner-approved `CLAUDE.md` workflow is applied.
+Game development is on `master`, with one local/remote game branch and one
+registered worktree. Engine fork master is `ae3eae8f`; UI remains upstream
+`817c2985`. All changes are intended for the consolidated finalization baseline.
 
-All **36 approved backup/archive/recovery branches are deleted**, including
-the public-EXE branch and our 17 maintainer-repo backups. [NAS preservation
-receipt](archive/BRANCH_PRESERVATION_20261109.json): all tips reconstructed and
-full Git integrity verified; EXE preserved. Original PC archive is unchanged.
+[Consolidation decisions and recovery](CONSOLIDATION.md) explain the retained
+MStan/upstream performance work, replaced inactive menu integration, recovered
+Steam Controller fixes and deferred renderer experiments. The 62 additional
+game topics and 44 old worktrees are preserved locally and retired from active
+work. The earlier 36 approved deletions remain in the historical receipts.
 
-Native overlay packaging is implemented: nine distinct original-disc images,
-7,459 guarded variants linked into the game, committed generated output and
-identity checks. No runtime compiler/cache is needed. See [overlay evidence](../aot/README.md)
-and [Windows build/delivery instructions](WINDOWS_BUILD.md).
+R4 now has a shared-UI in-game menu over the running game. Keyboard, controller
+menu events, mouse resume, pause/resume, mod persistence/restart notices and
+PGXP's locked enable switch have been checked. Full rebinding, disc/card and
+online setup remain in the full launcher, which ends the current session.
 
-## Verification and delivery
+## Verification and package
 
-Mac Release/CTest and isolated hidden smoke pass. Native smoke records 7.19M
-overlay dispatches, zero dispatch/segment misses and no interpreted R4-overlay
-PCs on the tested route. Windows x64 links all variants; imports are system/UCRT
-only, with checksummed versioned folders. Windows execution is not claimed.
-No STEAMBOX connection or operation occurred.
+Mac Release and 29 CTests pass. Hidden/dummy-audio smoke with
+`present_thread = false` records 7,203,494 native overlay dispatches, no R4
+interpreted overlay PCs and zero dispatch/segment misses. Evidence:
+`analysis/consolidation-20261109/consolidated-final/`.
 
-The NAS `builds` share remains unavailable; retain the final package under
-`dist/windows/` locally. Once the share exists, use `tools/deliver_windows.py`
-with a fresh version. The owner tests race boot, the normal-paced rank-8 route,
-and 4K/Max Detail slowdown, preserving `present_thread = false`.
+The portable package is `dist/windows/2026-11-09-consolidated-01/`, built using [WINDOWS_BUILD.md](WINDOWS_BUILD.md),
+with 7,459 linked variants, system/UCRT-only imports and checksums. The NAS is
+unrelated to development and delivery. Never connect to or operate STEAMBOX.
+The owner chooses how to transfer the portable folder and tests it by hand.
 
-## Next
+## Remaining finalization
 
-- Follow upstream review, then qualify/record the upstream pin and archive the fork.
-- Owner Windows playtest after NAS delivery; exhaustive mode/indirect-target
-  coverage is not established by the smoke route.
-- Old topic branches and 45 worktrees were outside the approved deletion list
-  and remain. Preserve their local data before retirement. Existing untracked
-  `recomp-ui/third_party/imgui` was left untouched.
-- Research leads: game issues [#108](https://github.com/tetrisgm/RidgeRacerType4Recomp/issues/108)
-  and [#109](https://github.com/tetrisgm/RidgeRacerType4Recomp/issues/109).
-
-Full PC archive: NAS `/volume3/pcbackup/pc-20261106/`. Additional verified
-preservation: `/volume2/homes/theadminaccount/r4-consolidation-20261109/`.
+- Owner Windows race/menu/physical Steam Controller playtest, including the
+  normal-paced rank-8 route and 4K/Max Detail slowdown. Synthetic controller
+  events and turbo smoke do not prove those outcomes.
+- Review [upstream fixes](UPSTREAM.md), then qualify and record an upstream pin
+  before archiving the engine fork. PR branches are review artifacts.
+- Exhaustive game-mode/indirect-target coverage is not established by smoke.
+  Research leads remain game issues #106, #108 and #109.

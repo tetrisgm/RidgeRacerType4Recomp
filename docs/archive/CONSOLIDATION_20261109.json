@@ -1,0 +1,564 @@
+{
+  "date": "2026-11-09",
+  "authorization": "Owner requested one development branch and authorized judgment to consolidate and clean up.",
+  "retained_game_branch": "master",
+  "local_archive": "/Users/shokunin/dev-archives/r4-20261109",
+  "bundle_sha256": "2a1b8ed509bec7c37360d9291ffc476da779300e7efd94ee2c51208986e51599",
+  "bundle_verification": "git bundle verify passed; every deleted local/remote tip matched bundle list-heads before deletion",
+  "worktree_preservation": "44 directories moved intact, with worktree Git metadata and staged/working binary patches; no source or ignored files deleted",
+  "remote_deletion": "Atomic push with expected-tip leases; 62 remote topic heads deleted",
+  "branches": [
+    {
+      "ref": "refs/remotes/origin/audit/integrated-presentation-evidence",
+      "oid": "86da0485d669ad6c16ee4f5828dd5207d6337383",
+      "unique_commits": [
+        "86da0485 Record per-slot render attribution and reject incomplete audit traces",
+        "eabd9abd Add hidden integrated presentation and audio audit harness",
+        "2875e38b Pin integrated frame surfaces and regenerate game output",
+        "ef8a34f4 Integrate R4 packet interpolation with PGXP audit for functional validation",
+        "8debe2f8 Freeze Car Effects with guest simulation and close the PGXP audit",
+        "bfb5b242 Record PGXP buffer stability fix and complete audit evidence",
+        "1c01c462 Record phase 3b PGXP audit and restore Car Effects draw callback"
+      ]
+    },
+    {
+      "ref": "refs/remotes/origin/bump/psxrecomp-bloom-mask",
+      "oid": "a41fde8ed89ec18cee088ec3407b037c6efc4bf3",
+      "unique_commits": []
+    },
+    {
+      "ref": "refs/remotes/origin/bump/psxrecomp-drop-presentation",
+      "oid": "663cb16e9fb3369f52e725d51a4bc2dd25bc82b0",
+      "unique_commits": []
+    },
+    {
+      "ref": "refs/remotes/origin/bump/psxrecomp-interp-instances",
+      "oid": "688ced0f6a2c79c82efc159cfda780464939da7d",
+      "unique_commits": []
+    },
+    {
+      "ref": "refs/remotes/origin/bump/psxrecomp-packet-gap-hold",
+      "oid": "86d85f622cd4e647eab781999eb8e9bdc789ad84",
+      "unique_commits": []
+    },
+    {
+      "ref": "refs/remotes/origin/docs/codex-prompt",
+      "oid": "4a8b6de0fba1fc50bc4166960e83d70ae2ae09de",
+      "unique_commits": []
+    },
+    {
+      "ref": "refs/remotes/origin/docs/handoff-threading",
+      "oid": "fcf019006cb185c7b74b8523823cb2880f0831a9",
+      "unique_commits": []
+    },
+    {
+      "ref": "refs/remotes/origin/docs/player-guide",
+      "oid": "40dd1941bd6c334225337b8ce01f9bf3b14f176a",
+      "unique_commits": []
+    },
+    {
+      "ref": "refs/remotes/origin/feat/adaptive-widescreen",
+      "oid": "acc85e30723da66b5b08ea779287499a36b18b7a",
+      "unique_commits": [
+        "acc85e30 docs: a wall beside the car leaves a band in wide views (R4's near plane)",
+        "f729baa7 docs: widescreen on merged psxrecomp master; identity via fp_identity.py",
+        "7d92ba70 Document where Fit to Window runs out of course (about 65:9)",
+        "a22830e9 docs: record the 2P VS, mirror and shards-on checks",
+        "ec9d9eec tools: pad2.py for 2P VS captures; smoke.py engages the wide view",
+        "71ce7527 Make the R4 tests developer-only so release zips can configure",
+        "04119af1 docs: widescreen guide, limitations, handoff",
+        "00a1f77b Retire renderer/adaptive/ and the R4_ADAPTIVE_RENDERER option",
+        "e783b304 Add r4.enhancement.widescreen: native-wide races, edge-anchored HUD",
+        "3a4c2d6f tools: add mod_state.py to enable a mod for --no-launcher runs",
+        "194fa300 tools: add r4_ws_scan.py, the widescreen cull-site scanner",
+        "0d71bc62 Pin psxrecomp master 470f03b7 and recomp-ui master 65833d7"
+      ]
+    },
+    {
+      "ref": "refs/remotes/origin/feat/base-r4-main",
+      "oid": "313ac0c22efc80d9066166dfd2b167a2727f7f0b",
+      "unique_commits": []
+    },
+    {
+      "ref": "refs/remotes/origin/feat/bundled-releases-v2",
+      "oid": "f18a0daeb518de6efda642083c9324e3d41958b3",
+      "unique_commits": []
+    },
+    {
+      "ref": "refs/remotes/origin/feat/camera-lookaround",
+      "oid": "0c8f54f3159fa9f1e6c29c12db01205a93abf143",
+      "unique_commits": []
+    },
+    {
+      "ref": "refs/remotes/origin/feat/display-defaults",
+      "oid": "c1c039377c7966c71d8b9fd7c4ef6bdf005bc6ef",
+      "unique_commits": [
+        "c1c03937 Pin psxrecomp #532: widescreen holds full speed at Match display",
+        "eb9c0786 Docs: what is on by default, how to turn it off, measured cost",
+        "ee08fecd Turn widescreen, frame rate and Match display on by default",
+        "6132c6bf Merge dynamic resolution (720p floor) into the display defaults",
+        "d46ec97e Pin history: name the pacing stack's PRs (#514-#518)",
+        "02012fcc Check that the psxrecomp pin has what R4 relies on",
+        "7f29221a Frame Rate: add an Unlimited rate; document leftover-time frames",
+        "b17c28ad Frame Rate: in-between frames only in leftover time, never a crossfade",
+        "a6c70040 Pin psxrecomp to the local frame-rate pacing stack",
+        "8aa509b4 Turn on dynamic resolution with a 720p floor"
+      ]
+    },
+    {
+      "ref": "refs/remotes/origin/feat/display-defaults-v2",
+      "oid": "9f357405b3a7d827aec7b561b256f0862f736095",
+      "unique_commits": []
+    },
+    {
+      "ref": "refs/remotes/origin/feat/dynamic-resolution",
+      "oid": "8aa509b45aae5cfce64df202fe66eb8445a6ad73",
+      "unique_commits": [
+        "8aa509b4 Turn on dynamic resolution with a 720p floor"
+      ]
+    },
+    {
+      "ref": "refs/remotes/origin/feat/frame-arch-3b-pgxp-audit",
+      "oid": "8debe2f8cc8803bfea478c2e18ca6e831685aa7d",
+      "unique_commits": [
+        "8debe2f8 Freeze Car Effects with guest simulation and close the PGXP audit",
+        "bfb5b242 Record PGXP buffer stability fix and complete audit evidence",
+        "1c01c462 Record phase 3b PGXP audit and restore Car Effects draw callback"
+      ]
+    },
+    {
+      "ref": "refs/remotes/origin/feat/frame-arch-4-interp",
+      "oid": "351dfbc0153be86acd867a2492402c9d2bbb6b27",
+      "unique_commits": []
+    },
+    {
+      "ref": "refs/remotes/origin/feat/frame-arch-5-rewind",
+      "oid": "21d2a5084a3b95571477f1b0f4b5ea3a2e13ddca",
+      "unique_commits": []
+    },
+    {
+      "ref": "refs/remotes/origin/feat/frame-arch-final",
+      "oid": "9e4da42ac40e27407fa7fd9e0edc1755998c52e9",
+      "unique_commits": []
+    },
+    {
+      "ref": "refs/remotes/origin/feat/frame-rate",
+      "oid": "70b6554fd0949d70a79aef591103569b3f709c55",
+      "unique_commits": [
+        "70b6554f Merge master (widescreen #2) into feat/frame-rate",
+        "cc29eee0 Frame Rate: fall back to frame blend when a quarter of the plans are shed",
+        "15b154fd Frame Rate: fall back to frame blend when every plan is shed for time",
+        "74257c2d Make the Frame Rate tests developer-only so release zips can configure",
+        "2e22c879 docs: R4 Frame Rate in the README and package notes",
+        "9776b383 Frame Rate: name race modes from runs; keep VS split screen stock until verified",
+        "29740d02 Frame Rate: hooks owned by the plugin id; frame blend while passes are unavailable",
+        "e7440592 Frame Rate: keep interpolating after a rolled-back pass",
+        "f7a07093 Interpolated in-between race frames (render passes)",
+        "f2939147 Add the R4 Frame Rate package (default off)",
+        "85e562c1 Pin psxrecomp master 470f03b7 and recomp-ui master 65833d7"
+      ]
+    },
+    {
+      "ref": "refs/remotes/origin/feat/frame-rate-leftover",
+      "oid": "d46ec97e19e9cbf7c7cd638c8fdb04486d2f7687",
+      "unique_commits": [
+        "d46ec97e Pin history: name the pacing stack's PRs (#514-#518)",
+        "02012fcc Check that the psxrecomp pin has what R4 relies on",
+        "7f29221a Frame Rate: add an Unlimited rate; document leftover-time frames",
+        "b17c28ad Frame Rate: in-between frames only in leftover time, never a crossfade",
+        "a6c70040 Pin psxrecomp to the local frame-rate pacing stack"
+      ]
+    },
+    {
+      "ref": "refs/remotes/origin/feat/gcs-batch",
+      "oid": "1a653ed6243959616480fdb98273debd79b0d661",
+      "unique_commits": [
+        "1a653ed6 Re-pin psxrecomp to the rebased #597 head (7fe0414d)",
+        "39e0cfbe Re-pin psxrecomp to the rebased #597 head (d7c6175c)",
+        "60eac580 Re-pin psxrecomp to the rebased PR head (ed3d3124)",
+        "71235a5a Re-pin psxrecomp to the reviewed PR branch (ae09e759)",
+        "20396615 Batch the scaled CPU charge in races (guest_cycle_scale_batch)"
+      ]
+    },
+    {
+      "ref": "refs/remotes/origin/feat/hd-hud",
+      "oid": "c8f6501671da89b0768fb3151aa9dd6d72ba7cae",
+      "unique_commits": []
+    },
+    {
+      "ref": "refs/remotes/origin/feat/hide-rear-view-mirror",
+      "oid": "8c9eacc4165abf32b94217e44f088a2a0a84ea36",
+      "unique_commits": []
+    },
+    {
+      "ref": "refs/remotes/origin/feat/idle-skip-store-counters",
+      "oid": "fd77a9106f7c8fa1ceccf81be91b27062f2f6a9f",
+      "unique_commits": [
+        "fd77a910 Re-pin psxrecomp to the rebased #590 head (684c671d)",
+        "6269f495 Re-pin psxrecomp to the rebased #590 head (06d5d4ff)",
+        "2a646a7b idle_skip: declare v_wait as the audited store-counter site",
+        "44f906d1 Re-pin psxrecomp to the rebased PR head (3db26f6b)",
+        "b71c4927 Re-pin psxrecomp to the reviewed PR branch (68058123)",
+        "a70c97ac Elide PsyQ v_wait in races (idle_skip store-counter loops)"
+      ]
+    },
+    {
+      "ref": "refs/remotes/origin/feat/internal-resolution",
+      "oid": "0bfc822710ce81dc9ba59c876e750ca1ba2652d2",
+      "unique_commits": [
+        "0bfc8227 Merge master (widescreen #2, frame rate #3) into feat/internal-resolution",
+        "5e5b76ab Internal resolution presets up to true 8K",
+        "b8fba8af Pin psxrecomp master 470f03b7 and recomp-ui 929cf6f (recomp-ui#71)"
+      ]
+    },
+    {
+      "ref": "refs/remotes/origin/feat/jogcon",
+      "oid": "38d32710a8d2decfd9679f1f1db255f7899717da",
+      "unique_commits": []
+    },
+    {
+      "ref": "refs/remotes/origin/feat/jogcon-force-feedback",
+      "oid": "4b00340551025948156aec351d7bdd174b8ed793",
+      "unique_commits": [
+        "4b003405 Pin psxrecomp to #609 head (2d3e3f69: provider-neutral setting macro)",
+        "6039aec9 Pin recomp-ui back to master (41c88ff); the setting field lives in recomp-launcher",
+        "d028b453 JogCon wheel force feedback: player setting, off by default",
+        "8a28e691 JogCon force feedback: off by default (owner decision)",
+        "7894268f JogCon force feedback: experimental opt-in (psxrecomp#609 review)",
+        "e2344e54 JogCon force feedback on wheels (opt in to psxrecomp#609)"
+      ]
+    },
+    {
+      "ref": "refs/remotes/origin/feat/launcher-surface",
+      "oid": "2467c5b41a91f75590c74c48e4b0a4e34d48c481",
+      "unique_commits": [
+        "2467c5b4 Pin psxrecomp 83f14688 (#603 provider-neutral menu contract) and recomp-launcher ed25c42; R4 selects recomp-launcher as its menu provider",
+        "71448ecc Surface: show the Wheel force feedback (experimental) toggle",
+        "e414dd25 Own the launcher title layer: R4's surfacing decisions and disc-sourced menu art",
+        "ba35590e Live mod options in the in-game menu: Controls scheme and Camera look",
+        "5c8bc522 Pin psxrecomp 83f14688 (#603 provider-neutral menu contract) and recomp-launcher ed25c42",
+        "475ef159 Pin recomp-launcher to main abdb2cb (includes the force-feedback toggle, recomp-launcher #1)",
+        "2f1b9a4f README: recomp-launcher link to RetroPortingToolKit",
+        "e1989fd6 recomp-launcher moved to RetroPortingToolKit/recomp-launcher",
+        "1aea0b9f Pin history: recomp-launcher 05964c0 (Wheel force feedback toggle)",
+        "2c0db253 Pin recomp-launcher to the Wheel force feedback toggle (05964c0)",
+        "8920fdd1 Pin history: nested recomp-net / rbengine columns",
+        "d47c5628 Release (macOS): never link Homebrew OpenSSL",
+        "5e344b1f Use recomp-launcher with the in-game overlay"
+      ]
+    },
+    {
+      "ref": "refs/remotes/origin/feat/link-battle",
+      "oid": "4f92501e9d8382f5f2cd8079b225dbd0e1f99681",
+      "unique_commits": []
+    },
+    {
+      "ref": "refs/remotes/origin/feat/live-graphics-menu",
+      "oid": "6c1a040f10c674ea4e348cc28253b90b96b07b70",
+      "unique_commits": [
+        "6c1a040f Graphics menu: every switch on one page, applying live"
+      ]
+    },
+    {
+      "ref": "refs/remotes/origin/feat/live-mod-options",
+      "oid": "ba35590ea0bc86f7b8bf45de6608f35ad6ef1a03",
+      "unique_commits": [
+        "ba35590e Live mod options in the in-game menu: Controls scheme and Camera look",
+        "5c8bc522 Pin psxrecomp 83f14688 (#603 provider-neutral menu contract) and recomp-launcher ed25c42",
+        "475ef159 Pin recomp-launcher to main abdb2cb (includes the force-feedback toggle, recomp-launcher #1)",
+        "2f1b9a4f README: recomp-launcher link to RetroPortingToolKit",
+        "e1989fd6 recomp-launcher moved to RetroPortingToolKit/recomp-launcher",
+        "1aea0b9f Pin history: recomp-launcher 05964c0 (Wheel force feedback toggle)",
+        "2c0db253 Pin recomp-launcher to the Wheel force feedback toggle (05964c0)",
+        "8920fdd1 Pin history: nested recomp-net / rbengine columns",
+        "d47c5628 Release (macOS): never link Homebrew OpenSSL",
+        "5e344b1f Use recomp-launcher with the in-game overlay"
+      ]
+    },
+    {
+      "ref": "refs/remotes/origin/feat/max-detail",
+      "oid": "849dd80e1644edeec028364a75bb310e9db28c7f",
+      "unique_commits": []
+    },
+    {
+      "ref": "refs/remotes/origin/feat/modern-controls",
+      "oid": "d43c45fcd7f825ce37c79b7c79d568d1ba7d2d46",
+      "unique_commits": []
+    },
+    {
+      "ref": "refs/remotes/origin/feat/owner-defaults-20261027",
+      "oid": "a5cecd73c27b8d88fe0080d7f045f0cca029927b",
+      "unique_commits": []
+    },
+    {
+      "ref": "refs/remotes/origin/feat/pgxp-default",
+      "oid": "cc9439724093483de5bff57f6df855c1ff240529",
+      "unique_commits": []
+    },
+    {
+      "ref": "refs/remotes/origin/feat/quality-presets",
+      "oid": "9779b098095e5cc93ad8ac0ad9603f569e0ec62e",
+      "unique_commits": [
+        "9779b098 Re-pin psxrecomp to the rebased #591 head (d4bfaad3)",
+        "c9417f4b Re-pin psxrecomp to the rebased #591 head (d324a85d)",
+        "f3962af8 presets: bloom on in Medium too; only Low drops it",
+        "13eb9ef3 Re-pin psxrecomp to the rebased #591 head (6af75ee6), recomp-ui to master",
+        "73430f33 Re-pin psxrecomp to the reviewed PR branch (b4fd771b)",
+        "fd4b4120 Ultra by default with the dynamic safety net; Low for low-end machines",
+        "1ed0c175 Low preset: PGXP extras off (PGXP core stays on)",
+        "d73021e8 Graphics presets: Low / Medium / High / Ultra with hardware detection"
+      ]
+    },
+    {
+      "ref": "refs/remotes/origin/feat/recomp-launcher",
+      "oid": "5c8bc5223063d3c46db434274bbaa754d12c92b5",
+      "unique_commits": [
+        "5c8bc522 Pin psxrecomp 83f14688 (#603 provider-neutral menu contract) and recomp-launcher ed25c42",
+        "475ef159 Pin recomp-launcher to main abdb2cb (includes the force-feedback toggle, recomp-launcher #1)",
+        "2f1b9a4f README: recomp-launcher link to RetroPortingToolKit",
+        "e1989fd6 recomp-launcher moved to RetroPortingToolKit/recomp-launcher",
+        "1aea0b9f Pin history: recomp-launcher 05964c0 (Wheel force feedback toggle)",
+        "2c0db253 Pin recomp-launcher to the Wheel force feedback toggle (05964c0)",
+        "8920fdd1 Pin history: nested recomp-net / rbengine columns",
+        "d47c5628 Release (macOS): never link Homebrew OpenSSL",
+        "5e344b1f Use recomp-launcher with the in-game overlay"
+      ]
+    },
+    {
+      "ref": "refs/remotes/origin/feat/vs-split",
+      "oid": "49ca0645bc6c314c9411b614f4d35b0a6c5b9fd3",
+      "unique_commits": []
+    },
+    {
+      "ref": "refs/remotes/origin/fix/8k-display",
+      "oid": "15ba9217caea443f67c206a6d1f6db47e02b24cc",
+      "unique_commits": []
+    },
+    {
+      "ref": "refs/remotes/origin/fix/default-30",
+      "oid": "d6eeb4af21b6f67c1d643b56c83c1d648f0972cc",
+      "unique_commits": []
+    },
+    {
+      "ref": "refs/remotes/origin/fix/draw-distance",
+      "oid": "da09faca8b28f43ea3b71b3eaf7a8273d6f8f603",
+      "unique_commits": [
+        "da09faca Fix Maximum at owner-selected 40 sections and qualify Stage 2",
+        "951e278a Pin corrected unchanged-frame cadence handling",
+        "0bde6db9 Reject proven backfaces before course projection",
+        "bd8eba43 Pin full-depth PGXP and consecutive-frame capture support",
+        "bd6feaac Cull course primitive groups before GTE without limiting visible depth",
+        "a35b8824 Snapshot immutable course visibility and filter each block once before merging",
+        "b24512e8 Bound local billboards and reject original off-screen course entries conservatively",
+        "be19413f Cull appended course blocks against the live GTE frustum before vertex work",
+        "20594475 Record Stage 2 acceptance failures and retain the best measured source",
+        "e7c06775 Extend Maximum scenery to the loaded circuit and qualified GTE range",
+        "0bb50c2c Cap R4 display rendering and pin BRIEF-4 slowdown fixes",
+        "9f327e8f Preserve completion-clock reporting and target profiler threads",
+        "de323805 Add native stack unwinding and thread CPU clocks to sampler",
+        "e664e59b Add production route profiling and bounded CPU load tools"
+      ]
+    },
+    {
+      "ref": "refs/remotes/origin/fix/dynres-floor-1080p",
+      "oid": "e5c8cd6349917f6d926ff0ed48ecfadd0dd0c017",
+      "unique_commits": []
+    },
+    {
+      "ref": "refs/remotes/origin/fix/dynres-off",
+      "oid": "21844cbc2c23c5394c2f5cd18f3c3ac304731eac",
+      "unique_commits": []
+    },
+    {
+      "ref": "refs/remotes/origin/fix/link-frame-state-snap",
+      "oid": "0a9a68c605e80c3de9344ffe66cf98c4deb12431",
+      "unique_commits": []
+    },
+    {
+      "ref": "refs/remotes/origin/fix/max-detail-restore-pacing",
+      "oid": "79812d18dbb1a18e75640e0dff41c144c75a16ac",
+      "unique_commits": []
+    },
+    {
+      "ref": "refs/remotes/origin/fix/menu-focus-start",
+      "oid": "f267b9ec67eb19e72fe2590aa4d2d6385f20d271",
+      "unique_commits": []
+    },
+    {
+      "ref": "refs/remotes/origin/fix/online-desync",
+      "oid": "19c684786b296aa014f79142ad190f801a263dd0",
+      "unique_commits": [
+        "19c68478 Pin psxrecomp fix/netplay-span-stall: N-peer episode handshake, deterministic tip-extend rereplay",
+        "fa026f9f Online harness: a peer that shed its own view during the race may present its quadrant",
+        "7628d735 Online 4-peer desync under load: framework fix pin; harness test load",
+        "4369836c Online harness --modern: drive with triggers and stick; per-seat brake and steering",
+        "d0a1f44e Link Battle: NeGcon seats (an online input transform); harness --modern",
+        "83c0d7ca Online harness: letterboxed fixed Views; per-player widescreen evidence",
+        "65a3208e Online widescreen per player, in each peer's own view only",
+        "21aa5a06 Online battle doc: own full-screen view, evidence; harness skips speculative digests",
+        "c34cf476 Online battle: each peer draws its own full-screen view",
+        "e6a0ed8a Online Link Battle doc, headless 2-4 peer regression and tool updates",
+        "d60f822e Link Battle online for 2-4 seats, each peer presenting its own view",
+        "7cb5b80c Keep offline play at two standalone pads",
+        "eb00b86f Add experimental three/four-seat Link Battle over netplay"
+      ]
+    },
+    {
+      "ref": "refs/remotes/origin/fix/paused-menu-present",
+      "oid": "2fb1d0212dacd3115818408a94c04d065665123e",
+      "unique_commits": []
+    },
+    {
+      "ref": "refs/remotes/origin/fix/present-no-drop",
+      "oid": "fb9e6d0f75c2dfb3a5017bbc8161e67032f05b3c",
+      "unique_commits": [
+        "fb9e6d0f Pin dynres load hold and opt-in DXGI present; screen counter: patches, rebuild, dumps",
+        "8e83dd85 Pin the concurrent render-pass worker; autodriver lifts in sharp corners",
+        "e7351241 Pin the render-pass worker priority change",
+        "58aa9571 Pin the interpolation present watchdog",
+        "3147659f Test-only in-process autodriver (R4_AUTODRIVE=1)",
+        "4f02d515 Add on-screen frame counter and fullscreen measurement run",
+        "36b60870 Pin present-thread no-drop fix",
+        "3ed92481 Add closed-loop centreline autodriver for test laps",
+        "a448e3aa Pin GPU display cache fix and record loaded Stage 2 profile comparison",
+        "95a57ec2 Resume BRIEF-5 with authorized loaded baseline regression comparison",
+        "411ce21d Record BRIEF-5 loaded baseline scope blocker and passing quiet gate",
+        "428349b8 Pin idle-budget replay scheduling and direct publication cost evidence",
+        "e46c865b Pin publication stage attribution and record regressed candidate",
+        "4523347c Pin measured publication footprint reductions and profile receipts",
+        "5a1fe6a3 Pin thread-owned overlay callbacks and preserve failing gate receipts",
+        "a244d6b2 Pin worker-owned replay image preparation and record qualification",
+        "0e3f65ad Pin measured publication-only fix after setting-0/1 profile diff",
+        "7d7f4014 Pin compact scaled charges after callback-order equivalence checks",
+        "0ae4f7d3 Pin shared clock body and consolidate current BRIEF-5 evidence",
+        "02090f8e Pin PGXP operand cost fix and adapt private execution fixtures",
+        "7c294210 Pin timed-load cycle fastpath after PC timing checks",
+        "3a5768b6 Expose stock and best-effort race rates; record PC qualification",
+        "0dec756f Checkpoint source-cycle optimization and continuing qualification",
+        "c7743b66 Separate private cache revisions and record GPU qualification progress",
+        "4e9c8155 Version private course caches and checkpoint timing fixes",
+        "42b5c4a3 Checkpoint production identity and present handoff correction",
+        "52ac833c Integrate private native draw worker for R4 extra frames",
+        "0c26f1e0 Checkpoint private dispatch and worker command capture",
+        "d5447d53 Checkpoint private replay contexts while worker integration continues",
+        "48f64dba Checkpoint BRIEF-5 overlay execution binding prerequisite",
+        "739a5fa4 docs: record stage 3 worker redirect and checkpoint",
+        "e57b46a6 WIP: checkpoint stage 3 before worker snapshot redirect",
+        "ec6a64cf Record unaccepted Stage 3 implementation and remaining GPU transaction work",
+        "488637ab Preserve expanded heaps in temporal redraws and verify guest identity",
+        "b419d42b Restore route identity probe and record Stage 3 gates",
+        "ae4d1f6d feat: add transactional race render interpolation",
+        "da09faca Fix Maximum at owner-selected 40 sections and qualify Stage 2",
+        "951e278a Pin corrected unchanged-frame cadence handling",
+        "0bde6db9 Reject proven backfaces before course projection",
+        "bd8eba43 Pin full-depth PGXP and consecutive-frame capture support",
+        "bd6feaac Cull course primitive groups before GTE without limiting visible depth",
+        "a35b8824 Snapshot immutable course visibility and filter each block once before merging",
+        "b24512e8 Bound local billboards and reject original off-screen course entries conservatively",
+        "be19413f Cull appended course blocks against the live GTE frustum before vertex work",
+        "20594475 Record Stage 2 acceptance failures and retain the best measured source",
+        "e7c06775 Extend Maximum scenery to the loaded circuit and qualified GTE range",
+        "0bb50c2c Cap R4 display rendering and pin BRIEF-4 slowdown fixes",
+        "9f327e8f Preserve completion-clock reporting and target profiler threads",
+        "de323805 Add native stack unwinding and thread CPU clocks to sampler",
+        "e664e59b Add production route profiling and bounded CPU load tools"
+      ]
+    },
+    {
+      "ref": "refs/remotes/origin/fix/race-real-time",
+      "oid": "77d6ec9c4b72d263ee2b70ce79616f62a1ce9400",
+      "unique_commits": [
+        "77d6ec9c Record event pacing and routed surface verification",
+        "6cf3de87 Record whole-image and native copy phase 3 evidence",
+        "8190ad4f Record phase 3 native input and region seeding evidence",
+        "2876b5e2 Record phase 3 integration and unpassed performance gates",
+        "89234c1e Record cropped-surface parity and native-input batching results",
+        "ae6d013c Record verified streaming groundwork and phase three remaining work",
+        "f5d69091 Pin complete-frame mailbox architecture and record phase two acceptance",
+        "55f5c5b6 Restore the shared race effects layer on session activation",
+        "da156eb9 Record complete-packet GL ownership and reset verification",
+        "7f044aeb Document per-draw native inputs and texture bank ownership gates",
+        "5c0e226c Record native provenance integration and durable request checks"
+      ]
+    },
+    {
+      "ref": "refs/remotes/origin/fix/release-blocking-waits",
+      "oid": "97407750b421d68b8463603f4d28013d5d950894",
+      "unique_commits": [
+        "97407750 Preserve release wait validation build and measurement harness",
+        "86da0485 Record per-slot render attribution and reject incomplete audit traces",
+        "eabd9abd Add hidden integrated presentation and audio audit harness",
+        "2875e38b Pin integrated frame surfaces and regenerate game output",
+        "ef8a34f4 Integrate R4 packet interpolation with PGXP audit for functional validation",
+        "8debe2f8 Freeze Car Effects with guest simulation and close the PGXP audit",
+        "bfb5b242 Record PGXP buffer stability fix and complete audit evidence",
+        "1c01c462 Record phase 3b PGXP audit and restore Car Effects draw callback"
+      ]
+    },
+    {
+      "ref": "refs/remotes/origin/fix/repin-psxrecomp-9fe89fd7",
+      "oid": "86c7945990611c3427d26f4a26e80294ce513fb2",
+      "unique_commits": [
+        "86c79459 Re-pin psxrecomp d099cbb5 (#697): release builds pass the OpenBIOS stamp gate"
+      ]
+    },
+    {
+      "ref": "refs/remotes/origin/fix/slowdowns",
+      "oid": "63554161469f3238bf355ea16662ca752943e5d0",
+      "unique_commits": [
+        "63554161 Cap R4 display rendering and pin BRIEF-4 slowdown fixes",
+        "c3e376b1 Preserve completion-clock reporting and target profiler threads",
+        "bb37eea3 Add native stack unwinding and thread CPU clocks to sampler",
+        "18eccb0f Add production route profiling and bounded CPU load tools"
+      ]
+    },
+    {
+      "ref": "refs/remotes/origin/fix/steam-controller-graphics",
+      "oid": "f060df6d74aab73574facfa15ca750ccd30bb715",
+      "unique_commits": []
+    },
+    {
+      "ref": "refs/remotes/origin/fix/steam-controller-outside-steam",
+      "oid": "bd704b7b127d644391e518655200685d483d622d",
+      "unique_commits": []
+    },
+    {
+      "ref": "refs/remotes/origin/fix/widescreen-near-plane",
+      "oid": "21ca77cea9cff0931c6b93cad73546cad7060cd7",
+      "unique_commits": [
+        "21ca77ce docs: correct the cause of the widescreen near-wall band"
+      ]
+    },
+    {
+      "ref": "refs/remotes/origin/integrate/frame-arch-4-3",
+      "oid": "2875e38bc72521a12f74512a0536efbedbc943a6",
+      "unique_commits": [
+        "2875e38b Pin integrated frame surfaces and regenerate game output",
+        "ef8a34f4 Integrate R4 packet interpolation with PGXP audit for functional validation",
+        "8debe2f8 Freeze Car Effects with guest simulation and close the PGXP audit",
+        "bfb5b242 Record PGXP buffer stability fix and complete audit evidence",
+        "1c01c462 Record phase 3b PGXP audit and restore Car Effects draw callback"
+      ]
+    },
+    {
+      "ref": "refs/remotes/origin/integrate/frame-arch-final",
+      "oid": "8872f0de9bff7f22d2375cf23fb369fa8f79fed5",
+      "unique_commits": []
+    },
+    {
+      "ref": "refs/remotes/origin/pin/review-fixes",
+      "oid": "add0ec3f4bc07046e1d9e21bb78dd13fed866acb",
+      "unique_commits": []
+    },
+    {
+      "ref": "refs/remotes/origin/pin/upstream-sync",
+      "oid": "8ee42bae9c401ef3e0d48ecbf1c80f66e2328754",
+      "unique_commits": []
+    },
+    {
+      "ref": "refs/remotes/origin/process/psxrecomp-fork",
+      "oid": "0c87a061b0b1fa6ce8c246b375bbfb6fa759c176",
+      "unique_commits": []
+    }
+  ]
+}

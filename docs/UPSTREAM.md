@@ -1,25 +1,28 @@
 # Upstream fixes
 
-R4 pins fork master `006fb5bb` (upstream `c1f5cafd` plus the three changes below).
-The fork master was fast-forwarded without rewriting history on 2026-11-08.
-Its old recovery/integration/topic refs are pending retirement; they are not
-additional development lines.
+R4 pins fork master `ae3eae8f` (upstream `c1f5cafd` plus the changes below).
+The fork has one R4 development line, master. PR heads are isolated review
+artifacts; the frozen performance baseline is not replaced by old topic heads.
 
 | Fix | Upstream PR | Original commit |
 |---|---|---|
 | HD upload residency across rewind | [#860](https://github.com/RetroPortingToolKit/psxrecomp/pull/860) | `b9dcf919` |
 | HD replacement coverage over transparent native texels | [#861](https://github.com/RetroPortingToolKit/psxrecomp/pull/861) | `3a0502c5` |
 | XA music alone is not a rewind movie | [#862](https://github.com/RetroPortingToolKit/psxrecomp/pull/862) | `006fb5bb` |
+| Direct-launch Steam Controller policies and HIDAPI | [#866](https://github.com/RetroPortingToolKit/psxrecomp/pull/866) | `fb34f318` |
+| In-game session volume host wiring | [#867](https://github.com/RetroPortingToolKit/psxrecomp/pull/867) | `ae3eae8f` |
 
-Each PR contains one fix over `c1f5cafd`. Mac integration validation uses all
-three together: Release, CTest 26/26, 40-step hidden/dummy-audio smoke with zero
-dispatch/segment misses; actual-ring rewind test passes and real-GL HD fixture
-passes 19 checks. PRs state this scope explicitly. Current upstream `9b914263`
-was inspected but not adopted without regeneration and full game validation.
+Each PR isolates one fix over `c1f5cafd`. Current Mac integration validation
+uses all five together: Release, 29 CTests, 40-step hidden/dummy-audio smoke
+with zero dispatch/segment misses, plus real in-game settings/pause/navigation
+checks. Controller policy tests and synthetic SDL events do not qualify a
+physical Steam Controller or Windows. Earlier recovery evidence includes the
+actual-ring rewind test and 19 real-GL HD fixture checks. PRs state their
+integration scope explicitly; a newer upstream pin requires fresh qualification.
 
-Once all three merge, test the new upstream pin, regenerate as required,
+Once these fixes merge, test the new upstream pin, regenerate as required,
 record it in `framework_pin_history.md`, switch `.gitmodules` upstream and
-archive the fork. Retire the three PR branches after landing. Do not merge
+archive the fork. Retire the PR branches after landing. Do not merge
 unrelated upstream changes merely to remove the fork early.
 
 Recovered research leads now have durable game issues:

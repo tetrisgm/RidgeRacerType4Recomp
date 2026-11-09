@@ -19,9 +19,9 @@ PE checks verify AMD64, all 7,459 linked variant symbols and system/UCRT-only
 imports. Source files must match the original-disc audit before staging.
 Each package records that evidence in `NATIVE-OVERLAYS.json` and `BUILD.json`.
 
-On 2026-11-09, no `/volume*/builds` directory was visible through the existing
-NAS connection. No share or permission was created. The final package stays
-local until the owner-created share is available.
+Builds stay on the Mac under `dist/windows/<version>/`. The NAS has no role
+in development, packaging or delivery. The owner chooses how to transfer the
+portable folder to the gaming PC.
 
 ## Toolchain setup (Mac only)
 
@@ -47,7 +47,7 @@ uses `std::terminate` without declaring it under libc++.
 From a recursively initialized `master` checkout:
 
 ```sh
-JOBS=2 bash tools/build_windows.sh 2026-11-09-native-02
+JOBS=2 bash tools/build_windows.sh 2026-11-09-consolidated-01
 ```
 
 Use a **new version every time**. Output is `dist/windows/<version>/` with
@@ -69,22 +69,18 @@ provides UCRT. There is no installer, administrator requirement or system
 change. A writable local folder holds the game's own state. Do not reuse the
 legacy `tools/package_release.sh` for STEAMBOX: it bundles an overlay compiler.
 
-## NAS delivery
+## Optional verified copy
 
-After the final Mac checks, use a package built from committed source. Mount
-the owner-created NAS `builds` share, then run:
+A finished package is already usable as a portable folder. To copy a clean,
+checksummed build to an existing local or removable destination:
 
 ```sh
-python3 tools/deliver_windows.py dist/windows/2026-11-09-native-02 --share /Volumes/builds
+python3 tools/deliver_windows.py dist/windows/2026-11-09-consolidated-01 --destination-root /Volumes/Transfer
 ```
 
-The helper refuses an absent share, dirty source build, checksum discrepancy,
-missing native variants or reused version. It reserves `r4/<version>/` with
-exclusive directory creation, copies the package, then verifies every SHA256
-at the destination. It never creates a share or changes permissions. Failed
-uploads keep their version reserved; retry under a new version.
-STEAMBOX reads via NAS user `pc` on B:; the owner copies the folder locally.
-Do not connect to or operate STEAMBOX from the Mac.
+The helper reserves `r4/<version>/` exclusively and verifies the copied files.
+It refuses dirty builds, checksum discrepancies and reused versions. No NAS,
+network share, remote connection or PC tooling is required.
 
 ## Owner test checklist
 
@@ -93,7 +89,10 @@ After a qualified folder is delivered:
 1. Select the owner's USA disc path and boot through menus into an active race.
 2. Replay the rank-8 crash route at normal pacing, with Max Detail and expanded
    8 MB RAM; report any hang and the build version.
-3. Check crowded-race audio and game speed at 4K/Max Detail. Preserve
+3. Check the in-game menu and physical Steam Controller through direct launch
+   and Steam Input. Verify buttons, sticks, menu open/close and no duplicate
+   keyboard actions.
+4. Check crowded-race audio and game speed at 4K/Max Detail. Preserve
    `present_thread = false` and the owner's native saves/settings.
 
 These are owner tests, not results from the Mac checks.

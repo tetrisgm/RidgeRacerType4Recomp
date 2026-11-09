@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Copy one verified portable build to an existing NAS builds share, once."""
+"""Copy one verified portable build to an existing destination directory, once."""
 import argparse
 import hashlib
 import json
@@ -33,10 +33,10 @@ def verify(folder):
     return expected
 
 
-def deliver(source, share):
-    source, share = source.resolve(), share.resolve()
-    if not share.is_dir():
-        raise ValueError('NAS builds share is unavailable; keep the build local')
+def deliver(source, destination_root):
+    source, destination_root = source.resolve(), destination_root.resolve()
+    if not destination_root.is_dir():
+        raise ValueError('Destination directory is unavailable; keep the build local')
     if not re.fullmatch('[A-Za-z0-9][A-Za-z0-9._-]*', source.name):
         raise ValueError('Invalid version folder name')
     verify(source)
@@ -44,10 +44,10 @@ def deliver(source, share):
     overlays = json.loads((source / 'NATIVE-OVERLAYS.json').read_text())
     if build['working_tree_dirty'] or overlays['linked_variants'] != overlays['published_variants']:
         raise ValueError('Build is dirty or native overlay link audit is incomplete')
-    parent = share / 'r4'
+    parent = destination_root / 'r4'
     parent.mkdir(exist_ok=True)
     destination = parent / source.name
-    destination.mkdir()  # Exclusive reservation; failed uploads are never reused.
+    destination.mkdir()  # Exclusive reservation; failed copies are never reused.
     for item in source.iterdir():
         if item.is_dir():
             shutil.copytree(item, destination / item.name)
@@ -60,10 +60,10 @@ def deliver(source, share):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('source', type=Path)
-    parser.add_argument('--share', required=True, type=Path,
-                        help='existing mounted NAS builds share; never created by this tool')
+    parser.add_argument('--destination-root', required=True, type=Path,
+                        help='existing local or removable destination directory; never created by this tool')
     args = parser.parse_args()
-    print(deliver(args.source, args.share))
+    print(deliver(args.source, args.destination_root))
 
 
 if __name__ == '__main__':

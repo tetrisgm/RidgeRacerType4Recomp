@@ -53,21 +53,22 @@ This project inherits, in order:
   editing, coordinate dirty work, and commit small, coherent changes.
 - Use short-lived topic branches and PRs only when review needs isolation.
   No worktree pairs or integration branches. Delete landed topic branches.
-- Until the three R4 engine fixes merge upstream, pin `tetrisgm/psxrecomp`
+- Until the R4 engine fixes merge upstream, pin `tetrisgm/psxrecomp`
   on its single development branch `master`, with one upstream PR per fix.
   Then pin verified upstream master, change `.gitmodules` to
   `RetroPortingToolKit/psxrecomp`, and archive the fork. Track PRs in
   `docs/UPSTREAM.md` and pin changes in `docs/framework_pin_history.md`.
-- Use upstream `recomp-ui`; the old custom `recomp-launcher` is retired.
+- Use upstream `recomp-ui`; R4 selects its in-game menu in `launcher/r4_menu.cpp`.
+  The old custom `recomp-launcher` is retired.
 - Engine enhancements remain elective and opt-in. Preserve the faithful
   base path; game-owned enhancements belong in this repository.
 - Build and test only on the Mac. Before every push, pass a Release build,
   CTest and `tools/smoke.py` against an isolated hidden runtime with dummy
   audio. Preserve native saves and explicit player settings.
 - Cross-build Windows on the Mac using `docs/WINDOWS_BUILD.md`. Deliver
-  portable, checksummed builds to a fresh `builds/r4/<version>/` folder on
-  the NAS. Never reuse a version folder, bundle game data, or publish a
-  release/feed. If the share is unavailable, retain the build locally.
+  portable, checksummed builds locally under `dist/windows/<version>/`.
+  Never reuse a version folder, bundle game data, or publish a release/feed.
+  The NAS is unrelated to development or delivery; do not use it.
 - STEAMBOX is a gaming console: never connect to or operate it, and never
   install development tools there. The owner tests finished builds by hand.
 - Never force-push. Backup, archive and recovery branch deletion requires

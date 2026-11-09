@@ -9,6 +9,7 @@ import subprocess
 import sys
 
 from dbg import cmd
+from check_ingame_menu import check_menu
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -31,6 +32,7 @@ def main():
     shutil.copytree(args.build.resolve() / 'mods/bundled', stage / 'mods/bundled')
     env = {k: v for k, v in os.environ.items() if not k.startswith('PSX_OVERLAY_')}
     env['SDL_AUDIODRIVER'] = 'dummy'
+    (stage / 'settings.toml').write_text('[video]\npresent_thread = false\n')
     launch = [str(stage / 'r4-runtime'), '--game', str(stage / 'game.toml'),
               '--disc', str(args.disc.resolve()), '--no-launcher', '--hidden-window',
               '--debug-port', str(args.port), '--memcard-dir', str(stage / 'memcards')]
@@ -57,6 +59,7 @@ def main():
                 raise RuntimeError(f'Dispatch misses: {stats}')
             if any(stage.rglob('*.dylib')) or any(stage.rglob('*.so')) or (stage / 'overlay_toolchain').exists():
                 raise RuntimeError('Unexpected external overlay library/toolchain in isolated run')
+            check_menu(stage / 'menu', args.port)
             print(json.dumps({'static_hits': overlay['static_hits'], 'dispatch_misses': 0,
                               'receipt': str(stage / 'native-overlay-check.json')}))
         finally:
