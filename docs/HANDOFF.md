@@ -1,39 +1,27 @@
 # Handoff
 
-## Current — 2026-11-09
+## Current — 2026-11-10
 
-Engine `b57e486e` restores four performance candidates from MStan's preserved
-ledger: render-ring batching, GL capability caching, fixed sampler units and
-allocation-free HD misses. Custom UI `ef8150f`, Select/Back, controls/settings,
-save/load and Steam Controller fixes remain intact. PGXP stays required.
+Engine `9fbb6ba8` fixes the measured 4K critical path: native snapshot copies
+stay on the render owner, PGXP depth resets use exact scissored hardware clears,
+and threaded debug runs no longer continuously read back VRAM by default.
+Custom UI `ef8150f`, Select/Back, settings/controls and Steam fixes remain.
 
-[Restoration and candidate audit](recovery/MSTAN_RESTORATION_20261109.md)
-records the exact dispositions, tests and performance limits. Local evidence:
-`analysis/mstan-restoration-20261109/`. Mac Release, 29 CTests, ring/GL/HD
-fixtures and actual menu/persistence/native-overlay smoke pass. New portable
-candidate: `dist/windows/2026-11-09-mstan-restored-01/`; use its BUILD.json,
-execution-contract sidecar and SHA256SUMS. Earlier packages omit these four
-optimizations.
-
-[Broader threading evaluation](recovery/THREADING_EVALUATION_20261109.md)
-traces the older draw workers, native raster/mailbox, audio, rewind and PGXP
-work. Three preserved component fixtures pass freshly on Mac; no architecture
-change is promoted. The next performance step is synchronized attribution of
-the current 4K bottleneck, followed by the relevant isolated port.
+[Qualification and measurements](recovery/PERFORMANCE_FIX_20261110.md): M4
+moving race sustains 59.936 VBlanks/s for 120 seconds at fixed 4K, full PGXP,
+Max Detail and rewind. Real-GL depth/snapshot/HD fixtures, Release, 29 CTests
+and native menu/race smoke are the validation gates. New portable candidate:
+`dist/windows/2026-11-10-4k-performance-01/`; use its BUILD.json and checksums.
 
 ## Remaining qualification
 
-Paired 4K grid tests improve from 45.896 to 47.306 VBlanks/s (about 3.1%) on
-the M4 under background load. This remains below full speed. The prior 1440p
-qualification is recorded in [Mac measurements](archive/MAC_PERFORMANCE_20261109.md);
-owner settings remain unchanged. Do not claim the restoration fixes all 4K
-slowdowns. Disc prefetch, Windows priority and larger architecture candidates
-have explicit dispositions in the new audit.
-
-Visible-window pacing/audio, the owner's specific rank-8 crash route, physical
-Steam Controller/Steam Input, effects/camera and all-course/multiplayer play
-remain to qualify. Windows execution is owner-only. NAS and STEAMBOX are not
-development machines for this work.
+Visible-window pacing/audio, physical Steam Controller/Steam Input, Windows
+execution, all courses, the owner's specific rank-8 route and multiplayer remain
+to qualify. The two-minute test establishes native game cadence, not 60 unique
+images/s or physical display scanout. Full prior threading evaluation remains
+in [the audit](recovery/THREADING_EVALUATION_20261109.md); do not reintroduce the
+old packet architecture to replace this measured fix. NAS and STEAMBOX are not
+development machines.
 
 ## References
 

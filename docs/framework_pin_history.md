@@ -442,3 +442,11 @@ upstream `817c2985`; R4 explicitly registers its shared-model menu. Full support
 regeneration was run: boot-game and overlay C are unchanged; the overlay audit
 records the generator invocation's compiler-path identity. See
 [consolidation decisions](CONSOLIDATION.md) and [upstream tracking](UPSTREAM.md).
+
+## 2026-11-10 — measured 4K render-stall fixes
+
+Engine `9fbb6ba8`, custom UI unchanged at `ef8150f`: ordered native snapshot
+copy without GL migration, opt-in threaded debug readback, and scissored PGXP
+depth clears. Full 4K moving Mac race reaches 59.936 VBlanks/s over 120 seconds.
+See [qualification](recovery/PERFORMANCE_FIX_20261110.md). Supported regeneration
+reuses 7,459 audited static variants; generated C is unchanged.

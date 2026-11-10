@@ -1,0 +1,1264 @@
+{
+  "date": "2026-11-10",
+  "machine": "Mac M4, 16 GiB",
+  "engine_delivery": "9fbb6ba8",
+  "runtime_changes": [
+    "7b93a5c8",
+    "c7b69a3d",
+    "7f71774f"
+  ],
+  "ui": "ef8150f",
+  "conditions": {
+    "hidden": true,
+    "dummy_audio": true,
+    "vsync": false,
+    "dynamic_resolution": false,
+    "display_ring": false,
+    "PGXP": true,
+    "internal_lines": 2160,
+    "aspect": "21:9",
+    "Max_Detail": true,
+    "present_thread": false,
+    "frame_generation": false,
+    "other_apps": "left running"
+  },
+  "limitations": [
+    "Fixed starting save and closed-loop wall-time driver, not identical per-frame input trajectories",
+    "No build or component-test overlap in accepted comparison series",
+    "Initial sampled diagnostic runs excluded from comparative gain claims; no-ring diagnostic overlapped a build",
+    "Not physical display scanout, real audio or Windows execution"
+  ],
+  "runs": [
+    {
+      "series": "copy-ab",
+      "run": "baseline-0-2160",
+      "seconds": 30.328605415998027,
+      "vblanks_per_second": 46.2929297520355,
+      "five_second_present_fps": [
+        22.24,
+        23.32,
+        27.93,
+        25.45,
+        19.36,
+        20.84
+      ],
+      "video": {
+        "id": 0,
+        "ok": true,
+        "dynamic": 0,
+        "level": 9,
+        "floor": 0,
+        "alloc_scale": 9,
+        "backend": "opengl",
+        "preset": -109,
+        "reference_lines": 240,
+        "requested_scale": 9,
+        "effective_scale": 9,
+        "texture_filter": 0,
+        "internal_lines": 2160,
+        "gl": 1,
+        "gl_max_dim": 16384,
+        "gl_max_scale": 32,
+        "gl_swap_interval": 0,
+        "gl_clamp_reason": 0,
+        "gl_alloc_retries": 0,
+        "gl_budget_mib": 2048,
+        "fbo_w": 9216,
+        "fbo_h": 4608,
+        "hidpi_window": 1,
+        "window_w": 1280,
+        "window_h": 720,
+        "drawable_w": 1280,
+        "drawable_h": 720,
+        "display_x": 0,
+        "display_y": 0,
+        "display_w": 320,
+        "display_h": 240,
+        "hr_scale": 9,
+        "windowed": 0,
+        "hires_window_x": 0,
+        "hires_window_w": 0,
+        "hires_fbo_w": 0,
+        "hires_fbo_h": 0,
+        "hires_window_grows": 0,
+        "hires_window_tiles": 0,
+        "hires_window_mib": 0
+      },
+      "dispatch": {
+        "id": 0,
+        "ok": true,
+        "static_hits": 362666,
+        "miss_total": 0,
+        "miss_unique": 0,
+        "segment_miss_total": 0,
+        "segment_miss_unique": 0
+      },
+      "render": {
+        "id": 0,
+        "ok": true,
+        "active": 1,
+        "held": 0,
+        "max_frames": 2,
+        "records": 28248998,
+        "bytes": 1134667888,
+        "frames_produced": 1886,
+        "frames_consumed": 1886,
+        "presents": 1498,
+        "presents_stale": 0,
+        "acquires": 128,
+        "releases": 128,
+        "oversize": 0,
+        "backpressure_waits": 558,
+        "backpressure_ms": 11810.834,
+        "ring_full_waits": 0,
+        "ring_full_ms": 0.0,
+        "acquire_ms": 3775.523,
+        "render_busy_ms": 29256.898,
+        "render_idle_ms": 7516.066,
+        "ring_high_water": 33554432,
+        "recent_acquires": [
+          {
+            "frame": 1885,
+            "wait_us": 42148.0,
+            "reason": "perf_aggregate"
+          },
+          {
+            "frame": 1871,
+            "wait_us": 38482.0,
+            "reason": "vram_transfer_out"
+          },
+          {
+            "frame": 1856,
+            "wait_us": 37161.0,
+            "reason": "vram_transfer_out"
+          },
+          {
+            "frame": 1841,
+            "wait_us": 35565.0,
+            "reason": "vram_transfer_out"
+          },
+          {
+            "frame": 1825,
+            "wait_us": 38655.0,
+            "reason": "vram_transfer_out"
+          },
+          {
+            "frame": 1810,
+            "wait_us": 39397.0,
+            "reason": "vram_transfer_out"
+          },
+          {
+            "frame": 1795,
+            "wait_us": 39641.0,
+            "reason": "vram_transfer_out"
+          },
+          {
+            "frame": 1780,
+            "wait_us": 42292.0,
+            "reason": "vram_transfer_out"
+          },
+          {
+            "frame": 1765,
+            "wait_us": 42629.0,
+            "reason": "vram_transfer_out"
+          },
+          {
+            "frame": 1750,
+            "wait_us": 43376.0,
+            "reason": "vram_transfer_out"
+          },
+          {
+            "frame": 1735,
+            "wait_us": 40471.0,
+            "reason": "vram_transfer_out"
+          },
+          {
+            "frame": 1720,
+            "wait_us": 48724.0,
+            "reason": "vram_transfer_out"
+          },
+          {
+            "frame": 1705,
+            "wait_us": 44516.0,
+            "reason": "vram_transfer_out"
+          },
+          {
+            "frame": 1690,
+            "wait_us": 47106.0,
+            "reason": "vram_transfer_out"
+          },
+          {
+            "frame": 1675,
+            "wait_us": 426.0,
+            "reason": "vram_transfer_out"
+          },
+          {
+            "frame": 1674,
+            "wait_us": 48745.0,
+            "reason": "perf_aggregate"
+          }
+        ],
+        "present_thread": {
+          "active": 0,
+          "slots": 0,
+          "submits": 0,
+          "presents": 0,
+          "waits": 0,
+          "wait_ms": 0.0,
+          "swap_ms_avg": 0.0,
+          "swap_ms_max": 0.0,
+          "queued_high": 0
+        }
+      },
+      "binary_sha256": "53e8626b39b039aec496d426e6cea7d705a80a2cd450ddb5d69125d010755992"
+    },
+    {
+      "series": "copy-ab",
+      "run": "baseline-1-2160",
+      "seconds": 30.32973995798966,
+      "vblanks_per_second": 49.885030405657524,
+      "five_second_present_fps": [
+        27.35,
+        26.27,
+        29.93,
+        22.68,
+        18.26,
+        25.06
+      ],
+      "video": {
+        "id": 0,
+        "ok": true,
+        "dynamic": 0,
+        "level": 9,
+        "floor": 0,
+        "alloc_scale": 9,
+        "backend": "opengl",
+        "preset": -109,
+        "reference_lines": 240,
+        "requested_scale": 9,
+        "effective_scale": 9,
+        "texture_filter": 0,
+        "internal_lines": 2160,
+        "gl": 1,
+        "gl_max_dim": 16384,
+        "gl_max_scale": 32,
+        "gl_swap_interval": 0,
+        "gl_clamp_reason": 0,
+        "gl_alloc_retries": 0,
+        "gl_budget_mib": 2048,
+        "fbo_w": 9216,
+        "fbo_h": 4608,
+        "hidpi_window": 1,
+        "window_w": 1280,
+        "window_h": 720,
+        "drawable_w": 1280,
+        "drawable_h": 720,
+        "display_x": 0,
+        "display_y": 240,
+        "display_w": 320,
+        "display_h": 240,
+        "hr_scale": 9,
+        "windowed": 0,
+        "hires_window_x": 0,
+        "hires_window_w": 0,
+        "hires_fbo_w": 0,
+        "hires_fbo_h": 0,
+        "hires_window_grows": 0,
+        "hires_window_tiles": 0,
+        "hires_window_mib": 0
+      },
+      "dispatch": {
+        "id": 0,
+        "ok": true,
+        "static_hits": 382588,
+        "miss_total": 0,
+        "miss_unique": 0,
+        "segment_miss_total": 0,
+        "segment_miss_unique": 0
+      },
+      "render": {
+        "id": 0,
+        "ok": true,
+        "active": 1,
+        "held": 0,
+        "max_frames": 2,
+        "records": 30266995,
+        "bytes": 1216032256,
+        "frames_produced": 2024,
+        "frames_consumed": 2024,
+        "presents": 1623,
+        "presents_stale": 0,
+        "acquires": 137,
+        "releases": 137,
+        "oversize": 0,
+        "backpressure_waits": 564,
+        "backpressure_ms": 11877.397,
+        "ring_full_waits": 0,
+        "ring_full_ms": 0.0,
+        "acquire_ms": 3600.203,
+        "render_busy_ms": 28925.224,
+        "render_idle_ms": 7721.169,
+        "ring_high_water": 33554432,
+        "recent_acquires": [
+          {
+            "frame": 2022,
+            "wait_us": 1906.0,
+            "reason": "perf_aggregate"
+          },
+          {
+            "frame": 2008,
+            "wait_us": 292.0,
+            "reason": "vram_transfer_out"
+          },
+          {
+            "frame": 1992,
+            "wait_us": 5257.0,
+            "reason": "vram_transfer_out"
+          },
+          {
+            "frame": 1976,
+            "wait_us": 5957.0,
+            "reason": "vram_transfer_out"
+          },
+          {
+            "frame": 1960,
+            "wait_us": 17635.0,
+            "reason": "vram_transfer_out"
+          },
+          {
+            "frame": 1944,
+            "wait_us": 30294.0,
+            "reason": "vram_transfer_out"
+          },
+          {
+            "frame": 1929,
+            "wait_us": 37509.0,
+            "reason": "vram_transfer_out"
+          },
+          {
+            "frame": 1914,
+            "wait_us": 35033.0,
+            "reason": "vram_transfer_out"
+          },
+          {
+            "frame": 1899,
+            "wait_us": 40490.0,
+            "reason": "vram_transfer_out"
+          },
+          {
+            "frame": 1884,
+            "wait_us": 37154.0,
+            "reason": "vram_transfer_out"
+          },
+          {
+            "frame": 1869,
+            "wait_us": 40854.0,
+            "reason": "vram_transfer_out"
+          },
+          {
+            "frame": 1854,
+            "wait_us": 34704.0,
+            "reason": "vram_transfer_out"
+          },
+          {
+            "frame": 1839,
+            "wait_us": 35654.0,
+            "reason": "vram_transfer_out"
+          },
+          {
+            "frame": 1824,
+            "wait_us": 37132.0,
+            "reason": "vram_transfer_out"
+          },
+          {
+            "frame": 1809,
+            "wait_us": 46693.0,
+            "reason": "vram_transfer_out"
+          },
+          {
+            "frame": 1794,
+            "wait_us": 39867.0,
+            "reason": "vram_transfer_out"
+          }
+        ],
+        "present_thread": {
+          "active": 0,
+          "slots": 0,
+          "submits": 0,
+          "presents": 0,
+          "waits": 0,
+          "wait_ms": 0.0,
+          "swap_ms_avg": 0.0,
+          "swap_ms_max": 0.0,
+          "queued_high": 0
+        }
+      },
+      "binary_sha256": "53e8626b39b039aec496d426e6cea7d705a80a2cd450ddb5d69125d010755992"
+    },
+    {
+      "series": "copy-ab",
+      "run": "candidate-0-2160",
+      "seconds": 30.338028875004966,
+      "vblanks_per_second": 51.222840033629105,
+      "five_second_present_fps": [
+        27.83,
+        27.58,
+        29.53,
+        23.05,
+        18.89,
+        26.88
+      ],
+      "video": {
+        "id": 0,
+        "ok": true,
+        "dynamic": 0,
+        "level": 9,
+        "floor": 0,
+        "alloc_scale": 9,
+        "backend": "opengl",
+        "preset": -109,
+        "reference_lines": 240,
+        "requested_scale": 9,
+        "effective_scale": 9,
+        "texture_filter": 0,
+        "internal_lines": 2160,
+        "gl": 1,
+        "gl_max_dim": 16384,
+        "gl_max_scale": 32,
+        "gl_swap_interval": 0,
+        "gl_clamp_reason": 0,
+        "gl_alloc_retries": 0,
+        "gl_budget_mib": 2048,
+        "fbo_w": 9216,
+        "fbo_h": 4608,
+        "hidpi_window": 1,
+        "window_w": 1280,
+        "window_h": 720,
+        "drawable_w": 1280,
+        "drawable_h": 720,
+        "display_x": 0,
+        "display_y": 0,
+        "display_w": 320,
+        "display_h": 240,
+        "hr_scale": 9,
+        "windowed": 0,
+        "hires_window_x": 0,
+        "hires_window_w": 0,
+        "hires_fbo_w": 0,
+        "hires_fbo_h": 0,
+        "hires_window_grows": 0,
+        "hires_window_tiles": 0,
+        "hires_window_mib": 0
+      },
+      "dispatch": {
+        "id": 0,
+        "ok": true,
+        "static_hits": 367073,
+        "miss_total": 0,
+        "miss_unique": 0,
+        "segment_miss_total": 0,
+        "segment_miss_unique": 0
+      },
+      "render": {
+        "id": 0,
+        "ok": true,
+        "active": 1,
+        "held": 0,
+        "max_frames": 2,
+        "records": 30815140,
+        "bytes": 1239078784,
+        "frames_produced": 2051,
+        "frames_consumed": 2051,
+        "presents": 1777,
+        "presents_stale": 0,
+        "acquires": 12,
+        "releases": 12,
+        "oversize": 0,
+        "backpressure_waits": 617,
+        "backpressure_ms": 12616.608,
+        "ring_full_waits": 0,
+        "ring_full_ms": 0.0,
+        "acquire_ms": 97.727,
+        "render_busy_ms": 31389.303,
+        "render_idle_ms": 5046.659,
+        "ring_high_water": 33554432,
+        "recent_acquires": [
+          {
+            "frame": 2049,
+            "wait_us": 248.0,
+            "reason": "perf_aggregate"
+          },
+          {
+            "frame": 1779,
+            "wait_us": 39511.0,
+            "reason": "perf_aggregate"
+          },
+          {
+            "frame": 1587,
+            "wait_us": 14.0,
+            "reason": "perf_aggregate"
+          },
+          {
+            "frame": 1352,
+            "wait_us": 23241.0,
+            "reason": "perf_aggregate"
+          },
+          {
+            "frame": 1055,
+            "wait_us": 325.0,
+            "reason": "perf_aggregate"
+          },
+          {
+            "frame": 777,
+            "wait_us": 83.0,
+            "reason": "perf_aggregate"
+          },
+          {
+            "frame": 495,
+            "wait_us": 33.0,
+            "reason": "scale_info"
+          },
+          {
+            "frame": 344,
+            "wait_us": 34123.0,
+            "reason": "set_display_aspect"
+          },
+          {
+            "frame": 283,
+            "wait_us": 25.0,
+            "reason": "restage_vram_after_savestate"
+          },
+          {
+            "frame": 194,
+            "wait_us": 48.0,
+            "reason": "clear_hd_texture_cache"
+          },
+          {
+            "frame": 29,
+            "wait_us": 32.0,
+            "reason": "present_blank"
+          },
+          {
+            "frame": 0,
+            "wait_us": 44.0,
+            "reason": "set_swap_interval"
+          }
+        ],
+        "present_thread": {
+          "active": 0,
+          "slots": 0,
+          "submits": 0,
+          "presents": 0,
+          "waits": 0,
+          "wait_ms": 0.0,
+          "swap_ms_avg": 0.0,
+          "swap_ms_max": 0.0,
+          "queued_high": 0
+        }
+      },
+      "binary_sha256": "131fcda866ae965bafaa6e365bb35118cf366be1f02b5cffcce495d666483ff4"
+    },
+    {
+      "series": "copy-ab",
+      "run": "candidate-1-2160",
+      "seconds": 30.337900874961633,
+      "vblanks_per_second": 51.22305615028697,
+      "five_second_present_fps": [
+        28.13,
+        27.98,
+        29.93,
+        22.88,
+        18.56,
+        26.31
+      ],
+      "video": {
+        "id": 0,
+        "ok": true,
+        "dynamic": 0,
+        "level": 9,
+        "floor": 0,
+        "alloc_scale": 9,
+        "backend": "opengl",
+        "preset": -109,
+        "reference_lines": 240,
+        "requested_scale": 9,
+        "effective_scale": 9,
+        "texture_filter": 0,
+        "internal_lines": 2160,
+        "gl": 1,
+        "gl_max_dim": 16384,
+        "gl_max_scale": 32,
+        "gl_swap_interval": 0,
+        "gl_clamp_reason": 0,
+        "gl_alloc_retries": 0,
+        "gl_budget_mib": 2048,
+        "fbo_w": 9216,
+        "fbo_h": 4608,
+        "hidpi_window": 1,
+        "window_w": 1280,
+        "window_h": 720,
+        "drawable_w": 1280,
+        "drawable_h": 720,
+        "display_x": 0,
+        "display_y": 0,
+        "display_w": 320,
+        "display_h": 240,
+        "hr_scale": 9,
+        "windowed": 0,
+        "hires_window_x": 0,
+        "hires_window_w": 0,
+        "hires_fbo_w": 0,
+        "hires_fbo_h": 0,
+        "hires_window_grows": 0,
+        "hires_window_tiles": 0,
+        "hires_window_mib": 0
+      },
+      "dispatch": {
+        "id": 0,
+        "ok": true,
+        "static_hits": 389014,
+        "miss_total": 0,
+        "miss_unique": 0,
+        "segment_miss_total": 0,
+        "segment_miss_unique": 0
+      },
+      "render": {
+        "id": 0,
+        "ok": true,
+        "active": 1,
+        "held": 0,
+        "max_frames": 2,
+        "records": 30929825,
+        "bytes": 1243666272,
+        "frames_produced": 2069,
+        "frames_consumed": 2069,
+        "presents": 1777,
+        "presents_stale": 0,
+        "acquires": 12,
+        "releases": 12,
+        "oversize": 0,
+        "backpressure_waits": 661,
+        "backpressure_ms": 13445.854,
+        "ring_full_waits": 0,
+        "ring_full_ms": 0.0,
+        "acquire_ms": 182.681,
+        "render_busy_ms": 31600.014,
+        "render_idle_ms": 5003.578,
+        "ring_high_water": 33554432,
+        "recent_acquires": [
+          {
+            "frame": 2067,
+            "wait_us": 7647.0,
+            "reason": "perf_aggregate"
+          },
+          {
+            "frame": 1802,
+            "wait_us": 37868.0,
+            "reason": "perf_aggregate"
+          },
+          {
+            "frame": 1615,
+            "wait_us": 51963.0,
+            "reason": "perf_aggregate"
+          },
+          {
+            "frame": 1382,
+            "wait_us": 22696.0,
+            "reason": "perf_aggregate"
+          },
+          {
+            "frame": 1080,
+            "wait_us": 28439.0,
+            "reason": "perf_aggregate"
+          },
+          {
+            "frame": 798,
+            "wait_us": 32296.0,
+            "reason": "perf_aggregate"
+          },
+          {
+            "frame": 513,
+            "wait_us": 38.0,
+            "reason": "scale_info"
+          },
+          {
+            "frame": 359,
+            "wait_us": 1632.0,
+            "reason": "set_display_aspect"
+          },
+          {
+            "frame": 301,
+            "wait_us": 28.0,
+            "reason": "restage_vram_after_savestate"
+          },
+          {
+            "frame": 194,
+            "wait_us": 28.0,
+            "reason": "clear_hd_texture_cache"
+          },
+          {
+            "frame": 29,
+            "wait_us": 29.0,
+            "reason": "present_blank"
+          },
+          {
+            "frame": 0,
+            "wait_us": 17.0,
+            "reason": "set_swap_interval"
+          }
+        ],
+        "present_thread": {
+          "active": 0,
+          "slots": 0,
+          "submits": 0,
+          "presents": 0,
+          "waits": 0,
+          "wait_ms": 0.0,
+          "swap_ms_avg": 0.0,
+          "swap_ms_max": 0.0,
+          "queued_high": 0
+        }
+      },
+      "binary_sha256": "131fcda866ae965bafaa6e365bb35118cf366be1f02b5cffcce495d666483ff4"
+    },
+    {
+      "series": "clear-ab",
+      "run": "baseline-0-2160",
+      "seconds": 30.350724124989938,
+      "vblanks_per_second": 50.9378291481048,
+      "five_second_present_fps": [
+        27.02,
+        26.14,
+        29.88,
+        24.01,
+        19.01,
+        26.88
+      ],
+      "video": {
+        "id": 0,
+        "ok": true,
+        "dynamic": 0,
+        "level": 9,
+        "floor": 0,
+        "alloc_scale": 9,
+        "backend": "opengl",
+        "preset": -109,
+        "reference_lines": 240,
+        "requested_scale": 9,
+        "effective_scale": 9,
+        "texture_filter": 0,
+        "internal_lines": 2160,
+        "gl": 1,
+        "gl_max_dim": 16384,
+        "gl_max_scale": 32,
+        "gl_swap_interval": 0,
+        "gl_clamp_reason": 0,
+        "gl_alloc_retries": 0,
+        "gl_budget_mib": 2048,
+        "fbo_w": 9216,
+        "fbo_h": 4608,
+        "hidpi_window": 1,
+        "window_w": 1280,
+        "window_h": 720,
+        "drawable_w": 1280,
+        "drawable_h": 720,
+        "display_x": 0,
+        "display_y": 0,
+        "display_w": 320,
+        "display_h": 240,
+        "hr_scale": 9,
+        "windowed": 0,
+        "hires_window_x": 0,
+        "hires_window_w": 0,
+        "hires_fbo_w": 0,
+        "hires_fbo_h": 0,
+        "hires_window_grows": 0,
+        "hires_window_tiles": 0,
+        "hires_window_mib": 0
+      },
+      "dispatch": {
+        "id": 0,
+        "ok": true,
+        "static_hits": 383387,
+        "miss_total": 0,
+        "miss_unique": 0,
+        "segment_miss_total": 0,
+        "segment_miss_unique": 0
+      },
+      "render": {
+        "id": 0,
+        "ok": true,
+        "active": 1,
+        "held": 0,
+        "max_frames": 2,
+        "records": 30840672,
+        "bytes": 1240033440,
+        "frames_produced": 2056,
+        "frames_consumed": 2056,
+        "presents": 1769,
+        "presents_stale": 0,
+        "acquires": 12,
+        "releases": 12,
+        "oversize": 0,
+        "backpressure_waits": 663,
+        "backpressure_ms": 13938.276,
+        "ring_full_waits": 0,
+        "ring_full_ms": 0.0,
+        "acquire_ms": 217.232,
+        "render_busy_ms": 31735.019,
+        "render_idle_ms": 4936.397,
+        "ring_high_water": 33554432,
+        "recent_acquires": [
+          {
+            "frame": 2054,
+            "wait_us": 55.0,
+            "reason": "perf_aggregate"
+          },
+          {
+            "frame": 1784,
+            "wait_us": 38604.0,
+            "reason": "perf_aggregate"
+          },
+          {
+            "frame": 1592,
+            "wait_us": 48496.0,
+            "reason": "perf_aggregate"
+          },
+          {
+            "frame": 1347,
+            "wait_us": 41353.0,
+            "reason": "perf_aggregate"
+          },
+          {
+            "frame": 1046,
+            "wait_us": 25671.0,
+            "reason": "perf_aggregate"
+          },
+          {
+            "frame": 781,
+            "wait_us": 30474.0,
+            "reason": "perf_aggregate"
+          },
+          {
+            "frame": 508,
+            "wait_us": 30.0,
+            "reason": "scale_info"
+          },
+          {
+            "frame": 354,
+            "wait_us": 32416.0,
+            "reason": "set_display_aspect"
+          },
+          {
+            "frame": 296,
+            "wait_us": 53.0,
+            "reason": "restage_vram_after_savestate"
+          },
+          {
+            "frame": 194,
+            "wait_us": 41.0,
+            "reason": "clear_hd_texture_cache"
+          },
+          {
+            "frame": 29,
+            "wait_us": 22.0,
+            "reason": "present_blank"
+          },
+          {
+            "frame": 0,
+            "wait_us": 17.0,
+            "reason": "set_swap_interval"
+          }
+        ],
+        "present_thread": {
+          "active": 0,
+          "slots": 0,
+          "submits": 0,
+          "presents": 0,
+          "waits": 0,
+          "wait_ms": 0.0,
+          "swap_ms_avg": 0.0,
+          "swap_ms_max": 0.0,
+          "queued_high": 0
+        }
+      },
+      "binary_sha256": "131fcda866ae965bafaa6e365bb35118cf366be1f02b5cffcce495d666483ff4"
+    },
+    {
+      "series": "clear-ab",
+      "run": "candidate-0-2160",
+      "seconds": 30.163685041014105,
+      "vblanks_per_second": 59.97277844335896,
+      "five_second_present_fps": [
+        29.96,
+        29.98,
+        29.92,
+        29.97,
+        30.0,
+        29.95
+      ],
+      "video": {
+        "id": 0,
+        "ok": true,
+        "dynamic": 0,
+        "level": 9,
+        "floor": 0,
+        "alloc_scale": 9,
+        "backend": "opengl",
+        "preset": -109,
+        "reference_lines": 240,
+        "requested_scale": 9,
+        "effective_scale": 9,
+        "texture_filter": 0,
+        "internal_lines": 2160,
+        "gl": 1,
+        "gl_max_dim": 16384,
+        "gl_max_scale": 32,
+        "gl_swap_interval": 0,
+        "gl_clamp_reason": 0,
+        "gl_alloc_retries": 0,
+        "gl_budget_mib": 2048,
+        "fbo_w": 9216,
+        "fbo_h": 4608,
+        "hidpi_window": 1,
+        "window_w": 1280,
+        "window_h": 720,
+        "drawable_w": 1280,
+        "drawable_h": 720,
+        "display_x": 0,
+        "display_y": 0,
+        "display_w": 320,
+        "display_h": 240,
+        "hr_scale": 9,
+        "windowed": 0,
+        "hires_window_x": 0,
+        "hires_window_w": 0,
+        "hires_fbo_w": 0,
+        "hires_fbo_h": 0,
+        "hires_window_grows": 0,
+        "hires_window_tiles": 0,
+        "hires_window_mib": 0
+      },
+      "dispatch": {
+        "id": 0,
+        "ok": true,
+        "static_hits": 396801,
+        "miss_total": 0,
+        "miss_unique": 0,
+        "segment_miss_total": 0,
+        "segment_miss_unique": 0
+      },
+      "render": {
+        "id": 0,
+        "ok": true,
+        "active": 1,
+        "held": 0,
+        "max_frames": 2,
+        "records": 33608169,
+        "bytes": 1351754336,
+        "frames_produced": 2338,
+        "frames_consumed": 2338,
+        "presents": 2061,
+        "presents_stale": 0,
+        "acquires": 12,
+        "releases": 12,
+        "oversize": 0,
+        "backpressure_waits": 9,
+        "backpressure_ms": 28.963,
+        "ring_full_waits": 0,
+        "ring_full_ms": 0.0,
+        "acquire_ms": 48.7,
+        "render_busy_ms": 23116.205,
+        "render_idle_ms": 13134.97,
+        "ring_high_water": 33554432,
+        "recent_acquires": [
+          {
+            "frame": 2336,
+            "wait_us": 1485.0,
+            "reason": "perf_aggregate"
+          },
+          {
+            "frame": 2034,
+            "wait_us": 97.0,
+            "reason": "perf_aggregate"
+          },
+          {
+            "frame": 1733,
+            "wait_us": 14722.0,
+            "reason": "perf_aggregate"
+          },
+          {
+            "frame": 1432,
+            "wait_us": 1980.0,
+            "reason": "perf_aggregate"
+          },
+          {
+            "frame": 1130,
+            "wait_us": 53.0,
+            "reason": "perf_aggregate"
+          },
+          {
+            "frame": 829,
+            "wait_us": 18380.0,
+            "reason": "perf_aggregate"
+          },
+          {
+            "frame": 528,
+            "wait_us": 744.0,
+            "reason": "scale_info"
+          },
+          {
+            "frame": 347,
+            "wait_us": 11136.0,
+            "reason": "set_display_aspect"
+          },
+          {
+            "frame": 286,
+            "wait_us": 29.0,
+            "reason": "restage_vram_after_savestate"
+          },
+          {
+            "frame": 194,
+            "wait_us": 34.0,
+            "reason": "clear_hd_texture_cache"
+          },
+          {
+            "frame": 29,
+            "wait_us": 21.0,
+            "reason": "present_blank"
+          },
+          {
+            "frame": 0,
+            "wait_us": 19.0,
+            "reason": "set_swap_interval"
+          }
+        ],
+        "present_thread": {
+          "active": 0,
+          "slots": 0,
+          "submits": 0,
+          "presents": 0,
+          "waits": 0,
+          "wait_ms": 0.0,
+          "swap_ms_avg": 0.0,
+          "swap_ms_max": 0.0,
+          "queued_high": 0
+        }
+      },
+      "binary_sha256": "b8a161c18b2c425e5e9329d0335cff05f80d723e680575c8cad921ee3d36b005"
+    },
+    {
+      "series": "clear-long",
+      "run": "candidate-0-2160",
+      "seconds": 120.64598604099592,
+      "vblanks_per_second": 59.93568652622128,
+      "five_second_present_fps": [
+        29.99,
+        29.93,
+        29.93,
+        29.97,
+        29.97,
+        29.98,
+        30.01,
+        30.01,
+        29.89,
+        30.01,
+        29.95,
+        29.95,
+        29.9,
+        30.01,
+        29.96,
+        29.98,
+        29.91,
+        30.05,
+        29.89,
+        29.95,
+        29.96,
+        29.95,
+        29.91,
+        30.01
+      ],
+      "video": {
+        "id": 0,
+        "ok": true,
+        "dynamic": 0,
+        "level": 9,
+        "floor": 0,
+        "alloc_scale": 9,
+        "backend": "opengl",
+        "preset": -109,
+        "reference_lines": 240,
+        "requested_scale": 9,
+        "effective_scale": 9,
+        "texture_filter": 0,
+        "internal_lines": 2160,
+        "gl": 1,
+        "gl_max_dim": 16384,
+        "gl_max_scale": 32,
+        "gl_swap_interval": 0,
+        "gl_clamp_reason": 0,
+        "gl_alloc_retries": 0,
+        "gl_budget_mib": 2048,
+        "fbo_w": 9216,
+        "fbo_h": 4608,
+        "hidpi_window": 1,
+        "window_w": 1280,
+        "window_h": 720,
+        "drawable_w": 1280,
+        "drawable_h": 720,
+        "display_x": 0,
+        "display_y": 0,
+        "display_w": 320,
+        "display_h": 240,
+        "hr_scale": 9,
+        "windowed": 0,
+        "hires_window_x": 0,
+        "hires_window_w": 0,
+        "hires_fbo_w": 0,
+        "hires_fbo_h": 0,
+        "hires_window_grows": 0,
+        "hires_window_tiles": 0,
+        "hires_window_mib": 0
+      },
+      "dispatch": {
+        "id": 0,
+        "ok": true,
+        "static_hits": 919310,
+        "miss_total": 0,
+        "miss_unique": 0,
+        "segment_miss_total": 0,
+        "segment_miss_unique": 0
+      },
+      "render": {
+        "id": 0,
+        "ok": true,
+        "active": 1,
+        "held": 0,
+        "max_frames": 2,
+        "records": 117371846,
+        "bytes": 4724279408,
+        "frames_produced": 7761,
+        "frames_consumed": 7761,
+        "presents": 7465,
+        "presents_stale": 0,
+        "acquires": 30,
+        "releases": 30,
+        "oversize": 0,
+        "backpressure_waits": 20,
+        "backpressure_ms": 138.375,
+        "ring_full_waits": 0,
+        "ring_full_ms": 0.0,
+        "acquire_ms": 206.23,
+        "render_busy_ms": 86311.157,
+        "render_idle_ms": 40399.979,
+        "ring_high_water": 33554432,
+        "recent_acquires": [
+          {
+            "frame": 7759,
+            "wait_us": 207.0,
+            "reason": "perf_aggregate"
+          },
+          {
+            "frame": 7458,
+            "wait_us": 20403.0,
+            "reason": "perf_aggregate"
+          },
+          {
+            "frame": 7157,
+            "wait_us": 377.0,
+            "reason": "perf_aggregate"
+          },
+          {
+            "frame": 6856,
+            "wait_us": 20065.0,
+            "reason": "perf_aggregate"
+          },
+          {
+            "frame": 6555,
+            "wait_us": 3038.0,
+            "reason": "perf_aggregate"
+          },
+          {
+            "frame": 6253,
+            "wait_us": 587.0,
+            "reason": "perf_aggregate"
+          },
+          {
+            "frame": 5953,
+            "wait_us": 213.0,
+            "reason": "perf_aggregate"
+          },
+          {
+            "frame": 5652,
+            "wait_us": 21793.0,
+            "reason": "perf_aggregate"
+          },
+          {
+            "frame": 5351,
+            "wait_us": 348.0,
+            "reason": "perf_aggregate"
+          },
+          {
+            "frame": 5050,
+            "wait_us": 22844.0,
+            "reason": "perf_aggregate"
+          },
+          {
+            "frame": 4747,
+            "wait_us": 408.0,
+            "reason": "perf_aggregate"
+          },
+          {
+            "frame": 4445,
+            "wait_us": 6880.0,
+            "reason": "perf_aggregate"
+          },
+          {
+            "frame": 4143,
+            "wait_us": 1131.0,
+            "reason": "perf_aggregate"
+          },
+          {
+            "frame": 3841,
+            "wait_us": 276.0,
+            "reason": "perf_aggregate"
+          },
+          {
+            "frame": 3540,
+            "wait_us": 23060.0,
+            "reason": "perf_aggregate"
+          },
+          {
+            "frame": 3238,
+            "wait_us": 20040.0,
+            "reason": "perf_aggregate"
+          }
+        ],
+        "present_thread": {
+          "active": 0,
+          "slots": 0,
+          "submits": 0,
+          "presents": 0,
+          "waits": 0,
+          "wait_ms": 0.0,
+          "swap_ms_avg": 0.0,
+          "swap_ms_max": 0.0,
+          "queued_high": 0
+        }
+      },
+      "binary_sha256": "b8a161c18b2c425e5e9329d0335cff05f80d723e680575c8cad921ee3d36b005"
+    }
+  ],
+  "depth_tests": {
+    "full_surface": {
+      "checks": 72,
+      "failures": 0
+    },
+    "window_tiles": {
+      "checks": 86,
+      "failures": 0
+    },
+    "reference": "former six-vertex depth draw; exact full depth, color, stencil buffers at active 1x,4x,9x"
+  },
+  "local_evidence": "analysis/performance-fix-20261110"
+}
