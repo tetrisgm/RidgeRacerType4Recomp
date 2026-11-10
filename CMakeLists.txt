@@ -271,6 +271,10 @@ if(R4_BUILD_TESTS AND BUILD_TESTING)
         add_test(NAME ${name} COMMAND test_${name})
         set_tests_properties(${name} PROPERTIES DEPENDS ${name}_build)
     endfunction()
+    r4_plugin_test(r4_interp "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_r4_interp.c")
+    r4_plugin_test(r4_interp_plugin
+        "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_r4_interp_plugin.c"
+        "${CMAKE_CURRENT_SOURCE_DIR}/src/mods/r4_interp.c")
     r4_plugin_test(r4_effects_clock "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_r4_effects_clock.cpp")
     r4_plugin_test(r4_race_state "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_r4_race_state.c")
     # Assertions are the checks even in a Release developer build.

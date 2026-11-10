@@ -770,6 +770,16 @@ static uint32_t r4_md_heap_permille(uint32_t used)
     return (uint32_t)((uint64_t)used * 1000u / r4_md_heap_cap());
 }
 
+/* The same heap selection for presentation-only race draws. The retail heap
+ * is too small for Max Detail; extra draws must not bypass its relocation. */
+uint32_t r4_max_detail_draw_heap(uint32_t buf)
+{
+    if (s_enabled && s_big_heap_allowed && md_ram8() &&
+        (buf == R4_BUF0 || buf == R4_BUF0 + R4_BUF_STRIDE))
+        return R4_MD_BIG_HEAP_BASE + (buf == R4_BUF0 ? 0u : R4_MD_BIG_HEAP_SIZE);
+    return buf + R4_BUF_HEAP;
+}
+
 static void r4_md_clear_otag(CPUState *cpu, uint32_t address)
 {
     (void)address;

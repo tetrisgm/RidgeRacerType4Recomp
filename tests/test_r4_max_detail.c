@@ -28,6 +28,8 @@
 #include "r4_pvs.h"
 #include "r4_widescreen_scene.h"
 
+extern uint32_t r4_max_detail_draw_heap(uint32_t buf);
+
 static int failures;
 #define CHECK(c, m) do { if (!(c)) { fprintf(stderr, "FAIL: %s\n", m); failures++; } } while (0)
 
@@ -1193,7 +1195,10 @@ static void test_pacing_and_heap(void) {
     s_cpu.gpr[31] = 0x8001E764u;
     hook(0x80093418u)(&s_cpu, 0x80093418u);
     CHECK(rd32(0x1F800000u) == 0x800ADCA0u + 0x1670u, "2 MB RAM: the stock heap");
+    CHECK(r4_max_detail_draw_heap(0x800ADCA0u) == 0x800AF310u, "redraw uses stock heap with 2 MB RAM");
     s_ram8 = 1;
+    CHECK(r4_max_detail_draw_heap(0x800ADCA0u) == 0x80200000u, "redraw uses expanded buffer 0 heap");
+    CHECK(r4_max_detail_draw_heap(0x800D0418u) == 0x80300000u, "redraw uses expanded buffer 1 heap");
     hook(0x80093418u)(&s_cpu, 0x80093418u);
     CHECK(rd32(0x1F800000u) == 0x80200000u, "8 MB RAM: buffer 0's heap moves to 0x80200000");
     wr32(0x1F800000u, 0x800ADCA0u + 0x22778u + 0x1670u);

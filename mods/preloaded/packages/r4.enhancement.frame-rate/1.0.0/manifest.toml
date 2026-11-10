@@ -1,0 +1,39 @@
+format_version = 7
+id = "r4.enhancement.frame-rate"
+version = "1.0.0"
+name = "R4 Frame Rate"
+author = "Shokunin"
+description = "Experimental intermediate race frames; performance qualification is incomplete."
+license = "MIT"
+resolver = "declarative"
+save_compatibility = "shared"
+
+[[target]]
+game_id = "SLUS-00797"
+
+[[feature]]
+id = "frame-rate"
+name = "Race frame rate (experimental)"
+description = "Redraw intermediate car and camera positions. This experimental mode currently causes slowdowns at 4K. Original mode keeps the game’s native frames."
+group = "Display"
+default_enabled = false
+
+[[option]]
+feature = "frame-rate"
+id = "rate"
+label = "Presentation rate"
+group = "Display"
+type = "choice"
+default = "60"
+
+[[option.choice]]
+value = "60"
+label = "60 FPS target (experimental)"
+
+[[option.choice]]
+value = "30"
+label = "30 FPS (original)"
+
+[[plugin]]
+feature = "frame-rate"
+id = "r4.framerate"

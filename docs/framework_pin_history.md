@@ -450,3 +450,12 @@ copy without GL migration, opt-in threaded debug readback, and scissored PGXP
 depth clears. Full 4K moving Mac race reaches 59.936 VBlanks/s over 120 seconds.
 See [qualification](recovery/PERFORMANCE_FIX_20261110.md). Supported regeneration
 reuses 7,459 audited static variants; generated C is unchanged.
+
+## 2026-11-10 — unqualified extra-frame checkpoint
+
+Engine `5846d90c` preserves the native performance fixes and adds queued pass
+rollback, temporal source provenance, upload reuse and frame-bound wakeups.
+The R4 redraw feature is off by default: fully admitted 4K redraw runs at only
+34–35 VBlanks/s, so this is not a 60 FPS release.
+Supported regeneration reuses all 7,459 audited static variants; generated C
+is unchanged. See [findings and regression checks](recovery/FRAME_RATE_20261110.md).

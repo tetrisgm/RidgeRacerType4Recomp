@@ -2,6 +2,17 @@
 
 ## Current — 2026-11-10
 
+The 60-distinct-frame restoration remains **unqualified; packaging is blocked**.
+The experiment is off by default. The owner found the visible race visually good
+but observed repeated slowdowns. Near-60 swap counters included rejected redraws;
+forcing every redraw costs about 34–35 VBlanks/s at fixed 2160 lines.
+[Current findings, fixes and verification](recovery/FRAME_RATE_20261110.md).
+Local engine checkpoint `5846d90c` passes Release, 33 CTests, menu/race smoke
+and rendering fixtures. The native-only 120-second regression run holds
+60.005 VBlanks/s and 29.92–30.07 original images/s. No new package was made.
+Next: qualify a separate-image R4 producer; the preserved MStan geometry pilot
+is Ape-specific, not a ready-made R4 implementation. No 60 FPS delivery is claimed.
+
 Engine `9fbb6ba8` fixes the measured 4K critical path: native snapshot copies
 stay on the render owner, PGXP depth resets use exact scissored hardware clears,
 and threaded debug runs no longer continuously read back VRAM by default.
