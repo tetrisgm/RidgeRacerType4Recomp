@@ -1,6 +1,19 @@
 # Handoff
 
-## Current — 2026-11-10
+## Resume here — 2026-11-10
+
+Owner asks Claude to take over. Work in this checkout on `master`; read
+`CLAUDE.md`, then [the continuation notes](recovery/FRAME_RATE_20261110.md#continuation-notes-for-claude).
+Game checkpoint `428fb4ec`, engine `5846d90c`, UI `ef8150f5`. These latest game
+and engine commits are local, not pushed. No new release/package was made.
+The checkout was clean at handoff; no agent-owned game or build was left running.
+
+The goal remains smooth **60 distinct frames/s at 4K on the Mac**, retaining
+MStan performance, the custom in-game menu on Select/Back, controls/settings
+and Steam Controller fixes. The owner authorized engineering decisions; do not
+ask again to continue. Native 30 FPS is a regression baseline, not completion.
+
+## Current blocker
 
 The 60-distinct-frame restoration remains **unqualified; packaging is blocked**.
 The experiment is off by default. The owner found the visible race visually good
@@ -10,7 +23,7 @@ forcing every redraw costs about 34–35 VBlanks/s at fixed 2160 lines.
 Local engine checkpoint `5846d90c` passes Release, 33 CTests, menu/race smoke
 and rendering fixtures. The native-only 120-second regression run holds
 60.005 VBlanks/s and 29.92–30.07 original images/s. No new package was made.
-Next: qualify a separate-image R4 producer; the preserved MStan geometry pilot
+Next: evaluate a separate-image R4 producer; the preserved MStan geometry pilot
 is Ape-specific, not a ready-made R4 implementation. No 60 FPS delivery is claimed.
 
 Engine `9fbb6ba8` fixes the measured 4K critical path: native snapshot copies
@@ -21,7 +34,7 @@ Custom UI `ef8150f`, Select/Back, settings/controls and Steam fixes remain.
 [Qualification and measurements](recovery/PERFORMANCE_FIX_20261110.md): M4
 moving race sustains 59.936 VBlanks/s for 120 seconds at fixed 4K, full PGXP,
 Max Detail and rewind. Real-GL depth/snapshot/HD fixtures, Release, 29 CTests
-and native menu/race smoke are the validation gates. New portable candidate:
+and native menu/race smoke are the validation gates. Earlier native-30 portable candidate (not the current checkpoint):
 `dist/windows/2026-11-10-4k-performance-01/`; use its BUILD.json and checksums.
 
 ## Remaining qualification

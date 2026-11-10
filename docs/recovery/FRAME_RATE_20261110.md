@@ -92,3 +92,115 @@ controller-latency and full-resolution visual qualification. It is not a drop-in
 performance patch and has not been imported here. No nearest-position matching,
 PGXP-off reference, lower-resolution acceptance or duplicate-frame success is
 an acceptable substitute for that work.
+
+## Continuation notes for Claude
+
+### Start and scope
+
+- Game `428fb4ec`; engine `5846d90c` after `9ac07698`; UI `ef8150f5`.
+  These game/engine checkpoints are local and unpushed. Previous qualified
+  native baseline: game `46c0c3ec`, engine `9fbb6ba8`, same UI.
+- Read `docs/recovery/HISTORY_AUDIT_20261109.md` and
+  `docs/recovery/THREADING_EVALUATION_20261109.md` before choosing further
+  historical ports. Branch cleanup/history preservation is already recorded;
+  do not restart consolidation or use the NAS. Work only on the Mac.
+- Read engine `CLAUDE.md`, `docs/internal/PLAN.md` and
+  `docs/internal/FAITHFUL_TIMING_PLAN.md` before engine edits.
+- Retain PGXP, 9x / 2160 lines, 21:9, Max Detail, effects and rewind when
+  comparing the recorded runs. Owner's present-thread setting is false.
+  Do not count repeated swaps as distinct frames or reduce quality to pass.
+- Automated tests use isolated saves/settings, hidden windows and dummy audio.
+  Owner also explicitly requested visible verification: skip the intro and load
+  the starting-grid save. Never reopen a game the owner closes. Serialize builds
+  and benchmark games, use two compile jobs, terminate only owned processes.
+
+### Reproduction traps
+
+The feature was disabled by default **after** the earlier benchmark harnesses
+were written. `analysis/60fps-20261110/frame-wake-cost.py` and
+`full-admission-cost.py` now need an explicit feature entry in their isolated
+`mods/state.toml`, in addition to the existing internal-resolution entry:
+
+```toml
+[[package]]
+id = "r4.enhancement.frame-rate"
+[[feature]]
+package_id = "r4.enhancement.frame-rate"
+id = "frame-rate"
+enabled = true
+[feature.values]
+rate = "60"
+```
+
+Use a fresh output directory; the harnesses create their directories and refuse
+existing ones. Assert `render_pass_stats` has actual completed passes before
+interpreting a 60-mode result. `PSX_RENDER_PASS_SHED=0` now bypasses both CPU
+and render-queue admission in debug builds, for full-cost attribution only.
+Normal admission still sheds at a two-frame backlog even with a four-frame
+queue; this explains many misleading near-60 swap results. The off-by-default
+feature has no netplay opt-in and its local-camera helpers are not connected
+to the current own-view bridge.
+
+`checkpoint-native-cost.py` is deliberately native-only. Starting-grid saves
+are in `analysis/mac-performance-20261109/grid-source/grid/memcards`. Harnesses
+stage their own copies, use port 4799, load slot 0 and run
+`tools/perf/autopilot.py`. Verify that the car/camera actually moves: some older
+endpoint captures were stationary or taken before the starting lights changed.
+
+### Next engineering decision and acceptance
+
+The guest-redraw path has not met the target after the recorded optimizations.
+Evaluate the explicit-scene, separate-target approach in engine history
+`c7ebe109` through `1b84d4fd`; do not blindly cherry-pick its legacy retirement.
+Relevant historical files are `presentation_scene.h/.c`, `presentation_draw.h/.c`,
+`presentation_gpu.h/.inc`, and `gte_presentation.h`. The Ape pilot is not an R4
+producer. R4 needs stable scene identity, transforms, texture versions and
+compatibility with HD replacements, native-wide geometry and post-effects.
+This is a candidate architecture, not a proven solution or a completed port.
+
+Visual acceptance must include race start, blue sky before the tunnel, tunnel
+seams, ground textures and gauge placement, with consecutive full-resolution
+frames checked for order and blinking. The owner's positive observation was
+for one visible run with most extra frames shed. The earlier `fullres-motion`
+capture raised an order concern; it was not re-qualified after scheduling fixes.
+
+For capture, set `PSX_PRESENT_SHOT_BURST`, record `present_shot_seq`, request
+`present_shot`, and wait for sequence advancement **and** `wrote=1`. Do not
+stop when file count alone reaches the target: the last PNG can still be
+partial (this happened in the 30-frame capture). `render_pass_dump` records
+native/generated pairs; require complete PNG IEND trailers. Capture/readback
+cost must be excluded from performance measurements. Small contact sheets
+cannot establish that fine polygon seams are clean.
+
+Keep distinct-image rate, game/VBlank cadence, completed/rejected passes,
+frame-time spikes and input latency separate. Full-resolution visual success
+and sustained performance are both required before packaging. Physical Steam
+Controller, visible audio/pacing, broader courses and multiplayer remain
+unqualified; automated menu tests do not establish those results.
+
+### Verification and delivery
+
+Latest checks passed before checkpoint: Release build, 33 CTests, full menu/race
+smoke, render-pass guards/sandbox/abort, render-thread core, and real-GL depth,
+bloom, upload-reference and HD fixtures (receipts listed above). Supported
+`JOBS=2 tools/regen.sh` reused 7,459 audited variants with no generated-C change.
+Regenerate again after future engine pin changes.
+
+```sh
+cmake --build build --parallel 2
+ctest --test-dir build --output-on-failure
+python3 tools/gen_r4_interp_fields.py --check
+python3 psxrecomp/runtime/tests/test_render_pass_guards.py
+python3 tools/verify_native_overlays.py analysis/NEW-UNIQUE-DIRECTORY --menu-script tests/custom_menu.txt
+```
+
+The overlay verifier includes the full smoke sequence. Real-GL fixture runner:
+`psxrecomp/runtime/tests/run_gl_texture_filter.py`; threading runner and stored
+harnesses/receipts live under the paths listed above. All raw game captures,
+saves and staged binaries remain ignored/local. Do not commit game data.
+
+Do not publish the checkpoint as a 60 FPS release. Once the target passes,
+update pin history/qualification, commit and push coherent verified changes,
+and follow `docs/WINDOWS_BUILD.md` for a new unique portable package built on
+the Mac. The existing `dist/windows/2026-11-10-4k-performance-01/` predates this
+experiment and is a native-30 candidate, not a current 60 FPS delivery.
