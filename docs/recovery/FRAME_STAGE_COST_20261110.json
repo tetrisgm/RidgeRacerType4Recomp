@@ -1,0 +1,59 @@
+{
+  "completion-fenced-drained-cost": {
+    "serialized": true,
+    "vblanks_per_second": 34.63810234992294,
+    "stages_ms": {
+      "backup": 9.193099487288137,
+      "draw": 17.84984066101695,
+      "capture": 1.8840945444915256,
+      "restore": 6.865042813559322
+    },
+    "samples": [
+      472,
+      472,
+      472,
+      472
+    ],
+    "passes": 472,
+    "aborted": 0,
+    "dispatch_misses": 0
+  },
+  "split-copy-cost": {
+    "serialized": true,
+    "vblanks_per_second": 35.40650128776441,
+    "stages_ms": {
+      "backup": 9.05703494623656,
+      "draw": 17.50844310107527,
+      "capture": 1.809155735483871,
+      "restore": 6.633611737634408
+    },
+    "samples": [
+      465,
+      465,
+      465,
+      465
+    ],
+    "passes": 465,
+    "aborted": 0,
+    "dispatch_misses": 0
+  },
+  "private-target-cost": {
+    "serialized": true,
+    "vblanks_per_second": 33.7161135629157,
+    "stages_ms": {
+      "backup": 18.410297040723982,
+      "draw": 17.71920230090498,
+      "capture": 1.8967195520361992,
+      "restore": 1.1022670633484164
+    },
+    "samples": [
+      442,
+      442,
+      442,
+      442
+    ],
+    "passes": 442,
+    "aborted": 0,
+    "dispatch_misses": 0
+  }
+}

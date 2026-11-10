@@ -459,3 +459,10 @@ The R4 redraw feature is off by default: fully admitted 4K redraw runs at only
 34–35 VBlanks/s, so this is not a 60 FPS release.
 Supported regeneration reuses all 7,459 audited static variants; generated C
 is unchanged. See [findings and regression checks](recovery/FRAME_RATE_20261110.md).
+
+## 2026-11-10 — completed-stage measurement
+
+Engine `055fc1c4` adds opt-in completed render-stage timing; it adds no fences
+when disabled. The private-target and split-blit experiments did not improve
+4K qualification and were removed. See [measured attribution](recovery/FRAME_RATE_20261110.md#completion-fenced-attribution-and-private-target-probe).
+Supported regeneration reuses the audited variants; generated C is unchanged.

@@ -2,9 +2,9 @@
 
 ## Resume here — 2026-11-10
 
-Owner asks Claude to take over. Work in this checkout on `master`; read
+Work in this checkout on `master`; read
 `CLAUDE.md`, then [the continuation notes](recovery/FRAME_RATE_20261110.md#continuation-notes-for-claude).
-Game checkpoint `428fb4ec`, engine `5846d90c`, UI `ef8150f5`. These latest game
+Game restoration checkpoint `428fb4ec`, current engine `055fc1c4`, UI `ef8150f5`. Latest game
 and engine commits are local, not pushed. No new release/package was made.
 The checkout was clean at handoff; no agent-owned game or build was left running.
 
@@ -23,7 +23,12 @@ forcing every redraw costs about 34–35 VBlanks/s at fixed 2160 lines.
 Local engine checkpoint `5846d90c` passes Release, 33 CTests, menu/race smoke
 and rendering fixtures. The native-only 120-second regression run holds
 60.005 VBlanks/s and 29.92–30.07 original images/s. No new package was made.
-Next: evaluate a separate-image R4 producer; the preserved MStan geometry pilot
+Completed-stage measurements identify 9.19 ms backup and 6.87 ms restoration
+per extra frame, alongside 17.85 ms draw work. A complete private framebuffer
+prototype reduced restoration but doubled setup and was slower; it was removed.
+[Measured costs and visible reference captures](recovery/FRAME_RATE_20261110.md#completion-fenced-attribution-and-private-target-probe).
+Next: implement an R4 scene producer and direct separate-image renderer that
+avoids framebuffer cloning; the preserved MStan geometry pilot
 is Ape-specific, not a ready-made R4 implementation. No 60 FPS delivery is claimed.
 
 Engine `9fbb6ba8` fixes the measured 4K critical path: native snapshot copies

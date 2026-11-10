@@ -204,3 +204,62 @@ update pin history/qualification, commit and push coherent verified changes,
 and follow `docs/WINDOWS_BUILD.md` for a new unique portable package built on
 the Mac. The existing `dist/windows/2026-11-10-4k-performance-01/` predates this
 experiment and is a native-30 candidate, not a current 60 FPS delivery.
+
+## Completion-fenced attribution and private-target probe
+
+A subsequent diagnostic brackets backup, draw, capture and restoration with
+`glFinish` and the host monotonic clock. It drains pending native batches and
+wide mirrors before starting. This deliberately serializes GPU work: the
+results attribute completed work, **not** asynchronous throughput or pure GPU
+execution time. Draw includes render-owner command consumption and any producer
+starvation. Source receipt: [stage costs](FRAME_STAGE_COST_20261110.json).
+
+| Probe | Backup ms | Draw ms | Capture ms | Restore ms | VBlanks/s |
+|---|---:|---:|---:|---:|---:|
+| Existing transaction | 9.193 | 17.850 | 1.884 | 6.865 | 34.64 |
+| Separate color/depth blits | 9.057 | 17.508 | 1.809 | 6.634 | 35.41 |
+| Complete private target | 18.410 | 17.719 | 1.897 | 1.102 | 33.72 |
+
+All runs retain fixed 9x, PGXP, full detail and explicit extra-frame enablement,
+with admission shedding bypassed to expose cost. The old CPU-only transaction
+timer reports roughly 7.4 ms guest work; it does not account for GPU completion.
+The private-target probe copies complete native surfaces into separate storage,
+draws there and restores by switching back to untouched original surfaces. It
+preserves arbitrary texture-feedback source contents but copies too much. Its
+restoration savings were outweighed by initialization. Neither attempted change
+was retained in runtime behavior. The prototype patch and isolated binaries
+remain locally under `analysis/60fps-20261110/`.
+
+The evidence supports eliminating framebuffer cloning, not merely moving it to
+another target. A replacement should consume explicit R4 scene geometry, camera,
+object transforms and immutable materials; render into its own output; and keep
+original game logic, menu and controllers. It must establish exact native-endpoint
+parity before interpolation. The R4 producer and replacement remain unimplemented;
+these probes are not a performance fix or release qualification.
+
+The opt-in diagnostic is `PSX_RENDER_PASS_STAGE_TIME=1`, queried using
+`render_pass_stage_times`. Its four total/count entries are backup, draw, capture,
+restore in that order. Default behavior has no completion fences. Reproduction:
+`analysis/60fps-20261110/completion-fenced-drained-cost.py`.
+
+### Visible reference capture
+
+`analysis/60fps-20261110/measured-visible-baseline/` loaded the saved race directly
+and drove five route samples with extra passes fully admitted, not mostly shed.
+Each sample has four complete native/generated pairs at 5040x2160, plus the
+1280x720 composed visible-window screenshot. The receipt confirms fixed 9x and
+zero dispatch misses. This was a visual-reference run, not a throughput benchmark
+(captures introduce stalls). The owned game process exited after capture.
+
+Inspected overview screenshots include sky/road, a green tunnel and the orange
+tunnel. A full-resolution green-tunnel wall crop across consecutive native and
+generated pairs shows continuous wall/road edges and gauge placement; no open
+seams or misplaced gauge were observed in that inspected subset. Additional
+full-resolution crop sequences of the orange-tunnel ground and the sky/bridge
+edge also show no missing patches in the inspected pairs. This is not
+continuous-video coverage, proof against all blinking, or acceptance of a new
+renderer. No new renderer was visually qualified.
+
+After retaining only the opt-in diagnostic: Release build, all 33 CTests and
+`stage-final-menu-smoke/native-overlay-check.json` pass (zero dispatch misses).
+Menu, Select/Back, settings and controller integration are unchanged.
