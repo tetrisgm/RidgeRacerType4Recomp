@@ -1,0 +1,63 @@
+{
+  "date": "2026-11-09",
+  "platform": "macOS arm64",
+  "kind": "historical standalone components, not integrated game performance",
+  "results": [
+    {
+      "name": "call-gate",
+      "source": "84d6ca22",
+      "command": [
+        "clang++",
+        "-std=c++17",
+        "-O2",
+        "-pthread",
+        "-Ianalysis/threading-evaluation-20261109/call-gate",
+        "analysis/threading-evaluation-20261109/call-gate/draw_call_gate.cpp",
+        "analysis/threading-evaluation-20261109/call-gate/test_draw_call_gate.cpp",
+        "-o",
+        "analysis/threading-evaluation-20261109/call-gate/test"
+      ],
+      "build_exit": 0,
+      "build_output": "",
+      "run_exit": 0,
+      "output": "PASS: owner call gate ordering, live worker stack, refusal, timeout and close\n"
+    },
+    {
+      "name": "rewind",
+      "source": "6cb8b57d",
+      "command": [
+        "clang++",
+        "-std=c++17",
+        "-O2",
+        "-pthread",
+        "-Ianalysis/threading-evaluation-20261109/rewind",
+        "analysis/threading-evaluation-20261109/rewind/rewind_worker.cpp",
+        "analysis/threading-evaluation-20261109/rewind/test_rewind_worker.cpp",
+        "-o",
+        "analysis/threading-evaluation-20261109/rewind/test"
+      ],
+      "build_exit": 0,
+      "build_output": "",
+      "run_exit": 0,
+      "output": ""
+    },
+    {
+      "name": "audio",
+      "source": "84d6ca22",
+      "command": [
+        "clang++",
+        "-std=c++17",
+        "-O2",
+        "-pthread",
+        "-Ianalysis/threading-evaluation-20261109/audio",
+        "analysis/threading-evaluation-20261109/audio/test_audio_transport.cpp",
+        "-o",
+        "analysis/threading-evaluation-20261109/audio/test"
+      ],
+      "build_exit": 0,
+      "build_output": "",
+      "run_exit": 0,
+      "output": "audio SPSC transport: exact resampler parity and concurrent wrap passed\n"
+    }
+  ]
+}

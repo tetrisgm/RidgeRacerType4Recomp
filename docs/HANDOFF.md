@@ -15,6 +15,12 @@ candidate: `dist/windows/2026-11-09-mstan-restored-01/`; use its BUILD.json,
 execution-contract sidecar and SHA256SUMS. Earlier packages omit these four
 optimizations.
 
+[Broader threading evaluation](recovery/THREADING_EVALUATION_20261109.md)
+traces the older draw workers, native raster/mailbox, audio, rewind and PGXP
+work. Three preserved component fixtures pass freshly on Mac; no architecture
+change is promoted. The next performance step is synchronized attribution of
+the current 4K bottleneck, followed by the relevant isolated port.
+
 ## Remaining qualification
 
 Paired 4K grid tests improve from 45.896 to 47.306 VBlanks/s (about 3.1%) on
