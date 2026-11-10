@@ -1,0 +1,418 @@
+{
+  "scope": "R4 candidate-ledger disposition and game ancestry; later framework commits inventoried, not claimed individually runtime-qualified",
+  "ledger_commit": "88496e72a1be6152f62d2eb3385ea3c77b0b6cc9",
+  "upstream_head": "cddb32214762416badff5bcbb5c68aef19df25cc",
+  "candidates": [
+    {
+      "name": "render-ring",
+      "source": "e57db5da15b80b8d5f53ab498f4fe3eef8252970",
+      "landed": "faf7bcb3",
+      "status": "restored",
+      "reason": "Batched publication, separate cache lines and burst accounting; 8,843 ring checks in both publication modes."
+    },
+    {
+      "name": "GL state cache",
+      "source": "63677cb729c11e5f0b1a02313f73a1bf642cbcb2",
+      "landed": "7330aa66",
+      "status": "restored",
+      "reason": "Cache blend/stencil queries; hidden GL and actual menu transitions qualified."
+    },
+    {
+      "name": "fixed sampler units",
+      "source": "cc413ceb2b3bea333ba2247dc7f25b3ba8a94d0b",
+      "landed": "b1bfaa79",
+      "status": "restored",
+      "reason": "Initialize program sampler units once; exact GL output matches diagnostic reference."
+    },
+    {
+      "name": "HD miss path",
+      "source": "b7f91c6e3f6547a75a7508ddf0bd29462a830008",
+      "landed": "7531a8a7",
+      "status": "restored",
+      "reason": "Allocation-free broad-phase misses and delayed leases; HD pack and real GL tests pass."
+    },
+    {
+      "name": "disc read-ahead",
+      "source": "81862e0a335f2d64263170edd479a24635c017c2",
+      "landed": null,
+      "status": "preserved, not adopted",
+      "reason": "MStan marked experimental: CHD, mapped CD-DA and mount lifetime remain unqualified. Not a demonstrated remedy for the measured racing render cost."
+    },
+    {
+      "name": "Windows render priority",
+      "source": "c1523113d33b6eb5091230eb0c6e4b70620f6689",
+      "landed": null,
+      "status": "preserved, not adopted",
+      "reason": "Windows-only scheduling policy; Mac cannot measure its benefit or audio/starvation impact. No silent default priority increase."
+    },
+    {
+      "name": "threaded draw contexts",
+      "source": "9f34cf894989caf15920936bb19cada4b4f1283a",
+      "landed": null,
+      "status": "preserved research",
+      "reason": "Different CPU/GTE/PGXP ownership and codegen architecture; transport tests do not qualify complete game frames."
+    },
+    {
+      "name": "packet/presentation workers",
+      "source": "84d6ca22259ad16d9dd5e13f390514e575cb8d10",
+      "landed": null,
+      "status": "preserved research",
+      "reason": "Original fork pipeline has unresolved visual/identity evidence; not a standalone optimization to merge."
+    },
+    {
+      "name": "rewind worker",
+      "source": "6cb8b57dc7fda4878067806aa16db5235c570bb7",
+      "landed": null,
+      "status": "preserved research",
+      "reason": "Depends on old native-raster/boot-state/rewind contracts; current HD-resident upstream rewind retained."
+    },
+    {
+      "name": "triangle/setup grouping",
+      "source": "6ea95b0f115bfb7cd89120cf765814b91220b8e8",
+      "landed": null,
+      "status": "preserved, inconclusive",
+      "reason": "MStan ledger records historical 5.73 vs 5.74 ms with roughly 10% variation; no demonstrated useful gain."
+    },
+    {
+      "name": "display-layout cache",
+      "source": "3c151afd1b2591defb9402cd55b5c343a4d0e1a8",
+      "landed": null,
+      "status": "preserved, inconclusive",
+      "reason": "Same low-priority/inconclusive assessment in the source candidate ledger."
+    },
+    {
+      "name": "inactive netplay native routing",
+      "source": "06bf20f9f54dc33d25b164e246e58199df49967b",
+      "landed": null,
+      "status": "later upstream integration",
+      "reason": "Targets function_entry_has_hook, absent from the pinned native-entry interface; do not port one hunk without its newer routing/codegen contract."
+    },
+    {
+      "name": "resident guard bulk hashing",
+      "source": "93b2bcc327081c54e656c972fa9b0d43e53bded0",
+      "landed": null,
+      "status": "not an R4 hot-path omission",
+      "reason": "Current tree has the guest_ranges_match definition but no R4/runtime call sites. Follow-ups 51639afc and 40e460a4 must accompany any future adoption."
+    },
+    {
+      "name": "offline launcher disc hashing",
+      "source": "1ef0bc8175b675528b6d01414ee3fd69980b5c06",
+      "landed": null,
+      "status": "later upstream integration",
+      "reason": "Startup/plan preparation change, not a racing-frame optimization; belongs with its mod-plan lifecycle tests during upstream refresh."
+    },
+    {
+      "name": "thread-CPU watchdog budget",
+      "source": "97c655e3628ce209e57805ac30811da08e1e317b",
+      "landed": null,
+      "status": "later diagnostic change",
+      "reason": "Changes watchdog semantics, not rendering throughput; do not hide the observed hidden-window VSync wait by relaxing the watchdog."
+    },
+    {
+      "name": "immutable geometry presentation",
+      "source": "308e5c7007aea5ec8ca01088c435e6b9b7f88c01",
+      "landed": null,
+      "status": "separate architecture",
+      "reason": "New lineage/geometry sampling/raster/presentation stack with multiple prerequisite commits; not a drop-in recovery of the six candidates."
+    }
+  ],
+  "game_commits": [
+    {
+      "commit": "568eee5214aa74fbfdcd5cff3604dee19c32af01",
+      "subject": "Fix fragmented red RPM bars with HD replacement coverage",
+      "in_current_ancestry": true
+    },
+    {
+      "commit": "6c248dbe0c9ab7787b926bb150dc92e27676c041",
+      "subject": "Record slot-4 scenery reproduction and focused qualification",
+      "in_current_ancestry": true
+    },
+    {
+      "commit": "98abdac9473a3616beae0c4654763fddd5a618ca",
+      "subject": "Stop stationary scenery oscillation in Maximum detail",
+      "in_current_ancestry": true
+    },
+    {
+      "commit": "9f9fbc84ab139bb1ffc3d934849128864a3ed3c8",
+      "subject": "Record native and wide first-straight scenery comparison",
+      "in_current_ancestry": true
+    },
+    {
+      "commit": "345a66fdd9a87951b8e7517d63ddb98547468001",
+      "subject": "Record integrated high-resolution rewind qualification",
+      "in_current_ancestry": true
+    },
+    {
+      "commit": "fddc0e2f031627a8087125a5c22a6103a0cbf833",
+      "subject": "Stabilize wide race horizon and preserve HD rewind",
+      "in_current_ancestry": true
+    },
+    {
+      "commit": "c99028bab6f8373b6e4450bb2d9634ec3954bc11",
+      "subject": "Scope R4 goal to culling camera rewind and loading",
+      "in_current_ancestry": true
+    },
+    {
+      "commit": "f1e1181c70b75805a0ee11c6e89e6d7d4fc9f74d",
+      "subject": "Document R4 playtest feedback burndown",
+      "in_current_ancestry": true
+    },
+    {
+      "commit": "deb37395be48c3aca521b9c4901e849934b34820",
+      "subject": "Add collaborator rebuild handoff and reviewed 4K graphics profile",
+      "in_current_ancestry": true
+    },
+    {
+      "commit": "8a64c3f1642c3a92cb17f1556cb7c6ec05a183b2",
+      "subject": "Record the prepared owner recovery preview",
+      "in_current_ancestry": true
+    },
+    {
+      "commit": "43d82c5aeddf705455c1fccbcb7f8e0977abc124",
+      "subject": "Record R4 recovery validation and comparative measurements",
+      "in_current_ancestry": true
+    },
+    {
+      "commit": "12e8870db5f8e92a3e2a460de538060232c2b978",
+      "subject": "Enable R4 rewind through the upstream mod catalog",
+      "in_current_ancestry": true
+    },
+    {
+      "commit": "d72d212cd3f6831f949a21762b18ef0465e707ec",
+      "subject": "Recover R4 on current upstream without the fork packet pipeline",
+      "in_current_ancestry": true
+    }
+  ],
+  "later_framework_inventory": [
+    {
+      "commit": "b0e61973",
+      "date": "2026-11-07",
+      "subject": "Honor explicit HD catalog policy in diagnostic release audits"
+    },
+    {
+      "commit": "dcfe2b2d",
+      "date": "2026-11-07",
+      "subject": "Preserve hardware noise clock phases across frequency changes"
+    },
+    {
+      "commit": "47c02aee",
+      "date": "2026-11-07",
+      "subject": "release: ship the overlay policy used by the codegen hash"
+    },
+    {
+      "commit": "6589d95d",
+      "date": "2026-11-07",
+      "subject": "Refresh OpenBIOS after combining analyzer and configuration changes"
+    },
+    {
+      "commit": "aabf209b",
+      "date": "2026-11-07",
+      "subject": "Use the shared mod-memory stub in GTE CMake fixtures"
+    },
+    {
+      "commit": "06bf20f9",
+      "date": "2026-11-07",
+      "subject": "Ignore inactive netplay hooks when choosing native entry routing"
+    },
+    {
+      "commit": "71df5a4e",
+      "date": "2026-11-07",
+      "subject": "Keep review handoff and local evidence locations in private tracking"
+    },
+    {
+      "commit": "208421e6",
+      "date": "2026-11-05",
+      "subject": "Record owner-requested future PR validation and merge handoff"
+    },
+    {
+      "commit": "a7c6f388",
+      "date": "2026-11-05",
+      "subject": "Record complete boundary and ABI follow-up qualification"
+    },
+    {
+      "commit": "e6444ee6",
+      "date": "2026-11-05",
+      "subject": "Commit pending delay loads before resuming an opaque call"
+    },
+    {
+      "commit": "5b0be9a6",
+      "date": "2026-11-05",
+      "subject": "Improve symbol-audited entry precision and ABI metadata"
+    },
+    {
+      "commit": "329b037a",
+      "date": "2026-11-07",
+      "subject": "Keep release override declarations and storage with their getters"
+    },
+    {
+      "commit": "25d4f3cc",
+      "date": "2026-11-07",
+      "subject": "Apply SPU pitch modulation and preserve high-rate sample positions"
+    },
+    {
+      "commit": "f1db740a",
+      "date": "2026-11-07",
+      "subject": "Use bundled Linux TinyCC resources and register hash regression"
+    },
+    {
+      "commit": "4ab92de6",
+      "date": "2026-11-07",
+      "subject": "Preserve runtime UTF-8 path bytes with C++20 char8_t"
+    },
+    {
+      "commit": "9dd018c2",
+      "date": "2026-11-06",
+      "subject": "Clarify PolyForm licensing and permit donations and advertising"
+    },
+    {
+      "commit": "4f35da54",
+      "date": "2026-11-05",
+      "subject": "Record built consumer gameplay and runtime qualification"
+    },
+    {
+      "commit": "395bcd2f",
+      "date": "2026-11-05",
+      "subject": "Recover symbol-confirmed preframe and callback entries across the full PSX corpus"
+    },
+    {
+      "commit": "8d959231",
+      "date": "2026-11-05",
+      "subject": "Fix function entries with gp-relative loads before frame allocation"
+    },
+    {
+      "commit": "395ed4ff",
+      "date": "2026-11-05",
+      "subject": "Expose dithering in the Image Filtering mod"
+    },
+    {
+      "commit": "c9a01972",
+      "date": "2026-11-04",
+      "subject": "Preserve the one-run AA override when resolving host mods"
+    },
+    {
+      "commit": "028f23ba",
+      "date": "2026-11-04",
+      "subject": "Preserve the one-run AA override when resolving host mods"
+    },
+    {
+      "commit": "b3791913",
+      "date": "2026-11-04",
+      "subject": "Add direct remappable quick save and quick load actions"
+    },
+    {
+      "commit": "3df46c4e",
+      "date": "2026-11-04",
+      "subject": "Apply explicit supersampling to fixed resolution mods"
+    },
+    {
+      "commit": "0cde07ba",
+      "date": "2026-11-04",
+      "subject": "Preserve GetlocL seek validity across snapshots and resident reads"
+    },
+    {
+      "commit": "7a0ee29f",
+      "date": "2026-11-04",
+      "subject": "Restore video controls through system settings and picture mods"
+    },
+    {
+      "commit": "fbb9df45",
+      "date": "2026-11-04",
+      "subject": "Anchor auto UI to the drawing buffer during horizontal swaps"
+    },
+    {
+      "commit": "cae30625",
+      "date": "2026-11-04",
+      "subject": "Group widescreen HUD in display coordinates across draw offsets"
+    },
+    {
+      "commit": "1ccad9a4",
+      "date": "2026-11-04",
+      "subject": "Keep one application manifest with GNU default-manifest injection"
+    },
+    {
+      "commit": "9afe200e",
+      "date": "2026-11-04",
+      "subject": "Omit dead fallthroughs after explicit split transfers"
+    },
+    {
+      "commit": "3fc90b2d",
+      "date": "2026-11-04",
+      "subject": "Fix setup-host BIOS validation ordering and cache leakage"
+    },
+    {
+      "commit": "8b7282d8",
+      "date": "2026-11-03",
+      "subject": "Preserve Python case aliases when staging on insensitive filesystems"
+    },
+    {
+      "commit": "d5d142f2",
+      "date": "2026-11-04",
+      "subject": "Clarify first-time Windows setup and source downloads"
+    },
+    {
+      "commit": "d6c2e106",
+      "date": "2026-11-03",
+      "subject": "Preserve Python case aliases when staging on insensitive filesystems"
+    },
+    {
+      "commit": "05d053d0",
+      "date": "2026-11-03",
+      "subject": "Preserve Python case aliases when staging on insensitive filesystems"
+    },
+    {
+      "commit": "060ef0ab",
+      "date": "2026-11-03",
+      "subject": "Record committed diagnostic plan identity without preparing a netplay offer"
+    },
+    {
+      "commit": "8345dbdb",
+      "date": "2026-11-03",
+      "subject": "Accept the expanded stale-selection diagnostic in catalog regression test"
+    },
+    {
+      "commit": "1ef0bc81",
+      "date": "2026-11-03",
+      "subject": "Avoid unused disc hashing for declarative offline launcher plans"
+    },
+    {
+      "commit": "37b965ba",
+      "date": "2026-11-03",
+      "subject": "Keep resolved-pad observers from consuming injected input"
+    },
+    {
+      "commit": "672bc9d6",
+      "date": "2026-11-03",
+      "subject": "Preserve UNC paths when resolving memory-card files on Windows"
+    },
+    {
+      "commit": "d35f13c9",
+      "date": "2026-11-03",
+      "subject": "Consume TCP controller input in lean runtime builds"
+    },
+    {
+      "commit": "dca4cbc0",
+      "date": "2026-11-03",
+      "subject": "Refresh netplay dependencies for current game releases"
+    },
+    {
+      "commit": "1df39a21",
+      "date": "2026-11-03",
+      "subject": "Initialize DMA fixture baseline before optimized checks"
+    },
+    {
+      "commit": "4b43e8b6",
+      "date": "2026-10-26",
+      "subject": "Support host-generated world draw packets without guest DMA cost"
+    },
+    {
+      "commit": "ee4ca0e2",
+      "date": "2026-10-26",
+      "subject": "Defer savestate loads across host continuations"
+    },
+    {
+      "commit": "e81844f9",
+      "date": "2026-11-03",
+      "subject": "Fix native emitter setup and draw-distance fixture linking"
+    }
+  ]
+}

@@ -47,7 +47,7 @@ uses `std::terminate` without declaring it under libc++.
 From a recursively initialized `master` checkout:
 
 ```sh
-JOBS=2 bash tools/build_windows.sh 2026-11-09-custom-menu-01
+JOBS=2 bash tools/build_windows.sh 2026-11-09-mstan-restored-01
 ```
 
 Use a **new version every time**. Output is `dist/windows/<version>/` with
@@ -75,7 +75,7 @@ A finished package is already usable as a portable folder. To copy a clean,
 checksummed build to an existing local or removable destination:
 
 ```sh
-python3 tools/deliver_windows.py dist/windows/2026-11-09-custom-menu-01 --destination-root /Volumes/Transfer
+python3 tools/deliver_windows.py dist/windows/2026-11-09-mstan-restored-01 --destination-root /Volumes/Transfer
 ```
 
 The helper reserves `r4/<version>/` exclusively and verifies the copied files.

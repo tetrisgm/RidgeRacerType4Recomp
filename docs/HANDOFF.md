@@ -2,38 +2,39 @@
 
 ## Current — 2026-11-09
 
-The original custom R4 menu is restored through `launcher/title_r4.cpp` and
-custom UI `ef8150f`. Select/Back alone opens it over the game. Controls,
-bindings, device/deadzone settings, display, volume and save/load are wired to
-the current runtime. Engine `d585a728` preserves the MStan recovery and Steam
-Controller baseline. PGXP remains required; Resume keeps restart-only edits
-pending without discarding the race.
+Engine `b57e486e` restores four performance candidates from MStan's preserved
+ledger: render-ring batching, GL capability caching, fixed sampler units and
+allocation-free HD misses. Custom UI `ef8150f`, Select/Back, controls/settings,
+save/load and Steam Controller fixes remain intact. PGXP stays required.
 
-[Restoration validation](archive/CUSTOM_MENU_20261109.md) records the Mac
-Release, 29 CTests, UI fixtures, actual menu/save-load/persistence checks and
-native boot-to-race smoke. Local evidence is
-`analysis/custom-menu-20261109/qualified-02/`. The portable Windows candidate is
-`dist/windows/2026-11-09-custom-menu-01/`, cross-built on the Mac; use its
-checksums and BUILD.json. Prior consolidated packages have the generic menu.
+[Restoration and candidate audit](recovery/MSTAN_RESTORATION_20261109.md)
+records the exact dispositions, tests and performance limits. Local evidence:
+`analysis/mstan-restoration-20261109/`. Mac Release, 29 CTests, ring/GL/HD
+fixtures and actual menu/persistence/native-overlay smoke pass. New portable
+candidate: `dist/windows/2026-11-09-mstan-restored-01/`; use its BUILD.json,
+execution-contract sidecar and SHA256SUMS. Earlier packages omit these four
+optimizations.
 
 ## Remaining qualification
 
-[Mac performance qualification](archive/MAC_PERFORMANCE_20261109.md) found
-no restoration regression: moving 4K runs average 54.82 VBlanks/s restored
-versus 54.79 baseline. 1440p holds full speed on the moving and eight-car-start
-routes; 4K's eight-car start averages 49.98 VBlanks/s under current background
-load. Owner settings remain unchanged. The crowded-race 4K slowdown is unresolved. Normal-paced rank-8 regression,
-physical Steam Controller/Steam Input, effects alignment, camera comfort,
-all-course and multiplayer play still need qualification. Windows execution
-is owner-only. Never access STEAMBOX or the unrelated NAS for development.
+Paired 4K grid tests improve from 45.896 to 47.306 VBlanks/s (about 3.1%) on
+the M4 under background load. This remains below full speed. The prior 1440p
+qualification is recorded in [Mac measurements](archive/MAC_PERFORMANCE_20261109.md);
+owner settings remain unchanged. Do not claim the restoration fixes all 4K
+slowdowns. Disc prefetch, Windows priority and larger architecture candidates
+have explicit dispositions in the new audit.
+
+Visible-window pacing/audio, the owner's specific rank-8 crash route, physical
+Steam Controller/Steam Input, effects/camera and all-course/multiplayer play
+remain to qualify. Windows execution is owner-only. NAS and STEAMBOX are not
+development machines for this work.
 
 ## References
 
-- [History audit and unavailable evidence](recovery/HISTORY_AUDIT_20261109.md)
-- [Upstream review](UPSTREAM.md) and [pin history](framework_pin_history.md)
+- [History audit](recovery/HISTORY_AUDIT_20261109.md)
+- [Menu restoration](archive/CUSTOM_MENU_20261109.md)
+- [Upstream reviews](UPSTREAM.md) / [pin history](framework_pin_history.md)
 - [Windows packaging](WINDOWS_BUILD.md)
-- [Historical consolidation](CONSOLIDATION.md)
 
-Game development remains on one local/remote master branch and one working
-checkout. Historical sources/old worktree directories remain locally preserved
-at `/Users/shokunin/dev-archives/r4-20261109/`.
+Game development has one master branch and one checkout. Historical sources
+remain at `/Users/shokunin/dev-archives/r4-20261109/`.

@@ -7,6 +7,7 @@ from pathlib import Path
 import re
 import shutil
 import subprocess
+import sys
 
 from check_static_overlays import check as check_static_overlays
 
@@ -58,6 +59,9 @@ def main():
             shutil.copytree(src, stage / name)
         else:
             shutil.copy2(src, stage / name)
+    subprocess.run([sys.executable, str(ROOT / 'psxrecomp/tools/release_stage.py'),
+                    'stage-execution', '--binary', str(stage / 'r4-runtime.exe'),
+                    '--manifest', str(build / 'r4-runtime.execution.json')], check=True)
     (stage / 'bios').mkdir()
     for name in ('openbios.bin', 'OpenBIOS.LICENSE'):
         shutil.copy2(build / 'bios' / name, stage / 'bios' / name)

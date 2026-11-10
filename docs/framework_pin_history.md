@@ -1,3 +1,8 @@
+2026-11-09 performance restoration: engine `b57e486e` adds the four qualified
+candidates to the custom-menu/Steam Controller baseline. UI remains `ef8150f`.
+Supported regeneration leaves generated C unchanged and reuses all 7,459
+native overlay variants. See [candidate dispositions and qualification](recovery/MSTAN_RESTORATION_20261109.md).
+
 2026-11-09 custom menu restoration: engine `d585a728` retains the prior
 `ae3eae8f` performance/Steam Controller baseline and adds full menu settings,
 save-state operations, persistent volume and synchronized debug resizing.

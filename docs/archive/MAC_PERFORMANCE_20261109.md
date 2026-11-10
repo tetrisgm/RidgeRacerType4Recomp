@@ -1,5 +1,9 @@
 # Mac performance qualification — 2026-11-09
 
+This report predates restoration of four parked performance candidates. Its
+baseline comparison does not establish that all MStan optimizations were
+present. See the [subsequent restoration](../recovery/MSTAN_RESTORATION_20261109.md).
+
 The custom-menu restoration does not show a performance regression against
 the preserved pre-restoration baseline. **1440p sustains full game speed on
 this Mac in the tested moving and eight-car-start routes. 4K does not.**
