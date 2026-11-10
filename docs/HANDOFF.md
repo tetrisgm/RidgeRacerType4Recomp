@@ -18,7 +18,11 @@ checksums and BUILD.json. Prior consolidated packages have the generic menu.
 
 ## Remaining qualification
 
-The crowded-race 4K slowdown is unresolved. Normal-paced rank-8 regression,
+[Mac performance qualification](archive/MAC_PERFORMANCE_20261109.md) found
+no restoration regression: moving 4K runs average 54.82 VBlanks/s restored
+versus 54.79 baseline. 1440p holds full speed on the moving and eight-car-start
+routes; 4K's eight-car start averages 49.98 VBlanks/s under current background
+load. Owner settings remain unchanged. The crowded-race 4K slowdown is unresolved. Normal-paced rank-8 regression,
 physical Steam Controller/Steam Input, effects alignment, camera comfort,
 all-course and multiplayer play still need qualification. Windows execution
 is owner-only. Never access STEAMBOX or the unrelated NAS for development.
