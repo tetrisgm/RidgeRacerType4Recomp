@@ -550,6 +550,137 @@
         "segment_miss_total": 0,
         "segment_miss_unique": 0
       }
+    },
+    {
+      "receipt": "analysis/60fps-20261111-crop-target-throughput/candidate-0-2160.json",
+      "disposition": "Probe removed; repeat did not establish a stable benefit",
+      "runtime_sha256": "6aa9919924de2a7ba786594b97d9bdfd7ba5f0bd724ac320bdd2bdb924a29302",
+      "elapsed_seconds": 120.45835033303592,
+      "vblanks_per_second": 57.82911670914326,
+      "present_fps_samples": [
+        60.08,
+        58.43,
+        59.75,
+        53.03,
+        53.74,
+        60.01,
+        59.98,
+        58.86,
+        61.29,
+        60.04,
+        60.04,
+        55.67,
+        50.15,
+        56.74,
+        60.61,
+        59.97,
+        60.63,
+        57.55,
+        58.94,
+        51.48,
+        52.18,
+        62.09,
+        59.88,
+        57.6
+      ],
+      "dispatch": {
+        "id": 0,
+        "ok": true,
+        "static_hits": 914201,
+        "miss_total": 0,
+        "miss_unique": 0,
+        "segment_miss_total": 0,
+        "segment_miss_unique": 0
+      }
+    },
+    {
+      "receipt": "analysis/60fps-20261111-crop-target-reference/candidate-0-2160.json",
+      "disposition": "Full-sized-target reference demonstrating run variability",
+      "runtime_sha256": "6aa9919924de2a7ba786594b97d9bdfd7ba5f0bd724ac320bdd2bdb924a29302",
+      "elapsed_seconds": 120.48058716597734,
+      "vblanks_per_second": 47.87493268151031,
+      "present_fps_samples": [
+        52.45,
+        47.8,
+        60.32,
+        52.49,
+        44.22,
+        49.49,
+        56.13,
+        52.86,
+        47.06,
+        46.45,
+        56.66,
+        58.32,
+        46.78,
+        39.31,
+        42.04,
+        43.87,
+        50.05,
+        45.03,
+        45.86,
+        43.24,
+        41.1,
+        46.88,
+        42.31,
+        38.41
+      ],
+      "dispatch": {
+        "id": 0,
+        "ok": true,
+        "static_hits": 751547,
+        "miss_total": 0,
+        "miss_unique": 0,
+        "segment_miss_total": 0,
+        "segment_miss_unique": 0
+      }
+    },
+    {
+      "receipt": "analysis/60fps-20261111-crop-target-repeat/candidate-0-2160.json",
+      "disposition": "Probe removed; repeat did not establish a stable benefit",
+      "runtime_sha256": "6aa9919924de2a7ba786594b97d9bdfd7ba5f0bd724ac320bdd2bdb924a29302",
+      "elapsed_seconds": 120.5202299579978,
+      "vblanks_per_second": 46.84690696298599,
+      "present_fps_samples": [
+        47.28,
+        46.44,
+        51.96,
+        43.7,
+        41.02,
+        38.97,
+        45.41,
+        53.01,
+        52.34,
+        43.24,
+        46.9,
+        48.29,
+        60.86,
+        47.25,
+        41.19,
+        34.02,
+        39.06,
+        48.93,
+        51.83,
+        48.12,
+        49.95,
+        45.26,
+        52.04,
+        47.9
+      ],
+      "dispatch": {
+        "id": 0,
+        "ok": true,
+        "static_hits": 760714,
+        "miss_total": 0,
+        "miss_unique": 0,
+        "segment_miss_total": 0,
+        "segment_miss_unique": 0
+      }
     }
-  ]
+  ],
+  "profiling": {
+    "timer_enabled": "analysis/60fps-20261111-margins-remaining-cost/",
+    "cpu_only": "analysis/60fps-20261111-margins-cpu-only-v2/",
+    "finding": "With GPU timer queries disabled, the dominant render-owner sampled stack remains Cocoa_GL_SwapWindow through Metal OpenGL submission semaphore waits; query-management stalls disappear. Bounded CPU sample, not a GPU occupancy measurement."
+  }
 }

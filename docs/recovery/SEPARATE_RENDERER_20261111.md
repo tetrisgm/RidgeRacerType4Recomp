@@ -130,3 +130,22 @@ VSync condition wait. The hidden-window harness now explicitly sets
 `PSX_VSYNC=0`, like the existing performance harnesses; menu rendering resumed
 above 80 FPS and the full script passed. Player settings and visible-game
 VSync behavior are unchanged. This fixes automation, not race performance.
+
+## Remaining-cost profile and rejected storage probe
+
+On the retained build, a CPU sample with GPU timer queries disabled still
+places the largest render-owner stack in Cocoa/OpenGL presentation, waiting
+on Metal submission semaphores. The query-management stalls seen with
+`PSX_GL_PERF=1` disappear, but the wait moves to normal presentation. This is
+a bounded CPU sample, not GPU occupancy or proof that replacing guest logic
+alone would reach 60. Receipts: `analysis/60fps-20261111-margins-remaining-cost/`
+and `analysis/60fps-20261111-margins-cpu-only-v2/`.
+
+A debug-only probe narrowed the private canonical target to the redraw's
+columns without reducing the rendered resolution. It passed the 144-check
+restoration fixture and initially measured 57.83 VBlanks/s. A subsequent
+full-sized reference measured 47.87 and a smaller-target repeat measured
+46.85. These runs do not establish a repeatable gain; the probe was removed
+and the verified `c593b788` runtime rebuilt. The variability also means the
+55.41 result must not be presented as an unconditional performance guarantee.
+No cropped-target race-image qualification or 60 FPS package is claimed.

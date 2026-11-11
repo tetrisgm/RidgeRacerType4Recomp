@@ -39,8 +39,13 @@ misses. The hidden harness explicitly disables VSync to avoid Cocoa throttling
 hidden windows to about 1 FPS. Engine pin is `c593b788` (implementation `1f5030c5`); supported game
 regeneration leaves generated C unchanged and reuses all 7,459 overlay variants. The UI pin remains `ef8150f5`.
 
-Next: measure the remaining cost after margin clipping and complete the R4
-pre-cull geometry/material producer before connecting the independent backend.
+The post-margin CPU-only profile still finds dominant render-owner waits in
+OpenGL/Metal presentation. A smaller private-target probe did not reproduce
+its initial gain and was removed; later runs varied substantially. See the
+receipt before interpreting the 55.41 measurement as repeatable capacity.
+
+Next: complete the R4 pre-cull geometry/material producer before connecting
+the independent backend, then qualify the complete presentation path.
 Preserve texture LOD mode 1 and anisotropy 16. Fresh targets remain debug-only,
 off by default (`PSX_RENDER_PASS_FRESH_TARGET=1`); they are not qualified for
 partial-frame or old-image feedback. Margin clipping is on by default under
