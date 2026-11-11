@@ -35,6 +35,9 @@ def main():
     shutil.copytree(args.build.resolve() / 'mods/bundled', stage / 'mods/bundled')
     env = {k: v for k, v in os.environ.items() if not k.startswith('PSX_OVERLAY_')}
     env['SDL_AUDIODRIVER'] = 'dummy'
+    # Cocoa may throttle a hidden window's display link to one swap per second.
+    # Script waits count rendered frames; isolated automation must not use VSync.
+    env['PSX_VSYNC'] = '0'
     if args.menu_script:
         env['R4L_OVERLAY_SCRIPT'] = str(args.menu_script.resolve())
     (stage / 'settings.toml').write_text('[video]\npresent_thread = false\n')

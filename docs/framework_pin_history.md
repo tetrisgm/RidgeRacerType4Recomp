@@ -1,3 +1,13 @@
+2026-11-11 presentation development: engine `c593b788` (implementation
+`1f5030c5`) adds the independent scene/GPU foundation, nonblocking ambient
+sampling, opaque-batch fusion, both-band fresh-target qualification and queued
+wide-margin clipping. R4's independent scene producer remains unconnected;
+fixed-9x 21:9 redraw throughput reaches 55.41 VBlanks/s, not sustained 60.
+Custom UI stays at `ef8150f5`. Supported regeneration leaves generated C
+unchanged and reuses all 7,459 audited native overlay variants. Release,
+38 CTests, exact tunnel-route comparisons and isolated menu/race smoke pass.
+See [evidence and limitations](recovery/SEPARATE_RENDERER_20261111.md).
+
 2026-11-09 performance restoration: engine `b57e486e` adds the four qualified
 candidates to the custom-menu/Steam Controller baseline. UI remains `ef8150f`.
 Supported regeneration leaves generated C unchanged and reuses all 7,459

@@ -38,6 +38,7 @@
 
 extern "C" {
 #include "host_overlay.h"
+#include "gpu_gl_renderer.h"
 #include "mod_plugins.h"
 #include "r4_race_state.h"
 }
@@ -90,13 +91,6 @@ struct Gl {
     void (*TexImage2D)(unsigned, int, int, int, int, int, unsigned, unsigned, const void *) = nullptr;
     void (*GenerateMipmap)(unsigned) = nullptr;
     void (*GetIntegerv)(unsigned, int *) = nullptr;
-    void (*GenBuffers)(int, unsigned *) = nullptr;
-    void (*BindBuffer)(unsigned, unsigned) = nullptr;
-    void (*BufferData)(unsigned, ptrdiff_t, const void *, unsigned) = nullptr;
-    void (*ReadPixels)(int, int, int, int, unsigned, unsigned, void *) = nullptr;
-    void *(*MapBufferRange)(unsigned, ptrdiff_t, ptrdiff_t, unsigned) = nullptr;
-    unsigned char (*UnmapBuffer)(unsigned) = nullptr;
-    void (*PixelStorei)(unsigned, int) = nullptr;
 } gl;
 
 constexpr int SMOKE_TEXTURES = 4;
@@ -120,9 +114,7 @@ struct State {
     float wheel_x[R4_RACE_CARS][2] = {}, wheel_y[R4_RACE_CARS][2] = {}, wheel_z[R4_RACE_CARS][2] = {};
     bool wheel_ok[R4_RACE_CARS][2] = {};
     unsigned tex_smoke[SMOKE_TEXTURES] = {}, tex_fire = 0;
-    /* scene brightness (asynchronous readback of three lines of the frame) */
-    unsigned pbo[2] = {};
-    int pbo_w = 0, pbo_i = 0, pbo_ready = 0;
+    /* Scene brightness, sampled asynchronously by the render owner. */
     float ambient = 0.8f;
     /* game frames between the sampled state and the displayed frame (PSX_R4_EFFECTS_DELAY) */
     int delay = 1;
@@ -285,13 +277,6 @@ void load_gl() {
     gl.TexImage2D = (void (*)(unsigned, int, int, int, int, int, unsigned, unsigned, const void *))f("glTexImage2D");
     gl.GenerateMipmap = (void (*)(unsigned))f("glGenerateMipmap");
     gl.GetIntegerv = (void (*)(unsigned, int *))f("glGetIntegerv");
-    gl.GenBuffers = (void (*)(int, unsigned *))f("glGenBuffers");
-    gl.BindBuffer = (void (*)(unsigned, unsigned))f("glBindBuffer");
-    gl.BufferData = (void (*)(unsigned, ptrdiff_t, const void *, unsigned))f("glBufferData");
-    gl.ReadPixels = (void (*)(int, int, int, int, unsigned, unsigned, void *))f("glReadPixels");
-    gl.MapBufferRange = (void *(*)(unsigned, ptrdiff_t, ptrdiff_t, unsigned))f("glMapBufferRange");
-    gl.UnmapBuffer = (unsigned char (*)(unsigned))f("glUnmapBuffer");
-    gl.PixelStorei = (void (*)(unsigned, int))f("glPixelStorei");
 }
 
 bool textures_ready() {
@@ -303,46 +288,11 @@ bool textures_ready() {
     return g.tex_fire != 0;
 }
 
-/* Average scene brightness, read without stalling (two readback buffers, one
- * frame late) on three lines across the middle of the frame: the smoke takes
- * the light of the place (tunnel, night, daylight). */
+/* Preserve the existing lighting response without blocking on ReadPixels. */
 void measure_ambient(int W, int H) {
-    if (!gl.GenBuffers || !gl.BindBuffer || !gl.BufferData || !gl.ReadPixels || !gl.MapBufferRange ||
-        !gl.UnmapBuffer)
-        return;
-    const unsigned PACK = 0x88EB;
-    const ptrdiff_t size = (ptrdiff_t)W * 4 * 3;
-    if (!g.pbo[0] || g.pbo_w != W) {
-        if (!g.pbo[0]) gl.GenBuffers(2, g.pbo);
-        for (unsigned b : g.pbo) { gl.BindBuffer(PACK, b); gl.BufferData(PACK, size, nullptr, 0x88E1 /* STREAM_READ */); }
-        g.pbo_w = W; g.pbo_ready = 0;
-    }
-    int alignment = 4;
-    gl.GetIntegerv(0x0D05, &alignment);
-    if (gl.PixelStorei) gl.PixelStorei(0x0D05, 4);
-    gl.BindBuffer(PACK, g.pbo[g.pbo_i]);
-    const int ys[3] = {H * 35 / 100, H * 55 / 100, H * 75 / 100};   /* GL: bottom at 0 */
-    for (int k = 0; k < 3; ++k)
-        gl.ReadPixels(0, ys[k], W, 1, 0x1908, 0x1401, (void *)(intptr_t)(k * W * 4));
-    if (gl.PixelStorei) gl.PixelStorei(0x0D05, alignment);
-    if (g.pbo_ready) {
-        gl.BindBuffer(PACK, g.pbo[g.pbo_i ^ 1]);
-        const uint8_t *p = (const uint8_t *)gl.MapBufferRange(PACK, 0, size, 0x0001 /* READ */);
-        if (p) {
-            double s = 0; int n = 0;
-            for (int k = 0; k < 3; ++k)
-                for (int x = W / 8; x < W * 7 / 8; x += 8, ++n) {
-                    const uint8_t *q = p + ((size_t)k * W + x) * 4;
-                    s += 0.3 * q[0] + 0.55 * q[1] + 0.15 * q[2];
-                }
-            gl.UnmapBuffer(PACK);
-            const float l = n ? (float)(s / n / 255.0) : 0.5f;
-            g.ambient += (std::fmin(1.f, 0.25f + 1.6f * l) - g.ambient) * 0.1f;
-        }
-    }
-    gl.BindBuffer(PACK, 0);
-    g.pbo_ready = 1;
-    g.pbo_i ^= 1;
+    float l;
+    if (gl_renderer_sample_ambient(W, H, &l))
+        g.ambient += (std::fmin(1.f, 0.25f + 1.6f * l) - g.ambient) * 0.1f;
 }
 
 /* ---------------------------------------------------------------- emission */
@@ -967,7 +917,6 @@ void r4_car_effects_draw(ImDrawList *dl, int W, int H, bool split_screen) {
         fresh.textures_tried = g.textures_tried; fresh.delay = g.delay;
         std::copy(std::begin(g.tex_smoke), std::end(g.tex_smoke), fresh.tex_smoke);
         fresh.tex_fire = g.tex_fire;
-        fresh.pbo[0] = g.pbo[0]; fresh.pbo[1] = g.pbo[1]; fresh.pbo_w = g.pbo_w;
         g = std::move(fresh);
         g_clock = R4EffectsClock{};
         g_rng = 0x9E3779B9u;

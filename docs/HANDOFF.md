@@ -1,63 +1,59 @@
 # Handoff
 
-## Resume here — 2026-11-10
+## Current work — 2026-11-11
 
-Work in this checkout on `master`; read
-`CLAUDE.md`, then [the continuation notes](recovery/FRAME_RATE_20261110.md#continuation-notes-for-claude).
-Game restoration checkpoint `428fb4ec`, current engine `055fc1c4`, UI `ef8150f5`. Latest game
-and engine commits are local, not pushed. No new release/package was made.
-The checkout was clean at handoff; no agent-owned game or build was left running.
+Use this Mac checkout on `master`; read `CLAUDE.md` and
+[the renderer development receipt](recovery/SEPARATE_RENDERER_20261111.md).
+The goal remains 60 distinct frames/s at fixed 2160 lines, retaining MStan's
+performance work, the custom Select/Back menu, settings/controls, Steam
+Controller fixes, full PGXP, Max Detail and effects. NAS and STEAMBOX are not
+build or test machines. The owner authorized engineering decisions and visible
+race verification; other automation stays hidden with isolated saves/settings.
 
-The goal remains smooth **60 distinct frames/s at 4K on the Mac**, retaining
-MStan performance, the custom in-game menu on Select/Back, controls/settings
-and Steam Controller fixes. The owner authorized engineering decisions; do not
-ask again to continue. Native 30 FPS is a regression baseline, not completion.
+## Result and blocker
 
-## Current blocker
+**4K/60 remains unqualified; no new package.** The independent scene snapshots,
+interpolation/clipping and private GPU backend pass fixtures, but the R4 scene
+producer is not connected. Do not call this a finished separate race renderer.
+The current race still uses guest redraws with CPU/device rollback. Its optional
+fresh-target experiment avoids native high-resolution backup/restore copies,
+now correctly handling both alternating vertical buffers.
 
-The 60-distinct-frame restoration remains **unqualified; packaging is blocked**.
-The experiment is off by default. The owner found the visible race visually good
-but observed repeated slowdowns. Near-60 swap counters included rejected redraws;
-forcing every redraw costs about 34–35 VBlanks/s at fixed 2160 lines.
-[Current findings, fixes and verification](recovery/FRAME_RATE_20261110.md).
-Local engine checkpoint `5846d90c` passes Release, 33 CTests, menu/race smoke
-and rendering fixtures. The native-only 120-second regression run holds
-60.005 VBlanks/s and 29.92–30.07 original images/s. No new package was made.
-Completed-stage measurements identify 9.19 ms backup and 6.87 ms restoration
-per extra frame, alongside 17.85 ms draw work. A complete private framebuffer
-prototype reduced restoration but doubled setup and was slower; it was removed.
-[Measured costs and visible reference captures](recovery/FRAME_RATE_20261110.md#completion-fenced-attribution-and-private-target-probe).
-Next: implement an R4 scene producer and direct separate-image renderer that
-avoids framebuffer cloning; the preserved MStan geometry pilot
-is Ape-specific, not a ready-made R4 implementation. No 60 FPS delivery is claimed.
+Fixed-9x, 21:9 (5040x2160), 120-second throughput improved from 36.33 to 47.38
+VBlanks/s with the buffer fix, then **55.41** with queued wide draws restricted
+to visible side margins. This is below steady 60. Shader, translucent-bloom and
+direct-capture probes established no useful gain and were removed. GPU tracing
+identified fragment work as the larger GPU cost. Measurement limits and hashes
+are in the receipt; do not substitute swap counters for distinct-frame proof.
 
-Engine `9fbb6ba8` fixes the measured 4K critical path: native snapshot copies
-stay on the render owner, PGXP depth resets use exact scissored hardware clears,
-and threaded debug runs no longer continuously read back VRAM by default.
-Custom UI `ef8150f`, Select/Back, settings/controls and Steam fixes remain.
+Six same-state full-resolution pairs before/inside/after the tunnel match
+exactly. Visible-run sky, ground and HUD captures, plus twelve successive tunnel
+images, show no gaps or blinking in the inspected samples. This is bounded
+coverage, not an exhaustive all-course or physical-display certification.
 
-[Qualification and measurements](recovery/PERFORMANCE_FIX_20261110.md): M4
-moving race sustains 59.936 VBlanks/s for 120 seconds at fixed 4K, full PGXP,
-Max Detail and rewind. Real-GL depth/snapshot/HD fixtures, Release, 29 CTests
-and native menu/race smoke are the validation gates. Earlier native-30 portable candidate (not the current checkpoint):
-`dist/windows/2026-11-10-4k-performance-01/`; use its BUILD.json and checksums.
+## Verification and next work
 
-## Remaining qualification
+Release and 38 CTests pass, including 144 private-target/ambient, 42 opaque-batch
+and 75 wide-margin GL checks. Final menu/controls/settings/boot-to-race smoke passes with zero dispatch
+misses. The hidden harness explicitly disables VSync to avoid Cocoa throttling
+hidden windows to about 1 FPS. Engine pin is `c593b788` (implementation `1f5030c5`); supported game
+regeneration leaves generated C unchanged and reuses all 7,459 overlay variants. The UI pin remains `ef8150f5`.
 
-Visible-window pacing/audio, physical Steam Controller/Steam Input, Windows
-execution, all courses, the owner's specific rank-8 route and multiplayer remain
-to qualify. The two-minute test establishes native game cadence, not 60 unique
-images/s or physical display scanout. Full prior threading evaluation remains
-in [the audit](recovery/THREADING_EVALUATION_20261109.md); do not reintroduce the
-old packet architecture to replace this measured fix. NAS and STEAMBOX are not
-development machines.
+Next: measure the remaining cost after margin clipping and complete the R4
+pre-cull geometry/material producer before connecting the independent backend.
+Preserve texture LOD mode 1 and anisotropy 16. Fresh targets remain debug-only,
+off by default (`PSX_RENDER_PASS_FRESH_TARGET=1`); they are not qualified for
+partial-frame or old-image feedback. Margin clipping is on by default under
+the canonical-center contract; `PSX_GL_WIDE_MARGINS_ONLY=0` is the reference.
 
 ## References
 
-- [History audit](recovery/HISTORY_AUDIT_20261109.md)
+- [Renderer work, tests and receipts](recovery/SEPARATE_RENDERER_20261111.md)
+- [Earlier frame-rate investigation](recovery/FRAME_RATE_20261110.md)
+- [Threading/history evaluation](recovery/THREADING_EVALUATION_20261109.md)
 - [Menu restoration](archive/CUSTOM_MENU_20261109.md)
 - [Upstream reviews](UPSTREAM.md) / [pin history](framework_pin_history.md)
 - [Windows packaging](WINDOWS_BUILD.md)
 
-Game development has one master branch and one checkout. Historical sources
-remain at `/Users/shokunin/dev-archives/r4-20261109/`.
+Historical sources remain at `/Users/shokunin/dev-archives/r4-20261109/`.
+The older native-30 Windows package is not the current renderer checkpoint.

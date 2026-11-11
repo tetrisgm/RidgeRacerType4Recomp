@@ -616,6 +616,14 @@ static void r4_pass_point(CPUState *cpu, uint32_t address) {
             pass.y = rd16(disp + 2u);
             pass.w = rd16(disp + 4u);
             pass.h = rd16(disp + 6u);
+#ifndef PSX_NO_DEBUG_TOOLS
+            /* Qualification only: identical guest state/phase through the
+             * transactional reference and fresh target, captured as two slots. */
+            const char *compare = getenv("PSX_RENDER_PASS_FRESH_TARGET");
+            if (n == 1 && compare && strcmp(compare, "compare") == 0) {
+                alphas[1] = alphas[0]; n = 2;
+            }
+#endif
             for (uint32_t i = 0; i < n; i++) {
                 pass.alpha_q16 = alphas[i];
                 (void)psx_mod_render_pass(cpu, &pass, r4_pass, &blend);
