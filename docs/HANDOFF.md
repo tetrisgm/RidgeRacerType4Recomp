@@ -36,13 +36,19 @@ coverage, not an exhaustive all-course or physical-display certification.
 Release and 38 CTests pass, including 144 private-target/ambient, 42 opaque-batch
 and 75 wide-margin GL checks. Final menu/controls/settings/boot-to-race smoke passes with zero dispatch
 misses. The hidden harness explicitly disables VSync to avoid Cocoa throttling
-hidden windows to about 1 FPS. Engine pin is `c593b788` (implementation `1f5030c5`); supported game
+hidden windows to about 1 FPS. Engine pin is `5d379876` (status-only follow-up to `c593b788`; implementation `1f5030c5`); supported game
 regeneration leaves generated C unchanged and reuses all 7,459 overlay variants. The UI pin remains `ef8150f5`.
 
 The post-margin CPU-only profile still finds dominant render-owner waits in
 OpenGL/Metal presentation. A smaller private-target probe did not reproduce
 its initial gain and was removed; later runs varied substantially. See the
 receipt before interpreting the 55.41 measurement as repeatable capacity.
+
+Later probes did not establish a useful gain and were removed: single-target
+redraw measured 56.99 VBlanks/s with nonzero pixel differences; bounded wide
+depth clears matched reference images but measured 51.46. The retained
+checkpoint at standard 16:9/3834x2160 measured 59.38 over 120 seconds, with
+54–56 FPS dips. Neither aspect qualifies steady 60. Details are in the receipt.
 
 Next: complete the R4 pre-cull geometry/material producer before connecting
 the independent backend, then qualify the complete presentation path.

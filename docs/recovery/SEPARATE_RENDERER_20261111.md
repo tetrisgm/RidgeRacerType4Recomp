@@ -149,3 +149,47 @@ full-sized reference measured 47.87 and a smaller-target repeat measured
 and the verified `c593b788` runtime rebuilt. The variability also means the
 55.41 result must not be presented as an unconditional performance guarantee.
 No cropped-target race-image qualification or 60 FPS package is claimed.
+
+## Additional target and depth-clear probes
+
+A one-target private redraw eliminated canonical triangle draws and rendered
+its center through the wide target. It measured 56.99 VBlanks/s over 120 seconds
+at 5040x2160, with five-second samples down to 47.10. Six same-state reference
+pairs differed at 96–590 pixels; changing the center to the canonical viewport
+reduced the differences to 39–380 pixels but did not eliminate them. These
+experiments were removed. They do not qualify a new raster grid or steady 60.
+Receipts: `analysis/60fps-20261111-single-target-throughput/`,
+`analysis/60fps-20261111-single-target-equivalence/`, and
+`analysis/60fps-20261111-single-grid-equivalence/`.
+
+The retained checkpoint was also measured at standard 16:9, fixed 9x
+(3834x2160). It reached **59.38 VBlanks/s over 120 seconds**, with five-second
+presentation samples of 54.17–61.15. This is closer than ultrawide but still
+contains slowdowns; it does not qualify locked 4K/60. Fresh targets were enabled,
+redraw shedding and dynamic resolution disabled, and dispatch misses were zero.
+Receipt: `analysis/60fps-20261111-standard-4k-throughput/`.
+
+Depth resets already use hardware clears; the queued polygon records are not
+executed as full-screen fragment draws. A subsequent conservative-bound probe
+restricted repeated wide depth clears to preceding depth-write bounds within
+one replay. It passed 99 real-GL color/depth/stencil checks at 1x/4x/9x and six
+same-state full-resolution race pairs matched exactly. Inspection of tunnel
+and exit images found no visible gaps or misplaced HUD in those stills. Its
+120-second ultrawide throughput was 51.46 VBlanks/s (43.12–59.80 presentation
+samples), which did not establish a useful gain. It was removed, including
+its probe-specific fixture extension. Receipts and preserved local patches:
+`analysis/60fps-20261111-depth-bounds-equivalence/`,
+`analysis/60fps-20261111-depth-bounds-throughput/`, and
+`analysis/60fps-20261111-depth-bounds-probe.patch`.
+
+All these measurements share the earlier host-variability limitation. No
+probe is enabled in the retained runtime, no independent R4 producer was
+connected, and no new package or continuous-motion certification is claimed.
+
+The restored runtime passes Release and all 38 CTests again. Final isolated
+menu/controls/settings and boot-to-race verification passed with 7,180,361
+native overlay calls and zero dispatch misses:
+`analysis/separate-renderer-20261111-probes-final-smoke/native-overlay-check.json`.
+Engine `5d379876` only records these results; no runtime code changed from
+`c593b788`. Supported regeneration again reused all 7,459 overlay variants
+and left generated C unchanged.

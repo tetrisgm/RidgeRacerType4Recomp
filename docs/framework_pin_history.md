@@ -1,3 +1,9 @@
+2026-11-11 follow-up measurements: engine `5d379876` changes only the status
+log; runtime remains the verified `c593b788` implementation. Rejected single-
+target and bounded-clear probes are removed. Standard 16:9 at 2160 lines
+measures 59.38 VBlanks/s with dips; no 60 FPS qualification or package.
+See [receipts](recovery/SEPARATE_RENDERER_20261111.md).
+
 2026-11-11 presentation development: engine `c593b788` (implementation
 `1f5030c5`) adds the independent scene/GPU foundation, nonblocking ambient
 sampling, opaque-batch fusion, both-band fresh-target qualification and queued
