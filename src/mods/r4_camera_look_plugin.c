@@ -1,3 +1,4 @@
+#include "psx_rewind.h"
 /* Local right-stick camera look for R4's single-player race cameras. */
 #include "mod_plugins.h"
 #include "cpu_state.h"
@@ -197,6 +198,8 @@ static int r4_camera_look_option_changed(const char *option_id, const char *valu
 }
 
 PSX_MOD_CONSTRUCTOR(r4_camera_look_register) {
+    (void)psx_rewind_register_region(&s_main, sizeof s_main);
+
     (void)psx_mod_register_activation_plugin(PLUGIN_ID,
                                              r4_camera_look_activate);
     (void)psx_mod_register_vblank_plugin(PLUGIN_ID,

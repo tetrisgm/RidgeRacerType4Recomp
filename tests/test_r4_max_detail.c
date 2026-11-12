@@ -24,11 +24,13 @@
 
 #include "cpu_state.h"
 #include "mod_plugins.h"
+int psx_rewind_register_region(void *state, uint32_t bytes) { return state && bytes; }
 #include "r4_max_detail.h"
 #include "r4_pvs.h"
 #include "r4_widescreen_scene.h"
 
 extern uint32_t r4_max_detail_draw_heap(uint32_t buf);
+extern int r4_max_detail_draw_heap_contains(uint32_t buf, uint32_t start, uint32_t end);
 
 static int failures;
 #define CHECK(c, m) do { if (!(c)) { fprintf(stderr, "FAIL: %s\n", m); failures++; } } while (0)
@@ -1199,6 +1201,11 @@ static void test_pacing_and_heap(void) {
     s_ram8 = 1;
     CHECK(r4_max_detail_draw_heap(0x800ADCA0u) == 0x80200000u, "redraw uses expanded buffer 0 heap");
     CHECK(r4_max_detail_draw_heap(0x800D0418u) == 0x80300000u, "redraw uses expanded buffer 1 heap");
+    CHECK(r4_max_detail_draw_heap_contains(0x800ADCA0u, 0x80200000u, 0x80200100u), "HUD ranges follow expanded heap");
+    CHECK(r4_max_detail_draw_heap_contains(0x800D0418u, 0x80300000u, 0x80400000u), "buffer 1 accepts its exact upper bound");
+    CHECK(!r4_max_detail_draw_heap_contains(0x800ADCA0u, 0x80300000u, 0x80300004u), "HUD rejects other buffer heap");
+    CHECK(!r4_max_detail_draw_heap_contains(0x800ADCA0u, 0x80200100u, 0x80200000u), "HUD rejects reversed range");
+    CHECK(!r4_max_detail_draw_heap_contains(0x800ADCA0u, 0x800AF310u, 0x800AF320u), "relocated producer rejects stale retail heap");
     hook(0x80093418u)(&s_cpu, 0x80093418u);
     CHECK(rd32(0x1F800000u) == 0x80200000u, "8 MB RAM: buffer 0's heap moves to 0x80200000");
     wr32(0x1F800000u, 0x800ADCA0u + 0x22778u + 0x1670u);

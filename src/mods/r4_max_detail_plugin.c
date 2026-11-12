@@ -1,3 +1,4 @@
+#include "psx_rewind.h"
 /* r4_max_detail_plugin.c - r4.enhancement.max-detail ("R4 Max Detail").
  *
  * Lifts R4's distance-based detail reducers (r4_max_detail.h,
@@ -780,6 +781,16 @@ uint32_t r4_max_detail_draw_heap(uint32_t buf)
     return buf + R4_BUF_HEAP;
 }
 
+/* Consumers of producer packet ranges must follow the same relocation as
+ * the allocator, including ordinary HUD packets emitted into the big heap. */
+int r4_max_detail_draw_heap_contains(uint32_t buf, uint32_t start, uint32_t end)
+{
+    uint32_t base = r4_max_detail_draw_heap(buf);
+    uint32_t size = base == buf + R4_BUF_HEAP
+        ? R4_BUF_HEAP_END - R4_BUF_HEAP : R4_MD_BIG_HEAP_SIZE;
+    return start >= base && end >= start && end - base <= size;
+}
+
 static void r4_md_clear_otag(CPUState *cpu, uint32_t address)
 {
     (void)address;
@@ -970,6 +981,8 @@ static void r4_max_detail_activate(void)
 
 PSX_MOD_CONSTRUCTOR(r4_register_max_detail)
 {
+    (void)psx_rewind_register_region(&s_main, sizeof s_main);
+
     R4_MD_REGISTER_ENTRY(R4_MD_COURSE_DISPATCH_FN, r4_md_course);
     R4_MD_REGISTER_ENTRY(R4_PVS_OCTANT_FN, r4_md_pvs_octant);
     R4_MD_REGISTER_ENTRY(R4_PVS_MERGE_FN, r4_md_pvs_merge);

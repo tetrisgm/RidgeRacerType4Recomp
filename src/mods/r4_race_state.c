@@ -1,3 +1,4 @@
+#include "psx_rewind.h"
 /* Race-state sampler for R4 (see r4_race_state.h). Reads guest RAM only and
  * never changes the race itself. Updated on entry to the view build
  * (0x8006E4D0, once per view and frame) and read by the render thread. */
@@ -359,6 +360,8 @@ int r4_race_project(const R4RaceState *s, int view, float wx, float wy, float wz
 
 PSX_MOD_CONSTRUCTOR(r4_register_race_state)
 {
+    (void)psx_rewind_register_region(s_stable,sizeof s_stable);
+    (void)psx_rewind_register_region(s_stable_ok,sizeof s_stable_ok);
     (void)psx_mod_register_function_entry_plugin(PLUGIN_ID, VIEW_BUILD, view_build);
     (void)psx_mod_register_command("r4.camera", camera_command);
 }

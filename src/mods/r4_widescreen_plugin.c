@@ -1,3 +1,4 @@
+#include "psx_rewind.h"
 /* r4_widescreen_plugin.c - r4.enhancement.widescreen ("R4 Custom Renderer").
  *
  * Native-wide widescreen for races. psxrecomp's native-wide renderer keeps
@@ -193,15 +194,16 @@ static int r4_ws_live(void)
 
 /* ---- HUD ----------------------------------------------------------------- */
 
+extern int r4_max_detail_draw_heap_contains(uint32_t buf, uint32_t start, uint32_t end);
+
 static void r4_hud_close(void)
 {
     if (!s_open.open) return;
     s_open.open = 0;
     R4BufferTags *bt = &s_buf[s_open.buf];
     uint32_t base = r4_buffer_base(s_open.buf);
-    uint32_t lo = base + R4_BUF_HEAP, hi = base + R4_BUF_HEAP_END;
     uint32_t end = rd32(R4_HEAP_PTR_ADDR);
-    if (s_open.start < lo || end > hi || end < s_open.start) {
+    if (!r4_max_detail_draw_heap_contains(base, s_open.start, end)) {
         s_stat.bad_ranges++;
         return;
     }
@@ -420,6 +422,8 @@ static void r4_widescreen_activate(void)
  * (fingerprints diverge). The in-game menu saves it for the next start. */
 PSX_MOD_CONSTRUCTOR(r4_register_widescreen)
 {
+    (void)psx_rewind_register_region(&s_main, sizeof s_main);
+
     for (int i = 0; i < R4_HUD_PRODUCER_COUNT; i++)
         R4_WS_REGISTER_ENTRY(r4_hud_producers[i].fn, r4_hud_enter);
     for (size_t i = 0; i < R4_WS_CLOSER_COUNT; i++)

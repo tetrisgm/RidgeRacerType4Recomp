@@ -5,6 +5,7 @@
 
 #include "cpu_state.h"
 #include "mod_plugins.h"
+int psx_rewind_register_region(void *state, uint32_t bytes) { return state && bytes; }
 #include "r4_interp.h"
 
 uint32_t r4_max_detail_draw_heap(uint32_t buf) { return buf + 0x1670u; }
@@ -102,6 +103,19 @@ int psx_mod_render_pass(CPUState *cpu, const PSXModRenderPass *pass,
     memcpy(s_spad, s_spad_ck, sizeof s_spad);
     *cpu = ck;
     return ok;
+}
+
+static int s_full_rate_plans;
+uint32_t psx_mod_render_pass_plan_full_rate(uint32_t p,uint32_t s,uint32_t *a,uint32_t max) {
+    s_full_rate_plans++;
+    return psx_mod_render_pass_plan(p,s,a,max);
+}
+
+static int s_complete_passes;
+int psx_mod_render_pass_complete(CPUState *cpu,const PSXModRenderPass *pass,
+                                 PSXModRenderPassFn fn,void *user) {
+    s_complete_passes++;
+    return psx_mod_render_pass(cpu,pass,fn,user);
 }
 
 void psx_dispatch_call(CPUState *cpu, uint32_t addr, uint32_t ra) {
@@ -282,6 +296,18 @@ int main(void) {
               psx_mod_read_word(0x1F800008u) == 9000u, "local pass restores shared fields");
         r4_interp_local_end(&cpu, &rect, check_local_draw, NULL, 0);
         CHECK(local_draws == 1, "failed base local draw cannot generate frames");
+    }
+
+    /* Only the qualified GP producer selects cleared private surfaces. */
+    CHECK(s_complete_passes==0 && s_full_rate_plans==0,"demo, split and local-view producers retain reference transactions");
+    {
+        static const uint32_t sig[6]={0x27BDFFC8u,0x3C03800Fu,0x8C622F94u,
+                                      0x00002021u,0xAFBF0030u,0xAFB5002Cu};
+        for(int i=0;i<6;++i)psx_mod_write_word(0x80114A38u+4u*i,sig[i]);
+        psx_mod_write_word(0x80100000u,0x80114A38u);
+        psx_mod_write_word(0x800FF860u,2);
+        r4_interp_activate(1);race_tick(&cpu);race_tick(&cpu);
+        CHECK(s_complete_passes==1 && s_full_rate_plans==1,"continuous GP tick selects the complete-image contract");
     }
 
     /* Disabled feature: hooks do nothing. */

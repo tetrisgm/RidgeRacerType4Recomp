@@ -1,3 +1,19 @@
+2026-11-11 state rewind: engine `a1c901b4` adds bounded compressed state
+history, process-local enhancement checkpoints, hold/release input replay and
+complete-redraw presentation barriers. It includes asynchronous command-boundary
+snapshot capture from `06f37870`. Hidden composed 4K captures fix the reported
+native-resolution center; exact RAM resume passes. Live motion and sustained
+rewind-on release qualification remain pending. UI stays `ef8150f5`.
+See [rewind implementation and evidence](REWIND_PLAYBACK.md).
+
+2026-11-11 Mac delivery: engine `a2fe7f12` includes queued guest-timeline
+records and explicit complete-image/full-rate contracts (`2c2af9da`), bounded
+texture-upload cleanup (`a1617aad`), and nominal 60/59.94-Hz hold normalization
+on real high-refresh desktops. Shipping TCP input/pause inspection works with
+tracing disabled. UI remains `ef8150f5`; supported regeneration reuses all
+7,459 overlay variants with no generated-C changes. R4 follows Max Detail's
+relocated heap for dynamic HUD anchors. See [Mac qualification](recovery/MAC_60FPS_20261111.md).
+
 2026-11-11 follow-up measurements: engine `5d379876` changes only the status
 log; runtime remains the verified `c593b788` implementation. Rejected single-
 target and bounded-clear probes are removed. Standard 16:9 at 2160 lines

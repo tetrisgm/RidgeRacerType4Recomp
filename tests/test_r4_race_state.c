@@ -3,6 +3,7 @@
 #include <string.h>
 #include "../src/mods/r4_race_state.c"
 
+int psx_rewind_register_region(void *state,uint32_t bytes) { return state && bytes; }
 static uint32_t test_frame = 1;
 uint8_t psx_mod_read_byte(uint32_t a) { (void)a; return 0; }
 uint16_t psx_mod_read_half(uint32_t a) {

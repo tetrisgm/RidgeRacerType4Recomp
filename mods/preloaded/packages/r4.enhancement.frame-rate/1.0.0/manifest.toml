@@ -3,7 +3,7 @@ id = "r4.enhancement.frame-rate"
 version = "1.0.0"
 name = "R4 Frame Rate"
 author = "Shokunin"
-description = "Experimental intermediate race frames; performance qualification is incomplete."
+description = "Intermediate race frames; qualified configurations are documented in the Mac build receipt."
 license = "MIT"
 resolver = "declarative"
 save_compatibility = "shared"
@@ -14,7 +14,7 @@ game_id = "SLUS-00797"
 [[feature]]
 id = "frame-rate"
 name = "Race frame rate (experimental)"
-description = "Redraw intermediate car and camera positions. This experimental mode currently causes slowdowns at 4K. Original mode keeps the game’s native frames."
+description = "Redraw intermediate car and camera positions. Performance depends on hardware, resolution and race mode. Original mode keeps the game’s native frames."
 group = "Display"
 default_enabled = false
 

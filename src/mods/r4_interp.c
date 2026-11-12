@@ -1,3 +1,4 @@
+#include "psx_rewind.h"
 /* r4_interp.c - true in-between frames for R4 races (SLUS-00797).
  *
  * The game runs its races at 30 Hz: every other VBlank the main loop
@@ -595,7 +596,9 @@ static void r4_pass_point(CPUState *cpu, uint32_t address) {
     continuous = R.prev_valid && R.prev_mode == mode &&
                  (mode == R4_MODE_DEMO ? demo_tick == R.prev_demo_tick + 1u
                                        : tick == R.prev_tick + 1u);
-    n = continuous ? psx_mod_render_pass_plan(2u, 1u, alphas, R4_MAX_PASSES) : 0;
+    n = !continuous ? 0 : mode == R4_MODE_GRAND_PRIX
+        ? psx_mod_render_pass_plan_full_rate(2u,1u,alphas,R4_MAX_PASSES)
+        : psx_mod_render_pass_plan(2u,1u,alphas,R4_MAX_PASSES);
     {
         if (n) {
             uint32_t b = rd32(R4_FRAME_COUNTER) & 1u;
@@ -626,7 +629,13 @@ static void r4_pass_point(CPUState *cpu, uint32_t address) {
 #endif
             for (uint32_t i = 0; i < n; i++) {
                 pass.alpha_q16 = alphas[i];
-                (void)psx_mod_render_pass(cpu, &pass, r4_pass, &blend);
+                /* GP redraw owns the complete image (viewport clear, course,
+                 * cars, mirror and HUD). Other modes retain the reference
+                 * transaction until their full-image contract is qualified. */
+                if(mode==R4_MODE_GRAND_PRIX)
+                    (void)psx_mod_render_pass_complete(cpu,&pass,r4_pass,&blend);
+                else
+                    (void)psx_mod_render_pass(cpu, &pass, r4_pass, &blend);
                 /* r4_pass clears this itself only when it returns; a pass
                  * the framework's watchdog rolls back leaves by longjmp. */
                 R.in_pass = 0;
@@ -643,6 +652,9 @@ static void r4_pass_point(CPUState *cpu, uint32_t address) {
 
 /* Entry hooks accepted by psxrecomp (2 = both); set once per process. */
 int r4_interp_register_hooks(void) {
+    (void)psx_rewind_register_region(&R, sizeof R);
+    (void)psx_rewind_register_region(&L, sizeof L);
+
     return psx_mod_register_function_entry_plugin(R4_FR_PLUGIN, R4_VSYNC,
                                                    r4_pass_point) +
            psx_mod_register_function_entry_plugin(R4_FR_PLUGIN, R4_CLEAR_OTAG_R,
