@@ -1,7 +1,7 @@
 {
   "runtime_qualified": true,
   "release_qualified": false,
-  "qualification_scope": "Exact rewind verified on final binary; final signed-app and unlocked graphics qualification pending",
+  "qualification_scope": "Final signed-app functional and exact rewind checks passed; on-screen final check pending",
   "sustained_4k60_qualified": false,
   "binary_sha256": "d076e9a071575e80d71321fd1690ed8d85984490344bfa72ed9ca8b3dc98958c",
   "engine_commit": "20e0e94d",
@@ -60,13 +60,13 @@
   "pixel_mismatches": 0,
   "required_checks": {
     "release_build": "passed final revisions",
-    "ctest": "41 cases passed; graphics run interrupted while Mac locked; final full suite pending",
+    "ctest": "44/44 passed, including all three real-GL fixtures",
     "regeneration": "7459 variants reused; no generated C changes",
     "ui_core": "passed"
   },
   "limitations": [
     "Complete rewind release is improved, not zero latency.",
-    "Final signed-app visible qualification pending.",
+    "Final on-screen check awaits unlocked Mac; prior RC3 tunnel/sky/ground samples are clean.",
     "Physical Steam Controller testing remains device-dependent.",
     "No all-course visual guarantee; inspected course samples only."
   ],
@@ -99,5 +99,19 @@
     "vblanks_per_second": 59.86280332214752,
     "intermediate_frames_rendered": 3551,
     "intermediate_frames_requested": 3551
-  }
+  },
+  "signed_package": {
+    "path": "dist/macos/0.2.1-20261112-rc1/R4.app",
+    "binary_sha256": "25c458ad54272becf9b729427b3fb9162ee1457d7721db77ac57421344b883f9",
+    "notarization_id": "2b5a9c8f-2287-4feb-bac7-b711d3b0b4fd",
+    "notarized": true,
+    "stapled": true,
+    "gatekeeper_accepted": true,
+    "menu_smoke_evidence": "analysis/mac-final-package-menu-20261112",
+    "static_overlay_hits": 7172763,
+    "dispatch_misses": 0,
+    "settings_restart": "passed",
+    "signature_after_play": "passed"
+  },
+  "test_only_engine_commit": "a6f0b4b5"
 }

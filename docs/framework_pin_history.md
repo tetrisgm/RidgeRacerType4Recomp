@@ -1,3 +1,9 @@
+2026-11-12 test-only engine `a6f0b4b5`: hidden presentation fixtures explicitly
+disable VSync after a sample proved the locked Mac stalled in Cocoa SwapWindow.
+All 44 title tests pass. Runtime source is identical to packaged `20e0e94d`;
+UI remains `a786d20`. Package execution identities and signed binary hashes are
+in the Mac/Windows release receipts; no package was silently rebuilt.
+
 2026-11-11 Windows package verification: engine `20e0e94d` requests forward-
 compatible core GL contexts, allowing the PE to create its context on Mac WGL.
 UI `a786d20` replaces existing binding files using filesystem rename; C rename
