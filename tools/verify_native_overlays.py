@@ -26,6 +26,8 @@ def main():
     parser.add_argument('--menu-script', type=Path, help='exercise the custom boot menu before smoke')
     parser.add_argument('--present-thread', action='store_true', help='also qualify the presentation worker')
     args = parser.parse_args()
+    if args.app:
+        subprocess.run(['codesign', '--verify', '--deep', '--strict', str(args.app.resolve())], check=True)
     stage = args.output.resolve()
     stage.mkdir(parents=True, exist_ok=False)
     if not args.app:
@@ -153,6 +155,9 @@ def main():
                 except subprocess.TimeoutExpired:
                     process.kill()
                     process.wait()
+
+    if args.app:
+        subprocess.run(['codesign', '--verify', '--deep', '--strict', str(args.app.resolve())], check=True)
 
 
 if __name__ == '__main__':

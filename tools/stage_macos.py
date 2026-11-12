@@ -156,6 +156,9 @@ included. OpenBIOS and all 7,459 native overlay variants are bundled.
 The custom game menu opens at startup and with Select/Back during play.
 Options contains display, controls, bindings and audio settings. Esc also
 opens the menu. Existing saves and settings are not installed or overwritten.
+To reuse an older portable installation, quit the game and copy its memcards
+folder and desired settings.toml/keybinds.ini/input.ini/config.ini into the
+Application Support folder above. Keep the original files as a backup.
 
 R4.app/Contents/Resources/runtime/QUALIFICATION.json contains measured results and their limits for this build;
 it is not a claim about every course, mode or Mac. Physical Steam Controller

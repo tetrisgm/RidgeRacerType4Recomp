@@ -7,16 +7,20 @@ Select/Back menu, controls/settings, MStan performance and Steam Controller fixe
 Rewind stays enabled: hold Y/Triangle/F8, release resumes the selected state.
 NAS and STEAMBOX are unrelated. Do not publish a release/feed.
 
-Engine `b8a88cea` includes exact nearest-checkpoint resume, skipped redundant
+Engine `bf8bc8c5` includes exact nearest-checkpoint resume, skipped redundant
 hidden redraw/presentation, PBO texture restaging, PGXP read-journal optimization
-and immutable Mac bundle storage. UI `4efe547` honors the host player-data root.
-Release build and 41 CTests passed; supported regeneration reused all 7,459
+and immutable Mac bundle storage. Keyboard bindings now share the player-data root. UI `4efe547` honors the host player-data root.
+Release build and 43 CTests passed; supported regeneration reused all 7,459
 variants without generated-C changes. Build: `build-shipping-20261111`.
 
 Compatible isolated grid: `analysis/release-pgxp-grid-20261111/memcards`.
 Execution identity `769ca791378dc7f82cab1af06580065bf515cbef79182c691f6f6e43c26c07fe`.
 Never bypass its guard. Current exact-state/image proof:
-`analysis/release-pgxp-proof-20261111/result.json` (three exact RAM restores and full-image parity passed).
+`analysis/release-final-proof-20261111/result.json` (exact RAM and full-image parity passed).
+
+The first signed candidate `2026.11.11-rc1` is rejected: keyboard bindings were
+created inside the sealed app, invalidating its signature and Apple notarization.
+Do not distribute it. The path fix and all 43 tests pass; the second candidate is next.
 
 ## Release gates still in progress
 

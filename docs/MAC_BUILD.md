@@ -67,7 +67,7 @@ Update external `DELIVERY.json` and regenerate checksums after stapling. Create
 the distributable archive from the stapled app. Staging does not publish a
 release or feed.
 
-See [current qualification](recovery/MAC_60FPS_20261111.md) for measured scope
+See [current qualification](recovery/MAC_RELEASE_20261111.json) for measured scope
 and remaining physical-display verification.
 
 The app declares the racing-game category and the supported Game Mode keys

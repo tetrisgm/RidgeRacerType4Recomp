@@ -49,6 +49,8 @@ def main():
     parser.add_argument('--full-cost', action='store_true',
                         help='disable redraw shedding to measure full workload capacity')
     args = parser.parse_args()
+    if args.app:
+        subprocess.run(['codesign', '--verify', '--deep', '--strict', str(args.app.resolve())], check=True)
     if args.seconds < 30 or args.seconds % 5:
         parser.error('--seconds must be a multiple of five, at least 30')
     stage = args.output.resolve()
@@ -283,6 +285,9 @@ frame_generation = false
                     except subprocess.TimeoutExpired:
                         process.kill()
                         process.wait()
+
+    if args.app:
+        subprocess.run(['codesign', '--verify', '--deep', '--strict', str(args.app.resolve())], check=True)
 
 
 if __name__ == '__main__':

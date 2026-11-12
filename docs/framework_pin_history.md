@@ -1,10 +1,12 @@
-2026-11-11 release preparation: engine `b8a88cea` includes `9e04b8a5` and `7ee7750d` for
+2026-11-11 release preparation: engine `bf8bc8c5` includes `b8a88cea`, `9e04b8a5` and `7ee7750d` for
 nearest-checkpoint exact rewind resume, non-draining transition timing and
 immutable Mac bundles. It skips redundant hidden reconstruction presentation
 and extends Mac PBO uploads to native VRAM restaging. Unchanged PGXP reads no
 longer create redundant rollback journal entries; mismatch validation is preserved. Three repeated releases
 restore exact RAM, with 77 full-resolution image comparisons and zero mismatches;
-41 CTests pass. UI `4efe547` keeps player settings in the host data directory
+The signed-bundle gate additionally caught keyboard bindings beside the executable;
+`bf8bc8c5` routes them to player data and adds the PGXP/keyboard fixtures to title
+CTest. UI `4efe547` keeps player settings in the host data directory
 while Steam shortcuts retain the actual executable path. Sustained timing and
 signed-bundle qualification are recorded separately in the release receipt.
 

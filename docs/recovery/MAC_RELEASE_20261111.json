@@ -3,8 +3,8 @@
   "release_qualified": false,
   "qualification_scope": "release candidate; signed-bundle performance, menu and notarization gates pending",
   "sustained_4k60_qualified": false,
-  "binary_sha256": "953661bcd1b19d66a95afcbaf1cc5eddc474868484dd919a7c72f005ec27c0f4",
-  "engine_commit": "b8a88cea",
+  "binary_sha256": "a29dd28e0ec06761d5238746716abf860cc4d6dc1f4a7dadca2b15100e66041a",
+  "engine_commit": "bf8bc8c5",
   "ui_commit": "4efe547",
   "internal_resolution": [
     3834,
@@ -19,7 +19,7 @@
     "direct": 0,
     "state_playback": 2,
     "seeking": 0,
-    "tick": 1968,
+    "tick": 1619,
     "title_blocked": false,
     "snaps": 188,
     "hd_residency_bytes": 5636992,
@@ -34,8 +34,8 @@
     "actual_word": 0,
     "matching_neighbor": 0,
     "resume_image_us": 0,
-    "state_history_bytes": 981348257,
-    "state_history_entries": 480,
+    "state_history_bytes": 806692626,
+    "state_history_entries": 396,
     "state_history_dropped": 0,
     "snapshot_interval": 4,
     "host_state_bytes": 20259632,
@@ -52,22 +52,21 @@
       0
     ]
   },
-  "exact_proof": "analysis/release-pgxp-proof-20261111/result.json",
+  "exact_proof": "analysis/release-final-proof-20261111/result.json",
   "exact_resume_ram_differences": [
-    0,
-    0,
     0
   ],
-  "full_internal_images_checked": 88,
+  "full_internal_images_checked": 20,
   "pixel_mismatches": 0,
   "required_checks": {
     "release_build": "passed",
-    "ctest": "41/41 passed",
+    "ctest": "43/43 passed",
     "regeneration": "7459 variants reused; no generated C changes"
   },
   "limitations": [
     "Signed-bundle menu and performance qualification pending.",
     "Physical Steam Controller testing remains device-dependent.",
     "No all-course visual guarantee; inspected course samples only."
-  ]
+  ],
+  "earlier_repeated_proof": "analysis/release-pgxp-proof-20261111/result.json"
 }
