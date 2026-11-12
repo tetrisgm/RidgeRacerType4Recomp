@@ -1,3 +1,11 @@
+2026-11-11 smooth rewind: engine `60aba7e8` records exact private-pass commands
+and native texture state, redraws backward at gameplay resolution, and resumes
+from the selected machine tick. Includes `802f1771` CRC batching. R4 opts in by
+default; other framework titles retain their backend. Visible rewind measured
+59.57 updates/s; full-image and RAM parity pass. Long-hold release still has a
+brief transition pause. Supported regeneration reuses all 7,459 variants.
+UI stays `ef8150f5`. See [rewind evidence](REWIND_PLAYBACK.md).
+
 2026-11-11 state rewind: engine `a1c901b4` adds bounded compressed state
 history, process-local enhancement checkpoints, hold/release input replay and
 complete-redraw presentation barriers. It includes asynchronous command-boundary

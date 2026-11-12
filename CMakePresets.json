@@ -1,0 +1,31 @@
+{
+  "version": 3,
+  "configurePresets": [
+    {
+      "name": "macos-native",
+      "displayName": "Apple Silicon native runtime",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build-macos-native",
+      "condition": {"type": "equals", "lhs": "${hostSystemName}", "rhs": "Darwin"},
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "CMAKE_OSX_ARCHITECTURES": "arm64",
+        "CMAKE_OSX_DEPLOYMENT_TARGET": "11.0",
+        "CMAKE_DISABLE_FIND_PACKAGE_OpenSSL": true,
+        "CMAKE_DISABLE_FIND_PACKAGE_SDL3": true,
+        "CMAKE_DISABLE_FIND_PACKAGE_Freetype": true,
+        "PSXRECOMP_BIOS_STEMS": "OpenBIOS",
+        "PSX_DEBUG_TOOLS": false,
+        "PSX_RUNTIME_IPO": true,
+        "PSX_ENABLE_VULKAN": false,
+        "R4_BUILD_TESTS": true
+      }
+    }
+  ],
+  "buildPresets": [
+    {"name": "macos-native", "configurePreset": "macos-native", "jobs": 2}
+  ],
+  "testPresets": [
+    {"name": "macos-native", "configurePreset": "macos-native", "output": {"outputOnFailure": true}}
+  ]
+}

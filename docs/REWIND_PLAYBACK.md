@@ -1,46 +1,46 @@
 # Direct rewind playback
 
-Owner requirement, 2026-11-11: rewind is a core release feature. It remains
-enabled. Holding the configured rewind input must immediately play the race
-backwards, without a filmstrip/menu or reduced-resolution preview; releasing
-resumes from the displayed point. Select/Back continues to open the custom game
-menu. Hold/release is the implementation default, not a changed owner binding.
+Hold Y/Triangle or F8 to rewind; release resumes the displayed point. Select/Back
+opens the custom menu. Existing bindings and settings remain authoritative.
+Rewind remains enabled in the local race package.
 
-## State history and presentation
+## Implementation
 
-The default implementation stores machine and engine state in memory, independent
-of output resolution. A bounded compression worker retains up to 1 GiB of machine
-snapshots, with eight raw hot checkpoints. CPU/device capture and queued native
-VRAM capture publish only when complete. Stable process-local enhancement regions
-retain interpolation endpoints, maximum-detail pacing, widescreen tracking,
-camera state and the host frame counter. These regions do not change disk/wire
-savestate formats. Recorded input includes physical camera axes and resolved pads.
+R4 selects exact command playback by default. Complete private render passes
+retain their ordered commands, PGXP/depth state, native texture memory and HD
+residency in a bounded 256 MiB compressed history. They redraw at the current
+gameplay resolution. This is resolution-independent state, not video history,
+thumbnail playback or fitted geometry. Other framework titles retain state
+playback unless they opt in. `PSX_REWIND_COMMANDS=0` selects that diagnostic path;
+`PSX_REWIND_VIDEO=1` is a separate diagnostic prototype, not the release backend.
 
-Restoring native VRAM alone cannot recreate the enhanced image: it produced the
-owner-reported pixelated center and doubled HUD. Backward presentation now tracks
-complete private redraws by guest tick, producer cycle and phase. Replay rebuilds
-that image at the current resolution before exposing the rewind point. Native
-VRAM restages cannot pass the presentation barrier. Missing redraw recovery is
-bounded by recorded input and four adjacent guest boundaries; failure is reported
-instead of replaying indefinitely. Release resumes the accepted historical state
-and truncates future history.
+Machine checkpoints use bounded compressed memory (1 GiB plus eight raw hot
+checkpoints), at most four guest frames apart. Recorded pads/camera inputs and
+process-local enhancement state reconstruct the exact selected tick on release.
+The guest CPU stays frozen during backward command playback. No unused thumbnail
+capture or large thumbnail-array moves occur on this path.
 
-The optional `--rewind-video` qualification flag selects an earlier pixel-cache
-prototype for diagnostics. It is not the default or the intended release design.
-No resolution reduction or thumbnail playback is permitted.
+Release keeps the selected full-quality image visible until a complete forward
+producer is ready. Native VRAM restaging cannot reach presentation; this prevents
+the former pixelated center and doubled HUD. Future history is truncated when
+resuming. Manual save/load remains independent.
 
-## Evidence and outstanding acceptance
+## Verification and limits
 
-`analysis/60fps-20261111-complete-proof/rewind-{0..5}.png` contains accepted
-3840×2160 backward frames without the previous center-resolution collapse.
-`analysis/60fps-20261111-complete-ram-proof/result.json` reports zero differing
-RAM words at release (CRC 3551031831), no pixel history, and 60.07 FPS over 30 s.
-Those observations precede the bounded failure guard; final-build checks remain
-necessary. They do not establish all-course visual correctness or rewind cadence.
+- `analysis/60fps-20261111-command-release-proof/result.json`: 24 original versus
+  replayed full internal images identical; selected tick 1710 restored with zero
+  differing RAM words. Diagnostic readbacks are excluded from performance claims.
+- `analysis/60fps-20261111-command-visible/result.json`: visible Helter Skelter
+  race, 2160 internal lines, 58.92 forward FPS over 120 seconds and 59.57 backward
+  updates/s. The physical screen is 1440p/75 Hz. Tunnel, sky, ground and HUD were
+  inspected; no center-resolution collapse or obvious seam/order faults observed.
+- `analysis/60fps-20261111-command-release-profile/result.json`: 60.01 forward FPS
+  over 30 seconds, 58.99 backward updates/s. Long-hold release took 0.38–0.51 s
+  across the timing runs, including up to 100 ms of observation polling. This
+  brief transition pause remains a limitation.
+- Real-GL fixtures cover exact pixels and live CPU/GPU/color/depth/stencil state
+  isolation at 1x/4x/9x, including changed textures and PGXP triangles.
 
-The Mac was locked during the attempted visible run. Complete on-screen motion
-verification after unlock: tunnel, sky, ground, hold/release transitions, repeated
-history branches, controller Y/Triangle and Select/Back menu coexistence. Measure
-120 seconds with rewind enabled separately from screenshots and the optional
-`--verify-state` RAM diagnostic. Keep release qualification false until these
-checks pass. See [handoff](HANDOFF.md) and [Mac workflow](MAC_BUILD.md).
+This is bounded course/build evidence, not an all-course guarantee or proof of
+perfect sustained 60 FPS. The owner requested wrapping up rather than more
+repeated performance runs. See [handoff](HANDOFF.md) and [Mac build](MAC_BUILD.md).

@@ -174,6 +174,10 @@ psxrecomp_add_game_runtime(psx-runtime
     EXTRAS_SOURCES ${R4_MOD_PLUGIN_SOURCES}
 )
 
+# R4's complete private render passes support resolution-independent rewind.
+set_property(SOURCE "${CMAKE_CURRENT_SOURCE_DIR}/psxrecomp/runtime/src/main.cpp"
+    APPEND PROPERTY COMPILE_DEFINITIONS PSX_REWIND_COMMANDS_DEFAULT=1)
+
 if(R4_REGION STREQUAL "PAL")
     # Mods and the title layer test R4_REGION_PAL; pal/mods/r4_pal_ntsc.h
     # declares the PAL-only helpers (r4_pal_message_language()).

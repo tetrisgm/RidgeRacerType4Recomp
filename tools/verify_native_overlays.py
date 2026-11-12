@@ -23,24 +23,30 @@ def main():
     parser.add_argument('--disc', type=Path, default=ROOT / 'disc/R4 - Ridge Racer Type 4 (USA).cue')
     parser.add_argument('--port', type=int, default=4798)
     parser.add_argument('--menu-script', type=Path, help='exercise the custom boot menu before smoke')
+    parser.add_argument('--present-thread', action='store_true', help='also qualify the presentation worker')
     args = parser.parse_args()
     stage = args.output.resolve()
     stage.mkdir(parents=True, exist_ok=False)
-    for name in ('r4-runtime', 'game.toml', 'game_options.toml', 'bios', 'assets', 'postfx'):
+    for name in ('r4-runtime', 'r4-runtime.execution.json', 'game.toml', 'game_options.toml', 'bios', 'assets', 'postfx'):
         src = args.build.resolve() / name
         if src.is_dir():
             shutil.copytree(src, stage / name)
         elif src.is_file():
             shutil.copy2(src, stage / name)
     shutil.copytree(args.build.resolve() / 'mods/bundled', stage / 'mods/bundled')
-    env = {k: v for k, v in os.environ.items() if not k.startswith('PSX_OVERLAY_')}
+    mod_state = args.build.resolve() / 'mods/state.toml'
+    if mod_state.is_file():
+        shutil.copy2(mod_state, stage / 'mods/state.toml')
+    env = {k: v for k, v in os.environ.items() if not k.startswith(('PSX_', 'R4L_'))}
     env['SDL_AUDIODRIVER'] = 'dummy'
+    # Shipping builds keep TCP control opt-in, independently of tracing.
+    env['PSX_DEBUG_SERVER'] = '1'
     # Cocoa may throttle a hidden window's display link to one swap per second.
     # Script waits count rendered frames; isolated automation must not use VSync.
     env['PSX_VSYNC'] = '0'
     if args.menu_script:
         env['R4L_OVERLAY_SCRIPT'] = str(args.menu_script.resolve())
-    (stage / 'settings.toml').write_text('[video]\npresent_thread = false\n')
+    (stage / 'settings.toml').write_text(f'[video]\npresent_thread = {str(args.present_thread).lower()}\n')
     launch = [str(stage / 'r4-runtime'), '--game', str(stage / 'game.toml'),
               '--disc', str(args.disc.resolve()), '--hidden-window',
               '--debug-port', str(args.port), '--memcard-dir', str(stage / 'memcards')]
@@ -77,7 +83,7 @@ def main():
                 assert 0 < volume['volume'] < 100, volume
                 assert settings['audio']['volume'] == volume['volume'], settings
                 assert settings['controller']['p2_device'] == 'keyboard', settings
-                assert settings['video']['present_thread'] is False, settings
+                assert settings['video']['present_thread'] is args.present_thread, settings
                 assert 'cross = K' in (stage / 'keybinds.ini').read_text()
                 assert 'cross = x' in (stage / 'input.ini').read_text()
             with (stage / 'smoke.log').open('w') as log:

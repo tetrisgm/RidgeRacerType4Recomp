@@ -1,0 +1,76 @@
+{
+  "release_qualified": true,
+  "qualification_scope": "local playtest with documented limitations; owner requested wrap-up",
+  "sustained_4k60_qualified": false,
+  "binary_sha256": "7450577563228aa776224f17413a2ce78fc4b51e671951e976f9520c9d6b51e3",
+  "engine_commit": "60aba7e8",
+  "internal_resolution": [
+    3834,
+    2160
+  ],
+  "physical_display": "2560x1440 at 75 Hz",
+  "rewind_status": {
+    "id": 0,
+    "ok": true,
+    "enabled": true,
+    "open": false,
+    "direct": 0,
+    "state_playback": 2,
+    "seeking": 0,
+    "tick": 2315,
+    "title_blocked": false,
+    "snaps": 188,
+    "hd_residency_bytes": 5636992,
+    "state_verification": 0,
+    "resume_checks": 0,
+    "resume_tick": 0,
+    "expected_ram_crc": 0,
+    "actual_ram_crc": 0,
+    "different_words": 0,
+    "first_difference": 0,
+    "expected_word": 0,
+    "actual_word": 0,
+    "matching_neighbor": 0,
+    "state_history_bytes": 1073001733,
+    "state_history_entries": 524,
+    "state_history_dropped": 2,
+    "snapshot_interval": 4,
+    "host_state_bytes": 20259632
+  },
+  "default_backend": "exact command redraw; no pixel history",
+  "final_default_check": {
+    "source": "analysis/rewind-command-default-final2-20261111/result.json",
+    "forward_fps": 60.049035201891,
+    "backward_updates_per_second": 60.058206371294915,
+    "release_observed_seconds": 0.12586816702969372,
+    "hold_release_passed": true
+  },
+  "visible_race": {
+    "source": "analysis/60fps-20261111-command-visible/result.json",
+    "seconds": 120,
+    "forward_fps": 58.92114564129725,
+    "backward_updates_per_second": 59.57247324378865
+  },
+  "exact_resume": {
+    "source": "analysis/60fps-20261111-command-release-proof/result.json",
+    "tick": 1710,
+    "different_ram_words": 0,
+    "expected_crc": 1982505207,
+    "actual_crc": 1982505207,
+    "full_internal_images_checked": 24,
+    "pixel_mismatches": 0
+  },
+  "required_checks": {
+    "release_build": "passed",
+    "ctest": "39/39 passed",
+    "menu_settings_race_smoke": "analysis/rewind-command-final-menu-20261111/native-overlay-check.json",
+    "dispatch_misses": 0,
+    "native_overlay_variants": 7459
+  },
+  "visual_scope": "Visible Helter Skelter tunnel, sky, ground and HUD samples inspected; no former center pixelation or obvious seams/order faults observed.",
+  "limitations": [
+    "Long-hold release observed at 0.38\u20130.51 seconds, including up to 100 ms polling.",
+    "Perfect sustained 60 FPS and all-course visual correctness are not established.",
+    "Physical Steam Controller behavior still requires that device; existing fixes retained and synthetic controls/menu checks passed."
+  ]
+}

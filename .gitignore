@@ -78,6 +78,7 @@ overlay_captures.json
 # Diagnostic dumps from debug-server probes (root-level only)
 /*.json
 !/catalog_identity.json
+!/CMakePresets.json
 /*.bmp
 /*.png
 /_*.txt
