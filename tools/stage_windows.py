@@ -27,11 +27,19 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('version')
     parser.add_argument('--toolchain', required=True, type=Path)
+    parser.add_argument('--race-60', action='store_true', help='select 2160-line/60-FPS race defaults with rewind')
     args = parser.parse_args()
     if not re.fullmatch(r'[A-Za-z0-9][A-Za-z0-9._-]*', args.version):
         parser.error('version must be a simple folder name')
+    if subprocess.check_output(['git', '-C', str(ROOT), 'status', '--porcelain', '--untracked-files=no'], text=True):
+        parser.error('commit the verified game and submodule work before packaging')
     build = ROOT / 'build-windows'
     stage = ROOT / 'dist/windows' / args.version
+    cache = (build / 'CMakeCache.txt').read_text().splitlines()
+    for setting in ('CMAKE_BUILD_TYPE:STRING=Release', 'PSX_DEBUG_TOOLS:BOOL=OFF',
+                    'PSX_RUNTIME_IPO:BOOL=ON', 'PSXRECOMP_BIOS_STEMS:STRING=OpenBIOS'):
+        if setting not in cache:
+            parser.error(f'unqualified Windows build: requires {setting}')
     if stage.exists():
         parser.error('version already exists; never reuse a delivery folder')
     report = subprocess.check_output([
@@ -49,16 +57,50 @@ def main():
                                       '--defined-only', str(build / 'r4-runtime.exe')], text=True)
     if not re.search(r'\bT psx_overlay_dispatch$', symbols, re.M):
         raise SystemExit('Windows executable does not link the native overlay dispatcher')
-    variants = re.findall(r'\bT ov_[A-Fa-f0-9_]+_func_[A-Fa-f0-9]+$', symbols, re.M)
+    variants = re.findall(r'\b[tT] ov_[A-Fa-f0-9_]+_func_[A-Fa-f0-9]+$', symbols, re.M)
     if len(variants) != audit['published_variants']:
         raise SystemExit(f'Linked overlay count mismatch: {len(variants)}')
     stage.mkdir(parents=True)  # Atomic refusal if another build reserves this version.
-    for name in ('r4-runtime.exe', 'game.toml', 'game_options.toml', 'assets', 'mods', 'postfx'):
+    for name in ('r4-runtime.exe', 'game.toml', 'game_options.toml', 'assets', 'postfx'):
         src = build / name
         if src.is_dir():
             shutil.copytree(src, stage / name)
         else:
             shutil.copy2(src, stage / name)
+    shutil.copytree(build / 'mods/bundled', stage / 'mods/bundled')
+    # Windows keeps its documented presentation-worker default; never carry
+    # portable player settings or a stale build-directory mod state forward.
+    game_config = (stage / 'game.toml').read_text()
+    game_config, replacements = re.subn(r'(?m)^present_thread\s*=.*$',
+                                        'present_thread = false', game_config)
+    if replacements != 1:
+        raise SystemExit('Expected exactly one present_thread default')
+    (stage / 'game.toml').write_text(game_config)
+    if args.race_60:
+        (stage / 'mods/state.toml').write_text('''format_version = 2
+[[package]]
+id = "psx.enhancement.internal-resolution"
+[[feature]]
+package_id = "psx.enhancement.internal-resolution"
+id = "internal-resolution"
+enabled = true
+[feature.values]
+resolution = "9x"
+[[package]]
+id = "r4.enhancement.frame-rate"
+[[feature]]
+package_id = "r4.enhancement.frame-rate"
+id = "frame-rate"
+enabled = true
+[feature.values]
+rate = "60"
+[[package]]
+id = "psx.feature.rewind"
+[[feature]]
+package_id = "psx.feature.rewind"
+id = "rewind"
+enabled = true
+''')
     subprocess.run([sys.executable, str(ROOT / 'psxrecomp/tools/release_stage.py'),
                     'stage-execution', '--binary', str(stage / 'r4-runtime.exe'),
                     '--manifest', str(build / 'r4-runtime.execution.json')], check=True)
@@ -80,6 +122,7 @@ def main():
         build / '_deps/psx_libchdr-src/LICENSE.txt': 'libchdr-LICENSE.txt',
         build / '_deps/libjuice-src/LICENSE': 'libjuice-LICENSE',
         ROOT / 'recomp-ui/LICENSE': 'recomp-ui-LICENSE',
+        ROOT / 'recomp-ui/LICENSES/recomp-ui-MIT.txt': 'recomp-ui-upstream-MIT.txt',
         ROOT / 'recomp-ui/third_party/imgui/LICENSE.txt': 'imgui-LICENSE.txt',
         ROOT / 'psxrecomp/lib/recomp-net/LICENSE': 'recomp-net-LICENSE',
         ROOT / 'psxrecomp/lib/retcomm-rbengine/LICENSE': 'rbengine-LICENSE',
@@ -133,6 +176,17 @@ Owner-only STEAMBOX checks:
    and Steam Input launch. Synthetic Mac button events do not qualify these.
 Report build version, route and observations. Preserve native saves/settings.
 ''')
+    if args.race_60:
+        with (stage / 'README.txt').open('a') as note:
+            note.write('\nFresh defaults select 2160-line internal rendering, the 60-FPS GP race enhancement,\n'
+                       'and hold Y/Triangle/F8 to rewind; release resumes the selected point.\n'
+                       'Select/Back opens the custom menu. Change preferences there if desired.\n')
+    (stage / 'DELIVERY.json').write_text(json.dumps(dict(
+        platform='Windows x64', signing='unsigned', published=False,
+        binary_sha256=digest(stage / 'r4-runtime.exe'),
+        windows_execution_qualified=False, release_qualified=False,
+        status='PE/import/overlay audits passed; owner Windows execution gate pending',
+        race_60_defaults=args.race_60), indent=2) + '\n')
     files = sorted(p for p in stage.rglob('*') if p.is_file())
     manifest = ''.join(f'{digest(p)}  {p.relative_to(stage).as_posix()}\n' for p in files)
     (stage / 'SHA256SUMS').write_text(manifest)

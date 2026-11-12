@@ -47,12 +47,17 @@ uses `std::terminate` without declaring it under libc++.
 From a recursively initialized `master` checkout:
 
 ```sh
-JOBS=2 bash tools/build_windows.sh 2026-11-10-4k-performance-01
+JOBS=2 bash tools/build_windows.sh 2026.11.11-release-01
 ```
 
 Use a **new version every time**. Output is `dist/windows/<version>/` with
 `BUILD.json`, PE imports, runtime assets, OpenBIOS, license notices and
-`SHA256SUMS`. The script refuses an existing version, stale overlay output,
+`SHA256SUMS`. Release builds enable runtime IPO/LTO and tracing stays off.
+Fresh package defaults select 2160-line rendering, the 60-FPS GP enhancement
+and hold-to-rewind. The Windows presentation worker remains off. Only bundled
+mods and new defaults are staged; build-directory player state is excluded.
+`DELIVERY.json` records signing and execution qualification separately.
+The script refuses an existing version, stale overlay output,
 missing linked variants or unexpected DLL imports, and rechecks every manifest
 entry. No Windows binary is executed. Earlier `2026-11-08-local-*` candidates
 remain blocked and must not be delivered.
