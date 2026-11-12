@@ -1,66 +1,58 @@
 # Ridge Racer Type 4 Recompiled — v0.2.1
 
-A stability and smoothness update to v0.2.0. Same features, same defaults;
-the extra race frames now come out steadier.
+The custom menu is integrated into the game, with full-resolution hold-to-rewind
+and the MStan performance and Steam Controller fixes retained.
 
 ## What changed
 
-- **Smoother 60 FPS races.** The OpenGL pipeline that draws the extra race
-  frames does far less driver work per frame (cached GL state, batched
-  render-thread handoff, one-time sampler setup, earlier PGXP seam
-  preparation, disc read-ahead). On the test PC a race holds about 59
-  distinct frames per second with no gap over 35 ms, measured on screen
-  while the machine was busy with other work. The 30 FPS choice is steady
-  at 30. The default rate is now **Auto**: 60 FPS, or the original 30 FPS
-  at an 8K (18x) internal resolution, where the GPU cannot hold 60; pick
-  **60 FPS** to force it.
-- **Match display capped at 4K.** The default internal resolution now stops
-  at 4K (9×) so an 8K panel holds 60 FPS; 5K and 8K stay in the list.
-- **Car Effects on by default** (exhaust flames, drift smoke, impact sparks;
-  Mods → Display to turn off), **PGXP CPU-mode propagation on**, and FMV
-  upscaled bicubic instead of nearest.
-- **Closed PGXP seams.** The hairline cracks PGXP's sub-pixel positions open
-  at road crests, wall tops and distant road are filled at every internal
-  resolution up to 18x, with PGXP's precision untouched.
-- **Fixed internal resolution.** Dynamic resolution is off by default; the
-  picture stays at the preset's resolution and the frame rate gives way
-  instead. If enabled, it never drops below 1080 lines.
-- **PGXP seam strips drawn only where surfaces actually meet.** The 0.2.1
-  candidate drew black and grey bars along kerbs, bloated lane marks and
-  wedges off wall tops; strips now follow the real gap and use the edge's
-  own texels.
-- **HD HUD loads before the race starts** instead of during it.
-
-Game logic, input and audio keep their original 30 Hz cadence. Modern
-controls (analog gas, brake and steering), Rewind, camera look-around,
-widescreen Fit, Max Detail, PGXP and the HD HUD are unchanged from v0.2.0
-and were re-verified for this release on Windows and macOS.
+- **Select/Back opens the game menu.** Controls, bindings, display, audio and
+  other settings are available there. Esc and Guide also open it.
+- **Hold Y/Triangle/F8 to rewind; release to resume.** Rewind redraws at the
+  gameplay resolution and restores the selected machine state. It does not
+  open a separate rewind menu or switch to a low-resolution preview.
+- **Lower rewind overhead.** Memory history, command replay, GL context
+  ownership and texture uploads avoid the earlier large capture/release stalls.
+- **Preserved rendering quality.** PGXP, widescreen and the native renderer
+  remain enabled. Fresh packages select fixed 9× (2160-line) rendering and
+  the 60-FPS Grand Prix enhancement, with rewind enabled.
+- **Persistent controls on both platforms.** Mac player files live outside
+  the signed app. Windows now correctly replaces existing binding files.
 
 ## Install
 
-Download the Windows x64, macOS Apple Silicon or macOS Intel zip and extract
-it into a new folder or over v0.2.0; extracting over keeps settings, controls
-and memory cards. Savestates from v0.2.0 are refused. The zips contain the
-compiled game and OpenBIOS but no disc or retail BIOS: use your own verified
-US bin/cue.
+The prepared packages are macOS Apple Silicon and Windows x64. They contain
+OpenBIOS and the compiled runtime; no disc, retail BIOS, compiler or SDK is
+included. Use your own verified USA BIN/CUE. This release does not include a
+new Intel Mac package.
 
-macOS builds are ad-hoc signed, not notarized: right-click → Open the first
-time, use **Open Anyway** in System Settings → Privacy & Security, or run
-`xattr -dr com.apple.quarantine <folder>` once.
+On Mac, open **R4.app** and select your disc. The app is Developer-ID signed,
+Apple-notarized and stapled. It can live in Applications. Player data is in
+`~/Library/Application Support/net.ramine.r4recomp/`; preserve existing saves
+and settings when moving from a portable installation.
 
-## Known issues
+On Windows, extract the portable ZIP into a new writable folder and open
+`r4-runtime.exe`. Preserve the previous folder as a backup. The Windows EXE is
+unsigned; hardened Defender reputation policies can block a new build.
+The package does not alter security policy or install system services.
 
-- The Display page shows the Graphics preset and screen mode only; the
-  internal resolution follows the preset. The race frame rate is under
-  Mods → Race frame rate.
-- On a machine detected as Ultra, the Graphics badge may read "Custom —
-  started from Ultra" before any setting is changed. Cosmetic.
-- 90, 100, 120 and 144 FPS and Match display are best-effort; 120 and 144
-  are not sustained on the test PC.
-- Wheel force feedback remains experimental and off by default.
-- Very rarely a 4-player online Link Battle halts on the Results screen
-  (RetroPortingToolKit/psxrecomp#636).
-- Extra Trial races render in 4:3 with stock controls, as in v0.2.0.
+## Verification and limits
+
+The Apple M4 visible race ran at 3834×2160 internally for two minutes with
+rewind enabled: **59.98 VBlanks/s**, all **3,605** requested intermediate frames
+rendered, and no gameplay guest-frame interval above 50 ms. Rewind releases
+resumed in **99–129 ms**. Tunnel, sky, road and rewind sequences showed no
+observed blinking, polygon seams, displaced HUD or resolution drop; the owner
+accepted the visual pass. This is a measured route, not a locked-60 guarantee
+for every course or machine.
+
+All 44 Mac tests and menu persistence checks pass. Exact rewind RAM restoration
+and full-resolution image comparisons pass on Mac and Windows-on-CrossOver.
+Native Windows qualification is in progress. Hands-on audio, gameplay and
+physical Steam Controller evaluation remains separate from automated input.
+
+Wheel force feedback remains experimental and off by default. The existing
+rare four-player Link Battle Results-screen halt and Extra Trial limitations
+remain outside this release's tested route.
 
 ---
 

@@ -1,7 +1,7 @@
 {
   "runtime_qualified": true,
-  "release_qualified": false,
-  "qualification_scope": "Final signed-app functional and exact rewind checks passed; on-screen final check pending",
+  "release_qualified": true,
+  "qualification_scope": "Mac local release package: automated functional/exact-rewind checks plus final visible run accepted by owner; hands-on audio/controller/gameplay evaluation remains separate",
   "sustained_4k60_qualified": false,
   "binary_sha256": "d076e9a071575e80d71321fd1690ed8d85984490344bfa72ed9ca8b3dc98958c",
   "engine_commit": "20e0e94d",
@@ -65,10 +65,9 @@
     "ui_core": "passed"
   },
   "limitations": [
-    "Complete rewind release is improved, not zero latency.",
-    "Final on-screen check awaits unlocked Mac; prior RC3 tunnel/sky/ground samples are clean.",
-    "Physical Steam Controller testing remains device-dependent.",
-    "No all-course visual guarantee; inspected course samples only."
+    "Brief rewind release transition remains (99\u2013129 ms in the final unrecorded run).",
+    "No locked-60 or all-course guarantee; the measured route has occasional shorter frame-time spikes.",
+    "Mac automated runs used dummy audio; owner hands-on audio/gameplay/controller checks remain."
   ],
   "earlier_repeated_proof": "analysis/release-warm-proof-20261111/result.json",
   "normal_timing": {
@@ -113,5 +112,33 @@
     "settings_restart": "passed",
     "signature_after_play": "passed"
   },
-  "test_only_engine_commit": "a6f0b4b5"
+  "test_only_engine_commit": "a6f0b4b5",
+  "final_visible": {
+    "evidence": "analysis/mac-final-visible-20261112/result.json",
+    "seconds": 120.58053525001742,
+    "vblanks_per_second": 59.976512668523384,
+    "intermediate_requested": 3605,
+    "intermediate_rendered": 3605,
+    "max_guest_frame_ms": 46.576,
+    "p99_guest_frame_ms": 24.188,
+    "guest_frames_above_50ms": 0,
+    "max_presentation_interval_ms": 58.112,
+    "release_ms": [
+      121.65,
+      98.86,
+      128.837
+    ],
+    "history_boundary_observation": "Third hold reached oldest image after about 0.6 s; held there correctly, active update rate 61.01/s",
+    "owner_visual_acceptance": "2026-11-12: seems solid to me; visual only, audio/gameplay testing will follow",
+    "motion_evidence": "analysis/mac-final-motion-20261112/visual-check.mp4",
+    "observed_artifacts": "No blinking, polygon seams, sky/HUD misordering or resolution drop observed in reviewed sequences",
+    "render_resolution": [
+      3834,
+      2160
+    ],
+    "display_resolution": [
+      2560,
+      1440
+    ]
+  }
 }

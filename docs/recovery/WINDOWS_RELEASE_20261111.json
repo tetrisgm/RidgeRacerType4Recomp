@@ -159,5 +159,26 @@
     "dispatch_misses": 0,
     "performance_qualification": false,
     "reason": "Rosetta/CrossOver and expensive diagnostic instrumentation; not native PC timing"
+  },
+  "native_attempt": {
+    "date": "2026-11-12",
+    "owner_authorized": true,
+    "machine": "STEAMBOX",
+    "gpu": "NVIDIA RTX 4080 SUPER",
+    "desktop": [
+      1920,
+      1080
+    ],
+    "binary_sha256": "ffdfe03d317774b848003a4f107b0fba46e923e2135a26237b4636e34727d3e5",
+    "launched": false,
+    "blocker": "Microsoft Defender ASR reputation/ransomware rules block the unsigned executable",
+    "rule_ids": [
+      "01443614-CD74-433A-B99E-2ECDC07BFC25",
+      "C1DB55AB-C21A-4637-BB3F-A12568109D35"
+    ],
+    "malware_detection_listed": false,
+    "security_policy_changed": false,
+    "approval_pending": "Temporary exact-EXE ASR exclusion, removed after playtest",
+    "evidence": "analysis/windows-native-20261112"
   }
 }
