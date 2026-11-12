@@ -2,57 +2,53 @@
 
 ## Current work — 2026-11-11
 
-Mac checkout on `master`; follow `CLAUDE.md`. NAS and STEAMBOX are unrelated.
-Keep the custom Select/Back menu, settings/controls, MStan performance work and
-Steam Controller fixes. The owner asked to wrap up rather than keep repeating
-performance tests. Rewind remains core: hold Y/Triangle or F8, release to resume.
+Preparing the proper Mac release on `master`; follow `CLAUDE.md`. Keep the custom
+Select/Back menu, controls/settings, MStan performance and Steam Controller fixes.
+Rewind stays enabled: hold Y/Triangle/F8, release resumes the selected state.
+NAS and STEAMBOX are unrelated. Do not publish a release/feed.
 
-Engine `60aba7e8` adds exact ordered command rewind, native texture history,
-private playback texture memory, fractional 60-Hz cadence, no unused thumbnails,
-and four-frame machine anchors. Includes CRC batching `802f1771`. R4 opts in by
-default in CMake; framework base remains selectable. UI stays `ef8150f5`.
-Supported regeneration reused all 7,459 native variants without generated-C edits.
+Engine `b8a88cea` includes exact nearest-checkpoint resume, skipped redundant
+hidden redraw/presentation, PBO texture restaging, PGXP read-journal optimization
+and immutable Mac bundle storage. UI `4efe547` honors the host player-data root.
+Release build and 41 CTests passed; supported regeneration reused all 7,459
+variants without generated-C changes. Build: `build-shipping-20261111`.
 
-Build: `build-shipping-20261111` (arm64 Release/IPO/OpenBIOS, tracing off).
-Release build and 39 CTests passed. Final isolated custom-menu/settings/race smoke:
-`analysis/rewind-command-final-menu-20261111/native-overlay-check.json`.
-Final default-backend run: `analysis/rewind-command-default-final2-20261111/result.json`.
-The current grid is `analysis/60fps-20261111-command-anchors-grid/memcards`;
-execution identity `732955a863cf162b31b127a282b22622cd07551b93a6a8b4329beff87fe7857e`.
-Do not bypass state identity checks.
+Compatible isolated grid: `analysis/release-pgxp-grid-20261111/memcards`.
+Execution identity `769ca791378dc7f82cab1af06580065bf515cbef79182c691f6f6e43c26c07fe`.
+Never bypass its guard. Current exact-state/image proof:
+`analysis/release-pgxp-proof-20261111/result.json` (three exact RAM restores and full-image parity passed).
 
-Local delivery: `dist/macos/2026.11.11-rewind2/R4.app`.
-Scope is a local playtest with the limitations below, not a perfect-60 claim.
+## Release gates still in progress
 
-## Evidence and limits
+- Verify final signed bundle's menu/settings persistence and hidden race smoke.
+- Measure actual packaged foreground performance and repeated rewind releases.
+- Notarize, staple, validate Gatekeeper and regenerate external delivery checksums.
+- Push engine/UI/game commits after required checks pass.
 
-- Exact release RAM and 24 full internal image comparisons passed:
-  `analysis/60fps-20261111-command-release-proof/result.json`.
-- Visible 120-second race: 58.92 forward FPS and 59.57 backward updates/s:
-  `analysis/60fps-20261111-command-visible/result.json`.
-- Subsequent 30-second run: 60.01 forward FPS and 58.99 backward updates/s:
-  `analysis/60fps-20261111-command-release-profile/result.json`.
-- Long-hold release took 0.38–0.51 seconds including observation polling. This
-  brief pause is still a known limitation. Do not claim perfect sustained 60.
-- Internal rendering is 2160 lines; physical display is 1440p/75 Hz. Visible
-  tunnel/sky/ground/HUD samples show no former center pixelation or obvious
-  seams/order faults. No all-course guarantee; physical Steam Controller testing
-  remains device-dependent. Synthetic host input and menu/settings tests pass.
+Developer ID signing and Keychain profile `pp-notary` are verified. The owner
+resolved Apple's account agreement requirement. Never expose credentials.
+Player data belongs in `~/Library/Application Support/net.ramine.r4recomp`;
+`PSX_BUNDLE_DATA_DIR` isolates checks. Resources stay inside the signed bundle.
 
-Command playback stores state/commands, not framebuffer history. Release keeps
-the last selected complete image until the first complete forward producer;
-native VRAM restages cannot leak to screen. The earlier independent scene API
-exists, but its R4 producer remains unconnected: do not call it a finished
-renderer built from scratch.
+Latest pre-PGXP foreground run: `analysis/release-upload-visible-20261111/result.json`:
+57.65 FPS, all 3,465 intermediate frames rendered, 135–161 ms complete rewind
+release. Prior exact proof restored three RAM states with zero differences and
+77 matching full-resolution images. These are bounded measurements, not proof
+of sustained perfect 60. Background work was active; do not stop unrelated jobs.
+
+Internal rendering is 3834×2160; the physical monitor is 2560×1440 at75 Hz.
+Tunnel/sky/ground/HUD samples showed no former pixelation or obvious seams/order
+faults. Physical Steam Controller testing remains device-dependent. The separate
+scene API's R4 producer is still unconnected; do not describe it as finished.
 
 ## References
 
-- [Rewind architecture and evidence](REWIND_PLAYBACK.md)
-- [Mac build/package workflow](MAC_BUILD.md)
-- [Delivery receipt](recovery/MAC_60FPS_20261111.json)
+- [Mac package workflow](MAC_BUILD.md)
+- [Rewind architecture](REWIND_PLAYBACK.md)
+- [Pin history](framework_pin_history.md)
+- [Previous local playtest receipt](recovery/MAC_60FPS_20261111.json)
 - [Renderer investigation](recovery/SEPARATE_RENDERER_20261111.md)
-- [Threading/history evaluation](recovery/THREADING_EVALUATION_20261109.md)
-- [Menu restoration](archive/CUSTOM_MENU_20261109.md)
-- [Upstream reviews](UPSTREAM.md) / [pin history](framework_pin_history.md)
+- [Threading evaluation](recovery/THREADING_EVALUATION_20261109.md)
+- [Menu restoration](archive/CUSTOM_MENU_20261109.md) / [upstream](UPSTREAM.md)
 
-Historical sources remain at `/Users/shokunin/dev-archives/r4-20261109/`.
+Historical sources: `/Users/shokunin/dev-archives/r4-20261109/`.

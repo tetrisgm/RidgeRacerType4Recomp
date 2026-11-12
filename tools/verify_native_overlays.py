@@ -20,6 +20,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('output', type=Path, help='new isolated directory; never reused')
     parser.add_argument('--build', type=Path, default=ROOT / 'build')
+    parser.add_argument('--app', type=Path, help='verify a packaged app with isolated Application Support data')
     parser.add_argument('--disc', type=Path, default=ROOT / 'disc/R4 - Ridge Racer Type 4 (USA).cue')
     parser.add_argument('--port', type=int, default=4798)
     parser.add_argument('--menu-script', type=Path, help='exercise the custom boot menu before smoke')
@@ -27,17 +28,20 @@ def main():
     args = parser.parse_args()
     stage = args.output.resolve()
     stage.mkdir(parents=True, exist_ok=False)
-    for name in ('r4-runtime', 'r4-runtime.execution.json', 'game.toml', 'game_options.toml', 'bios', 'assets', 'postfx'):
-        src = args.build.resolve() / name
-        if src.is_dir():
-            shutil.copytree(src, stage / name)
-        elif src.is_file():
-            shutil.copy2(src, stage / name)
-    shutil.copytree(args.build.resolve() / 'mods/bundled', stage / 'mods/bundled')
-    mod_state = args.build.resolve() / 'mods/state.toml'
-    if mod_state.is_file():
-        shutil.copy2(mod_state, stage / 'mods/state.toml')
+    if not args.app:
+        for name in ('r4-runtime', 'r4-runtime.execution.json', 'game.toml', 'game_options.toml', 'bios', 'assets', 'postfx'):
+            src = args.build.resolve() / name
+            if src.is_dir():
+                shutil.copytree(src, stage / name)
+            elif src.is_file():
+                shutil.copy2(src, stage / name)
+        shutil.copytree(args.build.resolve() / 'mods/bundled', stage / 'mods/bundled')
+        mod_state = args.build.resolve() / 'mods/state.toml'
+        if mod_state.is_file():
+            shutil.copy2(mod_state, stage / 'mods/state.toml')
     env = {k: v for k, v in os.environ.items() if not k.startswith(('PSX_', 'R4L_'))}
+    if args.app:
+        env['PSX_BUNDLE_DATA_DIR'] = str(stage)
     env['SDL_AUDIODRIVER'] = 'dummy'
     # Shipping builds keep TCP control opt-in, independently of tracing.
     env['PSX_DEBUG_SERVER'] = '1'
@@ -47,7 +51,8 @@ def main():
     if args.menu_script:
         env['R4L_OVERLAY_SCRIPT'] = str(args.menu_script.resolve())
     (stage / 'settings.toml').write_text(f'[video]\npresent_thread = {str(args.present_thread).lower()}\n')
-    launch = [str(stage / 'r4-runtime'), '--game', str(stage / 'game.toml'),
+    executable = args.app.resolve() / 'Contents/MacOS/r4-runtime' if args.app else stage / 'r4-runtime'
+    launch = [str(executable), '--game', str(stage / 'game.toml'),
               '--disc', str(args.disc.resolve()), '--hidden-window',
               '--debug-port', str(args.port), '--memcard-dir', str(stage / 'memcards')]
     if not args.menu_script:

@@ -1,3 +1,13 @@
+2026-11-11 release preparation: engine `b8a88cea` includes `9e04b8a5` and `7ee7750d` for
+nearest-checkpoint exact rewind resume, non-draining transition timing and
+immutable Mac bundles. It skips redundant hidden reconstruction presentation
+and extends Mac PBO uploads to native VRAM restaging. Unchanged PGXP reads no
+longer create redundant rollback journal entries; mismatch validation is preserved. Three repeated releases
+restore exact RAM, with 77 full-resolution image comparisons and zero mismatches;
+41 CTests pass. UI `4efe547` keeps player settings in the host data directory
+while Steam shortcuts retain the actual executable path. Sustained timing and
+signed-bundle qualification are recorded separately in the release receipt.
+
 2026-11-11 smooth rewind: engine `60aba7e8` records exact private-pass commands
 and native texture state, redraws backward at gameplay resolution, and resumes
 from the selected machine tick. Includes `802f1771` CRC batching. R4 opts in by

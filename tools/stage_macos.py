@@ -8,7 +8,6 @@ import re
 import shutil
 import subprocess
 import sys
-import tempfile
 
 from check_static_overlays import check as check_static_overlays
 from deliver_windows import verify
@@ -25,6 +24,8 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('version')
     parser.add_argument('--build', required=True, type=Path)
+    parser.add_argument('--sign-identity', default='-', help='Developer ID Application identity; - is local ad-hoc only')
+    parser.add_argument('--app-version', default='0.1.0')
     parser.add_argument('--race-60', action='store_true', help='select fixed 2160-line / 60-FPS race settings')
     parser.add_argument('--evidence', required=True, type=Path,
                         help='verified performance/visual qualification receipt')
@@ -33,7 +34,10 @@ def main():
         parser.error('version must be a simple folder name')
     build = args.build.resolve()
     delivery = ROOT / 'dist/macos' / args.version
-    stage = delivery / 'R4.app/Contents/MacOS'
+    app = delivery / 'R4.app'
+    contents = app / 'Contents'
+    stage = contents / 'Resources/runtime'
+    packaged_binary = contents / 'MacOS/r4-runtime'
     if delivery.exists():
         parser.error('version exists; never reuse a package directory')
     if output('git', '-C', str(ROOT), 'status', '--porcelain', '--untracked-files=no'):
@@ -56,17 +60,22 @@ def main():
     if len(variants) != audit['published_variants']:
         parser.error(f'linked overlay count mismatch: {len(variants)}')
     evidence = json.loads(args.evidence.read_text())
-    if not evidence.get('release_qualified') or not evidence.get('rewind_status', {}).get('enabled'):
+    if not evidence.get('runtime_qualified', evidence.get('release_qualified')) or not evidence.get('rewind_status', {}).get('enabled'):
         parser.error('release qualification must include enabled rewind and its required playback checks')
     if evidence.get('binary_sha256') != digest(binary):
         parser.error('qualification receipt does not identify this executable')
     stage.mkdir(parents=True)
-    (stage.parent / 'Info.plist').write_bytes(plistlib.dumps(dict(
+    packaged_binary.parent.mkdir(parents=True)
+    shutil.copy2(binary, packaged_binary)
+    (stage / 'bundle-id').write_text('net.ramine.r4recomp\n')
+    (contents / 'Info.plist').write_bytes(plistlib.dumps(dict(
         CFBundleExecutable='r4-runtime', CFBundleIdentifier='net.ramine.r4recomp',
         CFBundleName='R4 Recompiled', CFBundlePackageType='APPL',
-        CFBundleVersion='1', CFBundleShortVersionString='0.1',
-        NSHighResolutionCapable=True, LSMinimumSystemVersion='11.0')))
-    for name in ('r4-runtime', 'game.toml', 'game_options.toml', 'assets', 'postfx'):
+        CFBundleVersion='2026111101', CFBundleShortVersionString=args.app_version,
+        NSHighResolutionCapable=True, LSMinimumSystemVersion='11.0',
+        LSApplicationCategoryType='public.app-category.racing-games',
+        GCSupportsGameMode=True, LSSupportsGameMode=True)))
+    for name in ('game.toml', 'game_options.toml', 'assets', 'postfx'):
         source = build / name
         if source.is_dir():
             shutil.copytree(source, stage / name)
@@ -101,21 +110,6 @@ enabled = true
     (stage / 'bios').mkdir()
     for name in ('openbios.bin', 'OpenBIOS.LICENSE'):
         shutil.copy2(build / 'bios' / name, stage / 'bios' / name)
-    # Sign the standalone executable before placing it in the launch wrapper.
-    # Signing it inside Contents/MacOS makes codesign infer a bundle and treat
-    # runtime shader/data directories as nested code. This local package signs
-    # the executable only; it is not a sealed/notarized application bundle.
-    with tempfile.TemporaryDirectory(prefix='r4-macos-sign-') as temporary:
-        signed = Path(temporary) / 'r4-runtime'
-        shutil.copy2(binary, signed)
-        subprocess.run(['codesign', '--force', '--sign', '-', str(signed)], check=True)
-        subprocess.run(['codesign', '--verify', '--strict', str(signed)], check=True)
-        shutil.copy2(signed, stage / 'r4-runtime')
-        if digest(signed) != digest(stage / 'r4-runtime'):
-            raise RuntimeError('signed executable changed during staging')
-    subprocess.run([sys.executable, str(ROOT / 'psxrecomp/tools/release_stage.py'),
-                    'stage-execution', '--binary', str(stage / 'r4-runtime'),
-                    '--manifest', str(build / 'r4-runtime.execution.json')], check=True)
     for name in ('LICENSE', 'DISC.md', 'THIRD-PARTY-LICENSES'):
         source = ROOT / name
         if source.is_dir():
@@ -141,7 +135,7 @@ enabled = true
                  for name, path in [('game', ROOT), ('engine', ROOT / 'psxrecomp'),
                                     ('ui', ROOT / 'recomp-ui')]}
     revisions.update(working_tree_dirty=False, linked_overlay_variants=len(variants),
-                     source_binary_sha256=digest(binary), packaged_binary_sha256=digest(stage / 'r4-runtime'))
+                     source_binary_sha256=digest(binary))
     (stage / 'BUILD.json').write_text(json.dumps(revisions, indent=2) + '\n')
     overlay_receipt = {key: audit[key] for key in ('game_id', 'recipe_count',
         'published_variants', 'all_guards_match_known_input_bytes', 'full_static_coverage_proven',
@@ -153,25 +147,40 @@ enabled = true
     start = delivery / 'Start R4.command'
     start.write_text('#!/bin/zsh\ncd -- "${0:A:h}/R4.app/Contents/MacOS"\nexec ./r4-runtime "$@"\n')
     start.chmod(0o755)
-    (stage / 'README.txt').write_text('''R4 — Apple Silicon Mac local playtest package
+    (stage / 'README.txt').write_text('''R4 — Apple Silicon Mac release candidate
 
-Open R4.app (or Start R4.command) and choose your own USA disc. Keep the entire folder
-together and writable. No game data, retail BIOS, saves, compiler or SDK is
+Open R4.app (or Start R4.command) and choose your own USA disc. The app can live in Applications; player data is stored in
+~/Library/Application Support/net.ramine.r4recomp/. No game data, retail BIOS, saves, compiler or SDK is
 included. OpenBIOS and all 7,459 native overlay variants are bundled.
 
 The custom game menu opens at startup and with Select/Back during play.
 Options contains display, controls, bindings and audio settings. Esc also
 opens the menu. Existing saves and settings are not installed or overwritten.
 
-R4.app/Contents/MacOS/QUALIFICATION.json contains measured results and their limits for this build;
+R4.app/Contents/Resources/runtime/QUALIFICATION.json contains measured results and their limits for this build;
 it is not a claim about every course, mode or Mac. Physical Steam Controller
 behavior still requires that device; synthetic input tests are identified as
-such. This local package is ad-hoc signed, not notarized or publicly released.
+such. Signing and notarization status is recorded in DELIVERY.json beside the app.
 ''')
     if args.race_60:
         with (stage / 'README.txt').open('a') as note:
             note.write('\nThis package selects fixed 9x (2160 lines) and the 60-FPS GP race enhancement.\nAutomatic rewind capture is enabled in this release.\nManual save/load states also remain available.\nChange these in the custom menu if desired.\n')
     shutil.copy2(stage / 'README.txt', delivery / 'README.txt')
+    signing = ['codesign', '--force', '--sign', args.sign_identity]
+    if args.sign_identity != '-':
+        signing += ['--options', 'runtime', '--timestamp']
+    subprocess.run(signing + [str(app)], check=True)
+    subprocess.run(['codesign', '--verify', '--deep', '--strict', str(app)], check=True)
+    # The bound digest is outside the seal, avoiding a circular dependency
+    # between the executable signature and a sealed manifest containing it.
+    subprocess.run([sys.executable, str(ROOT / 'psxrecomp/tools/release_stage.py'),
+                    'stage-execution', '--binary', str(packaged_binary),
+                    '--manifest', str(build / 'r4-runtime.execution.json'),
+                    '--output', str(delivery / 'r4-runtime.execution.json')], check=True)
+    (delivery / 'DELIVERY.json').write_text(json.dumps(dict(
+        signing='ad-hoc' if args.sign_identity == '-' else 'Developer ID / hardened runtime',
+        notarized=False, published=False, binary_sha256=digest(packaged_binary),
+        app_version=args.app_version), indent=2) + '\n')
     files = sorted(p for p in delivery.rglob('*') if p.is_file())
     (delivery / 'SHA256SUMS').write_text(''.join(
         f'{digest(p)}  {p.relative_to(delivery).as_posix()}\n' for p in files))

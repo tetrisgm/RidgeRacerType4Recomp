@@ -23,6 +23,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('output', type=Path)
     parser.add_argument('--build', required=True, type=Path)
+    parser.add_argument('--app', type=Path, help='measure the signed app with isolated player data')
     parser.add_argument('--state', required=True, type=Path)
     parser.add_argument('--disc', type=Path,
                         default=ROOT / 'disc/R4 - Ridge Racer Type 4 (USA).cue')
@@ -37,6 +38,7 @@ def main():
     parser.add_argument('--rewind', action=argparse.BooleanOptionalAction, default=None,
                         help='diagnostic override; normal runs inherit the game preference')
     parser.add_argument('--rewind-video', action='store_true', help='measure full-resolution lossless video history')
+    parser.add_argument('--rewind-repetitions', type=int, choices=range(1, 6), default=1)
     parser.add_argument('--rewind-hold-seconds', type=float, default=1.0)
     parser.add_argument('--verify-draw', action='store_true', help='expensive exact internal-pixel rewind diagnostic, not performance evidence')
     parser.add_argument('--rewind-commands', action='store_true', help='qualify exact resolution-independent draw-command history')
@@ -52,15 +54,17 @@ def main():
     stage = args.output.resolve()
     stage.mkdir(parents=True, exist_ok=False)
     build = args.build.resolve()
-    for name in ('r4-runtime', 'r4-runtime.execution.json', 'game.toml',
-                 'game_options.toml', 'assets', 'bios', 'postfx'):
-        source = build / name
-        if source.is_dir():
-            shutil.copytree(source, stage / name)
-        elif source.is_file():
-            shutil.copy2(source, stage / name)
-    shutil.copytree(build / 'mods/bundled', stage / 'mods/bundled')
+    if not args.app:
+        for name in ('r4-runtime', 'r4-runtime.execution.json', 'game.toml',
+                     'game_options.toml', 'assets', 'bios', 'postfx'):
+            source = build / name
+            if source.is_dir():
+                shutil.copytree(source, stage / name)
+            elif source.is_file():
+                shutil.copy2(source, stage / name)
+        shutil.copytree(build / 'mods/bundled', stage / 'mods/bundled')
     shutil.copytree(args.state, stage / 'memcards')
+    (stage / 'mods').mkdir(exist_ok=True)
     (stage / 'mods/state.toml').write_text('''format_version = 2
 [[package]]
 id = "psx.enhancement.internal-resolution"
@@ -113,13 +117,17 @@ frame_generation = false
     if args.queue_frames:
         env['PSX_RENDER_THREAD_FRAMES'] = str(args.queue_frames)
 
+    executable = args.app.resolve() / 'Contents/MacOS/r4-runtime' if args.app else stage / 'r4-runtime'
+    if args.app:
+        env['PSX_BUNDLE_DATA_DIR'] = str(stage)
+
     def call(command, **kwargs):
         result = cmd(dict(cmd=command, **kwargs), port=args.port, timeout=15)
         if not result.get('ok', True):
             raise RuntimeError(result)
         return result
 
-    def wait(predicate, seconds=60):
+    def wait(predicate, seconds=60, interval=.1):
         deadline = time.monotonic() + seconds
         while time.monotonic() < deadline:
             if runtime.poll() is not None:
@@ -129,13 +137,13 @@ frame_generation = false
                     return
             except OSError:
                 pass
-            time.sleep(.1)
+            time.sleep(interval)
         raise RuntimeError('Timed out waiting for a live, moving race')
 
     def camera():
         return [int(v, 16) for v in call('mem_words', addr='0x1F800008', count=3)['words']]
 
-    launch = [str(stage / 'r4-runtime'), '--game', str(stage / 'game.toml'),
+    launch = [str(executable), '--game', str(stage / 'game.toml'),
               '--disc', str(args.disc.resolve()), '--no-launcher',
               '--debug-port', str(args.port), '--memcard-dir', str(stage / 'memcards')]
     if not args.visible:
@@ -190,69 +198,78 @@ frame_generation = false
                           frame_wall=call('frame_wall_ring', n=12000),
                           host_spans=call('host_span_ring', n=16000),
                           rewind_status=call('rewind_status'), pixel_history=call('rewind_video'), display_timing=call('display_timing'),
-                          binary_sha256=hashlib.sha256((stage / 'r4-runtime').read_bytes()).hexdigest())
+                          binary_sha256=hashlib.sha256(executable.read_bytes()).hexdigest())
             if args.rewind_video:
                 result['rewind_video'] = call('rewind_video')
             (stage / 'result.json').write_text(json.dumps(result, indent=2) + '\n')
             if args.verify_rewind:
-                assert result['rewind_status']['enabled'] and result['rewind_status']['snaps'] > 5
-                driver.terminate(); driver.wait(timeout=10); driver = None
-                call('clear_input')
-                def host(buttons):
-                    call('set_input', layer='host', buttons=buttons)
-                host('0xFFFF'); time.sleep(.15)
-                checks_before=call('rewind_status')['resume_checks']
-                call('host_key', name='F8', down=1)
-                wait(lambda: call('rewind_status')['direct'], seconds=10)
-                paused=call('frame')['frame']
-                before_camera=camera()
-                if args.capture_rewind:
-                    for shot in range(6):
-                        sequence = call('present_shot_seq')['seq']
-                        call('present_shot', path=str(stage / f'rewind-{shot}.png'))
-                        wait(lambda: call('present_shot_seq')['seq'] != sequence, seconds=10)
-                        assert call('present_shot_seq')['wrote']
-                        time.sleep(.08)
-                else:
-                    rewind_samples = []
-                    hold_start = time.monotonic()
-                    while time.monotonic() - hold_start < args.rewind_hold_seconds:
-                        rewind_samples.append(dict(elapsed=time.monotonic()-hold_start,
-                                                   presentation=call('rewind_video')))
-                        time.sleep(.02)
-                    result['rewind_samples'] = rewind_samples
-                    if len(rewind_samples)>1:
-                        first,last=rewind_samples[0],rewind_samples[-1]
-                        result['rewind_updates_per_second'] = (last['presentation'].get('draw_rendered',0)-first['presentation'].get('draw_rendered',0))/(last['elapsed']-first['elapsed'])
+                result['rewind_attempts']=[]
+                for attempt in range(args.rewind_repetitions):
+                    assert result['rewind_status']['enabled'] and result['rewind_status']['snaps'] > 5
+                    if driver is not None:
+                        driver.terminate(); driver.wait(timeout=10); driver = None
+                    call('clear_input')
+                    def host(buttons):
+                        call('set_input', layer='host', buttons=buttons)
+                    host('0xFFFF'); time.sleep(.15)
+                    checks_before=call('rewind_status')['resume_checks']
+                    call('host_key', name='F8', down=1)
+                    wait(lambda: call('rewind_status')['direct'], seconds=10)
+                    paused=call('frame')['frame']
+                    before_camera=camera()
+                    if args.capture_rewind:
+                        for shot in range(6):
+                            sequence = call('present_shot_seq')['seq']
+                            call('present_shot', path=str(stage / f'rewind-{shot}.png'))
+                            wait(lambda: call('present_shot_seq')['seq'] != sequence, seconds=10)
+                            assert call('present_shot_seq')['wrote']
+                            time.sleep(.08)
+                    else:
+                        rewind_samples = []
+                        hold_start = time.monotonic()
+                        while time.monotonic() - hold_start < args.rewind_hold_seconds:
+                            rewind_samples.append(dict(elapsed=time.monotonic()-hold_start,
+                                                       presentation=call('rewind_video')))
+                            time.sleep(.02)
+                        result['rewind_samples'] = rewind_samples
+                        if len(rewind_samples)>1:
+                            first,last=rewind_samples[0],rewind_samples[-1]
+                            result['rewind_updates_per_second'] = (last['presentation'].get('draw_rendered',0)-first['presentation'].get('draw_rendered',0))/(last['elapsed']-first['elapsed'])
+                        (stage / 'result.json').write_text(json.dumps(result, indent=2) + '\n')
+                    if call('rewind_status')['state_playback'] != 1:
+                        assert call('frame')['frame']==paused, 'Guest advanced behind video playback'
+                    assert call('rewind_status')['direct'], 'Direct rewind ended before key release'
+                    release_start=time.monotonic()
+                    call('host_key', name='F8', down=0)
+                    wait(lambda: (lambda status: not status['direct'] and status.get('resume_image_us', 0) != 18446744073709551615)(call('rewind_status')), seconds=10, interval=.005)
+                    result['release_observed_seconds']=time.monotonic()-release_start
+                    result['release_observation']='key release through first complete forward image; 5 ms polling'
+                    if args.verify_draw:
+                        verified = call('rewind_video')
+                        assert verified['draw_pixel_checks'] > 0 and verified['draw_pixel_mismatches'] == 0, verified
+                    result['rewind_frame_wall'] = call('frame_wall_ring', n=4096)
+                    history=call('rewind_status')
+                    restored=camera()
+                    if args.verify_state:
+                        assert history['resume_checks']==checks_before+1, history
+                        assert history['expected_ram_crc']==history['actual_ram_crc'], history
+                        if history['state_playback']==2:
+                            assert history['resume_tick']==call('rewind_video')['draw_last_tick'], history
+                    assert restored!=before_camera, 'Rewind did not change the race position'
+                    resumed_frame=call('frame')['frame']
+                    wait(lambda: call('frame')['frame']>resumed_frame+60, seconds=10)
+                    assert call('dispatch_stats')['miss_total']==0
+                    assert call('rewind_video').get('resume_complete_pending',0)==0, 'Forward complete-image gate remained closed'
+                    result['rewind_restore']=dict(passed=True,paused_frame=paused,
+                        camera_before=before_camera,camera_restored=restored,
+                        history_after=history,presentation_after=call('rewind_video'),
+                        resumed_frame=call('frame')['frame'])
+                    call('clear_input')
+                    result['rewind_attempts'].append(dict(
+                        release_observed_seconds=result['release_observed_seconds'],
+                        backward_updates_per_second=result.get('rewind_updates_per_second'),
+                        restore=result['rewind_restore']))
                     (stage / 'result.json').write_text(json.dumps(result, indent=2) + '\n')
-                if call('rewind_status')['state_playback'] != 1:
-                    assert call('frame')['frame']==paused, 'Guest advanced behind video playback'
-                assert call('rewind_status')['direct'], 'Direct rewind ended before key release'
-                release_start=time.monotonic()
-                call('host_key', name='F8', down=0)
-                wait(lambda: not call('rewind_status')['direct'], seconds=10)
-                result['release_observed_seconds']=time.monotonic()-release_start
-                if args.verify_draw:
-                    verified = call('rewind_video')
-                    assert verified['draw_pixel_checks'] > 0 and verified['draw_pixel_mismatches'] == 0, verified
-                result['rewind_frame_wall'] = call('frame_wall_ring', n=4096)
-                history=call('rewind_status')
-                restored=camera()
-                if args.verify_state:
-                    assert history['resume_checks']==checks_before+1, history
-                    assert history['expected_ram_crc']==history['actual_ram_crc'], history
-                    if history['state_playback']==2:
-                        assert history['resume_tick']==call('rewind_video')['draw_last_tick'], history
-                assert restored!=before_camera, 'Rewind did not change the race position'
-                resumed_frame=call('frame')['frame']
-                wait(lambda: call('frame')['frame']>resumed_frame+60, seconds=10)
-                assert call('dispatch_stats')['miss_total']==0
-                assert call('rewind_video').get('resume_complete_pending',0)==0, 'Forward complete-image gate remained closed'
-                result['rewind_restore']=dict(passed=True,paused_frame=paused,
-                    camera_before=before_camera,camera_restored=restored,
-                    history_after=history,presentation_after=call('rewind_video'),
-                    resumed_frame=call('frame')['frame'])
-                call('clear_input')
             (stage / 'result.json').write_text(json.dumps(result, indent=2) + '\n')
             print(json.dumps(dict(vblanks_per_second=speed,
                                   intermediate_requested=after['wanted']-before['wanted'],
