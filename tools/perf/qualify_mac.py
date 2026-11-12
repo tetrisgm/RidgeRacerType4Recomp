@@ -37,6 +37,8 @@ def main():
     parser.add_argument('--present-thread', action=argparse.BooleanOptionalAction, default=None)
     parser.add_argument('--rewind', action=argparse.BooleanOptionalAction, default=None,
                         help='diagnostic override; normal runs inherit the game preference')
+    parser.add_argument('--rewind-interval', type=int, choices=(1, 4, 8, 12, 15),
+                        help='diagnostic checkpoint frequency override')
     parser.add_argument('--rewind-video', action='store_true', help='measure full-resolution lossless video history')
     parser.add_argument('--rewind-repetitions', type=int, choices=range(1, 6), default=1)
     parser.add_argument('--rewind-hold-seconds', type=float, default=1.0)
@@ -106,6 +108,8 @@ frame_generation = false
         env['PSX_PRESENT_THREAD'] = str(int(args.present_thread))
     if args.rewind is not None:
         env['PSX_REWIND'] = str(int(args.rewind))
+    if args.rewind_interval is not None:
+        env['PSX_REWIND_INTERVAL'] = str(args.rewind_interval)
     if args.rewind_video:
         env['PSX_REWIND_VIDEO'] = '1'
     if args.rewind_commands:
@@ -194,7 +198,7 @@ frame_generation = false
             dispatch = call('dispatch_stats')
             assert dispatch['miss_total'] == dispatch['segment_miss_total'] == 0, dispatch
             assert len({tuple(s['camera']) for s in samples}) >= len(samples) * .8, 'Stationary workload'
-            result = dict(diagnostics=dict(ram=args.verify_state, pixels=args.verify_draw, captures=args.capture_rewind), native_display=args.native_display, borderless=args.borderless, rewind=args.rewind, present_thread=args.present_thread, full_cost=args.full_cost, queue_frames=args.queue_frames, frame_start=frame, frame_end=end_frame, elapsed=elapsed, vblanks_per_second=speed, video=video, pgxp=pgxp,
+            result = dict(diagnostics=dict(ram=args.verify_state, pixels=args.verify_draw, captures=args.capture_rewind), native_display=args.native_display, borderless=args.borderless, rewind=args.rewind, rewind_interval=args.rewind_interval, present_thread=args.present_thread, full_cost=args.full_cost, queue_frames=args.queue_frames, frame_start=frame, frame_end=end_frame, elapsed=elapsed, vblanks_per_second=speed, video=video, pgxp=pgxp,
                           pass_start=before, passes=after, dispatch=dispatch, samples=samples,
                           render=call('render_thread'), present=call('gl_present_ring', n=4096),
                           frame_wall=call('frame_wall_ring', n=12000),

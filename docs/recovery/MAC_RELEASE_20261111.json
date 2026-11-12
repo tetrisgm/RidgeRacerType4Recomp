@@ -1,10 +1,10 @@
 {
   "runtime_qualified": true,
   "release_qualified": false,
-  "qualification_scope": "release candidate; signed-bundle performance, menu and notarization gates pending",
+  "qualification_scope": "exact rewind verified; final signed-app visual/performance qualification pending",
   "sustained_4k60_qualified": false,
-  "binary_sha256": "a29dd28e0ec06761d5238746716abf860cc4d6dc1f4a7dadca2b15100e66041a",
-  "engine_commit": "bf8bc8c5",
+  "binary_sha256": "76cb32188892f6d01938382b5be55a811b48a13826647c93a3e09388865754d7",
+  "engine_commit": "afb51a4e",
   "ui_commit": "4efe547",
   "internal_resolution": [
     3834,
@@ -19,7 +19,7 @@
     "direct": 0,
     "state_playback": 2,
     "seeking": 0,
-    "tick": 1619,
+    "tick": 1537,
     "title_blocked": false,
     "snaps": 188,
     "hd_residency_bytes": 5636992,
@@ -34,8 +34,8 @@
     "actual_word": 0,
     "matching_neighbor": 0,
     "resume_image_us": 0,
-    "state_history_bytes": 806692626,
-    "state_history_entries": 396,
+    "state_history_bytes": 768873038,
+    "state_history_entries": 378,
     "state_history_dropped": 0,
     "snapshot_interval": 4,
     "host_state_bytes": 20259632,
@@ -52,11 +52,11 @@
       0
     ]
   },
-  "exact_proof": "analysis/release-final-proof-20261111/result.json",
+  "exact_proof": "analysis/release-resume-final-proof-20261111/result.json",
   "exact_resume_ram_differences": [
     0
   ],
-  "full_internal_images_checked": 20,
+  "full_internal_images_checked": 15,
   "pixel_mismatches": 0,
   "required_checks": {
     "release_build": "passed",
@@ -64,9 +64,31 @@
     "regeneration": "7459 variants reused; no generated C changes"
   },
   "limitations": [
-    "Signed-bundle menu and performance qualification pending.",
+    "Complete rewind release is improved, not zero latency.",
+    "Final signed-app visible qualification pending.",
     "Physical Steam Controller testing remains device-dependent.",
     "No all-course visual guarantee; inspected course samples only."
   ],
-  "earlier_repeated_proof": "analysis/release-pgxp-proof-20261111/result.json"
+  "earlier_repeated_proof": "analysis/release-warm-proof-20261111/result.json",
+  "normal_timing": {
+    "evidence": "analysis/release-warm-race-20261111/result.json",
+    "seconds": 30,
+    "vblanks_per_second": 60.05008585749322,
+    "release_ms": [
+      80.41,
+      103.3,
+      161.45
+    ],
+    "backward_updates_per_second": [
+      59.82043940169525,
+      59.89644709751941,
+      59.54724288190605
+    ]
+  },
+  "hardware": {
+    "cpu": "Apple M4",
+    "memory_bytes": 17179869184,
+    "display": "2560x1440 at 75 Hz"
+  },
+  "host_load_note": "Other active jobs and 6944 MiB swap usage observed; no unrelated jobs stopped."
 }

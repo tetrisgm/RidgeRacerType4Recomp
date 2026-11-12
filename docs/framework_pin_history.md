@@ -1,3 +1,10 @@
+2026-11-11 rewind transition: engine `afb51a4e` retains the GL context during
+command restoration, buffers preview texture uploads, and bounds first-image
+pipeline refill to four unpaced VBlanks. Three exact RAM restores and 98 full
+internal images match. All 43 tests pass; regeneration reuses 7,459 variants.
+Normal 30-second race: 60.05 VBlanks/s, 80/103/161 ms complete releases.
+UI remains `4efe547`; signed-app results are in the release receipt.
+
 2026-11-11 release preparation: engine `bf8bc8c5` includes `b8a88cea`, `9e04b8a5` and `7ee7750d` for
 nearest-checkpoint exact rewind resume, non-draining transition timing and
 immutable Mac bundles. It skips redundant hidden reconstruction presentation

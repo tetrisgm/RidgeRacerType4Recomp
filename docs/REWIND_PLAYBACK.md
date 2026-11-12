@@ -25,14 +25,16 @@ capture or large thumbnail-array moves occur on this path.
 
 Release keeps the selected full-quality image visible until a complete forward
 producer is ready. Native VRAM restaging cannot reach presentation; this prevents
-the former pixelated center and doubled HUD. Future history is truncated when
-resuming. Manual save/load remains independent.
+the former pixelated center and doubled HUD. Restoration retains GL context
+ownership; preview uploads use buffered transfers. After exact commit, at most
+four unpaced VBlanks refill the complete-image pipeline, stopping early when it
+is ready. Future history is truncated when resuming. Manual save/load remains independent.
 
 ## Verification and limits
 
 The current code passed three successive history branches with zero differing
-RAM words and 88 exact original/replayed full internal images with zero
-mismatches (`analysis/release-pgxp-proof-20261111/result.json`). Diagnostic
+RAM words and 98 exact original/replayed full internal images with zero
+mismatches (`analysis/release-warm-proof-20261111/result.json`). Diagnostic
 readbacks are excluded from performance claims. Real-GL fixtures cover pixels
 and live CPU/GPU/color/depth/stencil isolation at 1x/4x/9x, including changed
 textures and PGXP triangles. The title suite now includes the PGXP propagation and keyboard data-path
