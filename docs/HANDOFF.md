@@ -2,14 +2,15 @@
 
 ## Current work — 2026-11-11
 
-Finish the local Mac release on `master`; follow `CLAUDE.md`. Keep Select/Back
+Finish both local Mac and Windows releases on `master`; follow `CLAUDE.md`. Keep Select/Back
 menu, controls/settings, MStan performance and Steam Controller fixes. Rewind
 stays enabled: hold Y/Triangle/F8, release at the selected state. No NAS,
 STEAMBOX or public release/feed work.
 
-Engine `afb51a4e` / UI `4efe547`: exact command rewind, immutable Mac bundle
+Engine `e4817db4` / UI `4efe547`: exact command rewind, immutable Mac bundle
 storage, keyboard data-path fix, GL ownership retention and bounded first-image
-pipeline refill. Release build and 43 CTests pass. Regeneration reused all
+pipeline refill. The Windows diagnostic macro collision is fixed; both Apple
+and portable compression fixtures pass. The final 44-test Mac run is pending. Regeneration reused all
 7,459 variants without generated-C edits. Build: `build-shipping-20261111`.
 
 Current proof: `analysis/release-warm-proof-20261111/result.json`: three exact
@@ -20,16 +21,20 @@ zero latency or a sustained locked-60 qualification.
 
 Grid: `analysis/release-pgxp-grid-20261111/memcards`; execution identity
 `769ca791378dc7f82cab1af06580065bf515cbef79182c691f6f6e43c26c07fe`.
-Never bypass the guard. Final signed candidate packaging and visible check are
-in progress; then push coherent engine/UI/root commits after required smoke.
+Never bypass the guard. Final Mac/Windows packages and qualification are in progress; then push coherent
+engine/UI/root commits after required checks. Windows Release/LTO links; the
+final pin regeneration and packaged CrossOver compatibility check are next.
 
-RC1 is rejected (keyboard file broke its seal). RC2 is Apple-notarized and
-Gatekeeper-accepted, but superseded by the newer rewind fixes; do not mistake
-it for the final build. Apple account setup is resolved, profile `pp-notary`.
+RC1 is rejected (keyboard file broke its seal). RC3 is Apple-notarized, stapled
+and Gatekeeper-accepted. Its visible 120-second run averaged 59.86 VBlanks/s
+with all 3,551 requested intermediate frames rendered. Menu/settings persistence
+and hidden boot-to-race passed. The rewind recording has clean tunnel/sky/road/HUD
+samples; recording perturbs release timing (202–221 ms), so normal timing above
+is separate. New Windows-only portability/test changes require final artifacts. Apple account setup is resolved, profile `pp-notary`.
 Never expose credentials. Player data lives in Application Support;
 `PSX_BUNDLE_DATA_DIR` isolates tests. Do not change sealed app resources.
 
-Internal rendering is 3834×2160; display is 2560×1440 at75 Hz. Previous live
+Internal rendering is 3834×2160; display is 2560×1440 at75 Hz. Live
 samples showed clean tunnel/sky/ground/HUD. Physical Steam Controller testing
 remains device-dependent. The separate scene API's R4 producer is unconnected;
 do not describe it as finished. Do not stop unrelated background jobs.
@@ -43,5 +48,8 @@ do not describe it as finished. Do not stop unrelated background jobs.
 - [Renderer investigation](recovery/SEPARATE_RENDERER_20261111.md)
 - [Threading evaluation](recovery/THREADING_EVALUATION_20261109.md)
 - [Menu restoration](archive/CUSTOM_MENU_20261109.md) / [upstream](UPSTREAM.md)
+
+An isolated CrossOver bottle `R4ReleaseVerification20261111` was created on the
+Mac for PE verification. Other bottles and STEAMBOX remain untouched.
 
 Historical sources: `/Users/shokunin/dev-archives/r4-20261109/`.

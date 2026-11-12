@@ -17,6 +17,7 @@ import time
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / 'tools'))
 from dbg import cmd
+from crossover_runtime import runtime_command
 
 
 def main():
@@ -24,6 +25,7 @@ def main():
     parser.add_argument('output', type=Path)
     parser.add_argument('--build', required=True, type=Path)
     parser.add_argument('--app', type=Path, help='measure the signed app with isolated player data')
+    parser.add_argument('--crossover-bottle', help='Windows PE compatibility run on Mac; not native Windows performance qualification')
     parser.add_argument('--state', required=True, type=Path)
     parser.add_argument('--disc', type=Path,
                         default=ROOT / 'disc/R4 - Ridge Racer Type 4 (USA).cue')
@@ -51,6 +53,9 @@ def main():
     parser.add_argument('--full-cost', action='store_true',
                         help='disable redraw shedding to measure full workload capacity')
     args = parser.parse_args()
+    if args.app and args.crossover_bottle:
+        parser.error('--app and --crossover-bottle are mutually exclusive')
+    executable_name = 'r4-runtime.exe' if args.crossover_bottle else 'r4-runtime'
     if args.app:
         subprocess.run(['codesign', '--verify', '--deep', '--strict', str(args.app.resolve())], check=True)
     if args.seconds < 30 or args.seconds % 5:
@@ -59,7 +64,7 @@ def main():
     stage.mkdir(parents=True, exist_ok=False)
     build = args.build.resolve()
     if not args.app:
-        for name in ('r4-runtime', 'r4-runtime.execution.json', 'game.toml',
+        for name in (executable_name, 'r4-runtime.execution.json', 'game.toml',
                      'game_options.toml', 'assets', 'bios', 'postfx'):
             source = build / name
             if source.is_dir():
@@ -123,7 +128,7 @@ frame_generation = false
     if args.queue_frames:
         env['PSX_RENDER_THREAD_FRAMES'] = str(args.queue_frames)
 
-    executable = args.app.resolve() / 'Contents/MacOS/r4-runtime' if args.app else stage / 'r4-runtime'
+    executable = args.app.resolve() / 'Contents/MacOS/r4-runtime' if args.app else stage / executable_name
     if args.app:
         env['PSX_BUNDLE_DATA_DIR'] = str(stage)
 
@@ -154,6 +159,9 @@ frame_generation = false
               '--debug-port', str(args.port), '--memcard-dir', str(stage / 'memcards')]
     if not args.visible:
         launch.append('--hidden-window')
+    launch = runtime_command(executable, launch[1:], stage, args.crossover_bottle)
+    if args.crossover_bottle:
+        env['WINEDEBUG'] = '-all'
     driver = None
     with (stage / 'runtime.log').open('w') as log, (stage / 'driver.log').open('w') as driver_log:
         runtime = subprocess.Popen(launch, cwd=stage, env=env, stdout=log, stderr=subprocess.STDOUT)
@@ -198,7 +206,7 @@ frame_generation = false
             dispatch = call('dispatch_stats')
             assert dispatch['miss_total'] == dispatch['segment_miss_total'] == 0, dispatch
             assert len({tuple(s['camera']) for s in samples}) >= len(samples) * .8, 'Stationary workload'
-            result = dict(diagnostics=dict(ram=args.verify_state, pixels=args.verify_draw, captures=args.capture_rewind), native_display=args.native_display, borderless=args.borderless, rewind=args.rewind, rewind_interval=args.rewind_interval, present_thread=args.present_thread, full_cost=args.full_cost, queue_frames=args.queue_frames, frame_start=frame, frame_end=end_frame, elapsed=elapsed, vblanks_per_second=speed, video=video, pgxp=pgxp,
+            result = dict(execution_host='CrossOver on macOS; not native Windows' if args.crossover_bottle else 'native macOS', diagnostics=dict(ram=args.verify_state, pixels=args.verify_draw, captures=args.capture_rewind), native_display=args.native_display, borderless=args.borderless, rewind=args.rewind, rewind_interval=args.rewind_interval, present_thread=args.present_thread, full_cost=args.full_cost, queue_frames=args.queue_frames, frame_start=frame, frame_end=end_frame, elapsed=elapsed, vblanks_per_second=speed, video=video, pgxp=pgxp,
                           pass_start=before, passes=after, dispatch=dispatch, samples=samples,
                           render=call('render_thread'), present=call('gl_present_ring', n=4096),
                           frame_wall=call('frame_wall_ring', n=12000),

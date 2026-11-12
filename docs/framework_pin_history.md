@@ -1,3 +1,9 @@
+2026-11-11 dual-platform release: engine `e4817db4` fixes a Windows-header
+macro collision in rewind diagnostics and adds a Mac test of the portable zlib
+history backend. No renderer or gameplay behavior changes from `afb51a4e`.
+Windows x64 Release/LTO links and the portable history fixture passes. UI stays
+`4efe547`; final Mac/Windows receipts distinguish native and compatibility runs.
+
 2026-11-11 rewind transition: engine `afb51a4e` retains the GL context during
 command restoration, buffers preview texture uploads, and bounds first-image
 pipeline refill to four unpaced VBlanks. Three exact RAM restores and 98 full

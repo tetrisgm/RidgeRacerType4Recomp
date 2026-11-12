@@ -13,7 +13,8 @@ the disc extraction, duplicate slots and audit. Mac hidden smoke exercises the
 linked code with no R4-overlay interpreter PCs, dispatch misses or segment
 misses on its boot-to-race route. PGXP remains enabled. This is not exhaustive
 mode/indirect-target coverage; the generator explicitly retains
-`full_static_coverage_proven: false`. Windows execution remains owner-only.
+`full_static_coverage_proven: false`. Native Windows playtest results remain owner-only. Optional Windows PE
+execution through CrossOver on the Mac is recorded as compatibility evidence.
 
 PE checks verify AMD64, all 7,459 linked variant symbols and system/UCRT-only
 imports. Source files must match the original-disc audit before staging.
@@ -59,7 +60,7 @@ mods and new defaults are staged; build-directory player state is excluded.
 `DELIVERY.json` records signing and execution qualification separately.
 The script refuses an existing version, stale overlay output,
 missing linked variants or unexpected DLL imports, and rechecks every manifest
-entry. No Windows binary is executed. Earlier `2026-11-08-local-*` candidates
+entry. The build/staging command does not execute the Windows binary. Earlier `2026-11-08-local-*` candidates
 remain blocked and must not be delivered.
 
 No game disc, boot EXE, retail BIOS, player saves/settings, SDK or overlay
@@ -86,6 +87,23 @@ python3 tools/deliver_windows.py dist/windows/2026-11-10-4k-performance-01 --des
 The helper reserves `r4/<version>/` exclusively and verifies the copied files.
 It refuses dirty builds, checksum discrepancies and reused versions. No NAS,
 network share, remote connection or PC tooling is required.
+
+## Optional Mac-hosted PE compatibility check
+
+Use an existing isolated CrossOver bottle, never a player's bottle. The runtime
+and test files stay under the new analysis directory. The helper forces the
+standard `Z:` root mapping so debug image paths and player files stay isolated.
+
+```sh
+python3 tools/verify_native_overlays.py analysis/windows-release-check \
+  --build dist/windows/VERSION --crossover-bottle R4ReleaseVerification20261111 \
+  --menu-script tests/custom_menu.txt
+```
+
+This checks the actual PE's startup, native overlays, menu, controls and saved
+settings using CrossOver on macOS. It does not establish native Windows GPU
+performance or physical Steam Controller behavior. The receipt names the host
+and executable hash; Windows signing status is explicit in `DELIVERY.json`.
 
 ## Owner test checklist
 

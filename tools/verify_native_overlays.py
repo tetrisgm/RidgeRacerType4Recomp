@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Verify native overlay execution in an isolated hidden Mac boot-to-race run."""
 import argparse
+import hashlib
 import json
 import os
 from pathlib import Path
@@ -12,6 +13,7 @@ import tomllib
 
 from dbg import cmd
 from check_ingame_menu import check_menu
+from crossover_runtime import runtime_command, windows_path
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -21,17 +23,21 @@ def main():
     parser.add_argument('output', type=Path, help='new isolated directory; never reused')
     parser.add_argument('--build', type=Path, default=ROOT / 'build')
     parser.add_argument('--app', type=Path, help='verify a packaged app with isolated Application Support data')
+    parser.add_argument('--crossover-bottle', help='exercise the Windows PE through an existing isolated CrossOver bottle on the Mac')
     parser.add_argument('--disc', type=Path, default=ROOT / 'disc/R4 - Ridge Racer Type 4 (USA).cue')
     parser.add_argument('--port', type=int, default=4798)
     parser.add_argument('--menu-script', type=Path, help='exercise the custom boot menu before smoke')
     parser.add_argument('--present-thread', action='store_true', help='also qualify the presentation worker')
     args = parser.parse_args()
+    if args.app and args.crossover_bottle:
+        parser.error('--app and --crossover-bottle are mutually exclusive')
+    executable_name = 'r4-runtime.exe' if args.crossover_bottle else 'r4-runtime'
     if args.app:
         subprocess.run(['codesign', '--verify', '--deep', '--strict', str(args.app.resolve())], check=True)
     stage = args.output.resolve()
     stage.mkdir(parents=True, exist_ok=False)
     if not args.app:
-        for name in ('r4-runtime', 'r4-runtime.execution.json', 'game.toml', 'game_options.toml', 'bios', 'assets', 'postfx'):
+        for name in (executable_name, 'r4-runtime.execution.json', 'game.toml', 'game_options.toml', 'bios', 'assets', 'postfx'):
             src = args.build.resolve() / name
             if src.is_dir():
                 shutil.copytree(src, stage / name)
@@ -51,14 +57,17 @@ def main():
     # Script waits count rendered frames; isolated automation must not use VSync.
     env['PSX_VSYNC'] = '0'
     if args.menu_script:
-        env['R4L_OVERLAY_SCRIPT'] = str(args.menu_script.resolve())
+        env['R4L_OVERLAY_SCRIPT'] = (windows_path(args.menu_script) if args.crossover_bottle else str(args.menu_script.resolve()))
     (stage / 'settings.toml').write_text(f'[video]\npresent_thread = {str(args.present_thread).lower()}\n')
-    executable = args.app.resolve() / 'Contents/MacOS/r4-runtime' if args.app else stage / 'r4-runtime'
+    executable = args.app.resolve() / 'Contents/MacOS/r4-runtime' if args.app else stage / executable_name
     launch = [str(executable), '--game', str(stage / 'game.toml'),
               '--disc', str(args.disc.resolve()), '--hidden-window',
               '--debug-port', str(args.port), '--memcard-dir', str(stage / 'memcards')]
     if not args.menu_script:
         launch.append('--no-launcher')
+    launch = runtime_command(executable, launch[1:], stage, args.crossover_bottle)
+    if args.crossover_bottle:
+        env['WINEDEBUG'] = '-all'
     with (stage / 'runtime.log').open('w') as log:
         process = subprocess.Popen(launch, cwd=stage, env=env, stdout=log, stderr=subprocess.STDOUT)
         try:
@@ -100,6 +109,8 @@ def main():
                                timeout=240, check=True)
             receipt = {name: cmd({'cmd': name}, port=args.port)
                        for name in ('frame', 'overlay_loader_status', 'dispatch_stats', 'dirty_ram_stats')}
+            receipt['execution_host'] = 'CrossOver on macOS; not native Windows' if args.crossover_bottle else 'native macOS'
+            receipt['binary_sha256'] = hashlib.sha256(executable.read_bytes()).hexdigest()
             receipt['overlay_fallback'] = cmd({'cmd': 'dirty_ram_stats', 'lo': '0x801149a8',
                                                 'hi': '0x801281a8'}, port=args.port)
             (stage / 'native-overlay-check.json').write_text(json.dumps(receipt, indent=2) + '\n')

@@ -25,7 +25,7 @@ def main():
     parser.add_argument('version')
     parser.add_argument('--build', required=True, type=Path)
     parser.add_argument('--sign-identity', default='-', help='Developer ID Application identity; - is local ad-hoc only')
-    parser.add_argument('--app-version', default='0.1.0')
+    parser.add_argument('--app-version', default=(ROOT / 'VERSION').read_text().strip())
     parser.add_argument('--race-60', action='store_true', help='select fixed 2160-line / 60-FPS race settings')
     parser.add_argument('--evidence', required=True, type=Path,
                         help='verified performance/visual qualification receipt')
@@ -71,7 +71,7 @@ def main():
     (contents / 'Info.plist').write_bytes(plistlib.dumps(dict(
         CFBundleExecutable='r4-runtime', CFBundleIdentifier='net.ramine.r4recomp',
         CFBundleName='R4 Recompiled', CFBundlePackageType='APPL',
-        CFBundleVersion='2026111101', CFBundleShortVersionString=args.app_version,
+        CFBundleVersion=args.app_version, CFBundleShortVersionString=args.app_version,
         NSHighResolutionCapable=True, LSMinimumSystemVersion='11.0',
         LSApplicationCategoryType='public.app-category.racing-games',
         GCSupportsGameMode=True, LSSupportsGameMode=True)))
