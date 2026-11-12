@@ -148,5 +148,16 @@
   },
   "visual_qualified": false,
   "visual_blocker": "Mac desktop locked; black composed captures are not accepted",
-  "evidence": "analysis/windows-bindings-compat-20261111"
+  "evidence": "analysis/windows-bindings-compat-20261111",
+  "packaged_binary_sha256": "ffdfe03d317774b848003a4f107b0fba46e923e2135a26237b4636e34727d3e5",
+  "packaged_rewind": {
+    "evidence": "analysis/windows-final-rewind-20261112/result.json",
+    "exact_ram_differences": 0,
+    "full_resolution_images_checked": 13,
+    "pixel_mismatches": 0,
+    "internal_lines": 2160,
+    "dispatch_misses": 0,
+    "performance_qualification": false,
+    "reason": "Rosetta/CrossOver and expensive diagnostic instrumentation; not native PC timing"
+  }
 }

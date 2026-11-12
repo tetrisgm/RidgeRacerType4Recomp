@@ -1,11 +1,11 @@
 {
   "runtime_qualified": true,
   "release_qualified": false,
-  "qualification_scope": "exact rewind verified; final signed-app visual/performance qualification pending",
+  "qualification_scope": "Exact rewind verified on final binary; final signed-app and unlocked graphics qualification pending",
   "sustained_4k60_qualified": false,
-  "binary_sha256": "76cb32188892f6d01938382b5be55a811b48a13826647c93a3e09388865754d7",
-  "engine_commit": "afb51a4e",
-  "ui_commit": "4efe547",
+  "binary_sha256": "d076e9a071575e80d71321fd1690ed8d85984490344bfa72ed9ca8b3dc98958c",
+  "engine_commit": "20e0e94d",
+  "ui_commit": "a786d20",
   "internal_resolution": [
     3834,
     2160
@@ -19,49 +19,50 @@
     "direct": 0,
     "state_playback": 2,
     "seeking": 0,
-    "tick": 1537,
+    "tick": 2064,
     "title_blocked": false,
-    "snaps": 188,
-    "hd_residency_bytes": 5636992,
+    "snaps": 177,
+    "hd_residency_bytes": 5307168,
     "state_verification": 1,
-    "resume_checks": 0,
-    "resume_tick": 0,
-    "expected_ram_crc": 0,
-    "actual_ram_crc": 0,
+    "resume_checks": 1,
+    "resume_tick": 2058,
+    "expected_ram_crc": 3035283313,
+    "actual_ram_crc": 3035283313,
     "different_words": 0,
     "first_difference": 0,
     "expected_word": 0,
     "actual_word": 0,
     "matching_neighbor": 0,
-    "resume_image_us": 0,
-    "state_history_bytes": 768873038,
-    "state_history_entries": 378,
+    "resume_image_us": 63143,
+    "state_history_bytes": 1014272346,
+    "state_history_entries": 496,
     "state_history_dropped": 0,
     "snapshot_interval": 4,
-    "host_state_bytes": 20259632,
-    "release_us": 0,
-    "release_anchor": 0,
-    "release_target": 0,
+    "host_state_bytes": 19074228,
+    "release_us": 70051,
+    "release_anchor": 2054,
+    "release_target": 2058,
     "release_load_us": [
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0
+      3423,
+      1705,
+      3881,
+      235,
+      2598,
+      642,
+      12484
     ]
   },
-  "exact_proof": "analysis/release-resume-final-proof-20261111/result.json",
+  "exact_proof": "analysis/mac-final-rewind-20261112/result.json",
   "exact_resume_ram_differences": [
     0
   ],
-  "full_internal_images_checked": 15,
+  "full_internal_images_checked": 21,
   "pixel_mismatches": 0,
   "required_checks": {
-    "release_build": "passed",
-    "ctest": "43/43 passed",
-    "regeneration": "7459 variants reused; no generated C changes"
+    "release_build": "passed final revisions",
+    "ctest": "41 cases passed; graphics run interrupted while Mac locked; final full suite pending",
+    "regeneration": "7459 variants reused; no generated C changes",
+    "ui_core": "passed"
   },
   "limitations": [
     "Complete rewind release is improved, not zero latency.",
@@ -90,5 +91,13 @@
     "memory_bytes": 17179869184,
     "display": "2560x1440 at 75 Hz"
   },
-  "host_load_note": "Other active jobs and 6944 MiB swap usage observed; no unrelated jobs stopped."
+  "host_load_note": "Other active jobs and 6944 MiB swap usage observed; no unrelated jobs stopped.",
+  "previous_signed_candidate": {
+    "package": "dist/macos/2026.11.11-rc3/R4.app",
+    "notarization": "Accepted",
+    "visible_evidence": "analysis/release-rc3-visible-20261111/result.json",
+    "vblanks_per_second": 59.86280332214752,
+    "intermediate_frames_rendered": 3551,
+    "intermediate_frames_requested": 3551
+  }
 }

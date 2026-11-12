@@ -195,7 +195,7 @@ Report build version, route and observations. Preserve native saves/settings.
         if digest(stage / name) != expected:
             raise SystemExit(f'Manifest verification failed: {name}')
     print(f'Local candidate: {stage}\nVerified {len(files)} SHA256 entries; system DLLs only.')
-    print('Ready for owner playtest; no Windows execution performed on the Mac.')
+    print('Ready for owner playtest; native Windows qualification remains pending.')
 
 
 if __name__ == '__main__':
