@@ -47,7 +47,11 @@ for every course or machine.
 
 All 44 Mac tests and menu persistence checks pass. Exact rewind RAM restoration
 and full-resolution image comparisons pass on Mac and Windows-on-CrossOver.
-Native Windows qualification is in progress. Hands-on audio, gameplay and
+The native RTX 4080 SUPER PC ran the 4K drawable for two minutes at **59.96
+VBlanks/s**, with no sampled presentation interval above 19 ms. Select/Back
+menu checks and two exact rewind restores passed; 52 full-resolution images
+matched. Windows remains unsigned; the hardened test PC required an owner-
+approved temporary ASR exception, removed after the test. Hands-on audio, gameplay and
 physical Steam Controller evaluation remains separate from automated input.
 
 Wheel force feedback remains experimental and off by default. The existing

@@ -4,8 +4,8 @@
   "binary_sha256": "30a7b12df2079830e6456ad0923d11b79dcc22cf1f577f32b3e5676e16a15f45",
   "engine_commit": "20e0e94d",
   "ui_commit": "a786d20",
-  "native_windows_qualified": false,
-  "release_qualified": false,
+  "native_windows_qualified": true,
+  "release_qualified": true,
   "compatibility_boot_race": "passed",
   "static_hits": 7172641,
   "dispatch_stats": {
@@ -146,8 +146,7 @@
     "p1_cross_scancode": 14,
     "p1_cross_button": 2
   },
-  "visual_qualified": false,
-  "visual_blocker": "Mac desktop locked; black composed captures are not accepted",
+  "visual_qualified": true,
   "evidence": "analysis/windows-bindings-compat-20261111",
   "packaged_binary_sha256": "ffdfe03d317774b848003a4f107b0fba46e923e2135a26237b4636e34727d3e5",
   "packaged_rewind": {
@@ -170,15 +169,67 @@
       1080
     ],
     "binary_sha256": "ffdfe03d317774b848003a4f107b0fba46e923e2135a26237b4636e34727d3e5",
-    "launched": false,
-    "blocker": "Microsoft Defender ASR reputation/ransomware rules block the unsigned executable",
+    "launched": true,
+    "blocker": null,
     "rule_ids": [
       "01443614-CD74-433A-B99E-2ECDC07BFC25",
       "C1DB55AB-C21A-4637-BB3F-A12568109D35"
     ],
     "malware_detection_listed": false,
     "security_policy_changed": false,
-    "approval_pending": "Temporary exact-EXE ASR exclusion, removed after playtest",
-    "evidence": "analysis/windows-native-20261112"
+    "approval_pending": null,
+    "evidence": "analysis/windows-native-20261112",
+    "temporary_exception_used": true,
+    "temporary_exception_owner_approved": true,
+    "security_baseline_restored": true
+  },
+  "native_qualification": {
+    "evidence": "analysis/windows-native-20261112/result.json",
+    "exact_evidence": "analysis/windows-native-20261112/exact-result.json",
+    "seconds": 120.0278089,
+    "vblanks_per_second": 59.96110456366083,
+    "internal_lines": 2160,
+    "drawable": [
+      3840,
+      2160
+    ],
+    "physical_desktop": [
+      1920,
+      1080
+    ],
+    "gpu": "NVIDIA GeForce RTX 4080 SUPER",
+    "opengl": "3.3.0 NVIDIA 621.14",
+    "max_sampled_presentation_interval_ms": 18.904,
+    "intermediate_requested": 3600,
+    "intermediate_rendered": 3599,
+    "dispatch_misses": 0,
+    "release_observed_ms": [
+      150.0678,
+      119.57560000000001
+    ],
+    "release_poll_ms": 40,
+    "release_internal_ms": [
+      96.418,
+      91.358
+    ],
+    "exact_restores": 2,
+    "ram_differences": [
+      0,
+      0
+    ],
+    "full_resolution_images_checked": 52,
+    "pixel_mismatches": 0,
+    "select_back_menu": "passed open/close and composed capture",
+    "visual_observations": "Reviewed consecutive sky, ground and tunnel captures; no observed seams, blinking polygons or displaced HUD",
+    "audio": "Muted using dummy SDL audio at owner request",
+    "hands_on_controller_audio_gameplay": "Owner will test separately"
+  },
+  "pc_cleanup": {
+    "exception_removed": true,
+    "asr_policy_matches_baseline": true,
+    "task_removed": true,
+    "test_directory_removed": true,
+    "game_stopped": true,
+    "system_volume_changed": false
   }
 }
