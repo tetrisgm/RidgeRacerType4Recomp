@@ -27,6 +27,7 @@ def main():
     parser.add_argument('--disc', type=Path, default=ROOT / 'disc/R4 - Ridge Racer Type 4 (USA).cue')
     parser.add_argument('--port', type=int, default=4798)
     parser.add_argument('--menu-script', type=Path, help='exercise the custom boot menu before smoke')
+    parser.add_argument('--visible', action='store_true', help='show the isolated verification window')
     parser.add_argument('--present-thread', action='store_true', help='also qualify the presentation worker')
     args = parser.parse_args()
     if args.app and args.crossover_bottle:
@@ -61,8 +62,10 @@ def main():
     (stage / 'settings.toml').write_text(f'[video]\npresent_thread = {str(args.present_thread).lower()}\n')
     executable = args.app.resolve() / 'Contents/MacOS/r4-runtime' if args.app else stage / executable_name
     launch = [str(executable), '--game', str(stage / 'game.toml'),
-              '--disc', str(args.disc.resolve()), '--hidden-window',
+              '--disc', str(args.disc.resolve()),
               '--debug-port', str(args.port), '--memcard-dir', str(stage / 'memcards')]
+    if not args.visible:
+        launch.append('--hidden-window')
     if not args.menu_script:
         launch.append('--no-launcher')
     launch = runtime_command(executable, launch[1:], stage, args.crossover_bottle)
@@ -76,6 +79,8 @@ def main():
                 captured = set()
                 while time.monotonic() < deadline:
                     content = (stage / 'runtime.log').read_text(errors='replace')
+                    if 'GL context creation failed' in content:
+                        raise RuntimeError('OpenGL context creation failed; refusing software-only qualification')
                     if process.poll() is not None:
                         raise RuntimeError('Runtime exited during menu checks')
                     for n in range(1, 6):
@@ -128,6 +133,11 @@ def main():
             print(json.dumps({'static_hits': overlay['static_hits'], 'dispatch_misses': 0,
                               'receipt': str(stage / 'native-overlay-check.json')}))
         finally:
+            if args.crossover_bottle:
+                try:
+                    cmd({'cmd': 'quit'}, port=args.port, timeout=3)
+                except (OSError, RuntimeError):
+                    pass
             process.terminate()
             try:
                 process.wait(timeout=10)
@@ -160,6 +170,11 @@ def main():
                 assert restored['p1_cross_scancode'] == 14 and restored['p1_cross_button'] == 2, restored
                 (stage / 'restart-check.json').write_text(json.dumps(restored, indent=2) + '\n')
             finally:
+                if args.crossover_bottle:
+                    try:
+                        cmd({'cmd': 'quit'}, port=args.port, timeout=3)
+                    except (OSError, RuntimeError):
+                        pass
                 process.terminate()
                 try:
                     process.wait(timeout=10)

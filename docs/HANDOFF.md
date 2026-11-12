@@ -7,10 +7,11 @@ menu, controls/settings, MStan performance and Steam Controller fixes. Rewind
 stays enabled: hold Y/Triangle/F8, release at the selected state. No NAS,
 STEAMBOX or public release/feed work.
 
-Engine `e4817db4` / UI `4efe547`: exact command rewind, immutable Mac bundle
+Engine `20e0e94d` / UI `a786d20`: exact command rewind, immutable Mac bundle
 storage, keyboard data-path fix, GL ownership retention and bounded first-image
 pipeline refill. The Windows diagnostic macro collision is fixed; both Apple
-and portable compression fixtures pass. The final 44-test Mac run is pending. Regeneration reused all
+and portable compression fixtures pass. The Mac run passed 41 cases, then was stopped at the GL presentation fixture
+while the desktop was locked; rerun graphics checks after unlocking. Regeneration reused all
 7,459 variants without generated-C edits. Build: `build-shipping-20261111`.
 
 Current proof: `analysis/release-warm-proof-20261111/result.json`: three exact
@@ -24,6 +25,12 @@ Grid: `analysis/release-pgxp-grid-20261111/memcards`; execution identity
 Never bypass the guard. Final Mac/Windows packages and qualification are in progress; then push coherent
 engine/UI/root commits after required checks. Windows Release/LTO links; the
 final pin regeneration and packaged CrossOver compatibility check are next.
+The PE context now works with the forward-compatible GL flag. Windows bindings
+were captured but C rename could not replace existing INI files; filesystem
+rename fixes this (`analysis/windows-bindings-compat-20261111`: boot/race, menu and restart passed;
+7,172,641 static hits, zero dispatch misses).
+The screen is locked and the owner has been asked to unlock; black captures
+are not accepted as visual evidence. No game process should be left running.
 
 RC1 is rejected (keyboard file broke its seal). RC3 is Apple-notarized, stapled
 and Gatekeeper-accepted. Its visible 120-second run averaged 59.86 VBlanks/s

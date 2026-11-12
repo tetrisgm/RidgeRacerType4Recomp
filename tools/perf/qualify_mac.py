@@ -289,6 +289,11 @@ frame_generation = false
                                   intermediate_requested=after['wanted']-before['wanted'],
                                   intermediate_rendered=after['passes']-before['passes']), indent=2))
         finally:
+            if args.crossover_bottle:
+                try:
+                    cmd({'cmd': 'quit'}, port=args.port, timeout=3)
+                except (OSError, RuntimeError):
+                    pass
             for process in (driver, runtime):
                 if process is not None:
                     process.terminate()

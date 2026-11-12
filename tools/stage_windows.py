@@ -148,7 +148,7 @@ enabled = true
     (stage / 'BUILD.json').write_text(json.dumps(revisions, indent=2) + '\n')
     (stage / 'README.txt').write_text('''R4 Windows x64 — portable owner playtest build.
 
-Built on the Mac; no Windows execution has been performed. Windows 11 supplies
+Cross-built on the Mac; native Windows playtesting remains required. Windows 11 supplies
 all imported system/UCRT DLLs; no VC++ redistributable is imported. No installer,
 admin rights or system changes are required. Keep this folder writable.
 

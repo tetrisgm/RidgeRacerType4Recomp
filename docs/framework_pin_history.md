@@ -1,3 +1,11 @@
+2026-11-11 Windows package verification: engine `20e0e94d` requests forward-
+compatible core GL contexts, allowing the PE to create its context on Mac WGL.
+UI `a786d20` replaces existing binding files using filesystem rename; C rename
+failed on Windows and left edited controls in temporary files. The actual PE
+now saves K/X bindings correctly. Final runtime/restart and Mac graphics checks
+remain in progress; the desktop is locked. No native Windows qualification is
+implied by CrossOver execution.
+
 2026-11-11 dual-platform release: engine `e4817db4` fixes a Windows-header
 macro collision in rewind diagnostics and adds a Mac test of the portable zlib
 history backend. No renderer or gameplay behavior changes from `afb51a4e`.
