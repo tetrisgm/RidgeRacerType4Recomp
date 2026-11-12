@@ -6,6 +6,10 @@ list(APPEND CMAKE_TRY_COMPILE_PLATFORM_VARIABLES LLVM_MINGW_ROOT)
 if(NOT LLVM_MINGW_ROOT)
     message(FATAL_ERROR "Set LLVM_MINGW_ROOT to the extracted macOS llvm-mingw toolchain")
 endif()
+# Whole-project IPO probes may not inherit the parent cache with older CMake
+# policies. Preserve the selected root in this process's child environment,
+# including regeneration invoked without build_windows.sh's shell export.
+set(ENV{LLVM_MINGW_ROOT} "${LLVM_MINGW_ROOT}")
 file(TO_CMAKE_PATH "${LLVM_MINGW_ROOT}" _llvm_mingw)
 set(CMAKE_C_COMPILER "${_llvm_mingw}/bin/x86_64-w64-mingw32-clang")
 set(CMAKE_CXX_COMPILER "${_llvm_mingw}/bin/x86_64-w64-mingw32-clang++")
