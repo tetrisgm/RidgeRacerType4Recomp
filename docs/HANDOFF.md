@@ -1,5 +1,13 @@
 # Handoff
 
+## Current blocker — rewind release pause
+
+The owner requested removal of the remaining release pause before final release.
+The 2026-11-12 follow-up did **not** qualify a fix. All experimental runtime/test
+edits were reverted; the menu, controller fixes and existing packages remain intact.
+See [investigation](recovery/REWIND_RELEASE_20261112.md). The packages below are
+verified baseline artifacts, not evidence that this new release requirement is met.
+
 ## Release packages — 2026-11-12
 
 Both local 0.2.1 packages are qualified and prepared:
