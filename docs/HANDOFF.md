@@ -21,7 +21,7 @@ The current grid is `analysis/60fps-20261111-command-anchors-grid/memcards`;
 execution identity `732955a863cf162b31b127a282b22622cd07551b93a6a8b4329beff87fe7857e`.
 Do not bypass state identity checks.
 
-Local delivery: `dist/macos/2026.11.11-rewind1/R4.app`.
+Local delivery: `dist/macos/2026.11.11-rewind2/R4.app`.
 Scope is a local playtest with the limitations below, not a perfect-60 claim.
 
 ## Evidence and limits

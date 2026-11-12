@@ -8,6 +8,7 @@ import re
 import shutil
 import subprocess
 import sys
+import tempfile
 
 from check_static_overlays import check as check_static_overlays
 from deliver_windows import verify
@@ -100,8 +101,18 @@ enabled = true
     (stage / 'bios').mkdir()
     for name in ('openbios.bin', 'OpenBIOS.LICENSE'):
         shutil.copy2(build / 'bios' / name, stage / 'bios' / name)
-    subprocess.run(['codesign', '--force', '--sign', '-', str(stage / 'r4-runtime')], check=True)
-    subprocess.run(['codesign', '--verify', '--strict', str(stage / 'r4-runtime')], check=True)
+    # Sign the standalone executable before placing it in the launch wrapper.
+    # Signing it inside Contents/MacOS makes codesign infer a bundle and treat
+    # runtime shader/data directories as nested code. This local package signs
+    # the executable only; it is not a sealed/notarized application bundle.
+    with tempfile.TemporaryDirectory(prefix='r4-macos-sign-') as temporary:
+        signed = Path(temporary) / 'r4-runtime'
+        shutil.copy2(binary, signed)
+        subprocess.run(['codesign', '--force', '--sign', '-', str(signed)], check=True)
+        subprocess.run(['codesign', '--verify', '--strict', str(signed)], check=True)
+        shutil.copy2(signed, stage / 'r4-runtime')
+        if digest(signed) != digest(stage / 'r4-runtime'):
+            raise RuntimeError('signed executable changed during staging')
     subprocess.run([sys.executable, str(ROOT / 'psxrecomp/tools/release_stage.py'),
                     'stage-execution', '--binary', str(stage / 'r4-runtime'),
                     '--manifest', str(build / 'r4-runtime.execution.json')], check=True)
