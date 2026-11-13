@@ -1,6 +1,8 @@
 # Upstream fixes
 
-R4 pins fork master `9fbb6ba8` (upstream `c1f5cafd` plus the changes below).
+R4 pins fork master `d81b3919`. The table tracks the earlier isolated upstream
+fixes; subsequent integration and rewind work is recorded in
+[pin history](framework_pin_history.md).
 The fork has one R4 development line, master. PR heads are isolated review
 artifacts; the frozen performance baseline is not replaced by old topic heads.
 

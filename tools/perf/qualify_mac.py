@@ -50,6 +50,7 @@ def main():
                         help='after timing, navigate and load an automatic rewind point')
     parser.add_argument('--capture-rewind', action='store_true', help='capture accepted composed rewind frames separately from performance qualification')
     parser.add_argument('--verify-state', action='store_true', help='diagnostic RAM equality at rewind resume; separate from timing qualification')
+    parser.add_argument('--trace-rewind', action='store_true', help='record per-stage release timings')
     parser.add_argument('--full-cost', action='store_true',
                         help='disable redraw shedding to measure full workload capacity')
     args = parser.parse_args()
@@ -123,6 +124,8 @@ frame_generation = false
         env['PSX_REWIND_VERIFY_DRAW'] = '1'
     if args.verify_state:
         env['PSX_REWIND_VERIFY_STATE'] = '1'
+    if args.trace_rewind:
+        env['PSX_REWIND_TRACE'] = '1'
     if args.full_cost:
         env['PSX_RENDER_PASS_SHED'] = '0'
     if args.queue_frames:
@@ -206,7 +209,7 @@ frame_generation = false
             dispatch = call('dispatch_stats')
             assert dispatch['miss_total'] == dispatch['segment_miss_total'] == 0, dispatch
             assert len({tuple(s['camera']) for s in samples}) >= len(samples) * .8, 'Stationary workload'
-            result = dict(execution_host='CrossOver on macOS; not native Windows' if args.crossover_bottle else 'native macOS', diagnostics=dict(ram=args.verify_state, pixels=args.verify_draw, captures=args.capture_rewind), native_display=args.native_display, borderless=args.borderless, rewind=args.rewind, rewind_interval=args.rewind_interval, present_thread=args.present_thread, full_cost=args.full_cost, queue_frames=args.queue_frames, frame_start=frame, frame_end=end_frame, elapsed=elapsed, vblanks_per_second=speed, video=video, pgxp=pgxp,
+            result = dict(execution_host='CrossOver on macOS; not native Windows' if args.crossover_bottle else 'native macOS', diagnostics=dict(ram=args.verify_state, pixels=args.verify_draw, captures=args.capture_rewind, trace=args.trace_rewind), native_display=args.native_display, borderless=args.borderless, rewind=args.rewind, rewind_interval=args.rewind_interval, present_thread=args.present_thread, full_cost=args.full_cost, queue_frames=args.queue_frames, frame_start=frame, frame_end=end_frame, elapsed=elapsed, vblanks_per_second=speed, video=video, pgxp=pgxp,
                           pass_start=before, passes=after, dispatch=dispatch, samples=samples,
                           render=call('render_thread'), present=call('gl_present_ring', n=4096),
                           frame_wall=call('frame_wall_ring', n=12000),
@@ -234,7 +237,7 @@ frame_generation = false
                     if args.capture_rewind:
                         for shot in range(6):
                             sequence = call('present_shot_seq')['seq']
-                            call('present_shot', path=str(stage / f'rewind-{shot}.png'))
+                            call('present_shot', path=str(stage / f'rewind-{attempt}-{shot}.png'))
                             wait(lambda: call('present_shot_seq')['seq'] != sequence, seconds=10)
                             assert call('present_shot_seq')['wrote']
                             time.sleep(.08)
@@ -258,10 +261,18 @@ frame_generation = false
                     wait(lambda: (lambda status: not status['direct'] and status.get('resume_image_us', 0) != 18446744073709551615)(call('rewind_status')), seconds=10, interval=.005)
                     result['release_observed_seconds']=time.monotonic()-release_start
                     result['release_observation']='key release through first complete forward image; 5 ms polling'
+                    if args.capture_rewind:
+                        for shot in range(12):
+                            sequence = call('present_shot_seq')['seq']
+                            call('present_shot', path=str(stage / f'resume-{attempt}-{shot}.png'))
+                            wait(lambda: call('present_shot_seq')['seq'] != sequence, seconds=10, interval=.005)
+                            assert call('present_shot_seq')['wrote']
                     if args.verify_draw:
                         verified = call('rewind_video')
                         assert verified['draw_pixel_checks'] > 0 and verified['draw_pixel_mismatches'] == 0, verified
                     result['rewind_frame_wall'] = call('frame_wall_ring', n=4096)
+                    if args.trace_rewind:
+                        result.setdefault('release_stage_traces',[]).append(call('host_span_ring', n=65536))
                     history=call('rewind_status')
                     restored=camera()
                     if args.verify_state:

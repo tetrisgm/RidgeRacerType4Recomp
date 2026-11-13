@@ -1,4 +1,12 @@
 2026-11-12 test-only engine `a6f0b4b5`: hidden presentation fixtures explicitly
+
+## 2026-11-12 — d81b3919: restore rewind rendering pipeline
+
+Restore already-issued command producers, cache two working images, use safe
+state anchors and retain full-rate planning across context ownership changes.
+Mac composition uses a private drawable. Menu/controller code is unchanged.
+44 tests and exact pixel/RAM checks pass; regeneration changes no generated C.
+See [qualification](recovery/MAC_RELEASE_20261112.json).
 disable VSync after a sample proved the locked Mac stalled in Cocoa SwapWindow.
 All 44 title tests pass. Runtime source is identical to packaged `20e0e94d`;
 UI remains `a786d20`. Package execution identities and signed binary hashes are

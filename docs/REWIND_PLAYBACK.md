@@ -15,26 +15,32 @@ playback unless they opt in. `PSX_REWIND_COMMANDS=0` selects that diagnostic pat
 `PSX_REWIND_VIDEO=1` is a separate diagnostic prototype, not the release backend.
 
 Machine checkpoints use bounded compressed memory (1 GiB plus eight raw hot
-checkpoints), at most four guest frames apart. Recorded pads/camera inputs and
-process-local enhancement state reconstruct the exact selected tick on release.
-Release uses the nearest earlier checkpoint, preserving the sampled input boundary.
-Hidden reconstruction omits redundant private redraws and presentation; guest
-execution, canonical GPU work and the exact selected-state check remain intact.
-The guest CPU stays frozen during backward command playback. No unused thumbnail
-capture or large thumbnail-array moves occur on this path.
+checkpoints). Capture requests every snapshot-safe guest boundary; IRQ and
+callback-stack safety gates still defer unsafe captures. Recorded pads/camera
+inputs and process-local enhancement state reconstruct the exact selected tick
+from the nearest earlier checkpoint. The guest CPU stays frozen during backward
+command playback. No unused thumbnail capture occurs on this path.
 
-Release keeps the selected full-quality image visible until a complete forward
-producer is ready. Native VRAM restaging cannot reach presentation; this prevents
-the former pixelated center and doubled HUD. Restoration retains GL context
-ownership; preview uploads use buffered transfers. After exact commit, at most
-four unpaced VBlanks refill the complete-image pipeline, stopping early when it
-is ready. Future history is truncated when resuming. Manual save/load remains independent.
+Release primes presentation geometry while keeping the selected full-quality
+image visible. It restores pending complete producers only from the current
+branch's commands issued by the restored machine cycle. Two full-resolution
+working textures retain recently redrawn producers, avoiding another draw when
+reversing direction; this is a small rendering cache, not pixel history.
+
+The restored pending image can be published as part of commit. The presentation
+and history gates stay frozen until normal forward rendering reaches that
+producer's tick, cycle and phase: native VRAM restaging, an older complete image,
+or an earlier phase cannot replace it. This preserves image ordering and prevents
+the former pixelated center/doubled HUD. Full-rate planning uses the same guest
+cadence on the renderer and main threads. If eligible producer history is absent,
+the existing bounded forward refill remains the fallback. Future branch references
+are invalidated; manual save/load and the custom menu remain independent.
 
 ## Verification and limits
 
 The current code passed three successive history branches with zero differing
-RAM words and 98 exact original/replayed full internal images with zero
-mismatches (`analysis/release-warm-proof-20261111/result.json`). Diagnostic
+RAM words and 130 exact original/replayed full internal images with zero
+mismatches (`analysis/rewind-final-cocoa-exact-20261112/result.json`). Diagnostic
 readbacks are excluded from performance claims. Real-GL fixtures cover pixels
 and live CPU/GPU/color/depth/stencil isolation at 1x/4x/9x, including changed
 textures and PGXP triangles. The title suite now includes the PGXP propagation and keyboard data-path
@@ -45,7 +51,7 @@ the render queue. Earlier coarse polling and CPU-only transition measurements
 must not be compared as if they measured the same endpoint. PBO restaging and
 shorter replay remove redundant work; they do not establish zero latency.
 
-See the [current release receipt](recovery/MAC_RELEASE_20261111.json) for exact
+See the [current release receipt](recovery/MAC_RELEASE_20261112.json) for exact
 binary, performance and package status, and [handoff](HANDOFF.md) for pending
 gates. Internal rendering is 3834×2160; the test monitor is 1440p/75 Hz. Tunnel,
 sky, ground and HUD samples are bounded visual evidence, not an all-course

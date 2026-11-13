@@ -1,0 +1,109 @@
+{
+  "runtime_qualified": true,
+  "release_qualified": false,
+  "qualification_scope": "Native Mac automated functional and visible 2160-line race; package verification pending",
+  "binary_sha256": "408f27f5412a240618bfbcbcf181ef6250637512051278646cb94854dd392ce9",
+  "engine_commit": "d81b3919",
+  "ui_commit": "a786d20",
+  "internal_resolution": [
+    3834,
+    2160
+  ],
+  "physical_display": "2560x1440 at 75 Hz",
+  "rewind_status": {
+    "id": 0,
+    "ok": true,
+    "enabled": true,
+    "open": false,
+    "direct": 0,
+    "state_playback": 2,
+    "seeking": 0,
+    "tick": 7619,
+    "title_blocked": false,
+    "snaps": 403,
+    "hd_residency_bytes": 12083552,
+    "state_verification": 0,
+    "resume_checks": 0,
+    "resume_tick": 0,
+    "expected_ram_crc": 0,
+    "actual_ram_crc": 0,
+    "different_words": 0,
+    "first_difference": 0,
+    "expected_word": 0,
+    "actual_word": 0,
+    "matching_neighbor": 0,
+    "resume_image_us": 0,
+    "state_history_bytes": 1072838555,
+    "state_history_entries": 514,
+    "state_history_dropped": 0,
+    "snapshot_interval": 1,
+    "host_state_bytes": 43428892,
+    "release_us": 0,
+    "release_anchor": 0,
+    "release_target": 0,
+    "release_load_us": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  "normal_timing": {
+    "evidence": "analysis/rewind-final-performance-20261112/result.json",
+    "seconds": 120.4997210420006,
+    "vblanks_per_second": 59.859059735797096,
+    "intermediate_requested": 3599,
+    "intermediate_rendered": 3599,
+    "release_internal_ms": [
+      33.389,
+      42.327,
+      47.421,
+      27.059,
+      28.808
+    ],
+    "release_observed_ms": [
+      53.64066699985415,
+      60.128291999717476,
+      64.78758400044171,
+      44.623207999393344,
+      30.460041998594534
+    ],
+    "max_guest_frame_ms": 35.542,
+    "p99_guest_frame_ms": 26.373,
+    "guest_frames_above_50ms": 0
+  },
+  "exact_proof": "analysis/rewind-final-cocoa-exact-20261112/result.json",
+  "exact_resume_ram_differences": [
+    0,
+    0,
+    0
+  ],
+  "full_internal_images_checked": 130,
+  "pixel_mismatches": 0,
+  "required_checks": {
+    "release_build": "passed",
+    "ctest": "44/44 passed",
+    "regeneration": "7459 variants reused; no generated C changes",
+    "hidden_smoke": "passed; 7,172,589 static overlay hits, zero dispatch misses; menu/settings/binding persistence passed"
+  },
+  "limitations": [
+    "Finite measured route, not an all-course or locked-60 guarantee.",
+    "Muted tests; audio listening and physical Steam Controller testing remain owner checks.",
+    "Package signing and native Windows checks pending."
+  ],
+  "pre_version_stamp_binary_sha256": "608fea3fd4a1303124c18ec12e42972ce96486adb9bf457c5e087c505bbd4051",
+  "final_build_check": {
+    "evidence": "analysis/rewind-022-build-20261112/result.json",
+    "vblanks_per_second": 59.668301490106785,
+    "release_internal_ms": [
+      35.503,
+      55.033,
+      43.068
+    ],
+    "dispatch_misses": 0,
+    "execution_identity": "f3a59eb52c450e6d9f22c0cd78332c02932ca5ef11cbc3c5ffeb9787b8bb9135"
+  }
+}

@@ -1,3 +1,28 @@
+# Ridge Racer Type 4 Recompiled — v0.2.2
+
+Rewind release now restores the rendering work already issued at the selected
+state, eliminating the extra pipeline rebuild. Two full-resolution working
+images avoid redundant drawing; rewind history remains commands and state in
+bounded memory. Safe checkpoint anchors shorten the remaining state replay.
+
+The custom Select/Back menu, controls/settings, MStan performance work and
+Steam Controller fixes remain intact. PGXP and fixed 2160-line rendering stay
+on, including during hold-to-rewind. The Mac render worker now has a private
+hidden drawable to avoid competing with the visible presentation context.
+
+The two-minute native Mac race averaged 59.86 VBlanks/s and rendered all 3,599
+requested intermediate frames. Five internal releases took 27–47 ms (31–65 ms
+including input observation), versus the previous 99–129 ms transition. Three
+restores had zero RAM differences; all 130 full-resolution comparisons matched.
+These measurements cover a finite route, not every course or a locked-60 promise.
+Tests are muted; listening and physical-controller checks remain separate.
+
+Mac Apple Silicon and portable Windows x64 packages require your own USA disc.
+No game data, retail BIOS, developer tools or player saves are bundled.
+See the current qualification receipts for package verification status.
+
+---
+
 # Ridge Racer Type 4 Recompiled — v0.2.1
 
 The custom menu is integrated into the game, with full-resolution hold-to-rewind
