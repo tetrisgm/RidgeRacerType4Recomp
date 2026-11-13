@@ -30,6 +30,16 @@ NAS and unrelated work were untouched. Native PC test task/folder and the exact
 EXE ASR exception were removed; original security settings restored, volume
 unchanged. Cleanup: `analysis/windows-022-20261112/cleanup.json`.
 
+## Desktop playtest launchers
+
+Both desktops have **R4 Recompiled (Steam)**, launching the non-Steam 0.2.2
+entry with Steam Input enabled for this game. Mac install:
+`~/Applications/R4-0.2.2/`; PC install: `C:\Users\steam\Games\R4\0.2.2\`.
+The owner's disc path is supplied by each Steam entry. PC disc copy is outside
+the release folder. Steam configs were backed up; setup tasks/files removed.
+No security exception was added for these permanent installs. Setup receipts:
+`analysis/steam-desktop-20261112/`. Mac Steam client restored from Valve's installer.
+
 ## References
 
 - [Fix and evidence](recovery/REWIND_RELEASE_FIX_20261112.md)
