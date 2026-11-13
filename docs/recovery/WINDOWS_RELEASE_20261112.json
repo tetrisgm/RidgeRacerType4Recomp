@@ -1,0 +1,104 @@
+{
+  "runtime_qualified": true,
+  "release_qualified": true,
+  "windows_execution_qualified": true,
+  "platform": "Windows x64",
+  "signing": "unsigned",
+  "binary_sha256": "b1953f2ac9bd1c2d1afbe35cbf3fb4278033178c292e7d34ee149a203f5f8e4a",
+  "engine_commit": "d81b3919",
+  "game_commit": "63f58850",
+  "ui_commit": "a786d20",
+  "execution_host": "native Windows 11 / Ryzen 9800X3D / RTX 4080 SUPER",
+  "normal_timing": {
+    "evidence": "analysis/windows-022-20261112/first-evidence/normal.json",
+    "seconds": 120.0160073,
+    "vblanks_per_second": 59.95866853004366,
+    "intermediate_requested": 3598,
+    "intermediate_rendered": 3598,
+    "max_sampled_presentation_interval_ms": 19.143,
+    "release_internal_ms": [
+      42.056,
+      45.23,
+      71.826
+    ],
+    "release_observed_ms": [
+      64.08999999999999,
+      72.4272,
+      82.3368
+    ],
+    "dispatch_misses": 0
+  },
+  "drawable_resolution": [
+    3840,
+    2160
+  ],
+  "internal_resolution": [
+    3834,
+    2160
+  ],
+  "rewind_status": {
+    "id": 0,
+    "ok": true,
+    "enabled": true,
+    "open": false,
+    "direct": 0,
+    "state_playback": 2,
+    "seeking": 0,
+    "tick": 21467,
+    "title_blocked": false,
+    "snaps": 301,
+    "hd_residency_bytes": 9025184,
+    "state_verification": 0,
+    "resume_checks": 0,
+    "resume_tick": 0,
+    "expected_ram_crc": 0,
+    "actual_ram_crc": 0,
+    "different_words": 0,
+    "first_difference": 0,
+    "expected_word": 0,
+    "actual_word": 0,
+    "matching_neighbor": 0,
+    "resume_image_us": 0,
+    "state_history_bytes": 845886023,
+    "state_history_entries": 516,
+    "state_history_dropped": 1205,
+    "snapshot_interval": 1,
+    "host_state_bytes": 32436964,
+    "release_us": 71826,
+    "release_anchor": 21463,
+    "release_target": 21467,
+    "release_load_us": [
+      11357,
+      1171,
+      637,
+      6841,
+      5756,
+      553,
+      26316
+    ]
+  },
+  "exact_proof": "analysis/windows-022-20261112/final-evidence/exact.json",
+  "exact_resume_ram_differences": [
+    0,
+    0,
+    0
+  ],
+  "full_internal_images_checked": 108,
+  "pixel_mismatches": 0,
+  "menu": "Select/Back opens, pauses and resumes the integrated recomp-launcher menu in both runs",
+  "visual_review": "Reviewed native PC tunnel/sky/ground route captures and consecutive full-resolution rewind/resume images; no visible seams, blinking artifacts, displaced HUD or resolution drop observed.",
+  "required_checks": {
+    "cross_build": "Release/IPO on Mac; 7459 linked variants; system/UCRT imports only",
+    "native_race": "passed",
+    "exact_rewind": "passed",
+    "select_back_menu": "passed",
+    "cleanup": "all checks passed; original ASR rules/exclusions restored, test task/folder removed, system volume unchanged"
+  },
+  "cleanup_evidence": "analysis/windows-022-20261112/cleanup.json",
+  "test_controller_note": "PowerShell local controller completed both suites. Debug quit reports emu busy after the results are saved; task cleanup stopped the isolated process. Failed SSH streaming attempts are not performance evidence.",
+  "limitations": [
+    "Windows executable is unsigned. The hardened test PC required the owner-approved temporary exact-EXE ASR exception, removed afterward.",
+    "Tests used dummy audio. Listening and physical Steam Controller gameplay remain owner checks.",
+    "Finite tested route; not an all-course or locked-60 guarantee."
+  ]
+}

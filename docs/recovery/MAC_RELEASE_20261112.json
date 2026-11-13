@@ -1,7 +1,7 @@
 {
   "runtime_qualified": true,
-  "release_qualified": false,
-  "qualification_scope": "Native Mac automated functional and visible 2160-line race; package verification pending",
+  "release_qualified": true,
+  "qualification_scope": "Signed, notarized native Mac package; automated menu/persistence and exact rewind checks plus on-screen and captured visual review",
   "binary_sha256": "408f27f5412a240618bfbcbcf181ef6250637512051278646cb94854dd392ce9",
   "engine_commit": "d81b3919",
   "ui_commit": "a786d20",
@@ -91,8 +91,7 @@
   },
   "limitations": [
     "Finite measured route, not an all-course or locked-60 guarantee.",
-    "Muted tests; audio listening and physical Steam Controller testing remain owner checks.",
-    "Package signing and native Windows checks pending."
+    "Muted tests; audio listening and physical Steam Controller testing remain owner checks."
   ],
   "pre_version_stamp_binary_sha256": "608fea3fd4a1303124c18ec12e42972ce96486adb9bf457c5e087c505bbd4051",
   "final_build_check": {
@@ -105,5 +104,26 @@
     ],
     "dispatch_misses": 0,
     "execution_identity": "f3a59eb52c450e6d9f22c0cd78332c02932ca5ef11cbc3c5ffeb9787b8bb9135"
+  },
+  "signed_package": {
+    "path": "dist/macos/0.2.2/R4.app",
+    "binary_sha256": "55c3d3c28a6af809f477469a0d3173cf8c4f788e9f099e9c74c65909b119cecb",
+    "notarization_id": "771d30fd-63c0-4c39-847e-1f1443435a4c",
+    "notarized": true,
+    "stapled": true,
+    "gatekeeper_accepted": true,
+    "menu_smoke_evidence": "analysis/mac-022-bundle-20261112",
+    "static_overlay_hits": 7172735,
+    "dispatch_misses": 0,
+    "settings_restart": "passed",
+    "visual_evidence": "analysis/mac-022-visual-20261112/result.json",
+    "exact_resume_ram_differences": [
+      0,
+      0
+    ],
+    "full_internal_images_checked": 96,
+    "pixel_mismatches": 0,
+    "visual_review": "Live packaged app visible in CUA; 24 route captures cover tunnel, sky and ground; consecutive release frames retain full detail and HUD ordering. No seams or blinking artifacts observed in reviewed captures.",
+    "diagnostic_performance_excluded": true
   }
 }

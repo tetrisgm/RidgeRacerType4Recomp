@@ -1,30 +1,46 @@
 # Handoff
 
-## Current work — 0.2.2 release verification
+## Release 0.2.2 — complete locally
 
-Engine `d81b3919` fixes rewind release by restoring already-issued rendering
-work and using safe checkpoint anchors. It also separates Mac worker drawables.
-Menu/controller/UI code remains unchanged. All 44 tests pass; three exact
-restores and 130 full-resolution comparisons match. Native Mac two-minute
-4K race: 59.86 VBlanks/s, 3,599/3,599 intermediate frames, maximum guest frame
-35.542 ms. Five internal releases: 27–47 ms; observed input-to-image: 31–65 ms.
+- Mac: `dist/macos/R4-0.2.2-macOS-arm64.zip`, Developer-ID signed,
+  notarized, stapled and Gatekeeper accepted.
+- PC: `dist/windows/R4-0.2.2-Windows-x64.zip`, unsigned portable x64,
+  tested natively on the RTX 4080 SUPER at a 3840×2160 drawable.
 
-Packaging 0.2.2 is in progress. Do not label it finished until signed Mac bundle
-checks/notarization and native Windows package checks are recorded. Prior 0.2.1
-packages remain intact as historical baselines.
+Engine `d81b3919`, game integration `63f58850`, UI `a786d20`. Rewind restores
+already-issued rendering work and uses safe checkpoint anchors. Menu, controls,
+settings, MStan performance and Steam Controller fixes remain intact.
 
-Tests remain muted. Owner will separately check audible audio and physical
-Steam Controller gameplay. No NAS, public release/feed or unrelated process
-changes. Owner authorized SSH PC tests and an exact temporary EXE ASR exception;
-read the PC runbook, use the previously approved path, and restore protections.
+Mac: 59.86 VBlanks/s over two minutes, 3,599/3,599 intermediate frames,
+maximum guest-frame interval 35.542 ms. Internal release measurements 27–55 ms
+across the sustained and final version-stamped checks. PC: 59.96 VBlanks/s over
+two minutes, 3,598/3,598 intermediates, maximum sampled presentation interval
+19.143 ms, internal releases 42–72 ms. Neither is a zero-latency/all-course promise.
+
+All 44 Mac tests and actual signed-bundle menu/binding/settings restart checks
+pass. Exact state/image checks pass on both platforms: Mac 130 comparisons plus
+96 in the signed package; PC 108 comparisons. No RAM differences or pixel
+mismatches. Reviewed tunnel, sky, ground and consecutive resume captures show no
+observed seams, blinking artifacts, displaced HUD or resolution drop. Mac app
+was also checked on screen. Zero dispatch misses in tested routes.
+
+Tests were muted. Owner plans separate listening and physical Steam Controller
+playtests. No public release/feed was published; 0.2.1 artifacts remain intact.
+NAS and unrelated work were untouched. Native PC test task/folder and the exact
+EXE ASR exception were removed; original security settings restored, volume
+unchanged. Cleanup: `analysis/windows-022-20261112/cleanup.json`.
 
 ## References
 
-- [Current Mac receipt](recovery/MAC_RELEASE_20261112.json)
-- [Earlier investigation](recovery/REWIND_RELEASE_20261112.md)
-- [Rewind implementation](REWIND_PLAYBACK.md)
-- [Pin history](framework_pin_history.md)
+- [Fix and evidence](recovery/REWIND_RELEASE_FIX_20261112.md)
+- [Mac receipt](recovery/MAC_RELEASE_20261112.json)
+- [Windows receipt](recovery/WINDOWS_RELEASE_20261112.json)
+- [Release notes](../RELEASE_NOTES.md)
+- [Rewind](REWIND_PLAYBACK.md) / [pins](framework_pin_history.md)
 - [Mac workflow](MAC_BUILD.md) / [Windows workflow](WINDOWS_BUILD.md)
 
-Current grid: `analysis/rewind-release-grid-20261112/memcards`.
-Never bypass execution identity. Existing Keychain profile `pp-notary` works.
+Current grid: `analysis/rewind-release-grid-20261112/memcards`, execution identity
+`f3a59eb52c450e6d9f22c0cd78332c02932ca5ef11cbc3c5ffeb9787b8bb9135`.
+Never bypass execution identity. Keychain profile `pp-notary` works. The native
+PC suites saved passing results before debug `quit` reported busy; the one-off
+task cleanup stopped the process. This did not affect recorded race/rewind data.

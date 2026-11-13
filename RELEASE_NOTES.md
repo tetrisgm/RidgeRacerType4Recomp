@@ -14,12 +14,19 @@ The two-minute native Mac race averaged 59.86 VBlanks/s and rendered all 3,599
 requested intermediate frames. Five internal releases took 27–47 ms (31–65 ms
 including input observation), versus the previous 99–129 ms transition. Three
 restores had zero RAM differences; all 130 full-resolution comparisons matched.
+The final version-stamped build check measured 35–55 ms internally.
 These measurements cover a finite route, not every course or a locked-60 promise.
 Tests are muted; listening and physical-controller checks remain separate.
 
 Mac Apple Silicon and portable Windows x64 packages require your own USA disc.
 No game data, retail BIOS, developer tools or player saves are bundled.
-See the current qualification receipts for package verification status.
+The Mac app is Developer-ID signed, notarized and stapled. Windows remains
+unsigned. The native RTX 4080 SUPER test averaged 59.96 VBlanks/s, rendered all
+3,598 intermediate frames, and passed three exact restores with 108 matching
+images. Internal PC releases took 42–72 ms. Select/Back menu checks passed on
+both platforms. Tunnel, sky, ground and resume captures showed no observed
+seams, blinking artifacts or displaced HUD. See the current qualification
+receipts for the measured scope.
 
 ---
 
